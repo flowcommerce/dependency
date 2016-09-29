@@ -1,0 +1,24 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  form: Form[controllers.ProjectsController.UiForm],
+  orgs: Seq[com.bryzek.dependency.v0.models.Organization],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Add project")), errorMessages = errorMessages) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.ProjectsController.github()">Add project from Github</a>
+  </div>
+
+  <div class="container">
+
+    @helper.form(action = routes.ProjectsController.postCreate()) {
+
+      @projectForm(form, orgs, routes.ProjectsController.index())
+
+    }
+
+  </div>
+
+}

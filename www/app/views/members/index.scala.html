@@ -1,0 +1,69 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  org: com.bryzek.dependency.v0.models.Organization,
+  memberships: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Membership]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(s"${org.key}: Members"))) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.MembersController.create(org.key)">Add member</a>
+  </div>
+
+  @if(memberships.isEmpty) {
+
+    <p><em>This organization currently does not have any members.</em></p>
+
+  } else {
+    <div class="table-responsive">
+      <table class="table">
+	<thead>
+	  <tr>
+	    <th>Email</th>
+	    <th>Name</th>
+	    <th>Role</th>
+	    <th></th>
+	  </tr>
+	</thead>
+        @memberships.items.map { membership =>
+          <tr>
+            <td>@membership.user.email.getOrElse("N/A")</td>
+            <td>@Seq(membership.user.name.first, membership.user.name.last).flatten.mkString(" ")</td>
+            <td>@membership.role</td>
+            <td>
+	      @if(membership.role == com.bryzek.dependency.v0.models.Role.Admin) {
+	        @if(Some(membership.user.id) == data.user.map(_.id)) {
+  	          <a href="@routes.MembersController.postMakeMember(org.key, membership.id)" class="delete" data-confirm="If you remove your admin privileges, you will no longer have full access to this org. Would you like to proceed?">Make member</a>
+                } else {
+    	          <a href="@routes.MembersController.postMakeMember(org.key, membership.id)" class="delete" data-confirm="Are you sure?">Make member</a>
+	        }
+
+	      } else {
+  	        <a href="@routes.MembersController.postMakeAdmin(org.key, membership.id)" class="delete" data-confirm="Are you sure?">Make admin</a>
+              }
+
+	      |
+	      @if(Some(membership.user.id) == data.user.map(_.id)) {
+  	        <a href="@routes.MembersController.postDelete(org.key, membership.id)" class="delete" data-confirm="If you remove yourself, you will no longer have access to this org. Would you like to proceed?">Remove</a>
+              } else {
+    	        <a href="@routes.MembersController.postDelete(org.key, membership.id)" class="delete" data-confirm="Are you sure?">Remove</a>
+	      }
+            </td>
+          </tr>
+        }
+      </table>
+    </div>
+
+    @if(memberships.hasPrevious || memberships.hasNext) {
+      <ul class="pager">
+        @if(memberships.hasPrevious) {
+          <li><a href="@routes.MembersController.index(org = org.key, page = memberships.page - 1)">Previous</a></li>
+       }
+        @if(memberships.hasNext) {
+         <li><a href="@routes.MembersController.index(org = org.key, page = memberships.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+
+}

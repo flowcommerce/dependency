@@ -1,0 +1,28 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  binaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Binary]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Binaries"))) {
+
+  @if(binaries.isEmpty) {
+    <em>No binaries</em>
+
+  } else {
+    <div class="table-responsive">
+      @table(binaries)
+
+      @if(binaries.hasPrevious || binaries.hasNext) {
+        <ul class="pager">
+          @if(binaries.hasPrevious) {
+            <li><a href="@routes.BinariesController.index(binaries.page - 1)">Previous</a></li>
+          }
+          @if(binaries.hasNext) {
+            <li><a href="@routes.BinariesController.index(binaries.page + 1)">Next</a></li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+}

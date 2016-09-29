@@ -1,0 +1,21 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  project: com.bryzek.dependency.v0.models.Project,
+  form: Form[controllers.ProjectsController.UiForm],
+  orgs: Seq[com.bryzek.dependency.v0.models.Organization],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Edit project")), errorMessages = errorMessages) {
+
+  <div class="container">
+
+    @helper.form(action = routes.ProjectsController.postEdit(project.id)) {
+
+      @projectForm(form, orgs, routes.ProjectsController.show(project.id))
+
+    }
+
+  </div>
+
+}

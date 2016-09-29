@@ -1,0 +1,89 @@
+#!/usr/bin/env ruby
+
+KEYS_REPO_DIR = File.expand_path(File.join(File.dirname(__FILE__), '/../../keys'))
+if !File.directory?(KEYS_REPO_DIR)
+  puts "ERROR: Could not find keys repo. Expected at %s" % KEYS_REPO_DIR
+  exit(1)
+end
+
+subproject = (ARGV.shift || '').strip
+
+build_sbt_file = File.join(File.dirname(__FILE__) + "/../build.sbt")
+if !File.exists?(build_sbt_file)
+  puts "ERROR: Could not find build.sbt. Expected file at %s" % build_sbt_file
+  exit(1)
+end
+
+name = ""
+subprojects = []
+IO.readlines(build_sbt_file).each do |line|
+  parts = line.strip.split(":=").map(&:strip)
+  if parts[0] == "name" && !parts[1].empty?
+    name = parts[1].gsub(/\"/, '')
+  elsif line.match(/\sproject$/)
+    this_project = line.split("=", 2).map(&:strip).first.split(/\s+/).last
+    if !this_project.empty?
+      subprojects << this_project
+    end
+  end
+end
+
+if name.empty?
+  puts "ERROR: Could not find name property in build file[%s]" % build_sbt_file
+  exit(1)
+end
+
+if subproject == ""
+  print "ERROR: Specify subproject."
+  if !subprojects.empty?
+    print " Likely one of: " + subprojects.join(", ")
+  end
+  puts ""
+  exit(1)
+end
+
+# Select out the names of the configuration variables coming from the environment
+files = []
+
+base_conf_file = File.join(File.dirname(__FILE__), "..", subproject, "conf", "base.conf")
+if File.exists?(base_conf_file)
+  files << base_conf_file
+end
+
+application_conf_file = File.join(File.dirname(__FILE__), "..", subproject, "conf", "application.conf")
+if File.exists?(application_conf_file)
+  files << application_conf_file
+end
+
+names = []
+
+files.each do |file|
+  IO.readlines(file).map do |line|
+    (key, value) = line.split("=").map(&:strip)
+    if value && (md = value.match(/^\$\{\?(.+)\}$/))
+      names << md[1]
+    end
+  end
+end.select { |v| !v.empty? }
+
+key_file = File.join(KEYS_REPO_DIR, "ec2", "apps", "%s-%s" % [name, subproject])
+if File.exists?(key_file)
+  puts "Loading environment variables from %s" % key_file
+  vars = IO.readlines(key_file).map do |line|
+    (key, value) = line.strip.split("=", 2).map(&:strip)
+    if names.include?(key) && value && !value.empty?
+      puts " - setting env var %s" % key
+      "%s=\"%s\"" % [key, value]
+    else
+      ""
+    end
+  end.select { |v| !v.empty? }
+
+  command = [
+    vars.join(" "),
+    "sbt"
+  ].join(" ")
+  system( command )
+else
+  puts "WARNING: Could not find application keys file. Expected at %s" % key_file
+end

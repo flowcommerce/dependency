@@ -1,0 +1,42 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  id: String,
+  nextN: Int,
+  sleepTime: Int,
+  syncStarted: Option[com.bryzek.dependency.v0.models.Sync],
+  pending: Seq[String],
+  completed: Seq[String]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Please wait while we sync your project"))) {
+  <meta http-equiv="refresh" content="@sleepTime; url=@routes.ProjectsController.sync(id, nextN.toInt)" />
+
+  @if(syncStarted.isEmpty) {
+    <em>Waiting for project to sync.</em>
+  } else {
+    <em>
+      Project sync started at
+      @com.bryzek.dependency.www.lib.DateHelper.longDateTimeOption(syncStarted.map(_.createdAt)).
+      Waiting for sync to complete.
+    </em>
+
+    <div class="table-responsive">
+      <table class="table">
+      @pending.map { description =>
+        <tr>
+          <td>pending</td>
+          <td>@description</td>
+        </tr>
+      }
+      @completed.map { description =>
+        <tr>
+          <td>completed</td>
+          <td>@description</td>
+        </tr>
+      }
+
+      </table>
+    </div>
+  }
+    
+}

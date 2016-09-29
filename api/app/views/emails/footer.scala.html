@@ -1,0 +1,19 @@
+@(recipient: com.bryzek.dependency.api.lib.Recipient,
+  urls: com.bryzek.dependency.lib.Urls
+)
+
+<hr size="1">
+
+<p>
+  <em>
+    We love open source software and hope you find this project
+    helpful. We welcome feedback, suggestions, bugs, and
+    contributions. Please visit us
+    at <a href="@urls.github">Github</a>
+  </em>
+</p>
+
+<p>
+  This email was sent to @recipient.email.
+  <a href="@urls.www(urls.subscriptions(Some(recipient.identifier)))">Unsubscribe or update preferences</a>
+</p>

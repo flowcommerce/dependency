@@ -1,0 +1,26 @@
+@(data: com.bryzek.dependency.www.lib.UiData,
+  token: com.bryzek.dependency.v0.models.Token
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Token: " + token.masked))) {
+
+  @if(!token.cleartext.isEmpty) {
+    <blockquote>
+      <em>This is the only time you will see this token. Please copy it immediately.</em>
+      <p class="bg-success">
+	<b>@token.cleartext.get</b>
+      </p>
+    </blockquote>
+  }
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span>
+    <a href="@routes.TokensController.postDelete(token.id)" class="delete" data-confirm="Are you sure?">Delete</a>
+  </div>
+
+  <ul>
+    <li> Masked token: @token.masked</li>
+    <li> Description: @token.description.getOrElse("-")</liL
+  </ul>
+
+}

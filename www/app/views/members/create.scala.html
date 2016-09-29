@@ -1,0 +1,36 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  org: com.bryzek.dependency.v0.models.Organization,
+  form: Form[controllers.MembersController.UiForm],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(s"${org.key}: Add member")), errorMessages = errorMessages) {
+
+  <div class="container">
+
+    @helper.form(action = routes.MembersController.postCreate(org.key)) {
+
+      <fieldset>
+
+          @helper.inputText(
+              form("email"),
+              '_label -> "Email address of user to add",
+              '_error -> form.error("email")
+          )
+
+          @helper.select(
+              form("role"),
+              options = com.bryzek.dependency.v0.models.Role.all.map( r => (r.toString, r.toString) ),
+              '_label -> "Role",
+              '_error -> form("role")
+          )
+
+      </fieldset>
+
+      <button class="btn btn-large btn-primary" type="submit">Submit</button>
+
+    }
+
+  </div>
+}

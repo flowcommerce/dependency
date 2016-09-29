@@ -1,0 +1,40 @@
+@(data: com.bryzek.dependency.www.lib.UiData)
+
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="@routes.ApplicationController.index()">dependency</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <div class="col-sm-3 col-md-3 pull-right">
+          <form class="navbar-form" role="search" action="@routes.SearchController.index()">
+              <div class="input-group">
+                  <input type="text" class="form-control" placeholder="Search" name="q" value="@data.query.getOrElse("")">
+                  <div class="input-group-btn">
+                      <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                  </div>
+              </div>
+          </form>
+      </div> 
+
+      @if(data.user.isEmpty) {
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="@routes.LoginController.index(return_url = Some(data.requestPath))">Login/Register</a></li>
+        </ul>
+      } else {
+        <div class="dropdown nav navbar-nav navbar-right">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+            @data.user.get.email <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="@routes.OrganizationsController.index()">Organizations</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="@routes.TokensController.index()">Tokens</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="@routes.LogoutController.index()">Logout</a></li>
+          </ul>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+

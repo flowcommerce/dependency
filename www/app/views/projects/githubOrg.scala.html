@@ -1,0 +1,40 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  org: com.bryzek.dependency.v0.models.Organization,
+  repositories: io.flow.play.util.PaginatedCollection[io.flow.github.v0.models.Repository],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(s"${org.key}: Add project")), errorMessages = errorMessages) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.ProjectsController.create()">Add project manually</a>
+  </div>
+
+  @if(repositories.items.isEmpty) {
+    <em>No repositories were found that are not already added as projects.</em>
+  } else {
+    <div class="table-responsive">
+      <table class="table">
+        @repositories.items.map { repo =>
+          <tr>
+            <td><a class="postForm" href="@routes.ProjectsController.postGithubOrg(org.key, repo.owner.login, repo.name, repositories.page)">@{repo.owner.login}/@{repo.name}</a></td>
+            <td>@repo.description</td>
+          </tr>
+        }
+      </table>
+
+      @if(repositories.hasPrevious || repositories.hasNext) {
+        <ul class="pager">
+          @if(repositories.hasPrevious) {
+            <li><a href="@routes.ProjectsController.githubOrg(org.key, repositories.page - 1)">Previous</a></li>
+         }
+          @if(repositories.hasNext) {
+           <li><a href="@routes.ProjectsController.githubOrg(org.key, repositories.page + 1)">Next</a></li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+}

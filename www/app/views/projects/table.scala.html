@@ -1,0 +1,16 @@
+@(projects: Seq[com.bryzek.dependency.v0.models.Project])
+
+<div class="table-responsive">
+  <table class="table">
+    <tr>
+      <th>Owner</th>
+      <th>Project</th>
+    </tr>
+    @projects.map { p =>
+      <tr>
+        <td><a href="@routes.OrganizationsController.show(p.organization.key)">@{p.organization.key}</a></td>
+        <td><a href="@routes.ProjectsController.show(p.id)">@{p.name}</a></td>
+      </tr>
+    }
+  </table>
+</div>

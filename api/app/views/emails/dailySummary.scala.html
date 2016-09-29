@@ -1,0 +1,56 @@
+@(recipient: com.bryzek.dependency.api.lib.Recipient,
+  urls: com.bryzek.dependency.lib.Urls,
+  newRecommendations: Seq[com.bryzek.dependency.v0.models.Recommendation],
+  oldRecommendations: Seq[com.bryzek.dependency.v0.models.Recommendation],
+  lastEmail: Option[db.LastEmail]
+)
+
+@if(!recipient.name.first.isEmpty) {
+  <p>Dear @recipient.name.first.get,</p>
+}
+
+@if(lastEmail.isEmpty) {
+  <p>
+
+    This is your personalized daily summary of dependency
+    recommendations. At any time, you can unsubscribe by
+    visiting <a href="@urls.www(urls.subscriptions(Some(recipient.identifier)))">@urls.www(urls.subscriptions(None))</a>
+
+  </p>
+
+} else {
+
+  <p>
+    @{newRecommendations.size match {
+      case 0 => "No new recommendations"
+      case 1 => "1 new recommendation"
+      case n => s"$n new recommendations"
+    }}
+    since your last summary sent on
+    @io.flow.play.util.DateHelper.longDateTime(lastEmail.get.createdAt).
+  </p>
+}
+
+@if(newRecommendations.isEmpty && oldRecommendations.isEmpty) {
+  <em>We currently have no upgrade recommendations for you.</em>
+}
+  
+@if(!newRecommendations.isEmpty) {
+  <blockquote>
+    @recommendations(urls, newRecommendations)
+  </blockquote>
+}
+
+@if(!oldRecommendations.isEmpty) {
+  <p>As a reminder, here are your other outstanding upgrade recommendations</p>
+  <blockquote>
+    @recommendations(urls, oldRecommendations)
+  </blockquote>
+}
+
+<p>
+  <a href="@urls.wwwHost">Visit your dependency dashboard</a>
+</p>
+  
+
+@footer(recipient, urls)

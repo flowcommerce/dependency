@@ -1,0 +1,15 @@
+@(libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Library])
+
+@if(libraries.isEmpty) {
+  <em>No libraries</em>
+} else {
+  <div class="table-responsive">
+    <table class="table">
+      @libraries.items.map { library =>
+        <tr>
+          <td><a href="@routes.LibrariesController.show(library.id)">@library.groupId.@library.artifactId</td>
+        </tr>
+      }
+    </table>
+  </div>
+}

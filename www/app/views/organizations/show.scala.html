@@ -1,0 +1,43 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  organization: com.bryzek.dependency.v0.models.Organization,
+  projects: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Project]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(organization.key))) {
+
+  <div class="pull-right">
+    <a href="@routes.MembersController.index(organization.key)">Members</a>
+
+    @if(com.bryzek.dependency.www.lib.Permissions.Organization.edit(organization, data.user)) {
+      | <a href="@routes.OrganizationsController.edit(organization.key)">Edit</a>
+    }
+
+    @if(com.bryzek.dependency.www.lib.Permissions.Organization.delete(organization, data.user)) {
+      | <a class="delete" data-confirm="Are you sure?" href="@routes.OrganizationsController.postDelete(organization.key)">Delete</a>
+    }
+  </div>
+
+  <ul>
+    <li>Key: @organization.key</li>
+  </ul>
+
+  <h3>Projects</h3>
+  @if(projects.isEmpty) {
+    <em>This organization does not have any projects</em>
+  } else {
+    @views.html.projects.table(projects.items)
+    @if(projects.hasPrevious || projects.hasNext) {
+      <ul class="pager">
+        @if(projects.hasPrevious) {
+          <li><a href="@routes.OrganizationsController.show(organization.key, projectsPage = projects.page - 1)">Previous</a></li>
+        }
+        @if(projects.hasNext) {
+          <li><a href="@routes.OrganizationsController.show(organization.key, projectsPage = projects.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+
+  }
+
+}

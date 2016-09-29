@@ -1,0 +1,38 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  organizations: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Organization]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Organizations"))) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.OrganizationsController.create()">Add organization</a>
+  </div>
+
+  @if(organizations.isEmpty) {
+    <em>No organizations</em>
+
+  } else {
+  <div class="table-responsive">
+    <table class="table">
+      @organizations.items.map { org =>
+        <tr>
+          <td><a href="@routes.OrganizationsController.show(org.key)">@{org.key}</a></td>
+        </tr>
+      }
+    </table>
+  </div>
+    
+    @if(organizations.hasPrevious || organizations.hasNext) {
+      <ul class="pager">
+        @if(organizations.hasPrevious) {
+          <li><a href="@routes.OrganizationsController.index(organizations.page - 1)">Previous</a></li>
+       }
+        @if(organizations.hasNext) {
+         <li><a href="@routes.OrganizationsController.index(organizations.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+
+}

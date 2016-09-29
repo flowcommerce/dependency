@@ -1,0 +1,24 @@
+@(
+  libraryVersions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.LibraryVersion]
+)
+
+@if(libraryVersions.isEmpty) {
+  <em>No libraries</em>
+} else {
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Version</th>
+          <th>Cross built for</th>
+        </tr>
+      </thead>
+      @libraryVersions.items.map { version =>
+        <tr>
+          <td>@version.version</td>
+          <td>@version.crossBuildVersion.getOrElse("-")</td>
+        </tr>
+      }
+    </table>
+  </div>
+}

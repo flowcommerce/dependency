@@ -1,0 +1,22 @@
+@(
+  binaryVersions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.BinaryVersion]
+)
+
+@if(binaryVersions.isEmpty) {
+  <em>No binaries</em>
+} else {
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Version</th>
+        </tr>
+      </thead>
+      @binaryVersions.items.map { lang =>
+        <tr>
+          <td>@lang.version</td>
+        </tr>
+      }
+    </table>
+  </div>
+}

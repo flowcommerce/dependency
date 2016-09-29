@@ -1,0 +1,32 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  identifier: String,
+  userPublications: Seq[controllers.Subscriptions.UserPublication]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Subscriptions"))) {
+
+  @if(userPublications.isEmpty) {
+    <em>No publications found</em>
+  } else {
+    <table class="table table-hover table-condensed">
+      <tbody>
+        @userPublications.map { up =>
+         <tr>
+           <td>
+             @if(up.isSubscribed) {
+               Subscribed
+             } else {
+               Not subscribed
+             }
+             </br>
+             (<a href="@routes.SubscriptionsController.postToggle(identifier, up.publication)" class="postForm">Toggle</a>)
+           </td>
+           <td>@up.label</td>
+         </tr>
+       }
+      </tbody>
+    </table>
+  }
+
+}

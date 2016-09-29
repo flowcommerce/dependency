@@ -1,0 +1,76 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  library: com.bryzek.dependency.v0.models.Library,
+  versions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.LibraryVersion],
+  projectLibraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectLibrary],
+  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(s"Library: ${library.groupId}.${library.artifactId}"))) {
+
+  <div class="pull-right">
+    <a href="@routes.SyncsController.postLibrariesById(library.id)" class="btn btn-primary btn-sm active postForm" role="button">Sync</a>
+  </div>
+
+  <ul>
+    <li>Group ID: <a href="@routes.SearchController.index(q = Some(library.groupId))">@library.groupId</a></li>
+    <li>Artifact ID: <a href="@routes.SearchController.index(q = Some(library.artifactId))">@library.artifactId</a></li>
+    <li>Resolver: <a href="@routes.ResolversController.show(library.resolver.id)">@library.resolver.uri</a></li>
+    <li>Last synced:
+      @if(lastCompletedSync.isEmpty) {
+        <em>pending</em>
+      } else {
+        @io.flow.play.util.DateHelper.longDateTime(lastCompletedSync.get.createdAt)
+      }
+    </li>
+  </ul>
+
+  @views.html.libraries.versions.table(versions)
+  @if(versions.hasPrevious || versions.hasNext) {
+    <ul class="pager">
+      @if(versions.hasPrevious) {
+        <li><a href="@routes.LibrariesController.show(library.id, versionsPage = versions.page - 1, projectsPage = projectLibraries.page)">Previous</a></li>
+      }
+      @if(versions.hasNext) {
+        <li><a href="@routes.LibrariesController.show(library.id, versionsPage = versions.page + 1, projectsPage = projectLibraries.page)">Next</a></li>
+      }
+    </ul>
+  }
+
+  @if(projectLibraries.isEmpty) {
+    <em>No projects found that are using this library.</em>
+  } else {
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Library</th>
+            <th>Version</th>
+            <th>Cross built for</th>
+          </tr>
+        </thead>
+        @projectLibraries.items.map { rec =>
+          <tr>
+            <td><a href="@routes.ProjectsController.show(rec.project.id)">@{rec.project.name}</a></td>
+            <td>@rec.groupId.@rec.artifactId</td>
+            <td>@rec.version</td>
+            <td>@rec.crossBuildVersion.getOrElse("-")</td>
+          </tr>
+        }
+      </table>
+    </div>
+  
+    @if(projectLibraries.hasPrevious || projectLibraries.hasNext) {
+      <ul class="pager">
+        @if(projectLibraries.hasPrevious) {
+          <li><a href="@routes.LibrariesController.show(library.id, versionsPage = versions.page, projectsPage = projectLibraries.page - 1)">Previous</a></li>
+        }
+        @if(projectLibraries.hasNext) {
+          <li><a href="@routes.LibrariesController.show(library.id, versionsPage = versions.page, projectsPage = projectLibraries.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+  
+}

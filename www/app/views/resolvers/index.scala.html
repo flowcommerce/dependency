@@ -1,0 +1,30 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  resolvers: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Resolver]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Resolvers"))) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.ResolversController.create()">Add resolver</a>
+  </div>
+
+  @if(resolvers.isEmpty) {
+    <em>No resolvers</em>
+
+  } else {
+    @table(resolvers)
+
+    @if(resolvers.hasPrevious || resolvers.hasNext) {
+      <ul class="pager">
+        @if(resolvers.hasPrevious) {
+          <li><a href="@routes.ResolversController.index(resolvers.page - 1)">Previous</a></li>
+       }
+        @if(resolvers.hasNext) {
+         <li><a href="@routes.ResolversController.index(resolvers.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+
+}

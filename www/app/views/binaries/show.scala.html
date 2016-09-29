@@ -1,0 +1,62 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  binary: com.bryzek.dependency.v0.models.Binary,
+  versions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.BinaryVersion],
+  projectBinaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectBinary],
+  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(s"Binary: ${binary.name}"))) {
+
+  <div class="pull-right">
+    <a href="@routes.SyncsController.postBinariesById(binary.id)" class="btn btn-primary btn-sm active postForm" role="button">Sync</a>
+  </div>
+
+  <ul>
+    <li>Name: @binary.name</li>
+    <li>Last synced:
+      @if(lastCompletedSync.isEmpty) {
+        <em>pending</em>
+      } else {
+        @io.flow.play.util.DateHelper.longDateTime(lastCompletedSync.get.createdAt)
+      }
+    </li>
+  </ul>
+
+  @views.html.binaries.versions.table(versions)
+  @if(versions.hasPrevious || versions.hasNext) {
+    <ul class="pager">
+      @if(versions.hasPrevious) {
+        <li><a href="@routes.BinariesController.show(binary.id, versionsPage = versions.page - 1, projectsPage = projectBinaries.page)">Previous</a></li>
+      }
+      @if(versions.hasNext) {
+        <li><a href="@routes.BinariesController.show(binary.id, versionsPage = versions.page + 1, projectsPage = projectBinaries.page)">Next</a></li>
+      }
+    </ul>
+  }
+
+
+  <h3>Projects</h3>
+  <div class="table-responsive">
+    <table class="table">
+      @projectBinaries.items.map { rec =>
+        <tr>
+          <td><a href="@routes.ProjectsController.show(rec.project.id)">@{rec.project.name}</a></td>
+          <td><a href="">@{rec.version}</a></td>
+        </tr>
+      }
+    </table>
+  </div>
+
+  @if(projectBinaries.hasPrevious || projectBinaries.hasNext) {
+    <ul class="pager">
+      @if(projectBinaries.hasPrevious) {
+        <li><a href="@routes.LibrariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page - 1)">Previous</a></li>
+      }
+      @if(projectBinaries.hasNext) {
+        <li><a href="@routes.LibrariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page + 1)">Next</a></li>
+      }
+    </ul>
+  }
+
+}

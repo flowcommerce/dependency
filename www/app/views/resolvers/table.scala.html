@@ -1,0 +1,22 @@
+@(resolvers: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Resolver])
+
+<div class="table-responsive">
+  <table class="table">
+    <tr>
+      <th>Owner</th>
+      <th>Resolver URI</th>
+    </tr>
+    @resolvers.items.map { r =>
+      <tr>
+        <td>
+	  @if(r.organization.isEmpty) {
+	    Public
+	  } else {
+	    <a href="@routes.OrganizationsController.show(r.organization.get.key)">@{r.organization.get.key}</a>
+	  }
+	</td>
+        <td><a href="@routes.ResolversController.show(r.id)">@{r.uri}</a></td>
+      </tr>
+    }
+  </table>
+</div>

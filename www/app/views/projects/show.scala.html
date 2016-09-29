@@ -1,0 +1,145 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  project: com.bryzek.dependency.v0.models.Project,
+  recommendations: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Recommendation],
+  binaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectBinary],
+  libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectLibrary],
+  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some(project.name))) {
+
+  <div class="pull-right">
+    @if(com.bryzek.dependency.www.lib.Permissions.Project.edit(project, data.user)) {
+      <a href="@routes.ProjectsController.edit(project.id)">Edit</a>
+    }
+    @if(com.bryzek.dependency.www.lib.Permissions.Project.delete(project, data.user)) {
+      | <a class="delete" data-confirm="Are you sure?" href="@routes.ProjectsController.postDelete(project.id)">Delete</a>
+    }
+
+    <a href="@routes.SyncsController.postProjectsById(project.id)" class="btn btn-primary btn-sm active postForm" role="button">Sync</a>
+
+  </div>
+
+  <ul>
+    <li>Owner: <a href="@routes.OrganizationsController.show(project.organization.key)">@project.organization.key</a></li>
+    <li>Visbility: @project.visibility.toString</li>
+    <li>SCMS: @project.scms.toString</li>
+    <li>URI: <a href="@project.uri">@project.uri</a></li>
+    <li>Last synced:
+      @if(lastCompletedSync.isEmpty) {
+        <em>pending</em>
+      } else {
+        @io.flow.play.util.DateHelper.longDateTime(lastCompletedSync.get.createdAt)
+      }
+    </li>
+  </ul>
+
+  <h3>Recommendations</h3>
+  @if(recommendations.isEmpty) {
+    <em>Awesome - your project is fully up to date!</em>
+  } else {
+    <div class="table-responsive">
+      <table class="table">
+	<thead>
+	  <tr>
+	    <th>Name</th>
+	    <th>Current</th>
+	    <th>Recommended</th>
+	  </tr>
+	</thead>
+        @recommendations.items.map { rec =>
+          <tr>
+            <td><a href="@data.urls.recommendation(rec)">@com.bryzek.dependency.lib.Text.truncate(rec.name, 50)</a></td>
+            <td>@rec.from</td>
+            <td>@rec.to</td>
+          </tr>
+        }
+      </table>
+    </div>
+  }
+
+  <h3>Dependencies</h3>
+  @if(binaries.isEmpty && libraries.isEmpty) {
+    <em>No dependencies found</em>
+  } else {
+    @if(!binaries.isEmpty) {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+          <tr>
+  	    <th>Name</th>
+  	    <th>Version</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        @binaries.items.map { pb =>
+          <tr>
+            <td>
+	      @if(pb.binary.isEmpty) {
+  	        @pb.name.toString
+  	      } else {
+	        <a href="@routes.BinariesController.show(pb.binary.get.id)">@pb.name.toString</a>
+	      }
+            </td>
+            <td>@pb.version</td>
+            <td><a href="@com.bryzek.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, pb.path)">@pb.path</a></td>
+          </tr>
+        }
+        </table>
+      </div>
+
+      @if(binaries.hasPrevious || binaries.hasNext) {
+        <ul class="pager">
+          @if(binaries.hasPrevious) {
+            <li><a href="@routes.ProjectsController.show(project.id, recommendationsPage = recommendations.page, binariesPage = binaries.page - 1, librariesPage = libraries.page)">Previous</a></li>
+          }
+          @if(binaries.hasNext) {
+            <li><a href="@routes.ProjectsController.show(project.id, recommendationsPage = recommendations.page, binariesPage = binaries.page + 1, librariesPage = libraries.page)">Next</a></li>
+          }
+        </ul>
+      }
+    }
+
+    @if(!libraries.isEmpty) {
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+          <tr>
+  	    <th>Library</th>
+  	    <th>Version</th>
+            <th>Cross built for</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        @libraries.items.map { lib =>
+          <tr>
+            <td>
+	      @if(lib.library.isEmpty) {
+  	        @lib.groupId.@lib.artifactId
+  	      } else {
+	        <a href="@routes.LibrariesController.show(lib.library.get.id)">@lib.groupId.@lib.artifactId</a>
+	      }
+            </td>
+            <td>@lib.version</td>
+            <td>@lib.crossBuildVersion.getOrElse("-")</td>
+            <td><a href="@com.bryzek.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, lib.path)">@lib.path</a></td>
+          </tr>
+        }
+        </table>
+      </div>
+
+      @if(libraries.hasPrevious || libraries.hasNext) {
+        <ul class="pager">
+          @if(libraries.hasPrevious) {
+            <li><a href="@routes.ProjectsController.show(project.id, recommendationsPage = recommendations.page, binariesPage = libraries.page, librariesPage = libraries.page - 1)">Previous</a></li>
+          }
+          @if(libraries.hasNext) {
+            <li><a href="@routes.ProjectsController.show(project.id, recommendationsPage = recommendations.page, binariesPage = libraries.page, librariesPage = libraries.page + 1)">Next</a></li>
+          }
+        </ul>
+      }
+    }
+  }
+
+}

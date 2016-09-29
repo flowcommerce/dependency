@@ -1,0 +1,52 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  resolver: com.bryzek.dependency.v0.models.Resolver,
+  libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Library]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Resolver"))) {
+
+  <div class="pull-right">
+    @if(com.bryzek.dependency.www.lib.Permissions.Resolver.delete(resolver, data.user)) {
+      <a class="delete" data-confirm="Are you sure?" href="@routes.ResolversController.postDelete(resolver.id)">Delete</a>
+    }
+  </div>
+
+  <ul>
+    <li>URI: <a href="@resolver.uri">@resolver.uri</a></li>
+    <li>Owner: @{resolver.organization match {
+         case None => "Public"
+         case Some(org) => Html(s"<a href='${routes.OrganizationsController.show(org.key)}'>${org.key}</a>")
+      }}
+    </li>
+    <li>Visibility: @resolver.visibility.toString</li>
+    <li>Credentials:
+      @if(resolver.credentials.isEmpty) {
+        N/A
+      } else {
+        @{resolver.credentials.get match {
+          case com.bryzek.dependency.v0.models.UsernamePassword(username, None) => s"Username: $username"
+          case com.bryzek.dependency.v0.models.UsernamePassword(username, Some(_)) => s"Username: $username, password: masked"
+          case com.bryzek.dependency.v0.models.CredentialsUndefinedType(_) => "N/A"
+        }}
+      }
+    </li>
+  </ul>
+
+  <h3>Libraries</h3>
+  @if(libraries.isEmpty) {
+    <em>No libraries have been resolved from this resolver</em>
+  } else {
+    @views.html.libraries.table(libraries)
+    @if(libraries.hasPrevious || libraries.hasNext) {
+      <ul class="pager">
+        @if(libraries.hasPrevious) {
+          <li><a href="@routes.ResolversController.show(resolver.id, librariesPage = libraries.page - 1)">Previous</a></li>
+        }
+        @if(libraries.hasNext) {
+          <li><a href="@routes.ResolversController.show(resolver.id, librariesPage = libraries.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+}

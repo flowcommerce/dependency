@@ -1,0 +1,43 @@
+@(form: Form[controllers.ProjectsController.UiForm],
+  orgs: Seq[com.bryzek.dependency.v0.models.Organization],
+  cancelUrl: play.api.mvc.Call
+)(implicit flash: Flash, messages: Messages)
+
+<fieldset>
+
+    @organizations.select(orgs, form("organization"), form.error("organization"))
+
+    @helper.inputText(
+        form("name"),
+        '_label -> "Name",
+        '_error -> form.error("name")
+    )
+
+    @helper.select(
+        form("visibility"),
+        Seq( ("" -> "-- select --") ) ++ com.bryzek.dependency.v0.models.Visibility.all.map( v => (v.toString -> v.toString) ),
+        '_label -> "Visibility",
+        '_error -> form.error("visibility")
+    )
+
+    @helper.select(
+        form("scms"),
+        Seq( ("" -> "-- select --") ) ++ com.bryzek.dependency.v0.models.Scms.all.map( v => (v.toString -> v.toString) ),
+        '_label -> "SCMS",
+        '_error -> form.error("scms")
+    )
+
+    @helper.inputText(
+        form("uri"),
+        '_label -> "URI",
+        '_error -> form.error("uri")
+    )
+
+</fieldset>
+
+
+<div class="actions">
+  <button class="btn btn-large btn-primary" type="submit">Submit</button>
+  <a href="@cancelUrl" class="btn">Cancel</a>
+</div>
+

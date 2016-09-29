@@ -1,0 +1,30 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  projects: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Project]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Projects"))) {
+
+  <div class="pull-right">
+    <span class="glyphicon glyphicon-plus"></span> <a href="@routes.ProjectsController.github()">Add project</a>
+  </div>
+
+  @if(projects.isEmpty) {
+    <em>No projects</em>
+
+  } else {
+    @table(projects.items)
+
+    @if(projects.hasPrevious || projects.hasNext) {
+      <ul class="pager">
+        @if(projects.hasPrevious) {
+          <li><a href="@routes.ProjectsController.index(projects.page - 1)">Previous</a></li>
+       }
+        @if(projects.hasNext) {
+         <li><a href="@routes.ProjectsController.index(projects.page + 1)">Next</a></li>
+        }
+      </ul>
+    }
+  }
+
+}

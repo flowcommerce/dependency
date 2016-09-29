@@ -1,0 +1,15 @@
+@(binaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Binary])
+
+@if(binaries.isEmpty) {
+  <em>No binaries</em>
+} else {
+  <div class="table-responsive">
+    <table class="table">
+      @binaries.items.map { lang =>
+        <tr>
+          <td><a href="@routes.BinariesController.show(lang.id)">@lang.name</a</td>
+        </tr>
+      }
+    </table>
+  </div>
+}

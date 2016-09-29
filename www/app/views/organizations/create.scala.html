@@ -1,0 +1,19 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  form: Form[controllers.OrganizationsController.UiForm],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Add organization")), errorMessages = errorMessages) {
+
+  <div class="container">
+
+    @helper.form(action = routes.OrganizationsController.postCreate()) {
+
+      @organizationForm(form, routes.OrganizationsController.index())
+
+    }
+
+  </div>
+
+}

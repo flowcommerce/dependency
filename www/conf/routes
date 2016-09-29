@@ -1,0 +1,76 @@
+GET     /_internal_/healthcheck                 controllers.HealthchecksController.index()
+GET     /                                       controllers.ApplicationController.index(organization: Option[String] ?= None, page: Int ?= 0)
+
+GET     /libraries                              controllers.ApplicationController.redirect
+GET     /libraries/                             controllers.LibrariesController.index(page: Int ?= 0)
+GET     /libraries/:id                          controllers.LibrariesController.show(id: String, versionsPage: Int ?= 0, projectsPage: Int ?= 0)
+
+GET     /binaries                               controllers.ApplicationController.redirect
+GET     /binaries/                              controllers.BinariesController.index(page: Int ?= 0)
+GET     /binaries/:id                           controllers.BinariesController.show(id: String, versionsPage: Int ?= 0, projectsPage: Int ?= 0)
+
+GET     /projects                               controllers.ApplicationController.redirect
+GET     /projects/                              controllers.ProjectsController.index(page: Int ?= 0)
+GET     /projects/github                        controllers.ProjectsController.github()
+GET     /projects/github/:org                   controllers.ProjectsController.githubOrg(org: String, repositoriesPage: Int ?= 0)
+POST    /projects/github/:org/post              controllers.ProjectsController.postGithubOrg(org: String, owner: String, name: String, repositoriesPage: Int ?= 0)
+GET     /projects/create                        controllers.ProjectsController.create()
+POST    /projects/postCreate                    controllers.ProjectsController.postCreate()
+GET     /projects/:id                           controllers.ProjectsController.show(id: String, recommendationsPage: Int ?= 0, binariesPage: Int ?= 0, librariesPage: Int ?= 0)
+GET     /projects/:id/edit                      controllers.ProjectsController.edit(id: String)
+POST    /projects/:id/postEdit                  controllers.ProjectsController.postEdit(id: String)
+POST    /projects/:id/delete                    controllers.ProjectsController.postDelete(id: String)
+GET     /projects/:id/sync                      controllers.ProjectsController.sync(id: String, n: Int ?= 1, librariesPage: Int ?= 0)
+
+GET     /resolvers                              controllers.ApplicationController.redirect
+GET     /resolvers/                             controllers.ResolversController.index(page: Int ?= 0)
+GET     /resolvers/create                       controllers.ResolversController.create()
+POST    /resolvers/postCreate                   controllers.ResolversController.postCreate()
+GET     /resolvers/:id                          controllers.ResolversController.show(id: String, librariesPage: Int ?= 0)
+POST    /resolvers/:id/delete                   controllers.ResolversController.postDelete(id: String)
+
+GET     /search                                 controllers.SearchController.index(q: Option[String] ?= None, page: Int ?= 0)
+
+GET     /subscriptions                          controllers.ApplicationController.redirect
+GET     /subscriptions/                         controllers.SubscriptionsController.index()
+GET     /subscriptions/:identifier              controllers.SubscriptionsController.identifier(identifier: String)
+POST    /subscriptions/:identifier/:publication/toggle      controllers.SubscriptionsController.postToggle(identifier: String, publication: com.bryzek.dependency.v0.models.Publication)
+
+GET     /login                                  controllers.ApplicationController.redirect
+GET     /login/                                 controllers.LoginController.index(return_url: Option[String] ?= None)
+GET     /login/github                           controllers.LoginController.githubCallback(code: String, state: Option[String] ?= None, return_url: Option[String] ?= None)
+GET     /logout                                 controllers.LogoutController.index
+GET     /logged_out                             controllers.LogoutController.logged_out
+
+GET     /tokens                                 controllers.ApplicationController.redirect
+GET     /tokens/                                controllers.TokensController.index(page: Int ?= 0)
+GET     /tokens/create                          controllers.TokensController.create
+POST    /tokens/postCreate                      controllers.TokensController.postCreate
+GET     /tokens/:id/show                        controllers.TokensController.show(id: String)
+POST    /tokens/:id/postDelete                  controllers.TokensController.postDelete(id: String)
+
+GET     /organizations                          controllers.OrganizationsController.index(page: Int ?= 0)
+GET     /organizations/create                   controllers.OrganizationsController.create()
+POST    /organizations/postCreate               controllers.OrganizationsController.postCreate()
+GET     /organizations/:key                     controllers.OrganizationsController.show(key: String, projectsPage: Int ?= 0)
+GET     /organizations/:key/edit                controllers.OrganizationsController.edit(key: String)
+POST    /organizations/:key/postEdit            controllers.OrganizationsController.postEdit(key: String)
+POST    /organizations/:key/delete              controllers.OrganizationsController.postDelete(key: String)
+
+GET     /syncs                                  controllers.ApplicationController.redirect
+GET     /syncs/                                 controllers.SyncsController.index(objectId: Option[String] ?= None, page: Int ?= 0)
+POST    /syncs/binaries/:id                     controllers.SyncsController.postBinariesById(id: String)
+POST    /syncs/libraries/:id                    controllers.SyncsController.postLibrariesById(id: String)
+POST    /syncs/projects/:id                     controllers.SyncsController.postProjectsById(id: String)
+
+GET     /:org                                   controllers.OrganizationsController.redirectToDashboard(org: String)
+GET     /:org/members                           controllers.MembersController.index(org: String, page: Int ?= 0)
+GET     /:org/members/create                    controllers.MembersController.create(org: String)
+POST    /:org/members/createPost                controllers.MembersController.postCreate(org: String)
+POST    /:org/members/postDelete                controllers.MembersController.postDelete(org: String, id: String)
+POST    /:org/members/postMakeMember            controllers.MembersController.postMakeMember(org: String, id: String)
+POST    /:org/members/postMakeAdmin             controllers.MembersController.postMakeAdmin(org: String, id: String)
+
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /webjars/*file              controllers.WebJarAssets.at(file)

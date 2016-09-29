@@ -1,0 +1,28 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Library]
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Libraries"))) {
+
+  @if(libraries.isEmpty) {
+    <em>No libraries</em>
+
+  } else {
+    <div class="table-responsive">
+      @table(libraries)
+
+      @if(libraries.hasPrevious || libraries.hasNext) {
+        <ul class="pager">
+          @if(libraries.hasPrevious) {
+            <li><a href="@routes.LibrariesController.index(libraries.page - 1)">Previous</a></li>
+          }
+          @if(libraries.hasNext) {
+            <li><a href="@routes.LibrariesController.index(libraries.page + 1)">Next</a></li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+}

@@ -1,0 +1,20 @@
+@(
+  data: com.bryzek.dependency.www.lib.UiData,
+  organization: com.bryzek.dependency.v0.models.Organization,
+  form: Form[controllers.OrganizationsController.UiForm],
+  errorMessages: Seq[String] = Nil
+)(implicit flash: Flash, messages: Messages)
+
+@main(data.copy(title = Some("Edit organization")), errorMessages = errorMessages) {
+
+  <div class="container">
+
+    @helper.form(action = routes.OrganizationsController.postEdit(organization.key)) {
+
+      @organizationForm(form, routes.OrganizationsController.show(organization.key))
+
+    }
+
+  </div>
+
+}
