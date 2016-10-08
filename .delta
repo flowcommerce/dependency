@@ -3,8 +3,8 @@ builds:
       dockerfile: api/Dockerfile
       initial.number.instances: 1
       port.container: 9000
-      port.host: 6091
+      port.host: 6111
   - www:
       dockerfile: www/Dockerfile
       port.container: 9000
-      port.host: 6090
+      port.host: 6110
