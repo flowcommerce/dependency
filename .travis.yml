@@ -10,9 +10,8 @@ cache:
 services:
   - docker
 before_script:
-  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-  - docker run -d -p 127.0.0.1:6119:5432 flowcommerce/dependency-postgresql:latest
-script: 
+  - docker run -d -p 127.0.0.1:6119:5432 flowcommerce/delta-postgresql:latest
+script:
   - sbt ++$TRAVIS_SCALA_VERSION clean compile test
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm

@@ -1,22 +1,37 @@
 code:
-  bryzek:
-    dependency:
-      version: latest
-      generators:
-        play_2_4_client: generated/app
-        play_2_x_routes: api/conf/routes
-        anorm_2_x_parsers: api/app/generated
   flow:
     common:
       version: latest
       generators:
-        play_2_x_json: generated/app
+        play_2_x_routes: api/conf/common.routes
+        play_2_4_client: generated/app
         anorm_2_x_parsers: api/app/generated
+    docker-registry:
+      version: latest
+      generators:
+        play_2_4_client: generated/app
+    docker-hub:
+      version: latest
+      generators:
+        play_2_4_client: generated/app
     github:
       version: latest
       generators:
+        anorm_2_x_parsers: api/app/generated
         play_2_4_client: generated/app
     github-oauth:
       version: latest
       generators:
         play_2_4_client: generated/app
+    delta:
+      version: latest
+      generators:
+        play_2_x_routes: api/conf/delta.routes
+        anorm_2_x_parsers: api/app/generated
+        play_2_4_client: generated/app
+    delta-config:
+      version: latest
+      generators:
+        anorm_2_x_parsers: api/app/generated      
+        play_2_x_json: generated/app
+

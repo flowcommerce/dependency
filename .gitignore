@@ -1,4 +1,5 @@
 .idea/
+api/logs
 target/
 logs/
 .ivy2
