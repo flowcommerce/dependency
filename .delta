@@ -4,7 +4,11 @@ builds:
       initial.number.instances: 1
       port.container: 9000
       port.host: 6111
+      disable:
+        - build_docker_image
   - www:
       dockerfile: www/Dockerfile
       port.container: 9000
       port.host: 6110
+      disable:
+        - build_docker_image
