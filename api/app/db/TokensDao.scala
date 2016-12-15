@@ -20,8 +20,8 @@ sealed trait InternalTokenForm {
 
 object InternalTokenForm {
 
-  private[db] val GithubOauthTag = "github_oauth"
-  private[db] val UserCreatedTag = "user_created"
+  val GithubOauthTag = "github_oauth"
+  val UserCreatedTag = "user_created"
 
   private[this] val random = Random()
   private[this] val TokenLength = 64

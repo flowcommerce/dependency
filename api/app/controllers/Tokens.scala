@@ -36,7 +36,7 @@ class Tokens @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withToken(request.user, id) { token =>
+    withUserCreatedToken(request.user, id) { token =>
       Ok(Json.toJson(TokensDao.addCleartextIfAvailable(request.user, token)))
     }
   }
@@ -56,16 +56,16 @@ class Tokens @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withToken(request.user, id) { token =>
+    withUserCreatedToken(request.user, id) { token =>
       TokensDao.delete(request.user, token)
       NoContent
     }
   }
 
-  def withToken(user: UserReference, id: String)(
+  def withUserCreatedToken(user: UserReference, id: String)(
     f: Token => Result
   ) = {
-    TokensDao.findById(Authorization.User(user.id), id) match {
+    TokensDao.findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1).headOption match {
       case None => {
         Results.NotFound
       }
