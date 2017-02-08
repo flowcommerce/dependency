@@ -34,7 +34,7 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,      
       "io.flow" %% "lib-postgresql" % "0.0.42",
-      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.18",
+      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.19",
       "org.postgresql" % "postgresql" % "9.4.1212",
       "com.sendgrid"   %  "sendgrid-java" % "3.1.0"
     )
