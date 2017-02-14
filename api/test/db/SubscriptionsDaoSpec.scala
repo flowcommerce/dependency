@@ -44,8 +44,9 @@ class SubscriptionsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
   }
 
   "findAll by ids" in {
-    val subscription1 = createSubscription()
-    val subscription2 = createSubscription()
+    // Create subscriptions for two different users so unique constraint on (user_id, publication) is not violated 
+    val subscription1 = createSubscription(user = createUser())
+    val subscription2 = createSubscription(user = createUser())
 
     SubscriptionsDao.findAll(ids = Some(Seq(subscription1.id, subscription2.id))).map(_.id) must be(
       Seq(subscription1.id, subscription2.id)
