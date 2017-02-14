@@ -408,9 +408,10 @@ trait Helpers {
   }
 
   def createSubscription(
-    form: SubscriptionForm = createSubscriptionForm()
+    form: SubscriptionForm = createSubscriptionForm(),
+    user: User = systemUser
   ): Subscription = {
-    create(SubscriptionsDao.create(systemUser, form))
+    create(SubscriptionsDao.create(user, form))
   }
 
   def createSubscriptionForm(
