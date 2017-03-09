@@ -5,7 +5,7 @@ import com.bryzek.dependency.v0.models.json._
 import db.{UserIdentifiersDao, UsersDao}
 import io.flow.common.v0.models.{Error, User}
 import io.flow.common.v0.models.json._
-import io.flow.play.controllers.IdentifiedRestController
+import io.flow.play.controllers.FlowController
 import io.flow.play.util.Validation
 import play.api.mvc._
 import play.api.libs.json._
@@ -13,8 +13,7 @@ import scala.concurrent.Future
 
 class Users @javax.inject.Inject() (
   override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController {
+) extends Controller with FlowController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
