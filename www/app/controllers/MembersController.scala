@@ -15,7 +15,6 @@ import play.api.data.Forms._
 
 class MembersController @javax.inject.Inject() (
   val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
   override val dependencyClientProvider: DependencyClientProvider
 ) extends BaseController(tokenClient, dependencyClientProvider) {
 

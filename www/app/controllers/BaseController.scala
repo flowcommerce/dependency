@@ -5,7 +5,7 @@ import com.bryzek.dependency.v0.models.Organization
 import com.bryzek.dependency.www.lib.{DependencyClientProvider, Section, UiData}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.token.v0.interfaces.{Client => TokenClient}
-import io.flow.play.controllers.IdentifiedController
+import io.flow.play.controllers.FlowController
 import scala.concurrent.{ExecutionContext, Future}
 import play.api._
 import play.api.i18n._
@@ -41,7 +41,7 @@ abstract class BaseController(
   val tokenClient: io.flow.token.v0.interfaces.Client,
   val dependencyClientProvider: DependencyClientProvider
 ) extends Controller
-    with IdentifiedController
+    with FlowController
     with I18nSupport
 {
 

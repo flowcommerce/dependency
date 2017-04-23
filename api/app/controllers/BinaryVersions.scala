@@ -1,7 +1,7 @@
 package controllers
 
 import db.{Authorization, BinaryVersionsDao}
-import io.flow.play.controllers.IdentifiedRestController
+import io.flow.play.controllers.FlowController
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.Validation
 import com.bryzek.dependency.v0.models.BinaryVersion
@@ -13,8 +13,7 @@ import play.api.libs.json._
 @javax.inject.Singleton
 class BinaryVersions @javax.inject.Inject() (
   override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController {
+) extends Controller with FlowController {
 
   def get(
     id: Option[String],

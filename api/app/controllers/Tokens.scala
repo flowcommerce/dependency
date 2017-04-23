@@ -11,8 +11,7 @@ import play.api.libs.json._
 
 class Tokens @javax.inject.Inject() (
   override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
+) extends Controller with BaseFlowController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

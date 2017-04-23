@@ -1,7 +1,7 @@
 package controllers
 
 import db.{Authorization, ProjectLibrariesDao}
-import io.flow.play.controllers.IdentifiedRestController
+import io.flow.play.controllers.FlowController
 import io.flow.play.util.Validation
 import com.bryzek.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
@@ -11,8 +11,7 @@ import play.api.libs.json._
 @javax.inject.Singleton
 class ProjectLibraries @javax.inject.Inject() (
   override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController with Helpers {
+) extends Controller with FlowController with Helpers {
 
   def get(
     id: Option[String],
