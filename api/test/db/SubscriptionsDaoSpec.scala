@@ -9,19 +9,15 @@ import java.util.UUID
 
 class SubscriptionsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   "upsert" in {
     val form = createSubscriptionForm()
-    val subscription1 = SubscriptionsDao.create(systemUser, form).right.get
+    SubscriptionsDao.upsertByUserIdAndPublication(systemUser, form).right.get
 
-    val subscription2 = SubscriptionsDao.upsert(systemUser, form)
-    subscription1.id must be(subscription2.id)
+    SubscriptionsDao.upsertByUserIdAndPublication(systemUser, form)
+    val subscription = SubscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).get
 
-    val newSubscription = UUID.randomUUID.toString
-    val subscription3 = createSubscription()
-
-    subscription2.id must not be(subscription3.id)
+    val otherSubscription = createSubscription()
+    subscription.id must not be(otherSubscription.id)
   }
 
   "findById" in {

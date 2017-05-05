@@ -83,9 +83,14 @@ class Subscriptions @javax.inject.Inject() (
       }
       case s: JsSuccess[SubscriptionForm] => {
         val form = s.get
-        SubscriptionsDao.create(request.user, form) match {
+        SubscriptionsDao.upsertByUserIdAndPublication(request.user, form) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
-          case Right(subscription) => Created(Json.toJson(subscription))
+          case Right(subscription) => {
+            val sub = SubscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).getOrElse {
+              sys.error("Failed to upsert subscription")
+            }
+            Created(Json.toJson(sub))
+          }
         }
       }
     }

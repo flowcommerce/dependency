@@ -17,12 +17,16 @@ object SubscriptionsDao {
       from subscriptions
   """)
 
-  private[this] val InsertQuery = """
+  private[this] val UpsertQuery = """
     insert into subscriptions
     (id, user_id, publication, updated_by_user_id)
     values
     ({id}, {user_id}, {publication}, {updated_by_user_id})
+    on conflict(user_id, publication)
+    do nothing
   """
+
+  private[this] val idGenerator = io.flow.play.util.IdGenerator("sub")
 
   private[db] def validate(
     form: SubscriptionForm
@@ -40,38 +44,18 @@ object SubscriptionsDao {
     userErrors ++ publicationErrors
   }
 
-  def upsert(createdBy: UserReference, form: SubscriptionForm): Subscription = {
-    findByUserIdAndPublication(form.userId, form.publication).getOrElse {
-      create(createdBy, form) match {
-        case Left(errors) => {
-          findByUserIdAndPublication(form.userId, form.publication).getOrElse {
-            sys.error(errors.mkString(", "))
-          }
-        }
-        case Right(subscription) => subscription
-      }
-    }
-  }
-
-  def create(createdBy: UserReference, form: SubscriptionForm): Either[Seq[String], Subscription] = {
+  def upsertByUserIdAndPublication(createdBy: UserReference, form: SubscriptionForm): Either[Seq[String], Unit] = {
     validate(form) match {
       case Nil => {
-        val id = io.flow.play.util.IdGenerator("sub").randomId()
-
         DB.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            'id -> id,
+          SQL(UpsertQuery).on(
+            'id -> idGenerator.randomId(),
             'user_id -> form.userId,
             'publication -> form.publication.toString,
             'updated_by_user_id -> createdBy.id
           ).execute()
         }
-
-        Right(
-          findById(id).getOrElse {
-            sys.error("Failed to create subscription")
-          }
-        )
+        Right(())
       }
       case errors => Left(errors)
     }

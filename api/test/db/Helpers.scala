@@ -411,7 +411,8 @@ trait Helpers {
     form: SubscriptionForm = createSubscriptionForm(),
     user: User = systemUser
   ): Subscription = {
-    create(SubscriptionsDao.create(user, form))
+    SubscriptionsDao.upsertByUserIdAndPublication(user, form)
+    SubscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).get
   }
 
   def createSubscriptionForm(

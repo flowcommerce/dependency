@@ -36,7 +36,7 @@ class UserActor extends Actor with Util {
 
         // Subscribe the user automatically to key personalized emails.
         Seq(Publication.DailySummary).foreach { publication =>
-          SubscriptionsDao.upsert(
+          SubscriptionsDao.upsertByUserIdAndPublication(
             MainActor.SystemUser,
             SubscriptionForm(
               userId = user.id,
