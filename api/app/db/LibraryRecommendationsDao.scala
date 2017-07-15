@@ -28,7 +28,6 @@ object LibraryRecommendationsDao {
       limit = None
     ).foreach { projectLibrary =>
       projectLibrary.library.flatMap { lib => LibrariesDao.findById(auth, lib.id) }.map { library =>
-        println(s"Library: $library")
         val recentVersions = versionsGreaterThan(auth, library, projectLibrary.version)
         recommend(projectLibrary, recentVersions).map { v =>
           recommendations ++= Seq(
@@ -65,14 +64,12 @@ object LibraryRecommendationsDao {
     library: Library,
     version: String
   ): Seq[LibraryVersion] = {
-    val recommendations = LibraryVersionsDao.findAll(
+    LibraryVersionsDao.findAll(
       auth,
       libraryId = Some(library.id),
       greaterThanVersion = Some(version),
       limit = None
     )
-    println(s"versionsGreaterThan library:${library.id} version[$version] found #[" + recommendations.size + "]")
-    recommendations
   }
 
 }

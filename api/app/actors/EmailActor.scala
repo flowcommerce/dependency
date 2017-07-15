@@ -82,9 +82,7 @@ case class BatchEmailProcessor(
 
   def process() {
     subscriptions.foreach { subscription =>
-      println(s"subscription: $subscription")
       UsersDao.findById(subscription.user.id).foreach { user =>
-        println(s" - user[${user.id}] email[${user.email}]")
         Recipient.fromUser(user).map { DailySummaryEmailMessage(_) }.map { generator =>
           // Record before send in case of crash - prevent loop of
           // emails.

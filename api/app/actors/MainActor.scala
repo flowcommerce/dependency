@@ -165,7 +165,6 @@ class MainActor @javax.inject.Inject() (
 
     case m @ MainActor.Messages.LibrarySyncFuture(id, seconds) => withErrorHandler(m) {
       system.scheduler.scheduleOnce(Duration(seconds, "seconds")) {
-        println(s"MainActor.Messages.LibrarySyncFuture - $seconds - syncLibrary($id)")
         syncLibrary(id)
       }
     }

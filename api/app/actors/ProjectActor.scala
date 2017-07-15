@@ -90,7 +90,6 @@ class ProjectActor @javax.inject.Inject() (
             Logger.warn(s"Project id[${project.id}] name[${project.name}]: $error")
           }
           case Right(repo) => {
-            println(s"Create Hooks for project[${project.id}] repo[$repo]")
             TokensDao.getCleartextGithubOauthTokenByUserId(project.user.id) match {
               case None => {
                 Logger.warn(s"No oauth token for user[${project.user.id}]")
@@ -113,7 +112,7 @@ class ProjectActor @javax.inject.Inject() (
                       events = HookEvents,
                       active = true
                     ).map { hook =>
-                      println("  - hook created: " + hook)
+                      println("  - Project[${project.id}] hook created: " + hook)
                     }.recover {
                       case e: Throwable => {
                         Logger.error("Project[${project.id}] Error creating hook: " + e)
@@ -139,7 +138,6 @@ class ProjectActor @javax.inject.Inject() (
 
           dependencies.binaries.map { binaries =>
             val projectBinaries = binaries.map { form =>
-              println(s" -- project[${project.id}] name[${project.name}] binaries dao upsert")
               ProjectBinariesDao.upsert(project.user, form) match {
                 case Left(errors) => {
                   Logger.error(s"Project[${project.name}] id[${project.id}] Error storing binary[$form]: " + errors.mkString(", "))
@@ -155,8 +153,6 @@ class ProjectActor @javax.inject.Inject() (
 
           dependencies.librariesAndPlugins.map { libraries =>
             val projectLibraries = libraries.map { artifact =>
-              println(s" -- project[${project.id}] name[${project.name}] artifact upsert: " + artifact)
-              println(s" -- project[${project.id}] name[${project.name}] crossBuildVersion: " + dependencies.crossBuildVersion().map(_.value) + " binaries: " + dependencies.binaries)
               ProjectLibrariesDao.upsert(
                 project.user,
                 artifact.toProjectLibraryForm(
@@ -329,7 +325,6 @@ class ProjectActor @javax.inject.Inject() (
   }
 
   private[this] def resolveBinary(projectBinary: ProjectBinary): Option[Binary] = {
-    println(s"project id[${projectBinary.project.id}] projectBinaryCreated[${projectBinary.id}] name[${projectBinary.name}]")
     BinaryType(projectBinary.name) match {
       case BinaryType.Scala | BinaryType.Sbt => {
         BinariesDao.upsert(

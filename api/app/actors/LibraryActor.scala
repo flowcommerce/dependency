@@ -36,8 +36,6 @@ class LibraryActor extends Actor with Util {
               groupId = lib.groupId,
               artifactId = lib.artifactId
             ).map { resolution =>
-              println(s"Library[${lib.groupId}.${lib.artifactId}] resolver[${lib.resolver}] -- found[${resolution.resolver}]")
-
               resolution.versions.foreach { version =>
                 LibraryVersionsDao.upsert(
                   createdBy = MainActor.SystemUser,

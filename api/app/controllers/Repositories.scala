@@ -27,13 +27,6 @@ class Repositories @javax.inject.Inject() (
     limit: Long = 25,
     offset: Long = 0
   ) = Identified.async { request =>
-    println(s"getGithub")
-    println(s"  - owner: $owner")
-    println(s"  - name: $name")
-    println(s"  - organizationId: $organizationId")
-    println(s"  - existingProject: $existingProject")
-
-
     if (!existingProject.isEmpty && organizationId.isEmpty) {
       Future {
         UnprocessableEntity(Json.toJson(Validation.error("When filtering by existing projects, you must also provide the organization_id")))
