@@ -163,7 +163,7 @@ object ProjectLibrariesDao {
   def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectLibrary]) {
     val ids = projectBinaries.map(_.id)
     Pager.create { offset =>
-      findAll(Authorization.All, projectId = Some(projectId), limit = 100, offset = offset)
+      findAll(Authorization.All, projectId = Some(projectId), limit = Some(100), offset = offset)
     }.foreach { projectLibrary =>
       if (!ids.contains(projectLibrary.id)) {
         delete(user, projectLibrary)
@@ -201,12 +201,12 @@ object ProjectLibrariesDao {
       artifactId = Some(artifactId),
       version = Some(version.version),
       crossBuildVersion = Some(version.crossBuildVersion),
-      limit = 1
+      limit = Some(1)
     ).headOption
   }
 
   def findById(auth: Authorization, id: String): Option[ProjectLibrary] = {
-    findAll(auth, id = Some(id), limit = 1).headOption
+    findAll(auth, id = Some(id), limit = Some(1)).headOption
   }
 
   def findAll(
@@ -222,12 +222,12 @@ object ProjectLibrariesDao {
     isSynced: Option[Boolean] = None,
     hasLibrary: Option[Boolean] = None,
     orderBy: OrderBy = OrderBy("lower(project_libraries.group_id), lower(project_libraries.artifact_id), project_libraries.created_at"),
-    limit: Long = 25,
+    limit: Option[Long],
     offset: Long = 0
   ): Seq[ProjectLibrary] = {
 
     DB.withConnection { implicit c =>
-      Standards.query(
+      Standards.queryWithOptionalLimit(
         BaseQuery,
         tableName = "project_libraries",
         auth = auth.organizations("organizations.id", Some("projects.visibility")),

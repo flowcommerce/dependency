@@ -97,36 +97,22 @@ class ProjectActor @javax.inject.Inject() (
               }
 
               case Some(token) => {
-                println(s"Create Hooks for project[${project.id}] user[${project.user.id}] token[$token]")
                 val client = GithubHelper.apiClient(token)
 
                 client.hooks.get(repo.owner, repo.project).map { hooks =>
                   val targetUrl = HookBaseUrl + project.id
-                  println(s"Got back from call to get targetUrl[$targetUrl]")
-
-                  hooks.foreach { hook =>
-                    println(s"hook id[${hook.id}] url[${hook.url}]")
-                  }
-                  hooks.find(_.config.url == Some(targetUrl)) match {
-                    case Some(hook) => {
-                      println("  - existing hook found: " + hook.id)
-                      println("  - existing hook events: " + hook.events)
-                    }
-                    case None => {
-                      println("  - hook not found. Creating")
-                      println(s"  - HookEvents: ${HookEvents}")
-                      client.hooks.post(
-                        owner = repo.owner,
-                        repo = repo.project,
-                        name = HookName,
-                        config = io.flow.github.v0.models.HookConfig(
-                          url = Some(targetUrl),
-                          contentType = Some("json")
-                        ),
-                        events = HookEvents,
-                        active = true
-                      )
-                    }.map { hook =>
+                  hooks.find(_.config.url == Some(targetUrl)).getOrElse {
+                    client.hooks.post(
+                      owner = repo.owner,
+                      repo = repo.project,
+                      name = HookName,
+                      config = io.flow.github.v0.models.HookConfig(
+                        url = Some(targetUrl),
+                        contentType = Some("json")
+                      ),
+                      events = HookEvents,
+                      active = true
+                    ).map { hook =>
                       println("  - hook created: " + hook)
                     }.recover {
                       case e: Throwable => {
@@ -170,7 +156,7 @@ class ProjectActor @javax.inject.Inject() (
           dependencies.librariesAndPlugins.map { libraries =>
             val projectLibraries = libraries.map { artifact =>
               println(s" -- project[${project.id}] name[${project.name}] artifact upsert: " + artifact)
-              println(s" -- project[${project.id}] name[${project.name}] crossBuildVersion: " + dependencies.crossBuildVersion() + " binaries: " + dependencies.binaries)
+              println(s" -- project[${project.id}] name[${project.name}] crossBuildVersion: " + dependencies.crossBuildVersion().map(_.value) + " binaries: " + dependencies.binaries)
               ProjectLibrariesDao.upsert(
                 project.user,
                 artifact.toProjectLibraryForm(
@@ -294,8 +280,9 @@ class ProjectActor @javax.inject.Inject() (
     ProjectLibrariesDao.findAll(
       Authorization.All,
       projectId = Some(project.id),
-      isSynced = Some(false)
-    ).map( lib => s"Library ${lib.groupId}.${lib.artifactId}" ) ++ 
+      isSynced = Some(false),
+      limit = None
+    ).map( lib => s"Library ${lib.groupId}.${lib.artifactId}" ) ++
     ProjectBinariesDao.findAll(
       Authorization.All,
       projectId = Some(project.id),

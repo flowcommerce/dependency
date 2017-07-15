@@ -59,7 +59,7 @@ class LibraryActor extends Actor with Util {
         ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, lib.id)
 
         Pager.create { offset =>
-          ProjectLibrariesDao.findAll(Authorization.All, libraryId = Some(lib.id), offset = offset)
+          ProjectLibrariesDao.findAll(Authorization.All, libraryId = Some(lib.id), limit = Some(100), offset = offset)
         }.foreach { projectLibrary =>
           ProjectLibrariesDao.removeLibrary(MainActor.SystemUser, projectLibrary)
           sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)

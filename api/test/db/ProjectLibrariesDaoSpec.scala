@@ -124,31 +124,31 @@ class ProjectLibrariesDaoSpec extends PlaySpec with OneAppPerSuite with Helpers 
   "findAll" must {
 
     "filter by id" in {
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by ids" in {
       val other = createProjectLibrary(project)
 
-      ProjectLibrariesDao.findAll(Authorization.All, ids = Some(Seq(projectLibrary.id, other.id))).map(_.id).sorted must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, ids = Some(Seq(projectLibrary.id, other.id))).map(_.id).sorted must be(
         Seq(projectLibrary.id, other.id).sorted
       )
 
-      ProjectLibrariesDao.findAll(Authorization.All, ids = Some(Seq(projectLibrary.id, UUID.randomUUID.toString))).map(_.id).sorted must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, ids = Some(Seq(projectLibrary.id, UUID.randomUUID.toString))).map(_.id).sorted must be(
         Seq(projectLibrary.id).sorted
       )
 
-      ProjectLibrariesDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, ids = Some(Nil)) must be(Nil)
     }
 
     "filter by projectId" in {
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), projectId = Some(project.id)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), projectId = Some(project.id)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by libraryId" in {
@@ -156,67 +156,67 @@ class ProjectLibrariesDaoSpec extends PlaySpec with OneAppPerSuite with Helpers 
       val projectLibrary = createProjectLibrary(project)
       ProjectLibrariesDao.setLibrary(systemUser, projectLibrary, library)
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), libraryId = Some(library.id)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), libraryId = Some(library.id)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, libraryId = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, libraryId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by groupId" in {
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), groupId = Some(projectLibrary.groupId)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), groupId = Some(projectLibrary.groupId)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, groupId = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, groupId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by artifactId" in {
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), artifactId = Some(projectLibrary.artifactId)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), artifactId = Some(projectLibrary.artifactId)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, artifactId = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, artifactId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by version" in {
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), version = Some(projectLibrary.version)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), version = Some(projectLibrary.version)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, version = Some(UUID.randomUUID.toString)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, version = Some(UUID.randomUUID.toString)) must be(Nil)
     }
 
     "filter by crossBuildVersion" in {
       val projectLibrary = createProjectLibrary(project)(createProjectLibraryForm(project, crossBuildVersion = Some("2.11")))
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), crossBuildVersion = Some(Some("2.11"))).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(Some("2.11"))).map(_.id) must be(
         Seq(projectLibrary.id)
       )
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), crossBuildVersion = Some(Some(UUID.randomUUID.toString))) must be(Nil)
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), crossBuildVersion = Some(None)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(Some(UUID.randomUUID.toString))) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(None)) must be(Nil)
     }
 
     "filter by isSynced" in {
       createSync(createSyncForm(objectId = projectLibrary.id, event = SyncEvent.Completed))
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), isSynced = Some(true)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), isSynced = Some(true)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), isSynced = Some(false)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), isSynced = Some(false)) must be(Nil)
     }
 
     "filter by hasLibrary" in {
       val projectLibrary = createProjectLibrary(project)
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), hasLibrary = Some(true)) must be(Nil)
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), hasLibrary = Some(false)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(true)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(false)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
 
       ProjectLibrariesDao.setLibrary(systemUser, projectLibrary, createLibrary(org))
 
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), hasLibrary = Some(true)).map(_.id) must be(
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(true)).map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      ProjectLibrariesDao.findAll(Authorization.All, id = Some(projectLibrary.id), hasLibrary = Some(false)) must be(Nil)
+      ProjectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(false)) must be(Nil)
     }
   }
 

@@ -32,7 +32,7 @@ class ProjectLibraries @javax.inject.Inject() (
           projectId = projectId,
           libraryId = libraryId,
           isSynced = isSynced,
-          limit = limit,
+          limit = Some(limit),
           offset = offset
         )
       )

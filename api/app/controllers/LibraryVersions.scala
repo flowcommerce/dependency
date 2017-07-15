@@ -30,7 +30,7 @@ class LibraryVersions @javax.inject.Inject() (
           id = id,
           ids = optionals(ids),
           libraryId = libraryId,
-          limit = limit,
+          limit = Some(limit),
           offset = offset
         )
       )

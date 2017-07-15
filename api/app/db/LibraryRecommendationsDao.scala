@@ -21,15 +21,14 @@ object LibraryRecommendationsDao {
     var recommendations = scala.collection.mutable.ListBuffer[LibraryRecommendation]()
     val auth = Authorization.Organization(project.organization.id)
 
-    Pager.create { offset =>
-      ProjectLibrariesDao.findAll(
-        Authorization.Organization(project.organization.id),
-        projectId = Some(project.id),
-        hasLibrary = Some(true),
-        offset = offset
-      )
-    }.foreach { projectLibrary =>
+    ProjectLibrariesDao.findAll(
+      Authorization.Organization(project.organization.id),
+      projectId = Some(project.id),
+      hasLibrary = Some(true),
+      limit = None
+    ).foreach { projectLibrary =>
       projectLibrary.library.flatMap { lib => LibrariesDao.findById(auth, lib.id) }.map { library =>
+        println(s"Library: $library")
         val recentVersions = versionsGreaterThan(auth, library, projectLibrary.version)
         recommend(projectLibrary, recentVersions).map { v =>
           recommendations ++= Seq(
@@ -66,17 +65,13 @@ object LibraryRecommendationsDao {
     library: Library,
     version: String
   ): Seq[LibraryVersion] = {
-    var recommendations = scala.collection.mutable.ListBuffer[LibraryVersion]()
-    Pager.create { offset =>
-      LibraryVersionsDao.findAll(
-        auth,
-        libraryId = Some(library.id),
-        greaterThanVersion = Some(version),
-        offset = offset
-      )
-    }.foreach { libraryVersion =>
-      recommendations ++= Seq(libraryVersion)
-    }
+    val recommendations = LibraryVersionsDao.findAll(
+      auth,
+      libraryId = Some(library.id),
+      greaterThanVersion = Some(version),
+      limit = None
+    )
+    println(s"versionsGreaterThan library:${library.id} version[$version] found #[" + recommendations.size + "]")
     recommendations
   }
 

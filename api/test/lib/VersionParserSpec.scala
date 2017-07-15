@@ -46,6 +46,7 @@ class VersionParserSpec extends FunSpec with Matchers {
         )
       )
     )
+    VersionParser.parse("42.1.3") > VersionParser.parse("9.4.1212") should be(true)
   }
 
   it("separated text from numbers") {

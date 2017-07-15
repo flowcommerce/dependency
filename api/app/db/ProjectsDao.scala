@@ -175,7 +175,7 @@ object ProjectsDao {
 
   def delete(deletedBy: UserReference, project: Project) {
     Pager.create { offset =>
-      ProjectLibrariesDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+      ProjectLibrariesDao.findAll(Authorization.All, projectId = Some(project.id), limit = Some(100), offset = offset)
     }.foreach { ProjectLibrariesDao.delete(deletedBy, _) }
 
     Pager.create { offset =>

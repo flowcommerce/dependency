@@ -4,7 +4,7 @@ name := "dependency"
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.11.11"
 
 lazy val generated = project
   .in(file("generated"))

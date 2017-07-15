@@ -55,7 +55,7 @@ object LibraryVersionsDao {
       libraryId = Some(libraryId),
       version = Some(form.version),
       crossBuildVersion = Some(form.crossBuildVersion),
-      limit = 1
+      limit = Some(1)
     ).headOption.getOrElse {
       Try {
         createWithConnection(createdBy, libraryId, form)
@@ -70,7 +70,7 @@ object LibraryVersionsDao {
             libraryId = Some(libraryId),
             version = Some(form.version),
             crossBuildVersion = Some(form.crossBuildVersion),
-            limit = 1
+            limit = Some(1)
           ).headOption.getOrElse {
             play.api.Logger.error(ex.getMessage, ex)
             sys.error(ex.getMessage)
@@ -126,7 +126,7 @@ object LibraryVersionsDao {
       libraryId = Some(library.id),
       version = Some(version),
       crossBuildVersion = Some(crossBuildVersion),
-      limit = 1
+      limit = Some(1)
     ).headOption
   }
 
@@ -145,7 +145,7 @@ object LibraryVersionsDao {
   ) (
     implicit c: java.sql.Connection
   ): Option[LibraryVersion] = {
-    findAllWithConnection(auth, id = Some(id), limit = 1).headOption
+    findAllWithConnection(auth, id = Some(id), limit = Some(1)).headOption
   }
 
   def findAll(
@@ -156,7 +156,7 @@ object LibraryVersionsDao {
     version: Option[String] = None,
     crossBuildVersion: Option[Option[String]] = None,
     greaterThanVersion: Option[String] = None,
-    limit: Long = 25,
+    limit: Option[Long],
     offset: Long = 0
   ) = {
     DB.withConnection { implicit c =>
@@ -183,12 +183,12 @@ object LibraryVersionsDao {
     crossBuildVersion: Option[Option[String]] = None,
     greaterThanVersion: Option[String] = None,
     orderBy: OrderBy = OrderBy("-library_versions.sort_key, library_versions.created_at"),
-    limit: Long = 25,
+    limit: Option[Long],
     offset: Long = 0
   ) (
     implicit c: java.sql.Connection
   ): Seq[LibraryVersion] = {
-    Standards.query(
+    Standards.queryWithOptionalLimit(
       BaseQuery,
       tableName = "library_versions",
       auth = auth.organizations("organizations.id", Some("resolvers.visibility")),
@@ -215,10 +215,20 @@ object LibraryVersionsDao {
       ).bind("cross_build_version", crossBuildVersion.flatMap(v => v)).
       and(
         greaterThanVersion.map { v =>
-          s"library_versions.sort_key > {greater_than_version_sort_key}"
+          """
+            library_versions.sort_key > (
+              select lv2.sort_key
+                from library_versions lv2
+               where lv2.library_id = library_versions.library_id
+                 and lower(lv2.version) = lower(trim({greater_than_version}))
+                 and ( (lv2.cross_build_version is null and library_versions.cross_build_version is null)
+                       or
+                       (lv2.cross_build_version = library_versions.cross_build_version) )
+            )
+          """
         }
       ).
-      bind("greater_than_version_sort_key", greaterThanVersion).
+      bind("greater_than_version", greaterThanVersion).
       as(
         com.bryzek.dependency.v0.anorm.parsers.LibraryVersion.parser().*
       )
