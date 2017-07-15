@@ -118,9 +118,13 @@ object LibrariesDao {
   }
 
   def delete(deletedBy: UserReference, library: Library) {
-    Pager.create { offset =>
-      LibraryVersionsDao.findAll(Authorization.All, libraryId = Some(library.id), offset = offset)
-    }.foreach { LibraryVersionsDao.delete(deletedBy, _) }
+    LibraryVersionsDao.findAll(
+      Authorization.All,
+      libraryId = Some(library.id),
+      limit = None
+    ).foreach { lv =>
+      LibraryVersionsDao.delete(deletedBy, lv)
+    }
 
     DbHelpers.delete("libraries", deletedBy.id, library.id)
     MainActor.ref ! MainActor.Messages.LibraryDeleted(library.id)

@@ -13,6 +13,25 @@ private[db] case object Standards {
     * Returns query object decorated with standard attributes in this
     * project.
     */
+  def queryWithOptionalLimit(
+    query: Query,
+    tableName: String,
+    auth: Clause,
+    id: Option[String],
+    ids: Option[Seq[String]],
+    orderBy: Option[String],
+    limit: Option[Long],
+    offset: Long = 0
+  ): Query = {
+    query.
+      equals(s"$tableName.id", id).
+      optionalIn(s"$tableName.id", ids).
+      and(auth.sql).
+      orderBy(orderBy).
+      optionalLimit(limit).
+      offset(offset)
+  }
+
   def query(
     query: Query,
     tableName: String,
@@ -20,7 +39,7 @@ private[db] case object Standards {
     id: Option[String],
     ids: Option[Seq[String]],
     orderBy: Option[String],
-    limit: Long = 25,
+    limit: Long,
     offset: Long = 0
   ): Query = {
     query.

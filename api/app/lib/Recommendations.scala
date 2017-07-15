@@ -11,6 +11,12 @@ object Recommendations {
     */
   def version(current: VersionForm, others: Seq[VersionForm]): Option[String] = {
     val currentTag = Version(current.version)
+    if (current.version == "9.4.1212") {
+      println(s"current[${current}] #others[${others.size}]")
+      others.foreach { o =>
+        println(s" -- ${o}")
+      }
+    }
 
     others.
       filter(_ != current).

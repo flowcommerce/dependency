@@ -66,7 +66,7 @@ class ResolverActor extends Actor with Util {
       }
 
       Pager.create { offset =>
-        ProjectLibrariesDao.findAll(auth, hasLibrary = Some(false), offset = offset)
+        ProjectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
       }.foreach { projectLibrary =>
         sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
       }
