@@ -63,7 +63,10 @@ object Email {
         request.setEndpoint("mail/send")
         request.setBody(mail.build())
         val response = sendgrid.api(request)
-        assert(response.statusCode == 202, "Error sending email: " + response.body)
+        assert(
+          response.getStatusCode() == 202,
+          s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode()}]"
+        )
       }
     }
   }
