@@ -33,7 +33,7 @@ lazy val api = project
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       jdbc,      
-      "io.flow" %% "lib-postgresql" % "0.0.55",
+      "io.flow" %% "lib-postgresql" % "0.0.56",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
       "org.postgresql" % "postgresql" % "42.1.4",
       "com.sendgrid"   %  "sendgrid-java" % "4.1.0"
