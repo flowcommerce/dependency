@@ -4,6 +4,8 @@ import io.flow.play.util.Random
 import com.bryzek.dependency.v0.models._
 import io.flow.common.v0.models.{Name, User, UserReference}
 import java.util.UUID
+import org.scalatest.concurrent.Eventually._
+import org.scalatest.time.{Seconds, Span}
 
 trait Helpers {
 
@@ -29,6 +31,12 @@ trait Helpers {
     result match {
       case Left(errors) => sys.error(errors.mkString(", "))
       case Right(obj) => obj
+    }
+  }
+
+  def eventuallyInNSeconds[T](n: Int)(f: => T): T = {
+    eventually(timeout(Span(n, Seconds))) {
+      f
     }
   }
 

@@ -22,6 +22,7 @@ class SearchActor extends Actor with Util {
   def receive = {
 
     case m @ SearchActor.Messages.SyncBinary(id) => withErrorHandler(m) {
+      println(s"SearchActor.Messages.SyncBinary($id)")
       BinariesDao.findById(Authorization.All, id) match {
         case None => ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, id)
         case Some(binary) => ItemsDao.replaceBinary(MainActor.SystemUser, binary)
