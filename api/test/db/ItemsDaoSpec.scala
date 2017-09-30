@@ -23,27 +23,32 @@ class ItemsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
   }
 
   "findById" in {
-    val item = replaceItem(org)()
-    ItemsDao.findById(Authorization.All, item.id).map(_.id) must be(
-      Some(item.id)
-    )
+    val binary = createBinary(org)()
 
-    ItemsDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
+    val item = eventuallyInNSeconds(3) {
+      ItemsDao.findByObjectId(Authorization.All, binary.id).get
+    }
+
+    ItemsDao.findById(Authorization.All, item.id).get.id must be(item.id)
   }
 
   "findByObjectId" in {
     val binary = createBinary(org)()
-    val item = ItemsDao.replaceBinary(systemUser, binary)
-    ItemsDao.findByObjectId(Authorization.All, binary.id).map(_.id) must be(
-      Some(item.id)
-    )
-
-    ItemsDao.findByObjectId(Authorization.All, UUID.randomUUID.toString) must be(None)
+    eventuallyInNSeconds(3) {
+      ItemsDao.findByObjectId(Authorization.All, binary.id).get
+    }
   }
 
   "findAll by ids" in {
-    val item1 = replaceItem(org)()
-    val item2 = replaceItem(org)()
+    val binary1 = createBinary(org)()
+    val binary2 = createBinary(org)()
+
+    val item1 = eventuallyInNSeconds(3) {
+      ItemsDao.findByObjectId(Authorization.All, binary1.id).get
+    }
+    val item2 = eventuallyInNSeconds(3) {
+      ItemsDao.findByObjectId(Authorization.All, binary2.id).get
+    }
 
     ItemsDao.findAll(Authorization.All, ids = Some(Seq(item1.id, item2.id))).map(_.id).sorted must be(
       Seq(item1.id, item2.id).sorted

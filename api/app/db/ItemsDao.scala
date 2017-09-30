@@ -84,6 +84,7 @@ object ItemsDao {
 
   def replaceBinary(user: UserReference, binary: Binary): Item = {
     val label = binary.name.toString
+    println(s"replaceBinary label: id[${binary.id}] label: $label")
     replace(
       user,
       ItemForm(
