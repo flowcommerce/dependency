@@ -21,7 +21,7 @@ object Clause {
   }
 
   case class Or(conditions: Seq[String]) extends Clause {
-    assert(!conditions.isEmpty, "Must have at least one condition")
+    assert(conditions.nonEmpty, "Must have at least one condition")
 
     override val sql: String = conditions match {
       case Nil => "false"
