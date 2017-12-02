@@ -2,11 +2,11 @@ package db
 
 import com.bryzek.dependency.actors.MainActor
 import com.bryzek.dependency.api.lib.Validation
-import com.bryzek.dependency.v0.models.{Credentials, CredentialsUndefinedType, Resolver, ResolverForm, ResolverSummary}
-import com.bryzek.dependency.v0.models.{OrganizationSummary, UsernamePassword, Visibility}
+import com.bryzek.dependency.v0.models.{Credentials, Resolver, ResolverForm, ResolverSummary}
+import com.bryzek.dependency.v0.models.{OrganizationSummary, Visibility}
 import com.bryzek.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import io.flow.postgresql.{Query, Pager}
 import anorm._
 import play.api.db._
 import play.api.Play.current
@@ -92,9 +92,10 @@ object ResolversDao {
       }
     }
 
-    val organizationErrors = MembershipsDao.isMemberByOrgKey(form.organization, user) match  {
-      case false => Seq("You do not have access to this organization")
-      case true => Nil
+    val organizationErrors = if (MembershipsDao.isMemberByOrgKey(form.organization, user)) {
+      Nil
+    } else {
+      Seq("You do not have access to this organization")
     }
 
     urlErrors ++ uniqueErrors ++ organizationErrors
@@ -253,7 +254,7 @@ object ResolversDao {
           visibility = visibility,
           organization = organization,
           uri = uri,
-          credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials(_))
+          credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials)
         )
       }
     }

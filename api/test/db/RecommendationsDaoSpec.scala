@@ -1,20 +1,14 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Project, LibraryForm, LibraryVersion}
-import com.bryzek.dependency.v0.models.{Organization, Recommendation, VersionForm}
-import play.api.test._
-import play.api.test.Helpers._
-import org.scalatest._
+import com.bryzek.dependency.v0.models.{Organization, Recommendation}
 import org.scalatestplus.play._
 
 class RecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   def createRecommendation(
     org: Organization
   ): Recommendation = {
-    val (library,  libraryVersions) = createLibraryWithMultipleVersions(org)
+    val (_,  libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     RecommendationsDao.sync(systemUser, project)
@@ -23,7 +17,7 @@ class RecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
     }
   }
 
-  lazy val org = createOrganization()
+  private[this] lazy val org = createOrganization()
 
   "delete" in {
     val rec = createRecommendation(org)
@@ -39,7 +33,7 @@ class RecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
 
 
   "ignores earlier versions of library" in {
-    val (library,  libraryVersions) = createLibraryWithMultipleVersions(org)
+    val (_,  libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)()
     addLibraryVersion(project, libraryVersions.last)
     RecommendationsDao.sync(systemUser, project)

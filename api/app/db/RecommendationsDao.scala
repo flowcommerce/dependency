@@ -6,8 +6,6 @@ import io.flow.postgresql.{Query, OrderBy, Pager}
 import anorm._
 import play.api.db._
 import play.api.Play.current
-import play.api.libs.json._
-import scala.util.{Failure, Success, Try}
 
 object RecommendationsDao {
 
@@ -75,7 +73,7 @@ object RecommendationsDao {
       RecommendationsDao.findAll(Authorization.All, projectId = Some(project.id), limit = 1000, offset = offset)
     }.toSeq
 
-    val toAdd = newRecords.filter { rec => !existing.map(toForm(_)).contains(rec) }
+    val toAdd = newRecords.filter { rec => !existing.map(toForm).contains(rec) }
     val toRemove = existing.filter { rec => !newRecords.contains(toForm(rec)) }
 
     DB.withTransaction { implicit c =>
@@ -85,7 +83,7 @@ object RecommendationsDao {
       }
     }
 
-    if (!toAdd.isEmpty) {
+    if (toAdd.nonEmpty) {
       // TODO: raise event that we found stuff for this project to
       // enable things like notifications.
     }
@@ -110,23 +108,11 @@ object RecommendationsDao {
       form.from
     ) match {
       case None => {
-        Try(create(createdBy, form)) match {
-          case Success(rec) => rec
-          case Failure(ex) => {
-            throw ex
-          }
-        }
+        create(createdBy, form)
       }
-      case Some(rec) => {
-        (rec.to == form.to) match {
-          case true => {
-            // No-op
-          }
-          case false => {
-            DbHelpers.delete(c, "recommendations", createdBy.id, rec.id)
-            create(createdBy, form)
-          }
-        }
+      case Some(rec) if rec.to != form.to => {
+        DbHelpers.delete(c, "recommendations", createdBy.id, rec.id)
+        create(createdBy, form)
       }
     }
   }
@@ -198,7 +184,7 @@ object RecommendationsDao {
         offset = offset
       ).
         and(
-          organization.map { org =>
+          organization.map { _ =>
             "organizations.id in (select id from organizations where key = lower(trim({org})))"
           }
         ).bind("org", organization).
