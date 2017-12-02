@@ -7,7 +7,6 @@ import io.flow.postgresql.{Query, OrderBy, Pager}
 import anorm._
 import play.api.db._
 import play.api.Play.current
-import play.api.libs.json._
 
 object BinariesDao {
 
@@ -126,9 +125,10 @@ object BinariesDao {
         and(
           isSynced.map { value =>
             val clause = "select 1 from syncs where object_id = binaries.id and event = {sync_event_completed}"
-            value match {
-              case true => s"exists ($clause)"
-              case false => s"not exists ($clause)"
+            if (value) {
+              s"exists ($clause)"
+            } else {
+              s"not exists ($clause)"
             }
           }
         ).
