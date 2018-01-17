@@ -73,4 +73,4 @@ POST    /:org/members/postMakeAdmin             controllers.MembersController.po
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
-GET     /webjars/*file              org.webjars.play.WebJarAssets.at(file)
+->      /webjars                    webjars.Routes
