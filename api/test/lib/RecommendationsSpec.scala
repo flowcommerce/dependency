@@ -5,7 +5,7 @@ import org.specs2.mutable._
 
 class RecommendationsSpec extends Specification {
 
-  def simpleRecs(value: String, others: Seq[String]) = {
+  def simpleRecs(value: String, others: Seq[String]): Option[String] = {
     Recommendations.version(
       VersionForm(value),
       others.map(VersionForm(_))
@@ -32,33 +32,40 @@ class RecommendationsSpec extends Specification {
     simpleRecs(
       "9.4-1201-jdbc41",
       Seq("9.4-1205-jdbc4", "9.4-1205-jdbc41", "9.4-1205-jdbc42")
-    ) must beEqualTo(Some("9.4-1205-jdbc42"))
+    ) must beSome("9.4-1205-jdbc42")
   }
 
   "scalatest example" in {
     simpleRecs(
       "1.4.0-M3",
       Seq("1.4.0-M3", "1.4.0-M4", "1.4.0-SNAP1")
-    ) must beEqualTo(Some("1.4.0-M4"))
+    ) must beSome("1.4.0-M4")
+  }
+
+  "flow play upgrade example" in {
+    simpleRecs(
+      "0.4.21",
+      Seq("0.4.20", "0.4.21", "0.4.22", "0.4.20-play26", "0.4.21-play26", "0.4.22-play26")
+    ) must beSome("0.4.22")
   }
 
   "webjars-play example" in {
     simpleRecs(
       "2.4.0",
       Seq("2.4.0", "2.4.0-1", "2.4.0-2")
-    ) must beEqualTo(None)
+    ) must beNone
 
     simpleRecs(
       "2.4.0-1",
       Seq("2.4.0", "2.4.0-1", "2.4.0-2")
-    ) must beEqualTo(Some("2.4.0-2"))
+    ) must beSome("2.4.0-2")
   }
 
   "slick example - respects major version when textual" in {
     simpleRecs(
       "2.1.0-M3",
       Seq("2.1.0-M3", "3.1.0-M4", "3.1")
-    ) must beEqualTo(Some("3.1"))
+    ) must beSome("3.1")
   }
 
   "matches on cross build version" in {
@@ -82,7 +89,7 @@ class RecommendationsSpec extends Specification {
         VersionForm("1.1", Some("2.11.6")),
         VersionForm("1.1", Some("2.11.7"))
       )
-    ) must beEqualTo(Some("1.1"))
+    ) must beSome("1.1")
   }
 
   "matches on partial cross build version" in {
@@ -95,7 +102,7 @@ class RecommendationsSpec extends Specification {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10"))
       )
-    ) must beEqualTo(Some("1.2.2"))
+    ) must beSome("1.2.2")
   }
 
   "matches on partial cross build version" in {
@@ -108,6 +115,6 @@ class RecommendationsSpec extends Specification {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10"))
       )
-    ) must beEqualTo(None)
+    ) must beNone
   }
 }
