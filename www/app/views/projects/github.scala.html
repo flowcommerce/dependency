@@ -1,6 +1,6 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  orgs: Seq[com.bryzek.dependency.v0.models.Organization]
+  data: io.flow.dependency.www.lib.UiData,
+  orgs: Seq[io.flow.dependency.v0.models.Organization]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some("Add project - Select organization"))) {

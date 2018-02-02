@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.ProjectBinaryForm
-import com.bryzek.dependency.v0.models.{BinaryForm, BinaryType}
+import io.flow.dependency.v0.models.{BinaryForm, BinaryType}
 import org.specs2.mutable._
 
 class BuildSbtScalaParserSpec extends Specification with Factories {

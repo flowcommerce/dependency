@@ -1,19 +1,22 @@
 package controllers
 
 import db.{Authorization, LibrariesDao}
-import io.flow.play.util.Validation
+import io.flow.play.util.{Config, Validation}
 import io.flow.common.v0.models.UserReference
-import com.bryzek.dependency.v0.models.{Library, LibraryForm}
-import com.bryzek.dependency.v0.models.json._
+import io.flow.dependency.v0.models.{Library, LibraryForm}
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
 class Libraries @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
+  tokenClient: io.flow.token.v0.interfaces.Client,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends FlowController with BaseIdentifiedController {
 
   def get(
     id: Option[String],

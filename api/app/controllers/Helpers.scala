@@ -1,7 +1,7 @@
 package controllers
 
 import db.{Authorization, BinariesDao, LibrariesDao, OrganizationsDao, ProjectsDao, ResolversDao, UsersDao}
-import com.bryzek.dependency.v0.models.{Binary, Library, Organization, Project, Resolver}
+import io.flow.dependency.v0.models.{Binary, Library, Organization, Project, Resolver}
 import io.flow.common.v0.models.{User, UserReference}
 import play.api.mvc.{Result, Results}
 

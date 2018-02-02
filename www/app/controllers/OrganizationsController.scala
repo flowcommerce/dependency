@@ -1,8 +1,8 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.{Organization, OrganizationForm}
-import com.bryzek.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.{Organization, OrganizationForm}
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.util.{Pagination, PaginatedCollection}
 import scala.concurrent.Future
 
@@ -83,7 +83,7 @@ class OrganizationsController @javax.inject.Inject() (
         dependencyClient(request).organizations.post(uiForm.organizationForm).map { organization =>
           Redirect(routes.OrganizationsController.show(organization.key)).flashing("success" -> "Organization created")
         }.recover {
-          case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+          case response: io.flow.dependency.v0.errors.ErrorsResponse => {
             Ok(views.html.organizations.create(uiData(request), boundForm, response.errors.map(_.message)))
           }
         }
@@ -122,7 +122,7 @@ class OrganizationsController @javax.inject.Inject() (
           dependencyClient(request).organizations.putById(organization.id, uiForm.organizationForm).map { updated =>
             Redirect(routes.OrganizationsController.show(updated.key)).flashing("success" -> "Organization updated")
           }.recover {
-            case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+            case response: io.flow.dependency.v0.errors.ErrorsResponse => {
               Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.errors.map(_.message)))
             }
           }

@@ -1,7 +1,7 @@
-package com.bryzek.dependency.lib
+package io.flow.dependency.lib
 
-import com.bryzek.dependency.v0.models.{BinarySummary, BinaryType, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, OrganizationSummary, ProjectSummary, Reference}
-import com.bryzek.dependency.v0.models.{ProjectDetail, Recommendation, RecommendationType}
+import io.flow.dependency.v0.models.{BinarySummary, BinaryType, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, OrganizationSummary, ProjectSummary, Reference}
+import io.flow.dependency.v0.models.{ProjectDetail, Recommendation, RecommendationType}
 import io.flow.play.util.{IdGenerator, Random}
 import org.joda.time.DateTime
 

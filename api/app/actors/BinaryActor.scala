@@ -1,7 +1,7 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{Binary, BinaryForm}
-import com.bryzek.dependency.api.lib.DefaultBinaryVersionProvider
+import io.flow.dependency.v0.models.{Binary, BinaryForm}
+import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, BinaryVersionsDao, ItemsDao, ProjectBinariesDao, SyncsDao, UsersDao}
 import play.api.Logger

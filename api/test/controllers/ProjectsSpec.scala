@@ -1,7 +1,7 @@
 package controllers
 
-import com.bryzek.dependency.v0.{Authorization, Client}
-import com.bryzek.dependency.v0.models.{ProjectForm, ProjectPatchForm}
+import io.flow.dependency.v0.{Authorization, Client}
+import io.flow.dependency.v0.models.{ProjectForm, ProjectPatchForm}
 
 import java.util.UUID
 import play.api.libs.ws._

@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 case class ArtifactVersion(
   tag: Version,

@@ -1,7 +1,7 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
+  data: io.flow.dependency.www.lib.UiData,
   query: Option[String],
-  items: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Item]
+  items: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Item]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data) {
@@ -17,10 +17,10 @@
         <tr>
             <td>
               @{item.summary match {
-                case s: com.bryzek.dependency.v0.models.BinarySummary => "Binary"
-                case s: com.bryzek.dependency.v0.models.LibrarySummary => "Library"
-                case s: com.bryzek.dependency.v0.models.ProjectSummary => "Project"
-                case com.bryzek.dependency.v0.models.ItemSummaryUndefinedType(other) => other
+                case s: io.flow.dependency.v0.models.BinarySummary => "Binary"
+                case s: io.flow.dependency.v0.models.LibrarySummary => "Library"
+                case s: io.flow.dependency.v0.models.ProjectSummary => "Project"
+                case io.flow.dependency.v0.models.ItemSummaryUndefinedType(other) => other
               }}
               <a href="@data.urls.itemSummary(item.summary)">@item.label</a>
             </td>

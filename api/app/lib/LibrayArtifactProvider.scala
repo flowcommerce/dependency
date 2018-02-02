@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.{Authorization, ResolversDao}
-import com.bryzek.dependency.v0.models.{OrganizationSummary, ResolverSummary, Resolver, Visibility}
+import io.flow.dependency.v0.models.{OrganizationSummary, ResolverSummary, Resolver, Visibility}
 
 case class ArtifactResolution(
   resolver: ResolverSummary,

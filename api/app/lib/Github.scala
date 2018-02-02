@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.{GithubUsersDao, InternalTokenForm, TokensDao, UsersDao}
-import com.bryzek.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
+import io.flow.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
 import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.play.util.{Config, IdGenerator}
 import io.flow.github.oauth.v0.{Client => GithubOauthClient}

@@ -1,18 +1,24 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.api.lib.Validation
-import com.bryzek.dependency.v0.models.{Credentials, Resolver, ResolverForm, ResolverSummary}
-import com.bryzek.dependency.v0.models.{OrganizationSummary, Visibility}
-import com.bryzek.dependency.v0.models.json._
+import javax.inject.Inject
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.api.lib.Validation
+import io.flow.dependency.v0.models.{Credentials, Resolver, ResolverForm, ResolverSummary}
+import io.flow.dependency.v0.models.{OrganizationSummary, Visibility}
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, Pager}
+import io.flow.postgresql.{Pager, Query}
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
 
-object ResolversDao {
+class ResolversDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+) {
 
   val GithubOauthResolverTag = "github_oauth"
 
@@ -41,7 +47,7 @@ object ResolversDao {
 
   def credentials(resolver: Resolver): Option[Credentials] = {
     resolver.credentials.flatMap { _ =>
-      DB.withConnection { implicit c =>
+      db.withConnection { implicit c =>
         SQL(SelectCredentialsQuery).on('id -> resolver.id).as(
           SqlParser.str("credentials").*
         ).headOption.flatMap { parseCredentials(resolver.id, _) }
@@ -117,7 +123,7 @@ object ResolversDao {
 
         val id = io.flow.play.util.IdGenerator("res").randomId()
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'organization_id -> org.id,
@@ -153,7 +159,7 @@ object ResolversDao {
     }
 
     MainActor.ref ! MainActor.Messages.ResolverDeleted(resolver.id)
-    DbHelpers.delete("resolvers", deletedBy.id, resolver.id)
+    dbHelpersProvider.get.delete("resolvers", deletedBy.id, resolver.id)
   }
 
   def findByOrganizationAndUri(
@@ -184,7 +190,7 @@ object ResolversDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Resolver] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "resolvers",
@@ -230,7 +236,7 @@ object ResolversDao {
     organizationId: String,
     visibility: Visibility
   ): Int = {
-    DB.withConnection { implicit c =>    
+    db.withConnection { implicit c =>
       visibility match {
         case Visibility.Public => {
           SQL(NextPublicPositionQuery).as(SqlParser.int("position").single)
@@ -242,14 +248,14 @@ object ResolversDao {
     }
   }
 
-  private[this] def parser(): RowParser[com.bryzek.dependency.v0.models.Resolver] = {
+  private[this] def parser(): RowParser[io.flow.dependency.v0.models.Resolver] = {
     SqlParser.str("id") ~
-    com.bryzek.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
-    com.bryzek.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization").? ~
+    io.flow.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
+    io.flow.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization").? ~
     SqlParser.str("uri") ~
     SqlParser.str("credentials").? map {
       case id ~ visibility ~ organization ~ uri ~ credentials => {
-        com.bryzek.dependency.v0.models.Resolver(
+        io.flow.dependency.v0.models.Resolver(
           id = id,
           visibility = visibility,
           organization = organization,

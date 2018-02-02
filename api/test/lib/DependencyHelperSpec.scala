@@ -1,6 +1,6 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.BinaryType
+import io.flow.dependency.v0.models.BinaryType
 import org.specs2.mutable._
 
 class DependencyHelperSpec extends Specification with Factories {

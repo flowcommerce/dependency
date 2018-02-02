@@ -1,7 +1,7 @@
-package com.bryzek.dependency.lib
+package io.flow.dependency.lib
 
 import io.flow.play.util.Config
-import com.bryzek.dependency.v0.models.{ItemSummaryUndefinedType, RecommendationType}
+import io.flow.dependency.v0.models.{ItemSummaryUndefinedType, RecommendationType}
 import org.scalatest.{FunSpec, Matchers}
 
 class UrlsSpec extends FunSpec with Matchers with Factories {

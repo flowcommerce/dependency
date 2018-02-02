@@ -1,6 +1,6 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{Resolver, Visibility}
+import io.flow.dependency.v0.models.{Resolver, Visibility}
 import io.flow.postgresql.Pager
 import db.{Authorization, LibrariesDao, ProjectLibrariesDao, OrganizationsDao, SubscriptionsDao, ResolversDao}
 import akka.actor.Actor

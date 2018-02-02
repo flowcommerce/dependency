@@ -1,8 +1,8 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.{Membership, MembershipForm, Role}
-import com.bryzek.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.{Membership, MembershipForm, Role}
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.common.v0.models.User
 import io.flow.play.util.{Pagination, PaginatedCollection}
 import scala.concurrent.Future
@@ -21,7 +21,7 @@ class MembersController @javax.inject.Inject() (
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def section = Some(com.bryzek.dependency.www.lib.Section.Members)
+  override def section = Some(io.flow.dependency.www.lib.Section.Members)
 
   def index(orgKey: String, page: Int = 0) = Identified.async { implicit request =>
     withOrganization(request, orgKey) { org =>
@@ -86,7 +86,7 @@ class MembersController @javax.inject.Inject() (
                   ).map { membership =>
                     Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"User added as ${membership.role}")
                   }.recover {
-                    case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+                    case response: io.flow.dependency.v0.errors.ErrorsResponse => {
                       Ok(views.html.members.create(
                         uiData(request).copy(organization = Some(org.key)), org, boundForm, response.errors.map(_.message))
                       )
@@ -138,7 +138,7 @@ class MembersController @javax.inject.Inject() (
         ).map { membership =>
           Redirect(routes.MembersController.index(membership.organization.key)).flashing("success" -> s"User added as ${membership.role}")
         }.recover {
-          case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+          case response: io.flow.dependency.v0.errors.ErrorsResponse => {
             Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.errors.map(_.message).mkString(", "))
           }
         }

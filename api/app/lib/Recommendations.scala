@@ -1,6 +1,6 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.VersionForm
+import io.flow.dependency.v0.models.VersionForm
 
 object Recommendations {
 

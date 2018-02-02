@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.ProjectBinaryForm
-import com.bryzek.dependency.v0.models.{LibraryForm, BinaryType, Project}
+import io.flow.dependency.v0.models.{LibraryForm, BinaryType, Project}
 import play.api.Logger
 import scala.concurrent.{ExecutionContext, Future}
 

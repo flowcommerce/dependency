@@ -2,24 +2,26 @@
   "name": "dependency",
 
   "imports": [
-    { "uri": "http://www.apidoc.me/flow/common/0.0.12/service.json" },
-    { "uri": "http://www.apidoc.me/flow/github/0.0.3/service.json" }    
+    { "uri": "http://www.apidoc.me/flow/common/latest/service.json" },
+    { "uri": "http://www.apidoc.me/flow/error/latest/service.json" },
+    { "uri": "http://www.apidoc.me/flow/healthcheck/latest/service.json" },
+    { "uri": "http://www.apidoc.me/flow/github/0.0.3/service.json" }
   ],
 
   "unions": {
     "item_summary": {
       "discriminator": "discriminator",
       "types": [
-	{ "type": "binary_summary" },
-	{ "type": "library_summary" },
-	{ "type": "project_summary" }
+        { "type": "binary_summary" },
+        { "type": "library_summary" },
+        { "type": "project_summary" }
       ]
     },
 
     "credentials": {
       "discriminator": "discriminator",
       "types": [
-	{ "type": "username_password" }
+        { "type": "username_password" }
       ]
     }
   },
@@ -27,49 +29,49 @@
   "enums": {
     "role": {
       "values": [
-	{ "name": "member" },
-	{ "name": "admin" }
+        { "name": "member" },
+        { "name": "admin" }
       ]
     },
 
     "scms": {
       "values": [
-	{ "name": "github" }
+        { "name": "github" }
       ]
     },
 
     "binary_type": {
       "values": [
-	{ "name": "scala", "description": "See http://www.scala-lang.org/" },
-	{ "name": "sbt", "description": "See http://www.scala-sbt.org/" }
+        { "name": "scala", "description": "See http://www.scala-lang.org/" },
+        { "name": "sbt", "description": "See http://www.scala-sbt.org/" }
       ]
     },
 
     "publication": {
       "description": "A publication represents something that a user can subscribe to.",
       "values": [
-	{ "name": "daily_summary", "description": "A daily summary of dependencies that can be upgraded" }
+        { "name": "daily_summary", "description": "A daily summary of dependencies that can be upgraded" }
       ]
     },
 
     "recommendation_type": {
       "values": [
-	{ "name": "library" },
-	{ "name": "binary" }
+        { "name": "library" },
+        { "name": "binary" }
       ]
     },
 
     "sync_event": {
       "values": [
-	{ "name": "started" },
-	{ "name": "completed" }
+        { "name": "started" },
+        { "name": "completed" }
       ]
     },
 
     "visibility": {
       "values": [
-	{ "name": "public" },
-	{ "name": "private" }
+        { "name": "public" },
+        { "name": "private" }
       ]
     }
 
@@ -79,257 +81,257 @@
 
     "reference": {
       "fields": [
-	{ "name": "id", "type": "string" }
+        { "name": "id", "type": "string" }
       ]
     },
-    
+
     "username_password": {
       "fields": [
-	{ "name": "username", "type": "string" },
-	{ "name": "password", "type": "string", "required": false }
+        { "name": "username", "type": "string" },
+        { "name": "password", "type": "string", "required": false }
       ]
     },
 
     "resolver": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "visibility", "type": "visibility" },
+        { "name": "id", "type": "string" },
+        { "name": "visibility", "type": "visibility" },
         { "name": "organization", "type": "organization_summary", "required": false, "description": "The organization that created the resolver. If empty, indicates a globally public resolver" },
-	{ "name": "uri", "type": "string", "example": "https://flow.artifactoryonline.com/flow/libs-release" },
-	{ "name": "credentials", "type": "credentials", "required": false }
+        { "name": "uri", "type": "string", "example": "https://flow.artifactoryonline.com/flow/libs-release" },
+        { "name": "credentials", "type": "credentials", "required": false }
       ]
     },
 
     "resolver_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
+        { "name": "id", "type": "string" },
         { "name": "organization", "type": "organization_summary", "required": false },
-	{ "name": "visibility", "type": "visibility" },
-	{ "name": "uri", "type": "string" }
+        { "name": "visibility", "type": "visibility" },
+        { "name": "uri", "type": "string" }
       ]
     },
 
     "resolver_form": {
       "fields": [
-	{ "name": "visibility", "type": "visibility" },
-	{ "name": "organization", "type": "string" },
-	{ "name": "uri", "type": "string" },
-	{ "name": "credentials", "type": "credentials", "required": false }
+        { "name": "visibility", "type": "visibility" },
+        { "name": "organization", "type": "string" },
+        { "name": "uri", "type": "string" },
+        { "name": "credentials", "type": "credentials", "required": false }
       ]
     },
 
 
     "binary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "name", "type": "binary_type" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "name", "type": "binary_type" }
       ]
     },
 
     "binary_form": {
       "fields": [
-	{ "name": "organization_id", "type": "string" },
-	{ "name": "name", "type": "binary_type" }
+        { "name": "organization_id", "type": "string" },
+        { "name": "name", "type": "binary_type" }
       ]
     },
 
     "binary_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "name", "type": "binary_type" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "name", "type": "binary_type" }
       ]
     },
 
     "binary_version": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "binary", "type": "binary" },
-	{ "name": "version", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "binary", "type": "binary" },
+        { "name": "version", "type": "string" }
       ]
     },
 
     "library": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "group_id", "type": "string" },
-	{ "name": "artifact_id", "type": "string" },
-	{ "name": "resolver", "type": "resolver_summary", "description": "The resolver where we found this library" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "group_id", "type": "string" },
+        { "name": "artifact_id", "type": "string" },
+        { "name": "resolver", "type": "resolver_summary", "description": "The resolver where we found this library" }
       ]
     },
 
     "library_form": {
       "fields": [
-	{ "name": "organization_id", "type": "string" },
-	{ "name": "group_id", "type": "string" },
-	{ "name": "artifact_id", "type": "string" },
-	{ "name": "resolver_id", "type": "string" },
-	{ "name": "version", "type": "version_form", "required": false, "description": "If provided, we automatically record this version of this library." }
+        { "name": "organization_id", "type": "string" },
+        { "name": "group_id", "type": "string" },
+        { "name": "artifact_id", "type": "string" },
+        { "name": "resolver_id", "type": "string" },
+        { "name": "version", "type": "version_form", "required": false, "description": "If provided, we automatically record this version of this library." }
       ]
     },
 
     "library_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "group_id", "type": "string" },
-	{ "name": "artifact_id", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "group_id", "type": "string" },
+        { "name": "artifact_id", "type": "string" }
       ]
     },
 
     "version_form": {
       "fields": [
-	{ "name": "version", "type": "string", "example": "1.0.0" },
-	{ "name": "cross_build_version", "type": "string", "example": "2.11", "required": false }
+        { "name": "version", "type": "string", "example": "1.0.0" },
+        { "name": "cross_build_version", "type": "string", "example": "2.11", "required": false }
       ]
     },
 
     "library_version": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "library", "type": "library" },
-	{ "name": "version", "type": "string" },
-	{ "name": "cross_build_version", "type": "string", "required": false }
+        { "name": "id", "type": "string" },
+        { "name": "library", "type": "library" },
+        { "name": "version", "type": "string" },
+        { "name": "cross_build_version", "type": "string", "required": false }
       ]
     },
-    
+
     "organization": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference", "description": "The user that created this organization" },		
-	{ "name": "key", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference", "description": "The user that created this organization" },
+        { "name": "key", "type": "string" }
       ]
     },
 
     "organization_form": {
       "fields": [
-	{ "name": "key", "type": "string" }
+        { "name": "key", "type": "string" }
       ]
     },
 
     "organization_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "key", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "key", "type": "string" }
       ]
     },
 
     "project": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference", "description": "The user that created this project" },		
-	{ "name": "visibility", "type": "visibility" },
-	{ "name": "scms", "type": "scms" },
-	{ "name": "name", "type": "string" },
-	{ "name": "uri", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference", "description": "The user that created this project" },
+        { "name": "visibility", "type": "visibility" },
+        { "name": "scms", "type": "scms" },
+        { "name": "name", "type": "string" },
+        { "name": "uri", "type": "string" }
       ]
     },
 
     "project_detail": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "name", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "name", "type": "string" }
       ]
     },
 
     "project_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "organization", "type": "organization_summary" },
-	{ "name": "name", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "organization", "type": "organization_summary" },
+        { "name": "name", "type": "string" }
       ]
     },
 
     "project_library": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "project", "type": "project_detail" },
-	{ "name": "group_id", "type": "string" },
-	{ "name": "artifact_id", "type": "string" },
-	{ "name": "version", "type": "string" },
-	{ "name": "cross_build_version", "type": "string", "required": false },
-	{ "name": "path", "type": "string" },
-	{ "name": "library", "type": "reference", "required": false }
+        { "name": "id", "type": "string" },
+        { "name": "project", "type": "project_detail" },
+        { "name": "group_id", "type": "string" },
+        { "name": "artifact_id", "type": "string" },
+        { "name": "version", "type": "string" },
+        { "name": "cross_build_version", "type": "string", "required": false },
+        { "name": "path", "type": "string" },
+        { "name": "library", "type": "reference", "required": false }
       ]
     },
 
     "project_binary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "project", "type": "project_detail" },
-	{ "name": "name", "type": "string" },
-	{ "name": "version", "type": "string" },
-	{ "name": "path", "type": "string" },
-	{ "name": "binary", "type": "reference", "required": false }
+        { "name": "id", "type": "string" },
+        { "name": "project", "type": "project_detail" },
+        { "name": "name", "type": "string" },
+        { "name": "version", "type": "string" },
+        { "name": "path", "type": "string" },
+        { "name": "binary", "type": "reference", "required": false }
       ]
     },
 
     "project_form": {
       "fields": [
-	{ "name": "organization", "type": "string" },
-	{ "name": "name", "type": "string" },
-	{ "name": "visibility", "type": "visibility" },
-	{ "name": "scms", "type": "scms" },
-	{ "name": "uri", "type": "string" }
+        { "name": "organization", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "visibility", "type": "visibility" },
+        { "name": "scms", "type": "scms" },
+        { "name": "uri", "type": "string" }
       ]
     },
-    
+
     "repository": {
       "fields": [
-	{ "name": "name", "type": "string" },
-	{ "name": "visibility", "type": "visibility" },
-	{ "name": "uri", "type": "string" }
+        { "name": "name", "type": "string" },
+        { "name": "visibility", "type": "visibility" },
+        { "name": "uri", "type": "string" }
       ]
     },
-    
+
     "project_patch_form": {
       "fields": [
-	{ "name": "name", "type": "string", "required": false },
-	{ "name": "visibility", "type": "visibility", "required": false },
-	{ "name": "scms", "type": "scms", "required": false },
-	{ "name": "uri", "type": "string", "required": false }
+        { "name": "name", "type": "string", "required": false },
+        { "name": "visibility", "type": "visibility", "required": false },
+        { "name": "scms", "type": "scms", "required": false },
+        { "name": "uri", "type": "string", "required": false }
       ]
     },
 
     "recommendation": {
       "description": "Summary of a specific recommendations for a project. Designed for display in the project dashboard",
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "project", "type": "project_detail" },
-	{ "name": "type", "type": "recommendation_type" },
-	{ "name": "object", "type": "reference" },
-	{ "name": "name", "type": "string", "description": "The name of the library or binary to upgrade" },
-	{ "name": "from", "type": "string", "description": "The current version" },
-	{ "name": "to", "type": "string", "description": "The version to which we recommend upgrading" },
-	{ "name": "created_at", "type": "date-time-iso8601" }
+        { "name": "id", "type": "string" },
+        { "name": "project", "type": "project_detail" },
+        { "name": "type", "type": "recommendation_type" },
+        { "name": "object", "type": "reference" },
+        { "name": "name", "type": "string", "description": "The name of the library or binary to upgrade" },
+        { "name": "from", "type": "string", "description": "The current version" },
+        { "name": "to", "type": "string", "description": "The version to which we recommend upgrading" },
+        { "name": "created_at", "type": "date-time-iso8601" }
       ]
     },
 
     "user_form": {
       "fields": [
-	{ "name": "email", "type": "string", "required": false },
-	{ "name": "name", "type": "io.flow.common.v0.models.name", "required": false }
+        { "name": "email", "type": "string", "required": false },
+        { "name": "name", "type": "io.flow.common.v0.models.name", "required": false }
       ]
     },
 
     "github_user_form": {
       "fields": [
-	{ "name": "user_id", "type": "string" },
-	{ "name": "github_user_id", "type": "long" },
-	{ "name": "login", "type": "string" }
+        { "name": "user_id", "type": "string" },
+        { "name": "github_user_id", "type": "long" },
+        { "name": "login", "type": "string" }
       ]
     },
-    
+
     "github_user": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference" },
-	{ "name": "github_user_id", "type": "long" },
-	{ "name": "login", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference" },
+        { "name": "github_user_id", "type": "long" },
+        { "name": "login", "type": "string" }
       ]
     },
 
@@ -342,42 +344,42 @@
 
     "user_identifier": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference" },
-	{ "name": "value", "type": "string" }
+        { "name": "id", "type": "string" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference" },
+        { "name": "value", "type": "string" }
       ]
     },
 
     "token": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference" },
-	{ "name": "masked", "type": "string" },
-	{ "name": "cleartext", "type": "string", "required": false, "description": "The cleartext token. Only available when the token is initially created" },
-	{ "name": "description", "type": "string", "required": false }
+        { "name": "id", "type": "string" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference" },
+        { "name": "masked", "type": "string" },
+        { "name": "cleartext", "type": "string", "required": false, "description": "The cleartext token. Only available when the token is initially created" },
+        { "name": "description", "type": "string", "required": false }
       ]
     },
 
     "token_form": {
       "fields": [
-	{ "name": "user_id", "type": "string" },
-	{ "name": "description", "type": "string", "required": false }
+        { "name": "user_id", "type": "string" },
+        { "name": "description", "type": "string", "required": false }
       ]
     },
-    
+
     "subscription": {
       "description": "Represents a user that is currently subscribed to a publication",
       "fields": [
-	{ "name": "id", "type": "string", "description": "Internal unique identifier for this subscription record" },
-	{ "name": "user", "type": "io.flow.common.v0.models.user_reference" },
-	{ "name": "publication", "type": "publication" }
+        { "name": "id", "type": "string", "description": "Internal unique identifier for this subscription record" },
+        { "name": "user", "type": "io.flow.common.v0.models.user_reference" },
+        { "name": "publication", "type": "publication" }
       ]
     },
 
     "subscription_form": {
       "fields": [
-	{ "name": "user_id", "type": "string" },
-	{ "name": "publication", "type": "publication" }
+        { "name": "user_id", "type": "string" },
+        { "name": "publication", "type": "publication" }
       ]
     },
 
@@ -386,7 +388,7 @@
       "fields": [
         { "name": "id", "type": "string", "description": "Unique identifier for this item." },
         { "name": "organization", "type": "organization_summary" },
-	{ "name": "visibility", "type": "visibility" },
+        { "name": "visibility", "type": "visibility" },
         { "name": "summary", "type": "item_summary" },
         { "name": "label", "type": "string" },
         { "name": "description", "type": "string", "required": false }
@@ -399,15 +401,15 @@
         { "name": "id", "type": "string", "description": "Unique identifier for this item." },
         { "name": "object_id", "type": "string" },
         { "name": "event", "type": "sync_event" },
-	{ "name": "created_at", "type": "date-time-iso8601" }
+        { "name": "created_at", "type": "date-time-iso8601" }
       ]
     },
 
     "user_summary": {
       "fields": [
-	{ "name": "id", "type": "string" },
-	{ "name": "email", "type": "string", "required": false },
-	{ "name": "name", "type": "io.flow.common.v0.models.name" }
+        { "name": "id", "type": "string" },
+        { "name": "email", "type": "string", "required": false },
+        { "name": "name", "type": "io.flow.common.v0.models.name" }
       ]
     },
 
@@ -417,7 +419,7 @@
         { "name": "id", "type": "string", "description": "Unique identifier for this membership" },
         { "name": "user", "type": "user_summary" },
         { "name": "organization", "type": "organization_summary" },
-	{ "name": "role", "type": "role" }
+        { "name": "role", "type": "role" }
       ]
     },
 
@@ -432,7 +434,7 @@
     "github_webhook": {
       "description": "Defines a github hook",
       "fields": [
-	{ "name": "id", "type": "long" }
+        { "name": "id", "type": "long" }
       ]
     }
 
@@ -440,14 +442,14 @@
 
   "resources": {
 
-    "io.flow.common.v0.models.healthcheck": {
+    "io.flow.healthcheck.v0.models.healthcheck": {
       "path": "/_internal_",
       "operations": [
         {
           "method": "GET",
-	  "path": "/healthcheck",
+          "path": "/healthcheck",
           "responses": {
-            "200": { "type": "io.flow.common.v0.models.healthcheck" }
+            "200": { "type": "io.flow.healthcheck.v0.models.healthcheck" }
           }
         }
       ]
@@ -456,16 +458,16 @@
     "github_user": {
       "path": "/authentications",
       "operations": [
-	{
-	  "method": "POST",
-	  "path": "/github",
-	  "description": "Used to authenticate a user via github",
-	  "body": { "type": "github_authentication_form" },
+        {
+          "method": "POST",
+          "path": "/github",
+          "description": "Used to authenticate a user via github",
+          "body": { "type": "github_authentication_form" },
           "responses": {
             "200": { "type": "io.flow.common.v0.models.user" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
-	  }
-	}
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
+          }
+        }
       ]
     },
 
@@ -479,7 +481,7 @@
           "parameters": [
             { "name": "id", "type": "string", "description": "Find user with this id. Exact match", "required": false },
             { "name": "email", "type": "string", "description": "Find user with this email address. Case in-sensitive. Exact match", "required": false },
-	    { "name": "identifier", "type": "string", "description": "Find user associated with this randomly generated identifier. Exact match", "required": false }
+            { "name": "identifier", "type": "string", "description": "Find user associated with this randomly generated identifier. Exact match", "required": false }
           ],
           "responses": {
             "200": { "type": "[io.flow.common.v0.models.user]" },
@@ -515,7 +517,7 @@
           "body": { "type": "user_form" },
           "responses": {
             "201": { "type": "io.flow.common.v0.models.user" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -528,8 +530,8 @@
           "description": "Search projects. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find project with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
-	    { "name": "organization", "type": "string", "description": "Filter to resolvers belongs to the organization with this key", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "organization", "type": "string", "description": "Filter to resolvers belongs to the organization with this key", "required": false },
             { "name": "name", "type": "string", "description": "Find project with this name. Case in-sensitive. Exact match", "required": false },
             { "name": "group_id", "type": "string", "description": "Find projects that are dependent on a library with this group ID. Exact match", "required": false },
             { "name": "artifact_id", "type": "string", "description": "Find projects that are dependent on a library with this artifact ID. Exact match", "required": false },
@@ -537,7 +539,7 @@
             { "name": "library_id", "type": "string", "description": "Find projects that are dependent on a library", "required": false },
             { "name": "binary", "type": "string", "description": "Find projects that are dependent on this binary. Case in-sensitive. Exact match", "required": false },
             { "name": "binary_id", "type": "string", "description": "Find projects that are dependent on a binary", "required": false },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
@@ -564,38 +566,38 @@
           "responses": {
             "201": { "type": "project" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
         {
           "method": "PUT",
-	  "path": "/:id",
+          "path": "/:id",
           "description": "Update an existing project.",
           "body": { "type": "project_form" },
           "responses": {
             "200": { "type": "project", "description": "Project successfully updated" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
         {
           "method": "PATCH",
-	  "path": "/:id",
+          "path": "/:id",
           "description": "Patch an existing project",
           "body": { "type": "project_patch_form" },
           "responses": {
             "200": { "type": "project", "description": "Project successfully updated" },
             "401": { "type": "unit" },
             "404": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
-	{
-	  "method": "DELETE",
-	  "path": "/:id",
+        {
+          "method": "DELETE",
+          "path": "/:id",
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
@@ -612,9 +614,9 @@
           "description": "Search project libraries. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find project library with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
-	    { "name": "project_id", "type": "string", "description": "filter by this project", "required": false },
-	    { "name": "library_id", "type": "string", "description": "filter by this library", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "project_id", "type": "string", "description": "filter by this project", "required": false },
+            { "name": "library_id", "type": "string", "description": "filter by this library", "required": false },
             { "name": "is_synced", "type": "boolean", "description": "If true, filter by project libraries that have been synced. False to filter by project libraries that have not yet been synced. Main purpose of this filter is to see what libraries we are still evaluating after a project is added for the first time.", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
@@ -624,7 +626,7 @@
             "401": { "type": "unit" }
           }
         }
-	
+
       ]
     },
 
@@ -635,9 +637,9 @@
           "description": "Search project binaries. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find project binary with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
-	    { "name": "project_id", "type": "string", "description": "filter by this project", "required": false },
-	    { "name": "binary_id", "type": "string", "description": "filter by this binary", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "project_id", "type": "string", "description": "filter by this project", "required": false },
+            { "name": "binary_id", "type": "string", "description": "filter by this binary", "required": false },
             { "name": "is_synced", "type": "boolean", "description": "If true, filter by project binaries that have been synced. False to filter by project binaries that have not yet been synced. Main purpose of this filter is to see what binaries we are still evaluating after a project is added for the first time.", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
@@ -647,7 +649,7 @@
             "401": { "type": "unit" }
           }
         }
-	
+
       ]
     },
 
@@ -658,10 +660,10 @@
           "description": "Search organizations. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find organization with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "user_id", "type": "string", "description": "Find organizations that this user has access to", "required": false },
             { "name": "key", "type": "string", "description": "Find organization with this key. Case in-sensitive. Exact match", "required": false },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
@@ -676,7 +678,7 @@
           "path": "/users/:user_id",
           "parameters": [
             { "name": "user_id", "type": "string", "description": "Find organization representing this user" }
-	  ],
+          ],
           "responses": {
             "200": { "type": "organization" },
             "401": { "type": "unit" },
@@ -702,25 +704,25 @@
           "responses": {
             "201": { "type": "organization" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
         {
           "method": "PUT",
-	  "path": "/:id",
+          "path": "/:id",
           "description": "Update an existing organization.",
           "body": { "type": "organization_form" },
           "responses": {
             "200": { "type": "organization", "description": "Organization successfully updated" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
-	{
-	  "method": "DELETE",
-	  "path": "/:id",
+        {
+          "method": "DELETE",
+          "path": "/:id",
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
@@ -737,7 +739,7 @@
           "description": "Search all memberships. Results are always paginated.",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find organization with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "organization", "type": "string", "required": false, "description": "Filter to organization with this key. Case insensitive" },
             { "name": "user_id", "type": "string", "required": false },
             { "name": "role", "type": "role", "required": false },
@@ -753,32 +755,32 @@
         {
           "method": "GET",
           "path": "/:id",
-	  "responses": {
-	    "200": { "type": "membership" },
+          "responses": {
+            "200": { "type": "membership" },
             "401": { "type": "unit" },
             "404": { "type": "unit" }
-	  }
+          }
         },
 
         {
           "method": "POST",
           "body": { "type": "membership_form" },
-	  "responses": {
-	    "201": { "type": "membership" },
+          "responses": {
+            "201": { "type": "membership" },
             "401": { "type": "unit" },
             "404": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
-	  }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
+          }
         },
 
         {
           "method": "DELETE",
           "path": "/:id",
-	  "responses": {
-	    "204": { "type": "unit" },
+          "responses": {
+            "204": { "type": "unit" },
             "401": { "type": "unit" },
             "404": { "type": "unit" }
-	  }
+          }
         }
       ]
     },
@@ -790,10 +792,10 @@
           "description": "Search resolvers. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find resolver with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
-	    { "name": "organization", "type": "string", "description": "Filter to resolvers belongs to the organization with this key", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "organization", "type": "string", "description": "Filter to resolvers belongs to the organization with this key", "required": false },
             { "name": "visibility", "type": "visibility", "description": "Filter based on visibility", "required": false },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
@@ -820,13 +822,13 @@
           "responses": {
             "201": { "type": "resolver" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
-	{
-	  "method": "DELETE",
-	  "path": "/:id",
+        {
+          "method": "DELETE",
+          "path": "/:id",
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
@@ -843,7 +845,7 @@
           "description": "Search libraries. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find library with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "project_id", "type": "string", "description": "Find binaries associated with this project", "required": false },
             { "name": "group_id", "type": "string", "description": "Find library with this group_id. Case sensitive. Exact match", "required": false },
             { "name": "artifact_id", "type": "string", "description": "Find library with this artifact_id. Case sensitive. Exact match", "required": false },
@@ -875,13 +877,13 @@
           "responses": {
             "201": { "type": "library" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
-	{
-	  "method": "DELETE",
-	  "path": "/:id",
+        {
+          "method": "DELETE",
+          "path": "/:id",
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
@@ -898,7 +900,7 @@
           "description": "Search library versions. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find library version with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "library_id", "type": "string", "description": "Find binaries associated with this binary", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
@@ -930,7 +932,7 @@
           "description": "Search binaries. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find binary with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "project_id", "type": "string", "description": "Find binaries associated with this project", "required": false },
             { "name": "name", "type": "string", "description": "Find project with this name. Case in-sensitive. Exact match", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
@@ -960,13 +962,13 @@
           "responses": {
             "201": { "type": "binary" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
-	{
-	  "method": "DELETE",
-	  "path": "/:id",
+        {
+          "method": "DELETE",
+          "path": "/:id",
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
@@ -983,7 +985,7 @@
           "description": "Search binary versions. Results are paginated",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find binary version with this id. Exact match", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "binary_id", "type": "string", "description": "Find binaries associated with this binary", "required": false },
             { "name": "project_id", "type": "string", "description": "Find binaries associated with this project", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
@@ -1011,24 +1013,24 @@
 
     "repository": {
       "operations": [
-	{
+        {
           "method": "GET",
-	  "path": "/github",
+          "path": "/github",
           "description": "Returns a list of repositories from github",
           "parameters": [
-	    { "name": "owner", "type": "string", "required": false, "description": "Optionally filter by owner name. Case in-sensitive. Exact match" },            
-	    { "name": "name", "type": "string", "required": false, "description": "Optionally filter by repo name. Case in-sensitive. Exact match" },
-	    { "name": "organization_id", "type": "string", "required": false, "description": "If specified, we enable additional filtering by this organization (see existing_project parameter)." },
-	    { "name": "existing_project", "type": "boolean", "required": false, "description": "Optionally filter by repositories that are either already mapped to existing projects or not. Requires organization_id parameter to also be specified." },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
-	    { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
+            { "name": "owner", "type": "string", "required": false, "description": "Optionally filter by owner name. Case in-sensitive. Exact match" },
+            { "name": "name", "type": "string", "required": false, "description": "Optionally filter by repo name. Case in-sensitive. Exact match" },
+            { "name": "organization_id", "type": "string", "required": false, "description": "If specified, we enable additional filtering by this organization (see existing_project parameter)." },
+            { "name": "existing_project", "type": "boolean", "required": false, "description": "Optionally filter by repositories that are either already mapped to existing projects or not. Requires organization_id parameter to also be specified." },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
-	    "200": { "type": "[io.flow.github.v0.models.repository]" },
-	    "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "200": { "type": "[io.flow.github.v0.models.repository]" },
+            "401": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
-	}
+        }
       ]
     },
 
@@ -1039,16 +1041,16 @@
           "description": "Search subscriptions. Always paginated.",
           "parameters": [
             { "name": "id", "type": "string", "description": "Find the subscription with this id.", "required": false },
-	    { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+            { "name": "ids", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "user_id", "type": "string", "description": "Find subscriptions for this user.", "required": false },
-	    { "name": "identifier", "type": "string", "description": "Find subscriptions associated with this user identifier. Exact match", "required": false },
+            { "name": "identifier", "type": "string", "description": "Find subscriptions associated with this user identifier. Exact match", "required": false },
             { "name": "publication", "type": "publication", "description": "Find subscriptions for this publication.", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
             "200": { "type": "[subscription]" },
-	    "401": { "type": "unit" }
+            "401": { "type": "unit" }
           }
         },
 
@@ -1066,24 +1068,24 @@
         {
           "method": "POST",
           "description": "Create a new subscription.",
-	  "parameters": [
-	    { "name": "identifier", "type": "string", "description": "If a user identifier is provided, authentication is bypassed", "required": false }
-	  ],
+          "parameters": [
+            { "name": "identifier", "type": "string", "description": "If a user identifier is provided, authentication is bypassed", "required": false }
+          ],
           "body": { "type": "subscription_form" },
           "responses": {
             "201": { "type": "subscription" },
             "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         },
 
         {
           "method": "DELETE",
-	  "path": "/:id",
-	  "parameters": [
-	    { "name": "identifier", "type": "string", "description": "If a user identifier is provided, authentication is bypassed", "required": false }
-	  ],
-	  "responses": {
+          "path": "/:id",
+          "parameters": [
+            { "name": "identifier", "type": "string", "description": "If a user identifier is provided, authentication is bypassed", "required": false }
+          ],
+          "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
             "404": { "type": "unit" }
@@ -1095,129 +1097,129 @@
 
     "recommendation": {
       "operations": [
-	{
+        {
           "method": "GET",
           "description": "Returns a list of recommendations for this user",
           "parameters": [
-	    { "name": "organization", "type": "string", "required": false, "description": "Optionally filter to recommendations for this organization" },			
-	    { "name": "project_id", "type": "string", "required": false, "description": "Optionally filter by project" },
-	    { "name": "type", "type": "recommendation_type", "required": false, "description": "Optionally filter by type of recommendation." },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
-	    { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
+            { "name": "organization", "type": "string", "required": false, "description": "Optionally filter to recommendations for this organization" },
+            { "name": "project_id", "type": "string", "required": false, "description": "Optionally filter by project" },
+            { "name": "type", "type": "recommendation_type", "required": false, "description": "Optionally filter by type of recommendation." },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
-	    "200": { "type": "[recommendation]" },
-	    "401": { "type": "unit" }
+            "200": { "type": "[recommendation]" },
+            "401": { "type": "unit" }
           }
-	}
+        }
       ]
     },
 
     "item": {
       "operations": [
-	{
+        {
           "method": "GET",
           "description": "Returns a list of all matching items",
           "parameters": [
-	    { "name": "q", "type": "string", "required": false, "description": "Actual search query" },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
-	    { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
+            { "name": "q", "type": "string", "required": false, "description": "Actual search query" },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
-	    "200": { "type": "[item]" },
-	    "401": { "type": "unit" }
+            "200": { "type": "[item]" },
+            "401": { "type": "unit" }
           }
-	}
+        }
       ]
     },
 
     "sync": {
       "operations": [
-	{
+        {
           "method": "GET",
           "parameters": [
-	    { "name": "object_id", "type": "string", "required": false },
-	    { "name": "event", "type": "sync_event", "required": false },
-	    { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
-	    { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
+            { "name": "object_id", "type": "string", "required": false },
+            { "name": "event", "type": "sync_event", "required": false },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
           ],
           "responses": {
-	    "200": { "type": "[sync]" },
-	    "401": { "type": "unit" }
+            "200": { "type": "[sync]" },
+            "401": { "type": "unit" }
           }
-	},
-        
-	{
-	  "method": "POST",
-	  "path": "/binaries/:id",
-	  "responses": {
-            "204": { "type": "unit" },
-            "404": { "type": "unit" }
-          }
-	},
+        },
 
-	{
-	  "method": "POST",
-	  "path": "/libraries/:id",
-	  "responses": {
+        {
+          "method": "POST",
+          "path": "/binaries/:id",
+          "responses": {
             "204": { "type": "unit" },
             "404": { "type": "unit" }
           }
-	},
+        },
 
-	{
-	  "method": "POST",
-	  "path": "/projects/:id",
-	  "responses": {
+        {
+          "method": "POST",
+          "path": "/libraries/:id",
+          "responses": {
             "204": { "type": "unit" },
             "404": { "type": "unit" }
           }
-	}
+        },
+
+        {
+          "method": "POST",
+          "path": "/projects/:id",
+          "responses": {
+            "204": { "type": "unit" },
+            "404": { "type": "unit" }
+          }
+        }
       ]
     },
 
     "token": {
       "operations": [
-	{
-	  "method": "GET",
-	  "parameters": [
-	    { "name": "id", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
+        {
+          "method": "GET",
+          "parameters": [
+            { "name": "id", "type": "[string]", "description": "Filter by any one of these ids", "required": false },
             { "name": "user_id", "type": "string", "description": "Find tokens for this user.", "required": false },
             { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
             { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
-	  ],
+          ],
           "responses": {
             "200": { "type": "[token]" },
             "401": { "type": "unit" }
           }
-	},
+        },
 
-	{
-	  "method": "GET",
-	  "description": "Used to fetch one token",
-	  "path": "/:id",
+        {
+          "method": "GET",
+          "description": "Used to fetch one token",
+          "path": "/:id",
           "responses": {
             "200": { "type": "token" },
             "401": { "type": "unit" },
             "404": { "type": "unit" }
           }
-	},
+        },
 
-	{
-	  "method": "POST",
-	  "description": "Create a new API token for this user",
-	  "body": { "type": "token_form" },
+        {
+          "method": "POST",
+          "description": "Create a new API token for this user",
+          "body": { "type": "token_form" },
           "responses": {
             "201": { "type": "token" },
-	    "401": { "type": "unit" },
-            "422": { "type": "[io.flow.common.v0.models.error]" }
+            "401": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
-	},
+        },
 
         {
           "method": "DELETE",
-	  "path": "/:id",
-	  "responses": {
+          "path": "/:id",
+          "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
             "404": { "type": "unit" }
@@ -1233,11 +1235,11 @@
       "description": "The target of the github webooks",
 
       "operations": [
-	{
-	  "method": "POST",
-	  "path": "/:project_id",
-	  "description": "Receives a webhook on push for this particular project"
-	}
+        {
+          "method": "POST",
+          "path": "/:project_id",
+          "description": "Receives a webhook on push for this particular project"
+        }
       ]
     }
   }

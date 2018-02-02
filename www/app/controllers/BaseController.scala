@@ -1,8 +1,8 @@
 package controllers
 
-import com.bryzek.dependency.v0.Client
-import com.bryzek.dependency.v0.models.Organization
-import com.bryzek.dependency.www.lib.{DependencyClientProvider, Section, UiData}
+import io.flow.dependency.v0.Client
+import io.flow.dependency.v0.models.Organization
+import io.flow.dependency.www.lib.{DependencyClientProvider, Section, UiData}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import io.flow.play.controllers.IdentifiedController

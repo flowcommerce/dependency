@@ -1,8 +1,8 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.{Organization, Project, ProjectForm, Scms, SyncEvent, Visibility}
-import com.bryzek.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.{Organization, Project, ProjectForm, Scms, SyncEvent, Visibility}
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.common.v0.models.User
 import io.flow.play.util.{Pagination, PaginatedCollection}
 import scala.concurrent.Future
@@ -21,7 +21,7 @@ class ProjectsController @javax.inject.Inject() (
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  override def section = Some(com.bryzek.dependency.www.lib.Section.Projects)
+  override def section = Some(io.flow.dependency.www.lib.Section.Projects)
 
   def index(page: Int = 0) = Identified.async { implicit request =>
     for {
@@ -186,7 +186,7 @@ class ProjectsController @javax.inject.Inject() (
           ).map { project =>
             Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
           }.recover {
-            case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+            case response: io.flow.dependency.v0.errors.ErrorsResponse => {
               Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.errors.map(_.message)))
             }
           }
@@ -241,7 +241,7 @@ class ProjectsController @javax.inject.Inject() (
               ).map { project =>
                 Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")
               }.recover {
-                case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+                case response: io.flow.dependency.v0.errors.ErrorsResponse => {
                   Ok(views.html.projects.edit(uiData(request), project, boundForm, orgs, response.errors.map(_.message)))
                 }
               }

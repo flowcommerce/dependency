@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import io.flow.common.v0.models.Name
 import org.specs2.mutable._

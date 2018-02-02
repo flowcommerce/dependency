@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.Publication
+import io.flow.dependency.v0.models.Publication
 import io.flow.common.v0.models.User
 import play.api.test._
 import play.api.test.Helpers._

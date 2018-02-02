@@ -1,8 +1,8 @@
-package com.bryzek.dependency.www.lib
+package io.flow.dependency.www.lib
 
 import io.flow.common.v0.models.User
 import io.flow.play.util.{Config => FlowConfig}
-import com.bryzek.dependency.lib.Urls
+import io.flow.dependency.lib.Urls
 
 sealed trait Section
 

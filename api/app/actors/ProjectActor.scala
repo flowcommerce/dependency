@@ -1,7 +1,7 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.api.lib.{DefaultLibraryArtifactProvider, Dependencies, GithubDependencyProviderClient, GithubHelper, GithubUtil}
-import com.bryzek.dependency.v0.models.{Binary, BinaryForm, BinaryType, Library, LibraryForm, Project, ProjectBinary, ProjectLibrary, RecommendationType, VersionForm}
+import io.flow.dependency.api.lib.{DefaultLibraryArtifactProvider, Dependencies, GithubDependencyProviderClient, GithubHelper, GithubUtil}
+import io.flow.dependency.v0.models.{Binary, BinaryForm, BinaryType, Library, LibraryForm, Project, ProjectBinary, ProjectLibrary, RecommendationType, VersionForm}
 import io.flow.postgresql.Pager
 import io.flow.play.actors.ErrorHandler
 import io.flow.play.util.Config
@@ -9,7 +9,9 @@ import db.{Authorization, BinariesDao, LibrariesDao, LibraryVersionsDao, Project
 import db.{ProjectsDao, RecommendationsDao, SyncsDao, TokensDao}
 import play.api.Logger
 import play.libs.Akka
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+import io.flow.github.v0.models.HookForm
+
 import scala.concurrent.ExecutionContext
 
 object ProjectActor {
@@ -42,10 +44,11 @@ object ProjectActor {
 
 class ProjectActor @javax.inject.Inject() (
   config: Config,
+  actorSystem: ActorSystem,
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor with ErrorHandler {
 
-  implicit val projectExecutionContext: ExecutionContext = Akka.system.dispatchers.lookup("project-actor-context")
+  implicit val projectExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("project-actor-context")
 
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"
   private[this] val HookName = "web"
@@ -104,13 +107,15 @@ class ProjectActor @javax.inject.Inject() (
                     client.hooks.post(
                       owner = repo.owner,
                       repo = repo.project,
-                      name = HookName,
-                      config = io.flow.github.v0.models.HookConfig(
-                        url = Some(targetUrl),
-                        contentType = Some("json")
-                      ),
-                      events = HookEvents,
-                      active = true
+                      hookForm = HookForm(
+                        name = HookName,
+                        config = io.flow.github.v0.models.HookConfig(
+                          url = Some(targetUrl),
+                          contentType = Some("json")
+                        ),
+                        events = HookEvents,
+                        active = true
+                      )
                     ).map { hook =>
                       println("  - Project[${project.id}] hook created: " + hook)
                     }.recover {

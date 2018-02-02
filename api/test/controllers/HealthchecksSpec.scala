@@ -1,6 +1,6 @@
 package controllers
 
-import com.bryzek.dependency.v0.Client
+import io.flow.dependency.v0.Client
 import io.flow.common.v0.models.Healthcheck
 
 import play.api.libs.ws._

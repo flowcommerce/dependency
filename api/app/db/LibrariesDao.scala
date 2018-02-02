@@ -1,16 +1,24 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.api.lib.Version
-import com.bryzek.dependency.v0.models.{Library, LibraryForm}
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import javax.inject.Inject
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.api.lib.Version
+import io.flow.dependency.v0.models.{Library, LibraryForm}
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
 
-object LibrariesDao {
+@Singleton
+class LibrariesDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers],
+  libraryVersionsDaoProvider: Provider[LibraryVersionsDao]
+){
 
   private[this] val BaseQuery = Query(s"""
     select libraries.id,
@@ -53,7 +61,7 @@ object LibrariesDao {
     }
 
     val existsErrors = if (groupIdErrors.isEmpty && artifactIdErrors.isEmpty) {
-      LibrariesDao.findByGroupIdAndArtifactId(Authorization.All, form.groupId, form.artifactId) match {
+      findByGroupIdAndArtifactId(Authorization.All, form.groupId, form.artifactId) match {
         case None => Nil
         case Some(lib) => {
           if (Some(lib.id) == existing.map(_.id)) {
@@ -71,14 +79,14 @@ object LibrariesDao {
   }
 
   def upsert(createdBy: UserReference, form: LibraryForm): Either[Seq[String], Library] = {
-    LibrariesDao.findByGroupIdAndArtifactId(Authorization.All, form.groupId, form.artifactId) match {
+    findByGroupIdAndArtifactId(Authorization.All, form.groupId, form.artifactId) match {
       case None => {
         create(createdBy, form)
       }
       case Some(lib) => {
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           form.version.foreach { version =>
-            LibraryVersionsDao.upsertWithConnection(createdBy, lib.id, version)
+            libraryVersionsDaoProvider.get.upsertWithConnection(createdBy, lib.id, version)
           }
         }
         Right(lib)
@@ -91,7 +99,7 @@ object LibrariesDao {
       case Nil => {
         val id = io.flow.play.util.IdGenerator("lib").randomId()
 
-        DB.withTransaction { implicit c =>
+        db.withTransaction { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'organization_id -> form.organizationId,
@@ -101,7 +109,7 @@ object LibrariesDao {
             'updated_by_user_id -> createdBy.id
           ).execute()
           form.version.foreach { version =>
-            LibraryVersionsDao.upsertWithConnection(createdBy, id, version)
+            libraryVersionsDaoProvider.get.upsertWithConnection(createdBy, id, version)
           }
         }
 
@@ -118,15 +126,15 @@ object LibrariesDao {
   }
 
   def delete(deletedBy: UserReference, library: Library) {
-    LibraryVersionsDao.findAll(
+    libraryVersionsDaoProvider.get.findAll(
       Authorization.All,
       libraryId = Some(library.id),
       limit = None
     ).foreach { lv =>
-      LibraryVersionsDao.delete(deletedBy, lv)
+      libraryVersionsDaoProvider.get.delete(deletedBy, lv)
     }
 
-    DbHelpers.delete("libraries", deletedBy.id, library.id)
+    dbHelpersProvider.get.delete("libraries", deletedBy.id, library.id)
     MainActor.ref ! MainActor.Messages.LibraryDeleted(library.id)
   }
 
@@ -160,7 +168,7 @@ object LibrariesDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Library] = {
-    DB.withConnection { implicit c =>    
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "libraries",
@@ -191,7 +199,7 @@ object LibrariesDao {
         ).
         equals("libraries.resolver_id", resolverId).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Library.parser().*
+          io.flow.dependency.v0.anorm.parsers.Library.parser().*
         )
     }
   }

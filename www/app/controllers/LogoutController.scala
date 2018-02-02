@@ -1,6 +1,6 @@
 package controllers
 
-import com.bryzek.dependency.www.lib.UiData
+import io.flow.dependency.www.lib.UiData
 import play.api._
 import play.api.i18n.{MessagesApi, I18nSupport}
 import play.api.mvc.{Action, Controller}

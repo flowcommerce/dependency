@@ -1,24 +1,26 @@
 package controllers
 
 import db.{LastEmailsDao, UsersDao}
-import com.bryzek.dependency.v0.models.Publication
-import com.bryzek.dependency.api.lib.{Email, Recipient}
-import com.bryzek.dependency.actors._
-import io.flow.play.controllers.AnonymousController
+import io.flow.dependency.v0.models.Publication
+import io.flow.dependency.api.lib.{Email, Recipient}
+import io.flow.dependency.actors._
+import io.flow.play.controllers.{AnonymousController, FlowController, FlowControllerComponents}
 import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
 class Emails @javax.inject.Inject() (
-  val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with AnonymousController with Helpers {
+  tokenClient: io.flow.token.v0.interfaces.Client,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends FlowController  with Helpers {
 
-  private[this] val TestEmailAddressName = "com.bryzek.dependency.api.test.email"
+  private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
   private[this] lazy val TestEmailAddress = config.optionalString(TestEmailAddressName)
 
-  override def user(
+  def user(
     session: play.api.mvc.Session,
     headers: play.api.mvc.Headers,
     path: String,

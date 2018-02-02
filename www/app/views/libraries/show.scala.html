@@ -1,9 +1,9 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  library: com.bryzek.dependency.v0.models.Library,
-  versions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.LibraryVersion],
-  projectLibraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectLibrary],
-  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+  data: io.flow.dependency.www.lib.UiData,
+  library: io.flow.dependency.v0.models.Library,
+  versions: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.LibraryVersion],
+  projectLibraries: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.ProjectLibrary],
+  lastCompletedSync: Option[io.flow.dependency.v0.models.Sync]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some(s"Library: ${library.groupId}.${library.artifactId}"))) {

@@ -1,6 +1,6 @@
 package controllers
 
-import com.bryzek.dependency.www.lib.UiData
+import io.flow.dependency.www.lib.UiData
 import io.flow.common.v0.models.Healthcheck
 import io.flow.common.v0.models.json._
 

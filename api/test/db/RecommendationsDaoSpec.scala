@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Organization, Recommendation}
+import io.flow.dependency.v0.models.{Organization, Recommendation}
 import org.scalatestplus.play._
 
 class RecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {

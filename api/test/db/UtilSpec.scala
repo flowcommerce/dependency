@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Credentials, CredentialsUndefinedType, UsernamePassword}
+import io.flow.dependency.v0.models.{Credentials, CredentialsUndefinedType, UsernamePassword}
 
 import org.specs2.mutable._
 

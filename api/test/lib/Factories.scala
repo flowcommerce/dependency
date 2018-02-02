@@ -1,6 +1,6 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.{ProjectSummary, OrganizationSummary, ResolverSummary, Visibility}
+import io.flow.dependency.v0.models.{ProjectSummary, OrganizationSummary, ResolverSummary, Visibility}
 import java.util.UUID
 
 trait Factories {

@@ -1,7 +1,7 @@
 package controllers
 
-import com.bryzek.dependency.www.lib.{DependencyClientProvider, UiData}
-import com.bryzek.dependency.v0.models.GithubAuthenticationForm
+import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
+import io.flow.dependency.v0.models.GithubAuthenticationForm
 import play.api._
 import play.api.i18n._
 import play.api.mvc._
@@ -40,7 +40,7 @@ class LoginController @javax.inject.Inject() (
       }
       Redirect(url).withSession { "user_id" -> user.id.toString }
     }.recover {
-      case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
+      case response: io.flow.dependency.v0.errors.ErrorsResponse => {
         Ok(views.html.login.index(UiData(requestPath = request.path), returnUrl, response.errors.map(_.message)))
       }
     }

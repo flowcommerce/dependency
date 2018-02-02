@@ -1,7 +1,7 @@
 package controllers
 
-import com.bryzek.dependency.v0.models.{Publication, SubscriptionForm}
-import com.bryzek.dependency.www.lib.{DependencyClientProvider, UiData}
+import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
+import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.common.v0.models.User
 import scala.concurrent.Future
 
@@ -111,7 +111,7 @@ class SubscriptionsController @javax.inject.Inject() (
     UiData(
       requestPath = request.path,
       user = user,
-      section = Some(com.bryzek.dependency.www.lib.Section.Subscriptions)
+      section = Some(io.flow.dependency.www.lib.Section.Subscriptions)
     )
   }
 

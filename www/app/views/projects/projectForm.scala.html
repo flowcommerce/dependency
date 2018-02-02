@@ -1,5 +1,5 @@
 @(form: Form[controllers.ProjectsController.UiForm],
-  orgs: Seq[com.bryzek.dependency.v0.models.Organization],
+  orgs: Seq[io.flow.dependency.v0.models.Organization],
   cancelUrl: play.api.mvc.Call
 )(implicit flash: Flash, messages: Messages)
 
@@ -15,14 +15,14 @@
 
     @helper.select(
         form("visibility"),
-        Seq( ("" -> "-- select --") ) ++ com.bryzek.dependency.v0.models.Visibility.all.map( v => (v.toString -> v.toString) ),
+        Seq( ("" -> "-- select --") ) ++ io.flow.dependency.v0.models.Visibility.all.map( v => (v.toString -> v.toString) ),
         '_label -> "Visibility",
         '_error -> form.error("visibility")
     )
 
     @helper.select(
         form("scms"),
-        Seq( ("" -> "-- select --") ) ++ com.bryzek.dependency.v0.models.Scms.all.map( v => (v.toString -> v.toString) ),
+        Seq( ("" -> "-- select --") ) ++ io.flow.dependency.v0.models.Scms.all.map( v => (v.toString -> v.toString) ),
         '_label -> "SCMS",
         '_error -> form.error("scms")
     )

@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.{UserIdentifiersDao, UsersDao}
 import io.flow.common.v0.models.{Name, User}

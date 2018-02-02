@@ -1,6 +1,6 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.Credentials
+import io.flow.dependency.v0.models.Credentials
 import org.apache.commons.lang3.StringUtils
 
 object RemoteVersions {

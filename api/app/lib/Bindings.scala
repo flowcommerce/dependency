@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import io.flow.delta.api.lib.DefaultTokenClient
 import io.flow.token.v0.interfaces.{Client => TokenClient}

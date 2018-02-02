@@ -1,14 +1,21 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Publication, Subscription, SubscriptionForm}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.v0.models.{Publication, Subscription, SubscriptionForm}
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy}
+import io.flow.postgresql.{OrderBy, Query}
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
 
-object SubscriptionsDao {
+@Singleton
+class SubscriptionsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+){
 
   private[this] val BaseQuery = Query(s"""
     select subscriptions.id,
@@ -47,7 +54,7 @@ object SubscriptionsDao {
   def upsertByUserIdAndPublication(createdBy: UserReference, form: SubscriptionForm): Either[Seq[String], Unit] = {
     validate(form) match {
       case Nil => {
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(UpsertQuery).on(
             'id -> idGenerator.randomId(),
             'user_id -> form.userId,
@@ -62,7 +69,7 @@ object SubscriptionsDao {
   }
 
   def delete(deletedBy: UserReference, subscription: Subscription) {
-    DbHelpers.delete("subscriptions", deletedBy.id, subscription.id)
+    dbHelpersProvider.get.delete("subscriptions", deletedBy.id, subscription.id)
   }
 
   def findByUserIdAndPublication(
@@ -92,7 +99,7 @@ object SubscriptionsDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Subscription] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "subscriptions",
@@ -128,7 +135,7 @@ object SubscriptionsDao {
           }
         ).bind("identifier", identifier).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Subscription.parser().*
+          io.flow.dependency.v0.anorm.parsers.Subscription.parser().*
         )
     }
   }

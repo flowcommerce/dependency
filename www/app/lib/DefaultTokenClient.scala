@@ -1,4 +1,4 @@
-package com.bryzek.dependency.www.lib
+package io.flow.dependency.www.lib
 
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.Client

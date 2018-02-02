@@ -1,11 +1,11 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import org.scalatest._
 import play.api.test._
 import play.api.test.Helpers._
 import org.scalatestplus.play._
 
-import com.bryzek.dependency.v0.models.{Library, OrganizationSummary}
+import io.flow.dependency.v0.models.{Library, OrganizationSummary}
 import org.joda.time.DateTime
 import java.util.UUID
 

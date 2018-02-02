@@ -1,16 +1,25 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.v0.models.{Scms, Binary, BinaryForm, Library, LibraryForm, Project, ProjectForm, ProjectSummary, OrganizationSummary, Visibility}
-import com.bryzek.dependency.api.lib.GithubUtil
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.v0.models.{Binary, BinaryForm, Library, LibraryForm, OrganizationSummary, Project, ProjectForm, ProjectSummary, Scms, Visibility}
+import io.flow.dependency.api.lib.GithubUtil
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
 
-object ProjectsDao {
+@Singleton
+class ProjectsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers],
+  membershipsDaoProvider: Provider[MembershipsDao],
+  projectLibrariesDaoProvider: Provider[ProjectLibrariesDao]
+){
 
   private[this] val BaseQuery = Query(s"""
     select projects.id,
@@ -86,7 +95,7 @@ object ProjectsDao {
       Seq("Name cannot be empty")
 
     } else {
-      ProjectsDao.findByOrganizationKeyAndName(Authorization.All, form.organization, form.name) match {
+      findByOrganizationKeyAndName(Authorization.All, form.organization, form.name) match {
         case None => Seq.empty
         case Some(p) => {
           Some(p.id) == existing.map(_.id) match {
@@ -97,7 +106,7 @@ object ProjectsDao {
       }
     }
 
-    val organizationErrors = MembershipsDao.isMemberByOrgKey(form.organization, user) match  {
+    val organizationErrors = membershipsDaoProvider.get.isMemberByOrgKey(form.organization, user) match  {
       case false => Seq("You do not have access to this organization")
       case true => Nil
     }
@@ -112,10 +121,10 @@ object ProjectsDao {
         val org = OrganizationsDao.findByKey(Authorization.All, form.organization).getOrElse {
           sys.error("Could not find organization with key[${form.organization}]")
         }
-        
+
         val id = io.flow.play.util.IdGenerator("prj").randomId()
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'organization_id -> org.id,
@@ -150,7 +159,7 @@ object ProjectsDao {
           "Changing organization not currently supported"
         )
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(UpdateQuery).on(
             'id -> project.id,
             'visibility -> form.visibility.toString,
@@ -175,8 +184,8 @@ object ProjectsDao {
 
   def delete(deletedBy: UserReference, project: Project) {
     Pager.create { offset =>
-      ProjectLibrariesDao.findAll(Authorization.All, projectId = Some(project.id), limit = Some(100), offset = offset)
-    }.foreach { ProjectLibrariesDao.delete(deletedBy, _) }
+      projectLibrariesDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), limit = Some(100), offset = offset)
+    }.foreach { projectLibrariesDaoProvider.get.delete(deletedBy, _) }
 
     Pager.create { offset =>
       ProjectBinariesDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
@@ -186,7 +195,7 @@ object ProjectsDao {
       RecommendationsDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
     }.foreach { RecommendationsDao.delete(deletedBy, _) }
 
-    DbHelpers.delete("projects", deletedBy.id, project.id)
+    dbHelpersProvider.get.delete("projects", deletedBy.id, project.id)
     MainActor.ref ! MainActor.Messages.ProjectDeleted(project.id)
   }
 
@@ -216,7 +225,7 @@ object ProjectsDao {
     offset: Long = 0
   ): Seq[Project] = {
 
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "projects",
@@ -259,7 +268,7 @@ object ProjectsDao {
           binaryId.map { v => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") }
         ).bind("binary_id", binaryId).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Project.parser().*
+          io.flow.dependency.v0.anorm.parsers.Project.parser().*
         )
     }
   }

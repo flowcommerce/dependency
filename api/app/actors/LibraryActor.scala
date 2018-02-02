@@ -1,7 +1,7 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{Library, LibraryForm, VersionForm}
-import com.bryzek.dependency.api.lib.DefaultLibraryArtifactProvider
+import io.flow.dependency.v0.models.{Library, LibraryForm, VersionForm}
+import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, ItemsDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao, UsersDao}
 import play.api.Logger

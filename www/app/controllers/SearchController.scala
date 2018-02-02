@@ -1,6 +1,6 @@
 package controllers
 
-import com.bryzek.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.util.{Pagination, PaginatedCollection}
 
 import play.api._

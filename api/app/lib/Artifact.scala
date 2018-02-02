@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.ProjectLibraryForm
-import com.bryzek.dependency.v0.models.{LibraryForm, ProjectSummary, VersionForm}
+import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary, VersionForm}
 
 case class Artifact(
   project: ProjectSummary,

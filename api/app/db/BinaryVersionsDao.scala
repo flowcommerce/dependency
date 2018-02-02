@@ -1,17 +1,24 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.api.lib.Version
-import com.bryzek.dependency.v0.models.{Binary, BinaryType, BinaryVersion}
-import io.flow.postgresql.{Query, OrderBy}
+import javax.inject.Inject
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.api.lib.Version
+import io.flow.dependency.v0.models.{Binary, BinaryType, BinaryVersion}
+import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
+
 import scala.util.{Failure, Success, Try}
 
-object BinaryVersionsDao {
+class BinaryVersionsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+){
 
   private[this] val BaseQuery = Query(s"""
     select binary_versions.id,
@@ -33,7 +40,7 @@ object BinaryVersionsDao {
   """
 
   def upsert(createdBy: UserReference, binaryId: String, version: String): BinaryVersion = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       upsertWithConnection(createdBy, binaryId, version)
     }
   }
@@ -67,7 +74,7 @@ object BinaryVersionsDao {
   }
 
   def create(createdBy: UserReference, binaryId: String, version: String): BinaryVersion = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       createWithConnection(createdBy, binaryId, version)
     }
   }
@@ -92,7 +99,7 @@ object BinaryVersionsDao {
   }
 
   def delete(deletedBy: UserReference, bv: BinaryVersion) {
-    DbHelpers.delete("binary_versions", deletedBy.id, bv.id)
+    dbHelpersProvider.get.delete("binary_versions", deletedBy.id, bv.id)
     MainActor.ref ! MainActor.Messages.BinaryVersionDeleted(bv.id, bv.binary.id)
   }
 
@@ -112,7 +119,7 @@ object BinaryVersionsDao {
     auth: Authorization,
     id: String
   ): Option[BinaryVersion] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       findByIdWithConnection(auth, id)
     }
   }
@@ -137,7 +144,7 @@ object BinaryVersionsDao {
     limit: Long = 25,
     offset: Long = 0
   ) = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       findAllWithConnection(
         auth,
         id = id,
@@ -194,7 +201,7 @@ object BinaryVersionsDao {
       limit(limit).
       offset(offset).
       as(
-        com.bryzek.dependency.v0.anorm.parsers.BinaryVersion.parser().*
+        io.flow.dependency.v0.anorm.parsers.BinaryVersion.parser().*
       )
   }
 

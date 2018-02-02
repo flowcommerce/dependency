@@ -1,18 +1,21 @@
 package controllers
 
 import db.{Authorization, InternalTokenForm, TokensDao}
-import io.flow.play.util.Validation
+import io.flow.play.util.{Config, Validation}
 import io.flow.common.v0.models.UserReference
-import com.bryzek.dependency.v0.models.{Token, TokenForm}
-import com.bryzek.dependency.v0.models.json._
+import io.flow.dependency.v0.models.{Token, TokenForm}
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import play.api.mvc._
 import play.api.libs.json._
 
-class Tokens @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
+class Tokens @javax.inject.Inject()(
+  tokenClient: io.flow.token.v0.interfaces.Client,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends FlowController with BaseIdentifiedController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

@@ -1,10 +1,10 @@
-import play.PlayImport.PlayKeys._
+import play.sbt.PlayScala._
 
 name := "dependency"
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.11.12"
+scalaVersion in ThisBuild := "2.12.4"
 
 lazy val generated = project
   .in(file("generated"))
@@ -29,11 +29,13 @@ lazy val api = project
   .enablePlugins(NewRelic)
   .settings(commonSettings: _*)
   .settings(
-    routesImport += "com.bryzek.dependency.v0.Bindables._",
+    routesImport += "io.flow.dependency.v0.Bindables._",
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
-      jdbc,      
-      "io.flow" %% "lib-postgresql" % "0.0.60",
+      jdbc,
+      ws,
+      guice,
+      "io.flow" %% "lib-postgresql-play26" % "0.0.61",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
       "org.postgresql" % "postgresql" % "42.2.0",
       "com.sendgrid"   %  "sendgrid-java" % "4.1.2"
@@ -48,14 +50,16 @@ lazy val www = project
   .enablePlugins(NewRelic)
   .settings(commonSettings: _*)
   .settings(
-    routesImport += "com.bryzek.dependency.v0.Bindables._",
+    routesImport += "io.flow.dependency.v0.Bindables._",
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
-      "org.webjars" %% "webjars-play" % "2.6.2",
-      "org.webjars" % "bootstrap" % "3.3.7",
+      ws,
+      guice,
+      "org.webjars" %% "webjars-play" % "2.6.3",
+      "org.webjars" % "bootstrap" % "4.0.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "org.webjars" % "font-awesome" % "5.0.2",
-      "org.webjars" % "jquery" % "2.1.4"
+      "org.webjars" % "font-awesome" % "5.0.6",
+      "org.webjars" % "jquery" % "3.3.1"
     )
   )
 
@@ -67,9 +71,10 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play" % "0.1.37",
-    specs2 % Test,
-    "org.scalatestplus" %% "play" % "1.4.0" % "test"
+    "io.flow" %% "lib-play-play26" % "0.4.35",
+    "com.typesafe.play" %% "play-json-joda" % "2.6.8",
+    "com.typesafe.play" %% "play-json" % "2.6.8",
+    "io.flow" %% "lib-test-utils" % "0.0.4" % Test
   ),
   scalacOptions += "-feature",
   credentials += credsToUse,

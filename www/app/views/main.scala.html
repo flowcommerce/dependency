@@ -1,5 +1,5 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
+  data: io.flow.dependency.www.lib.UiData,
   errorMessages: Seq[String] = Nil,
   jsFiles: Seq[String] = Seq.empty
 )(content: Html)(implicit flash: Flash)
@@ -26,12 +26,12 @@
 
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Dashboard)) { class="active" } href="@routes.ApplicationController.index()">Dashboard</a></li>
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Projects)) { class="active" } href="@routes.ProjectsController.index()">Projects</a></li>
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Libraries)) { class="active" } href="@routes.LibrariesController.index()">Libraries</a></li>
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Binaries)) { class="active" } href="@routes.BinariesController.index()">Binaries</a></li>
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Resolvers)) { class="active" } href="@routes.ResolversController.index()">Resolvers</a></li>
-            <li><a@if(data.section == Some(com.bryzek.dependency.www.lib.Section.Subscriptions)) { class="active" } href="@routes.SubscriptionsController.index()">Subscriptions</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Dashboard)) { class="active" } href="@routes.ApplicationController.index()">Dashboard</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Projects)) { class="active" } href="@routes.ProjectsController.index()">Projects</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Libraries)) { class="active" } href="@routes.LibrariesController.index()">Libraries</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Binaries)) { class="active" } href="@routes.BinariesController.index()">Binaries</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Resolvers)) { class="active" } href="@routes.ResolversController.index()">Resolvers</a></li>
+            <li><a@if(data.section == Some(io.flow.dependency.www.lib.Section.Subscriptions)) { class="active" } href="@routes.SubscriptionsController.index()">Subscriptions</a></li>
           </ul>
         </div>
 

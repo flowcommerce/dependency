@@ -1,7 +1,7 @@
 package controllers
 
-import com.bryzek.dependency.v0.{Authorization, Client}
-import com.bryzek.dependency.v0.errors.{ErrorsResponse, UnitResponse}
+import io.flow.dependency.v0.{Authorization, Client}
+import io.flow.dependency.v0.errors.{ErrorsResponse, UnitResponse}
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}

@@ -1,4 +1,4 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}

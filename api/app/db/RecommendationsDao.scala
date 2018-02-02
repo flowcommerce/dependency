@@ -1,13 +1,20 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Project, Recommendation, RecommendationType}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.v0.models.{Project, Recommendation, RecommendationType}
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 
-object RecommendationsDao {
+@Singleton
+class RecommendationsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+){
 
   private[this] case class RecommendationForm(
     projectId: String,
@@ -76,10 +83,10 @@ object RecommendationsDao {
     val toAdd = newRecords.filter { rec => !existing.map(toForm).contains(rec) }
     val toRemove = existing.filter { rec => !newRecords.contains(toForm(rec)) }
 
-    DB.withTransaction { implicit c =>
+    db.withTransaction { implicit c =>
       toAdd.foreach { upsert(user, _) }
       toRemove.foreach { rec =>
-        DbHelpers.delete(c, "recommendations", user.id, rec.id)
+        dbHelpersProvider.get.delete(c, "recommendations", user.id, rec.id)
       }
     }
 
@@ -90,7 +97,7 @@ object RecommendationsDao {
   }
 
   def delete(deletedBy: UserReference, rec: Recommendation) {
-    DbHelpers.delete("recommendations", deletedBy.id, rec.id)
+    dbHelpersProvider.get.delete("recommendations", deletedBy.id, rec.id)
   }
 
   private[this] def upsert(
@@ -111,7 +118,7 @@ object RecommendationsDao {
         create(createdBy, form)
       }
       case Some(rec) if rec.to != form.to => {
-        DbHelpers.delete(c, "recommendations", createdBy.id, rec.id)
+        dbHelpersProvider.get.delete(c, "recommendations", createdBy.id, rec.id)
         create(createdBy, form)
       }
     }
@@ -172,7 +179,7 @@ object RecommendationsDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Recommendation] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "recommendations",
@@ -198,7 +205,7 @@ object RecommendationsDao {
         optionalText("recommendations.from_version", fromVersion).
         equals("recommendations.object_id", objectId).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Recommendation.parser().*
+          io.flow.dependency.v0.anorm.parsers.Recommendation.parser().*
         )
     }
   }

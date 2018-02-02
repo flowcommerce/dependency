@@ -1,17 +1,25 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.api.lib.Version
-import com.bryzek.dependency.v0.models.{Library, LibraryVersion, VersionForm}
-import io.flow.postgresql.{Query, OrderBy}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.api.lib.Version
+import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
+import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
+
 import scala.util.{Failure, Success, Try}
 
-object LibraryVersionsDao {
+@Singleton
+class LibraryVersionsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+){
 
   private[this] val BaseQuery = Query(s"""
     select library_versions.id,
@@ -42,7 +50,7 @@ object LibraryVersionsDao {
   """
 
   def upsert(createdBy: UserReference, libraryId: String, form: VersionForm): LibraryVersion = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       upsertWithConnection(createdBy, libraryId, form)
     }
   }
@@ -81,7 +89,7 @@ object LibraryVersionsDao {
   }
 
   def create(createdBy: UserReference, libraryId: String, form: VersionForm): LibraryVersion = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       createWithConnection(createdBy, libraryId, form)
     }
   }
@@ -111,7 +119,7 @@ object LibraryVersionsDao {
   }
 
   def delete(deletedBy: UserReference, lv: LibraryVersion) {
-    DbHelpers.delete("library_versions", deletedBy.id, lv.id)
+    dbHelpersProvider.get.delete("library_versions", deletedBy.id, lv.id)
     MainActor.ref ! MainActor.Messages.LibraryVersionDeleted(lv.id, lv.library.id)
   }
 
@@ -134,7 +142,7 @@ object LibraryVersionsDao {
     auth: Authorization,
     id: String
   ): Option[LibraryVersion] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       findByIdWithConnection(auth, id)
     }
   }
@@ -159,7 +167,7 @@ object LibraryVersionsDao {
     limit: Option[Long],
     offset: Long = 0
   ) = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       findAllWithConnection(
         auth,
         id = id,
@@ -230,7 +238,7 @@ object LibraryVersionsDao {
       ).
       bind("greater_than_version", greaterThanVersion).
       as(
-        com.bryzek.dependency.v0.anorm.parsers.LibraryVersion.parser().*
+        io.flow.dependency.v0.anorm.parsers.LibraryVersion.parser().*
       )
   }
 

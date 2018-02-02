@@ -1,7 +1,7 @@
 package controllers
 
-import com.bryzek.dependency.v0.Client
-import com.bryzek.dependency.v0.models.UserForm
+import io.flow.dependency.v0.Client
+import io.flow.dependency.v0.models.UserForm
 import io.flow.common.v0.models.Name
 import io.flow.play.util.Validation
 

@@ -1,7 +1,7 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  organization: com.bryzek.dependency.v0.models.Organization,
-  projects: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Project]
+  data: io.flow.dependency.www.lib.UiData,
+  organization: io.flow.dependency.v0.models.Organization,
+  projects: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Project]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some(organization.key))) {
@@ -9,11 +9,11 @@
   <div class="pull-right">
     <a href="@routes.MembersController.index(organization.key)">Members</a>
 
-    @if(com.bryzek.dependency.www.lib.Permissions.Organization.edit(organization, data.user)) {
+    @if(io.flow.dependency.www.lib.Permissions.Organization.edit(organization, data.user)) {
       | <a href="@routes.OrganizationsController.edit(organization.key)">Edit</a>
     }
 
-    @if(com.bryzek.dependency.www.lib.Permissions.Organization.delete(organization, data.user)) {
+    @if(io.flow.dependency.www.lib.Permissions.Organization.delete(organization, data.user)) {
       | <a class="delete" data-confirm="Are you sure?" href="@routes.OrganizationsController.postDelete(organization.key)">Delete</a>
     }
   </div>

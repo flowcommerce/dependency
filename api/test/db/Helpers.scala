@@ -1,7 +1,7 @@
 package db
 
 import io.flow.play.util.Random
-import com.bryzek.dependency.v0.models._
+import io.flow.dependency.v0.models._
 import io.flow.common.v0.models.{Name, User, UserReference}
 import java.util.UUID
 import org.scalatest.concurrent.Eventually._

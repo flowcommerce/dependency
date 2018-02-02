@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.UserIdentifier
+import io.flow.dependency.v0.models.UserIdentifier
 import io.flow.common.v0.models.User
 
 import org.scalatest._

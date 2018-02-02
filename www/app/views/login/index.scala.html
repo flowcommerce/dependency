@@ -1,4 +1,4 @@
-@(data: com.bryzek.dependency.www.lib.UiData,
+@(data: io.flow.dependency.www.lib.UiData,
   returnUrl: Option[String],
   errorMessages: Seq[String] = Nil
 )(implicit flash: Flash, messages: Messages)
@@ -7,7 +7,7 @@
 
   <div class="pull-left">
 
-    <a class="btn btn-block btn-social btn-github" href="@com.bryzek.dependency.www.lib.Config.githubOauthUrl(returnUrl)">
+    <a class="btn btn-block btn-social btn-github" href="@io.flow.dependency.www.lib.Config.githubOauthUrl(returnUrl)">
       <span class="fa fa-github"></span> Sign in with Github
     </a>
 

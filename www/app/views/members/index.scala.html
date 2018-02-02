@@ -1,7 +1,7 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  org: com.bryzek.dependency.v0.models.Organization,
-  memberships: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Membership]
+  data: io.flow.dependency.www.lib.UiData,
+  org: io.flow.dependency.v0.models.Organization,
+  memberships: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Membership]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some(s"${org.key}: Members"))) {
@@ -31,7 +31,7 @@
             <td>@Seq(membership.user.name.first, membership.user.name.last).flatten.mkString(" ")</td>
             <td>@membership.role</td>
             <td>
-	      @if(membership.role == com.bryzek.dependency.v0.models.Role.Admin) {
+	      @if(membership.role == io.flow.dependency.v0.models.Role.Admin) {
 	        @if(Some(membership.user.id) == data.user.map(_.id)) {
   	          <a href="@routes.MembersController.postMakeMember(org.key, membership.id)" class="delete" data-confirm="If you remove your admin privileges, you will no longer have full access to this org. Would you like to proceed?">Make member</a>
                 } else {

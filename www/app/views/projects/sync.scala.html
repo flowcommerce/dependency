@@ -1,9 +1,9 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
+  data: io.flow.dependency.www.lib.UiData,
   id: String,
   nextN: Int,
   sleepTime: Int,
-  syncStarted: Option[com.bryzek.dependency.v0.models.Sync],
+  syncStarted: Option[io.flow.dependency.v0.models.Sync],
   pending: Seq[String],
   completed: Seq[String]
 )(implicit flash: Flash, messages: Messages)
@@ -16,7 +16,7 @@
   } else {
     <em>
       Project sync started at
-      @com.bryzek.dependency.www.lib.DateHelper.longDateTimeOption(syncStarted.map(_.createdAt)).
+      @io.flow.dependency.www.lib.DateHelper.longDateTimeOption(syncStarted.map(_.createdAt)).
       Waiting for sync to complete.
     </em>
 

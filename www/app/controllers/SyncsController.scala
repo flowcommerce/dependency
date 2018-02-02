@@ -1,8 +1,8 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.Sync
-import com.bryzek.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.Sync
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.common.v0.models.User
 import io.flow.play.util.{Pagination, PaginatedCollection}
 import scala.concurrent.Future

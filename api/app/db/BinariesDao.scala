@@ -1,14 +1,23 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.v0.models.{Binary, BinaryForm, SyncEvent}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.v0.models.{Binary, BinaryForm, SyncEvent}
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 
-object BinariesDao {
+@Singleton
+class BinariesDao @Inject()(
+  db: Database,
+  binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
+  dbHelpersProvider: Provider[DbHelpers]
+
+) {
 
   private[this] val BaseQuery = Query(s"""
     select binaries.id,
@@ -33,7 +42,7 @@ object BinariesDao {
       Seq("Name cannot be empty")
 
     } else {
-      BinariesDao.findByName(Authorization.All, form.name.toString) match {
+      findByName(Authorization.All, form.name.toString) match {
         case None => Seq.empty
         case Some(_) => Seq("Binary with this name already exists")
       }
@@ -41,7 +50,7 @@ object BinariesDao {
   }
 
   def upsert(createdBy: UserReference, form: BinaryForm): Either[Seq[String], Binary] = {
-    BinariesDao.findByName(Authorization.All, form.name.toString) match {
+    findByName(Authorization.All, form.name.toString) match {
       case Some(binary) => Right(binary)
       case None => create(createdBy, form)
     }
@@ -52,7 +61,7 @@ object BinariesDao {
       case Nil => {
         val id = io.flow.play.util.IdGenerator("bin").randomId()
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'organization_id -> form.organizationId,
@@ -75,10 +84,10 @@ object BinariesDao {
 
   def delete(deletedBy: UserReference, binary: Binary) {
     Pager.create { offset =>
-      BinaryVersionsDao.findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
-    }.foreach { BinaryVersionsDao.delete(deletedBy, _) }
+      binaryVersionsDaoProvider.get().findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
+    }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
 
-    DbHelpers.delete("binaries", deletedBy.id, binary.id)
+    dbHelpersProvider.get.delete("binaries", deletedBy.id, binary.id)
     MainActor.ref ! MainActor.Messages.BinaryDeleted(binary.id)
   }
 
@@ -106,7 +115,7 @@ object BinariesDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Binary] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       BaseQuery.
         equals("binaries.id", id).
         optionalIn("binaries.id", ids).
@@ -137,7 +146,7 @@ object BinariesDao {
         limit(limit).
         offset(offset).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Binary.parser().*
+          io.flow.dependency.v0.anorm.parsers.Binary.parser().*
         )
     }
   }

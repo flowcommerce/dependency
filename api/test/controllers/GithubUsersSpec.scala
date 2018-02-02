@@ -1,9 +1,9 @@
 package controllers
 
 import db.GithubUsersDao
-import com.bryzek.dependency.api.lib.MockGithubData
-import com.bryzek.dependency.v0.Client
-import com.bryzek.dependency.v0.models.GithubAuthenticationForm
+import io.flow.dependency.api.lib.MockGithubData
+import io.flow.dependency.v0.Client
+import io.flow.dependency.v0.models.GithubAuthenticationForm
 import io.flow.play.util.Validation
 import io.flow.github.v0.models.OwnerType
 import io.flow.github.v0.models.{User => GithubUser}

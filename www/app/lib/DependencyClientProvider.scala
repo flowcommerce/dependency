@@ -1,8 +1,8 @@
-package com.bryzek.dependency.www.lib
+package io.flow.dependency.www.lib
 
 import io.flow.common.v0.models.UserReference
-import com.bryzek.dependency.v0.{Authorization, Client}
-import com.bryzek.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.{Authorization, Client}
+import io.flow.dependency.v0.errors.UnitResponse
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 

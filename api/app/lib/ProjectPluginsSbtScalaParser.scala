@@ -1,6 +1,6 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.ProjectSummary
+import io.flow.dependency.v0.models.ProjectSummary
 
 /**
   * Takes the contents of a project/plugins.sbt file and parses it, providing

@@ -1,6 +1,6 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
+import io.flow.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
 import db.{Authorization, BinariesDao, ItemForm, ItemsDao, LibrariesDao, ProjectsDao}
 import play.api.Logger
 import akka.actor.Actor

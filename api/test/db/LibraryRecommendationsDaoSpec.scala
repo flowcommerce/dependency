@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Project, LibraryForm, LibraryVersion, VersionForm}
+import io.flow.dependency.v0.models.{Project, LibraryForm, LibraryVersion, VersionForm}
 import play.api.test._
 import play.api.test.Helpers._
 import org.scalatest._
