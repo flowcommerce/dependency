@@ -1,7 +1,7 @@
 package controllers
 
 import com.google.inject.Provider
-import db.{LastEmailsDao, RecommendationsDao, UsersDao}
+import db.{LastEmailsDao, RecommendationsDao, UserIdentifiersDao, UsersDao}
 import io.flow.dependency.v0.models.Publication
 import io.flow.dependency.api.lib.{Email, Recipient}
 import io.flow.dependency.actors._
@@ -17,7 +17,8 @@ class Emails @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   usersDao: UsersDao,
   lastEmailsDao: LastEmailsDao,
-  recommendationsDao: RecommendationsDao
+  recommendationsDao: RecommendationsDao,
+  userIdentifiersDao: UserIdentifiersDao
 ) extends FlowController   {
 
   private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
@@ -39,14 +40,14 @@ class Emails @javax.inject.Inject() (
         usersDao.findByEmail("mbryzek@alum.mit.edu") match {
           case None => Ok(s"No user with email address[$email] found")
           case Some(user) => {
-            val recipient = Recipient.fromUser(user).getOrElse {
+            val recipient = Recipient.fromUser(userIdentifiersDao, usersDao, user).getOrElse {
               Recipient(email = "noemail@test.flow.io", name = user.name, userId = user.id, identifier = "TESTID")
             }
             val generator = new DailySummaryEmailMessage(recipient)
 
             Ok(
               Seq(
-                "Subject: " + Email.subjectWithPrefix(generator.subject()),
+                "Subject: " + Email.subjectWithPrefix(config, generator.subject()),
                 "<br/><br/><hr size=1/>",
                 generator.body(lastEmailsDao, recommendationsDao, config)
               ).mkString("\n")

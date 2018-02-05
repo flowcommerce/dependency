@@ -1,17 +1,19 @@
 package io.flow.dependency.api.lib
 
-import db.ProjectBinaryForm
+import db.{ProjectBinaryForm, TokensDao}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.dependency.v0.models.{BinaryForm, BinaryType, LibraryForm, Project, ProjectSummary}
 import io.flow.github.v0.Client
 import io.flow.github.v0.errors.UnitResponse
 import io.flow.github.v0.models.{Contents, Encoding}
-import io.flow.play.util.DefaultConfig
+import io.flow.play.util.{Config, DefaultConfig}
 import org.apache.commons.codec.binary.Base64
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import java.net.URI
+
+import play.api.libs.ws.WSClient
 
 object GithubUtil {
 
@@ -60,8 +62,12 @@ object GithubUtil {
 
 object GithubDependencyProviderClient {
 
-  def instance(project: ProjectSummary, user: UserReference) = {
-    new GithubDependencyProvider(new DefaultGithub(), project, user)
+  def instance(wsClient: WSClient,
+    config: Config,
+    tokensDao: TokensDao,
+    project: ProjectSummary,
+    user: UserReference) = {
+    new GithubDependencyProvider(new DefaultGithub(wsClient, config, tokensDao), project, user)
   }
 
 }

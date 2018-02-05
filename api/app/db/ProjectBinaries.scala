@@ -1,6 +1,6 @@
 package db
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.api.lib.Version

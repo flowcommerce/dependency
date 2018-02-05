@@ -10,6 +10,7 @@ import play.api.Logger
 import play.libs.Akka
 import akka.actor.{Actor, ActorSystem}
 import io.flow.github.v0.models.HookForm
+import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
 
@@ -53,6 +54,8 @@ class ProjectActor @javax.inject.Inject() (
   librariesDao: LibrariesDao,
   binariesDao: BinariesDao,
   usersDao: UsersDao,
+  resolversDao: ResolversDao,
+  wsClient: WSClient,
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor with ErrorHandler {
 
@@ -109,7 +112,7 @@ class ProjectActor @javax.inject.Inject() (
               }
 
               case Some(token) => {
-                val client = GithubHelper.apiClient(token)
+                val client = GithubHelper.apiClient(wsClient, token)
 
                 client.hooks.get(repo.owner, repo.project).map { hooks =>
                   val targetUrl = HookBaseUrl + project.id
@@ -148,7 +151,7 @@ class ProjectActor @javax.inject.Inject() (
 
         val summary = projectsDao.toSummary(project)
 
-        GithubDependencyProviderClient.instance(summary, project.user).dependencies(project).map { dependencies =>
+        GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user).dependencies(project).map { dependencies =>
           println(s" - project[${project.id}] name[${project.name}] dependencies: $dependencies")
 
           dependencies.binaries.map { binaries =>
@@ -308,6 +311,7 @@ class ProjectActor @javax.inject.Inject() (
       }
       case None => {
         DefaultLibraryArtifactProvider().resolve(
+          resolversDao = resolversDao,
           organization = projectLibrary.project.organization,
           groupId = projectLibrary.groupId,
           artifactId = projectLibrary.artifactId

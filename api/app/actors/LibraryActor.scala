@@ -26,10 +26,12 @@ class LibraryActor @Inject()
   resolversDao: ResolversDao,
   libraryVersionsDao: LibraryVersionsDao,
   itemsDao: ItemsDao,
-  projectLibrariesDao: ProjectLibrariesDao
+  projectLibrariesDao: ProjectLibrariesDao,
+  usersDao: UsersDao
 ) extends Actor with Util {
 
   var dataLibrary: Option[Library] = None
+  lazy val SystemUser = usersDao.systemUser
 
   def receive = {
 
@@ -39,16 +41,17 @@ class LibraryActor @Inject()
 
     case m @ LibraryActor.Messages.Sync => withErrorHandler(m) {
       dataLibrary.foreach { lib =>
-        syncsDao.withStartedAndCompleted(MainActor.SystemUser, "library", lib.id) {
+        syncsDao.withStartedAndCompleted(SystemUser, "library", lib.id) {
           resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
             DefaultLibraryArtifactProvider().resolve(
+              resolversDao = resolversDao,
               resolver = resolver,
               groupId = lib.groupId,
               artifactId = lib.artifactId
             ).map { resolution =>
               resolution.versions.foreach { version =>
                 libraryVersionsDao.upsert(
-                  createdBy = MainActor.SystemUser,
+                  createdBy = SystemUser,
                   libraryId = lib.id,
                   form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
                 )
@@ -64,12 +67,12 @@ class LibraryActor @Inject()
 
     case m @ LibraryActor.Messages.Deleted => withErrorHandler(m) {
       dataLibrary.foreach { lib =>
-        itemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, lib.id)
+        itemsDao.deleteByObjectId(Authorization.All, SystemUser, lib.id)
 
         Pager.create { offset =>
           projectLibrariesDao.findAll(Authorization.All, libraryId = Some(lib.id), limit = Some(100), offset = offset)
         }.foreach { projectLibrary =>
-          projectLibrariesDao.removeLibrary(MainActor.SystemUser, projectLibrary)
+          projectLibrariesDao.removeLibrary(SystemUser, projectLibrary)
           sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
         }
       }

@@ -11,6 +11,7 @@ import play.api.mvc._
 import play.api.libs.json._
 
 import scala.concurrent.Future
+import io.flow.error.v0.models.json._
 
 class Users @javax.inject.Inject()(
   val config: Config,

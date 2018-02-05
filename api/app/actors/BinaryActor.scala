@@ -29,6 +29,7 @@ class BinaryActor @Inject() (
 ) extends Actor with Util {
 
   var dataBinary: Option[Binary] = None
+  lazy val SystemUser = usersDao.systemUser
 
   def receive = {
 
@@ -38,7 +39,7 @@ class BinaryActor @Inject() (
 
     case m @ BinaryActor.Messages.Sync => withErrorHandler(m) {
       dataBinary.foreach { binary =>
-        syncsDao.withStartedAndCompleted(MainActor.SystemUser, "binary", binary.id) {
+        syncsDao.withStartedAndCompleted(SystemUser, "binary", binary.id) {
           DefaultBinaryVersionProvider.versions(binary.name).foreach { version =>
             binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
           }
@@ -50,12 +51,12 @@ class BinaryActor @Inject() (
 
     case m @ BinaryActor.Messages.Deleted => withErrorHandler(m) {
       dataBinary.foreach { binary =>
-        itemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, binary.id)
+        itemsDao.deleteByObjectId(Authorization.All, SystemUser, binary.id)
 
         Pager.create { offset =>
           projectBinariesDao.findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
         }.foreach { projectBinary =>
-          projectBinariesDao.removeBinary(MainActor.SystemUser, projectBinary)
+          projectBinariesDao.removeBinary(SystemUser, projectBinary)
           sender ! MainActor.Messages.ProjectBinarySync(projectBinary.project.id, projectBinary.id)
         }
       }

@@ -2,14 +2,13 @@ package controllers
 
 import controllers.helpers.LibrariesHelper
 import db.{Authorization, LibrariesDao}
-import io.flow.play.util.{Config, Validation}
-import io.flow.common.v0.models.UserReference
-import io.flow.dependency.v0.models.{Library, LibraryForm}
+import io.flow.dependency.v0.models.LibraryForm
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import play.api.mvc._
+import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
+import play.api.mvc._
+import io.flow.error.v0.models.json._
 
 @javax.inject.Singleton
 class Libraries @javax.inject.Inject() (

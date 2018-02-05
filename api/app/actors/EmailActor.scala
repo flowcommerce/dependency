@@ -19,6 +19,7 @@ object EmailActor {
     case object ProcessDailySummary
   }
 
+  //TODO used for pattern matching, remove static injector later
   val PreferredHourToSendEst: Int = {
     val config = play.api.Play.current.injector.instanceOf[Config]
     val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
@@ -82,8 +83,11 @@ class BatchEmailProcessor @Inject()(
   usersDao: UsersDao,
   lastEmailsDao: LastEmailsDao,
   recommendationsDao: RecommendationsDao,
+  userIdentifiersDao: UserIdentifiersDao,
   config: Config
 ) {
+
+  lazy val SystemUser = usersDao.systemUser
 
   def process(
     publication: Publication,
@@ -93,11 +97,11 @@ class BatchEmailProcessor @Inject()(
   ) {
     subscriptions.foreach { subscription =>
       usersDao.findById(subscription.user.id).foreach { user =>
-        Recipient.fromUser(user).map { new DailySummaryEmailMessage(_) }.map { generator =>
+        Recipient.fromUser(userIdentifiersDao, usersDao, user).map { new DailySummaryEmailMessage(_) }.map { generator =>
           // Record before send in case of crash - prevent loop of
           // emails.
           lastEmailsDao.record(
-            MainActor.SystemUser,
+            SystemUser,
             LastEmailForm(
               userId = user.id,
               publication = publication
@@ -105,6 +109,7 @@ class BatchEmailProcessor @Inject()(
           )
 
           Email.sendHtml(
+            config = config,
             recipient = generator.recipient,
             subject = generator.subject(),
             body = generator.body(lastEmailsDao, recommendationsDao, config)

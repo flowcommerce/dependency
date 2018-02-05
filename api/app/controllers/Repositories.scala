@@ -2,8 +2,7 @@ package controllers
 
 import db.{Authorization, OrganizationsDao, ProjectsDao}
 import io.flow.dependency.api.lib.Github
-import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.error.v0.models.json._
 import io.flow.github.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}

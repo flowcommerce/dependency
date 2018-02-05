@@ -5,6 +5,7 @@ import io.flow.play.util.{Config, Validation}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.{Token, TokenForm}
 import io.flow.dependency.v0.models.json._
+import io.flow.error.v0.models.json._
 import io.flow.common.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import play.api.mvc._

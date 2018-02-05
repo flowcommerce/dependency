@@ -1,10 +1,9 @@
 package controllers
 
-import io.flow.common.v0.models.json._
+import io.flow.healthcheck.v0.models.json._
 import io.flow.healthcheck.v0.models.Healthcheck
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.Config
-import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 

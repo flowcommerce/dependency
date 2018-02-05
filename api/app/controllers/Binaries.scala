@@ -1,16 +1,14 @@
 package controllers
 
-import com.google.inject.Provider
 import controllers.helpers.BinaryHelper
 import db.{Authorization, BinariesDao}
+import io.flow.dependency.v0.models.BinaryForm
+import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
-import io.flow.common.v0.models.UserReference
-import io.flow.dependency.v0.models.{Binary, BinaryForm}
-import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import play.api.mvc._
 import play.api.libs.json._
+import io.flow.error.v0.models.json._
+import play.api.mvc._
 
 @javax.inject.Singleton
 class Binaries @javax.inject.Inject()(

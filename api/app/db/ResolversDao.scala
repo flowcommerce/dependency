@@ -20,7 +20,8 @@ class ResolversDao @Inject()(
   dbHelpersProvider: Provider[DbHelpers],
   membershipsDaoProvider: Provider[MembershipsDao],
   librariesDaoProvider: Provider[LibrariesDao],
-  organizationsDaoProvider: Provider[OrganizationsDao]
+  organizationsDaoProvider: Provider[OrganizationsDao],
+  usersDaoProvider: Provider[UsersDao]
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
@@ -158,7 +159,7 @@ class ResolversDao @Inject()(
         offset = offset
       )
     }.foreach { library =>
-      librariesDaoProvider.get.delete(MainActor.SystemUser, library)
+      librariesDaoProvider.get.delete(usersDaoProvider.get.systemUser, library)
     }
 
     MainActor.ref ! MainActor.Messages.ResolverDeleted(resolver.id)
@@ -280,5 +281,5 @@ class ResolversDao @Inject()(
       }
     }
   }
-  
+
 }

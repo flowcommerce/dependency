@@ -2,13 +2,14 @@ package controllers
 
 import controllers.helpers.{OrganizationsHelper, UsersHelper}
 import db.OrganizationsDao
-import io.flow.play.util.{Config, Validation}
-import io.flow.dependency.v0.models.{Organization, OrganizationForm}
+import io.flow.dependency.v0.models.OrganizationForm
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import play.api.mvc._
+import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
+import io.flow.error.v0.models.json._
+import play.api.mvc._
+import io.flow.error.v0.models.json._
 
 class Organizations @javax.inject.Inject()(
   val config: Config,
@@ -18,8 +19,6 @@ class Organizations @javax.inject.Inject()(
   organizationsHelper: OrganizationsHelper,
   usersHelper: UsersHelper
 ) extends FlowController with BaseIdentifiedController {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   def get(
     id: Option[String],

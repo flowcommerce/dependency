@@ -6,7 +6,7 @@ import io.flow.play.util.{Config, Validation}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.{Membership, MembershipForm, Role}
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.error.v0.models.json._
 import play.api.mvc._
 import play.api.libs.json._
 

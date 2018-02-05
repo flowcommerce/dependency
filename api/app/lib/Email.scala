@@ -10,40 +10,39 @@ import com.sendgrid._
 
 object Email {
 
-  private[this] val config = play.api.Play.current.injector.instanceOf[Config]
+  private[this] def subjectPrefix(config: Config) = config.requiredString("mail.subject.prefix")
 
-  private[this] val SubjectPrefix = config.requiredString("mail.subject.prefix")
-
-  def subjectWithPrefix(subject: String): String = {
-    SubjectPrefix + " " + subject
+  def subjectWithPrefix(config: Config, subject: String): String = {
+    subjectPrefix(config) + " " + subject
   }
 
-  private[this] val fromEmail = config.requiredString("mail.default.from.email")
-  private[this] val fromName = Name(
+  private[this] def fromEmail(config: Config) = config.requiredString("mail.default.from.email")
+  private[this] def fromName(config: Config) = Name(
     Some(config.requiredString("mail.default.from.name.first")),
     Some(config.requiredString("mail.default.from.name.last"))
   )
 
-  val localDeliveryDir = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
+  def localDeliveryDir(config: Config) = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
 
   // Initialize sendgrid on startup to verify that all of our settings
   // are here. If using localDeliveryDir, set password to a test
   // string.
-  private[this] val sendgrid = {
-    localDeliveryDir match {
+  private[this] def sendgrid(config: Config) = {
+    localDeliveryDir(config) match {
       case None => new SendGrid(config.requiredString("sendgrid.api.key"))
       case Some(_) => new SendGrid("development")
     }
   }
 
   def sendHtml(
+    config: Config,
     recipient: Recipient,
     subject: String,
     body: String
   ) {
-    val prefixedSubject = subjectWithPrefix(subject)
+    val prefixedSubject = subjectWithPrefix(config, subject)
 
-    val from = new com.sendgrid.Email(fromEmail)
+    val from = new com.sendgrid.Email(fromEmail(config))
     val to = recipient.fullName() match {
       case Some(fn) => new com.sendgrid.Email(recipient.email, fn)
       case None => new com.sendgrid.Email(recipient.email)
@@ -52,7 +51,7 @@ object Email {
 
     val mail = new com.sendgrid.Mail(from, prefixedSubject, to, content)
 
-    localDeliveryDir match {
+    localDeliveryDir(config) match {
       case Some(dir) => {
         localDelivery(dir, recipient, prefixedSubject, body)
       }
@@ -62,7 +61,7 @@ object Email {
         request.setMethod(Method.POST)
         request.setEndpoint("mail/send")
         request.setBody(mail.build())
-        val response = sendgrid.api(request)
+        val response = sendgrid(config).api(request)
         assert(
           response.getStatusCode() == 202,
           s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode()}]"

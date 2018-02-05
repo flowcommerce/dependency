@@ -16,9 +16,10 @@ trait LibraryArtifactProvider {
     * Returns the artifacts for this library.
     * 
     * @param organization Used to look up private resolvers for this organization.
-    * @param resolver If specified, we search this resolver first
+//    * @param resolver If specified, we search this resolver first
     */
   def resolve(
+    resolversDao: ResolversDao,
     organization: OrganizationSummary,
     groupId: String,
     artifactId: String
@@ -30,6 +31,7 @@ trait LibraryArtifactProvider {
     * groupId/artifactId on this resolver.
     */
   def resolve(
+    resolversDao: ResolversDao,
     resolver: Resolver,
     groupId: String,
     artifactId: String
@@ -38,10 +40,10 @@ trait LibraryArtifactProvider {
       resolver = resolver.uri,
       groupId = groupId,
       artifactId = artifactId,
-      credentials = ResolversDao.credentials(resolver)
+      credentials = resolversDao.credentials(resolver)
     ) match {
       case Nil => None
-      case versions => Some(ArtifactResolution(ResolversDao.toSummary(resolver), versions))
+      case versions => Some(ArtifactResolution(resolversDao.toSummary(resolver), versions))
     }
   }
 
@@ -51,11 +53,13 @@ trait LibraryArtifactProvider {
 case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
 
   override def resolve(
+    resolversDao: ResolversDao,
     organization: OrganizationSummary,
     groupId: String,
     artifactId: String
   ): Option[ArtifactResolution] = {
     internalResolve(
+      resolversDao,
       organization = organization,
       groupId = groupId,
       artifactId = artifactId,
@@ -65,13 +69,14 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
   }
 
   private[this] def internalResolve(
+    resolversDao: ResolversDao,
     organization: OrganizationSummary,
     groupId: String,
     artifactId: String,
     limit: Long,
     offset: Long
   ): Option[ArtifactResolution] = {
-    ResolversDao.findAll(
+    resolversDao.findAll(
       Authorization.Organization(organization.id),
       limit = limit,
       offset = offset
@@ -85,7 +90,7 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
             resolver = resolver.uri,
             groupId = groupId,
             artifactId = artifactId,
-            credentials = ResolversDao.credentials(resolver)
+            credentials = resolversDao.credentials(resolver)
           ) match {
             case Nil => {}
             case versions => {
@@ -108,6 +113,7 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
         }
 
         internalResolve(
+          resolversDao,
           organization = organization,
           groupId = groupId,
           artifactId = artifactId,
