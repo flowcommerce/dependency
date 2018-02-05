@@ -1,7 +1,11 @@
 package io.flow.delta.api.lib
 
+import javax.inject.Inject
+
 import db.{TokensDao, UsersDao}
 import io.flow.common.v0.models.UserReference
+import io.flow.token.v0
+import io.flow.token.v0.{OrganizationTokens, PartnerTokens, TokenValidations}
 import io.flow.token.v0.interfaces.Client
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models.{TokenAuthenticationForm, TokenReference, Token => FlowToken}
@@ -10,14 +14,25 @@ import org.joda.time.DateTime
 import scala.concurrent.{ExecutionContext, Future}
 
 @javax.inject.Singleton
-class DefaultTokenClient() extends Client {
+class DefaultTokenClient @Inject ()(
 
-  def baseUrl = throw new UnsupportedOperationException()
+) extends Client {
 
-  def tokens: io.flow.token.v0.Tokens = new Tokens()
+//  def baseUrl = throw new UnsupportedOperationException()
+//
+//  def tokens: io.flow.token.v0.Tokens = new Tokens()
+//
+//  def validations = throw new UnsupportedOperationException()
 
-  def validations = throw new UnsupportedOperationException()
+  override def organizationTokens: OrganizationTokens = throw new UnsupportedOperationException()
 
+  override def partnerTokens: PartnerTokens = throw new UnsupportedOperationException()
+
+  override def tokenValidations: TokenValidations = throw new UnsupportedOperationException()
+
+  override def baseUrl: String = throw new UnsupportedOperationException()
+
+  override def tokens: v0.Tokens = new Tokens()
 }
 
 class Tokens() extends io.flow.token.v0.Tokens {
@@ -29,7 +44,7 @@ class Tokens() extends io.flow.token.v0.Tokens {
     offset: Long = 0,
     sort: String = "journal_timestamp",
     requestHeaders: Seq[(String, String)] = Nil
-  )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.TokenVersion]] = throw new UnsupportedOperationException()
+  )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models..TokenVersion]] = throw new UnsupportedOperationException()
 
   override def getCleartextById(
     id: String,

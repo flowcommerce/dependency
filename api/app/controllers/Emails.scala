@@ -1,7 +1,7 @@
 package controllers
 
 import com.google.inject.Provider
-import db.{LastEmailsDao, UsersDao}
+import db.{LastEmailsDao, RecommendationsDao, UsersDao}
 import io.flow.dependency.v0.models.Publication
 import io.flow.dependency.api.lib.{Email, Recipient}
 import io.flow.dependency.actors._
@@ -12,11 +12,12 @@ import play.api.libs.json._
 
 @javax.inject.Singleton
 class Emails @javax.inject.Inject() (
-  tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  lastEmailsDao: LastEmailsDao,
+  recommendationsDao: RecommendationsDao
 ) extends FlowController   {
 
   private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
@@ -41,13 +42,13 @@ class Emails @javax.inject.Inject() (
             val recipient = Recipient.fromUser(user).getOrElse {
               Recipient(email = "noemail@test.flow.io", name = user.name, userId = user.id, identifier = "TESTID")
             }
-            val generator = DailySummaryEmailMessage(recipient)
+            val generator = new DailySummaryEmailMessage(recipient)
 
             Ok(
               Seq(
                 "Subject: " + Email.subjectWithPrefix(generator.subject()),
                 "<br/><br/><hr size=1/>",
-                generator.body()
+                generator.body(lastEmailsDao, recommendationsDao, config)
               ).mkString("\n")
             ).as(HTML)
           }

@@ -13,7 +13,6 @@ import play.api.libs.json._
 import scala.concurrent.Future
 
 class Repositories @javax.inject.Inject() (
-  tokenClient: io.flow.token.v0.interfaces.Client,
   val github: Github,
   val config: Config,
   val controllerComponents: ControllerComponents,

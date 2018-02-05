@@ -12,7 +12,6 @@ import play.api.libs.json._
 
 @javax.inject.Singleton
 class GithubWebhooks @javax.inject.Inject() (
-  tokenClient: io.flow.token.v0.interfaces.Client ,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,

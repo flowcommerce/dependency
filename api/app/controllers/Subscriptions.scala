@@ -15,7 +15,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @javax.inject.Singleton
 class Subscriptions @javax.inject.Inject() (
-  tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
