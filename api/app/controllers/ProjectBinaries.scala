@@ -15,7 +15,7 @@ class ProjectBinaries @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   projectBinariesDao: ProjectBinariesDao
-) extends FlowController with Helpers {
+) extends FlowController  {
 
   def get(
     id: Option[String],

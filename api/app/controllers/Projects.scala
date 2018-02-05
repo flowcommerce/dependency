@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.helpers.ProjectHelper
 import db.{Authorization, ProjectsDao}
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
@@ -15,8 +16,9 @@ class Projects @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  projectsDao: ProjectsDao
-) extends FlowController with Helpers {
+  projectsDao: ProjectsDao,
+  projectHelper: ProjectHelper
+) extends FlowController {
 
   def get(
     id: Option[String],
@@ -54,7 +56,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       Ok(Json.toJson(project))
     }
   }
@@ -74,7 +76,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def patchById(id: String) = Identified(parse.json) { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectPatchForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -98,7 +100,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def putById(id: String) = Identified(parse.json) { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -114,7 +116,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       projectsDao.delete(request.user, project)
       NoContent
     }

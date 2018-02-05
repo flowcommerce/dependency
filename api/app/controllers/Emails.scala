@@ -5,7 +5,7 @@ import db.{LastEmailsDao, UsersDao}
 import io.flow.dependency.v0.models.Publication
 import io.flow.dependency.api.lib.{Email, Recipient}
 import io.flow.dependency.actors._
-import io.flow.play.controllers.{AnonymousController, FlowController, FlowControllerComponents}
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
@@ -17,7 +17,7 @@ class Emails @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   usersDao: UsersDao
-) extends FlowController  with Helpers {
+) extends FlowController   {
 
   private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
   private[this] lazy val TestEmailAddress = config.optionalString(TestEmailAddressName)

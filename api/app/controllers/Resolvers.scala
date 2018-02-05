@@ -1,7 +1,8 @@
 package controllers
 
 import db.{Authorization, ResolversDao}
-import io.flow.play.controllers.{FlowController, FlowControllerComponents, IdentifiedRestController}
+import io.flow.common.v0.models.UserReference
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
 import io.flow.dependency.v0.models.{Resolver, ResolverForm, Visibility}
 import io.flow.dependency.v0.models.json._
@@ -16,7 +17,7 @@ class Resolvers @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   resolversDao: ResolversDao
-) extends FlowController with Helpers {
+) extends FlowController  {
 
   def get(
     id: Option[String],
@@ -65,6 +66,19 @@ class Resolvers @javax.inject.Inject() (
     withResolver(request.user, id) { resolver =>
       resolversDao.delete(request.user, resolver)
       NoContent
+    }
+  }
+
+  def withResolver(user: UserReference, id: String)(
+    f: Resolver => Result
+  ): Result = {
+    resolversDao.findById(Authorization.User(user.id), id) match {
+      case None => {
+        Results.NotFound
+      }
+      case Some(resolver) => {
+        f(resolver)
+      }
     }
   }
 

@@ -15,7 +15,7 @@ class ProjectLibraries @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   projectLibrariesDao: ProjectLibrariesDao
-) extends FlowController with Helpers {
+) extends FlowController  {
 
   def get(
     id: Option[String],

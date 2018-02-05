@@ -1,9 +1,10 @@
 package controllers
 
+import controllers.helpers.UsersHelper
 import db.Authorization
-import io.flow.play.controllers.{IdentifiedRequest}
+import io.flow.play.controllers.IdentifiedRequest
 
-trait BaseIdentifiedController extends Helpers {
+trait BaseIdentifiedController extends UsersHelper {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

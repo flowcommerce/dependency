@@ -17,7 +17,7 @@ class Memberships @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   membershipsDao: MembershipsDao
-) extends FlowController with Helpers {
+) extends FlowController  {
 
   def get(
     id: Option[String],

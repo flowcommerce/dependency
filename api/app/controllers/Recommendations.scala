@@ -16,7 +16,7 @@ class Recommendations @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   recommendationsDao: RecommendationsDao
-) extends FlowController with Helpers {
+) extends FlowController  {
 
   def get(
     organization: Option[String],

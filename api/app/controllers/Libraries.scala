@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.helpers.LibrariesHelper
 import db.{Authorization, LibrariesDao}
 import io.flow.play.util.{Config, Validation}
 import io.flow.common.v0.models.UserReference
@@ -16,7 +17,8 @@ class Libraries @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  librariesDao: LibrariesDao
+  librariesDao: LibrariesDao,
+  librariesHelper: LibrariesHelper
 ) extends FlowController with BaseIdentifiedController {
 
   def get(
@@ -47,7 +49,7 @@ class Libraries @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
+    librariesHelper.withLibrary(request.user, id) { library =>
       Ok(Json.toJson(library))
     }
   }
@@ -67,7 +69,7 @@ class Libraries @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
+    librariesHelper.withLibrary(request.user, id) { library =>
       librariesDao.delete(request.user, library)
       NoContent
     }

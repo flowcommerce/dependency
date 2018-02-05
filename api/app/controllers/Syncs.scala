@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
 import db.SyncsDao
 import io.flow.dependency.actors.MainActor
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
@@ -16,8 +17,11 @@ class Syncs @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  syncsDao: SyncsDao
-) extends FlowController with Helpers {
+  syncsDao: SyncsDao,
+  librariesHelper: LibrariesHelper,
+  binaryHelper: BinaryHelper,
+  projectHelper: ProjectHelper
+) extends FlowController {
 
   def get(
     objectId: Option[String],
@@ -38,21 +42,21 @@ class Syncs @javax.inject.Inject()(
   }
 
   def postBinariesById(id: String) = Identified { request =>
-    withBinary(request.user, id) { binary =>
+    binaryHelper.withBinary(request.user, id) { binary =>
       MainActor.ref ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }
   }
 
   def postLibrariesById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
+    librariesHelper.withLibrary(request.user, id) { library =>
       MainActor.ref ! MainActor.Messages.LibrarySync(library.id)
       NoContent
     }
   }
 
   def postProjectsById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       MainActor.ref ! MainActor.Messages.ProjectSync(id)
       NoContent
     }

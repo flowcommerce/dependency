@@ -1,6 +1,7 @@
 package controllers
 
 import com.google.inject.Provider
+import controllers.helpers.BinaryHelper
 import db.{Authorization, BinariesDao}
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
@@ -17,8 +18,9 @@ class Binaries @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  binariesDao: BinariesDao
-) extends FlowController with Helpers {
+  binariesDao: BinariesDao,
+  binaryHelper: BinaryHelper
+) extends FlowController  {
 
   def get(
     id: Option[String],
@@ -44,7 +46,7 @@ class Binaries @javax.inject.Inject()(
   }
 
   def getById(id: String) = Identified { request =>
-    withBinary(request.user, id) { binary =>
+    binaryHelper.withBinary(request.user, id) { binary =>
       Ok(Json.toJson(binary))
     }
   }
@@ -65,7 +67,7 @@ class Binaries @javax.inject.Inject()(
   }
 
   def deleteById(id: String) = Identified { request =>
-    withBinary(request.user, id) { binary =>
+    binaryHelper.withBinary(request.user, id) { binary =>
       binariesDao.delete(request.user, binary)
       NoContent
     }

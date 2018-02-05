@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.helpers.{OrganizationsHelper, UsersHelper}
 import db.OrganizationsDao
 import io.flow.play.util.{Config, Validation}
 import io.flow.dependency.v0.models.{Organization, OrganizationForm}
@@ -14,7 +15,9 @@ class Organizations @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  organizationsDao: OrganizationsDao
+  organizationsDao: OrganizationsDao,
+  organizationsHelper: OrganizationsHelper,
+  usersHelper: UsersHelper
 ) extends FlowController with BaseIdentifiedController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,13 +46,13 @@ class Organizations @javax.inject.Inject()(
   }
 
   def getById(id: String) = Identified { request =>
-    withOrganization(request.user, id) { organization =>
+    organizationsHelper.withOrganization(request.user, id) { organization =>
       Ok(Json.toJson(organization))
     }
   }
 
   def getUsersByUserId(userId: String) = Identified { request =>
-    withUser(userId) { user =>
+    usersHelper.withUser(userId) { user =>
       Ok(Json.toJson(organizationsDao.upsertForUser(user)))
     }
   }
@@ -69,7 +72,7 @@ class Organizations @javax.inject.Inject()(
   }
 
   def putById(id: String) = Identified(parse.json) { request =>
-    withOrganization(request.user, id) { organization =>
+    organizationsHelper.withOrganization(request.user, id) { organization =>
       request.body.validate[OrganizationForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -85,7 +88,7 @@ class Organizations @javax.inject.Inject()(
   }
 
   def deleteById(id: String) = Identified { request =>
-    withOrganization(request.user, id) { organization =>
+    organizationsHelper.withOrganization(request.user, id) { organization =>
       organizationsDao.delete(request.user, organization)
       NoContent
     }
