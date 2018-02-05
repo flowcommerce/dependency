@@ -1,9 +1,12 @@
 package io.flow.dependency.actors
 
+import javax.inject.Inject
+
 import io.flow.dependency.v0.models.{Resolver, Visibility}
 import io.flow.postgresql.Pager
-import db.{Authorization, LibrariesDao, ProjectLibrariesDao, OrganizationsDao, SubscriptionsDao, ResolversDao}
+import db._
 import akka.actor.Actor
+
 import scala.concurrent.ExecutionContext
 
 object ResolverActor {
@@ -19,9 +22,15 @@ object ResolverActor {
 
 }
 
-class ResolverActor extends Actor with Util {
+class ResolverActor @Inject()(
+  ResolversDao: ResolversDao,
+  LibrariesDao: LibrariesDao,
+  ProjectLibrariesDao: ProjectLibrariesDao,
+  usersDao: UsersDao
+) extends Actor with Util {
 
   var dataResolver: Option[Resolver] = None
+  lazy val SystemUser = usersDao.systemUser
 
   def receive = {
 
@@ -42,7 +51,7 @@ class ResolverActor extends Actor with Util {
         Pager.create { offset =>
           LibrariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
         }.foreach { library =>
-          LibrariesDao.delete(MainActor.SystemUser, library)
+          LibrariesDao.delete(SystemUser, library)
         }
       }
 

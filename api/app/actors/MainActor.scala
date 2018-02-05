@@ -17,7 +17,7 @@ object MainActor {
     MainActorProvider.ref()
   }
 
-  lazy val SystemUser = db.UsersDao.systemUser
+//  lazy val SystemUser = UsersDao.systemUser
 
   object Messages {
 

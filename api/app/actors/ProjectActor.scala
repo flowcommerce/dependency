@@ -1,12 +1,11 @@
 package io.flow.dependency.actors
 
-import io.flow.dependency.api.lib.{DefaultLibraryArtifactProvider, Dependencies, GithubDependencyProviderClient, GithubHelper, GithubUtil}
-import io.flow.dependency.v0.models.{Binary, BinaryForm, BinaryType, Library, LibraryForm, Project, ProjectBinary, ProjectLibrary, RecommendationType, VersionForm}
+import io.flow.dependency.api.lib._
+import io.flow.dependency.v0.models._
 import io.flow.postgresql.Pager
 import io.flow.play.actors.ErrorHandler
 import io.flow.play.util.Config
-import db.{Authorization, BinariesDao, LibrariesDao, LibraryVersionsDao, ProjectBinariesDao, ProjectLibrariesDao}
-import db.{ProjectsDao, RecommendationsDao, SyncsDao, TokensDao}
+import db._
 import play.api.Logger
 import play.libs.Akka
 import akka.actor.{Actor, ActorSystem}
@@ -45,8 +44,19 @@ object ProjectActor {
 class ProjectActor @javax.inject.Inject() (
   config: Config,
   actorSystem: ActorSystem,
+  projectsDao: ProjectsDao,
+  tokensDao: TokensDao,
+  syncsDao: SyncsDao,
+  projectBinariesDao:ProjectBinariesDao,
+  projectLibrariesDao: ProjectLibrariesDao,
+  recommendationsDao: RecommendationsDao,
+  librariesDao: LibrariesDao,
+  binariesDao: BinariesDao,
+  usersDao: UsersDao,
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor with ErrorHandler {
+
+  lazy val SystemUser = usersDao.systemUser
 
   implicit val projectExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("project-actor-context")
 
@@ -54,7 +64,7 @@ class ProjectActor @javax.inject.Inject() (
   private[this] val HookName = "web"
   private[this] val HookEvents = Seq(io.flow.github.v0.models.HookEvent.Push)
 
-  private[this] lazy val dataProject: Option[Project] = ProjectsDao.findById(Authorization.All, projectId)
+  private[this] lazy val dataProject: Option[Project] = projectsDao.findById(Authorization.All, projectId)
 
   def receive = {
 
@@ -93,7 +103,7 @@ class ProjectActor @javax.inject.Inject() (
             Logger.warn(s"Project id[${project.id}] name[${project.name}]: $error")
           }
           case Right(repo) => {
-            TokensDao.getCleartextGithubOauthTokenByUserId(project.user.id) match {
+            tokensDao.getCleartextGithubOauthTokenByUserId(project.user.id) match {
               case None => {
                 Logger.warn(s"No oauth token for user[${project.user.id}]")
               }
@@ -134,16 +144,16 @@ class ProjectActor @javax.inject.Inject() (
 
     case m @ ProjectActor.Messages.Sync => withErrorHandler(m.toString) {
       dataProject.foreach { project =>
-        SyncsDao.recordStarted(MainActor.SystemUser, "project", project.id)
+        syncsDao.recordStarted(SystemUser, "project", project.id)
 
-        val summary = ProjectsDao.toSummary(project)
+        val summary = projectsDao.toSummary(project)
 
         GithubDependencyProviderClient.instance(summary, project.user).dependencies(project).map { dependencies =>
           println(s" - project[${project.id}] name[${project.name}] dependencies: $dependencies")
 
           dependencies.binaries.map { binaries =>
             val projectBinaries = binaries.map { form =>
-              ProjectBinariesDao.upsert(project.user, form) match {
+              projectBinariesDao.upsert(project.user, form) match {
                 case Left(errors) => {
                   Logger.error(s"Project[${project.name}] id[${project.id}] Error storing binary[$form]: " + errors.mkString(", "))
                   None
@@ -153,12 +163,12 @@ class ProjectActor @javax.inject.Inject() (
                 }
               }
             }
-            ProjectBinariesDao.setIds(project.user, project.id, projectBinaries.flatten)
+            projectBinariesDao.setIds(project.user, project.id, projectBinaries.flatten)
           }
 
           dependencies.librariesAndPlugins.map { libraries =>
             val projectLibraries = libraries.map { artifact =>
-              ProjectLibrariesDao.upsert(
+              projectLibrariesDao.upsert(
                 project.user,
                 artifact.toProjectLibraryForm(
                   crossBuildVersion = dependencies.crossBuildVersion()
@@ -173,10 +183,10 @@ class ProjectActor @javax.inject.Inject() (
                 }
               }
             }
-            ProjectLibrariesDao.setIds(project.user, project.id, projectLibraries.flatten)
+            projectLibrariesDao.setIds(project.user, project.id, projectLibraries.flatten)
           }
 
-          RecommendationsDao.sync(MainActor.SystemUser, project)
+          recommendationsDao.sync(SystemUser, project)
 
           processPendingSync(project)
         }.recover {
@@ -191,9 +201,9 @@ class ProjectActor @javax.inject.Inject() (
     case m @ ProjectActor.Messages.Deleted => withErrorHandler(m.toString) {
       dataProject.foreach { project =>
         Pager.create { offset =>
-          RecommendationsDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+          recommendationsDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
         }.foreach { rec =>
-          RecommendationsDao.delete(MainActor.SystemUser, rec)
+          recommendationsDao.delete(SystemUser, rec)
         }
       }
       context.stop(self)
@@ -201,14 +211,14 @@ class ProjectActor @javax.inject.Inject() (
 
     case m @ ProjectActor.Messages.ProjectLibraryDeleted(id, version) => withErrorHandler(m.toString) {
       dataProject.foreach { project =>
-        RecommendationsDao.findAll(
+        recommendationsDao.findAll(
           Authorization.All,
           projectId = Some(project.id),
           `type` = Some(RecommendationType.Library),
           objectId = Some(id),
           fromVersion = Some(version)
         ).foreach { rec =>
-          RecommendationsDao.delete(MainActor.SystemUser, rec)
+          recommendationsDao.delete(SystemUser, rec)
         }
 
         processPendingSync(project)
@@ -217,14 +227,14 @@ class ProjectActor @javax.inject.Inject() (
 
     case m @ ProjectActor.Messages.ProjectBinaryDeleted(id, version) => withErrorHandler(m.toString) {
       dataProject.foreach { project =>
-        RecommendationsDao.findAll(
+        recommendationsDao.findAll(
           Authorization.All,
           projectId = Some(project.id),
           `type` = Some(RecommendationType.Binary),
           objectId = Some(id),
           fromVersion = Some(version)
         ).foreach { rec =>
-          RecommendationsDao.delete(MainActor.SystemUser, rec)
+          recommendationsDao.delete(SystemUser, rec)
         }
         processPendingSync(project)
       }
@@ -238,11 +248,11 @@ class ProjectActor @javax.inject.Inject() (
     * project_libraries.library_id
     */
   def syncProjectLibrary(id: String) {
-    SyncsDao.withStartedAndCompleted(MainActor.SystemUser, "project_library", id) {
+    syncsDao.withStartedAndCompleted(SystemUser, "project_library", id) {
       dataProject.foreach { project =>
-        ProjectLibrariesDao.findById(Authorization.All, id).map { projectLibrary =>
+        projectLibrariesDao.findById(Authorization.All, id).map { projectLibrary =>
           resolveLibrary(projectLibrary).map { lib =>
-            ProjectLibrariesDao.setLibrary(MainActor.SystemUser, projectLibrary, lib)
+            projectLibrariesDao.setLibrary(SystemUser, projectLibrary, lib)
           }
         }
         processPendingSync(project)
@@ -251,24 +261,24 @@ class ProjectActor @javax.inject.Inject() (
   }
 
   def syncProjectBinary(id: String) {
-    SyncsDao.withStartedAndCompleted(MainActor.SystemUser, "project_binary", id) {
+    syncsDao.withStartedAndCompleted(SystemUser, "project_binary", id) {
       dataProject.foreach { project =>
-        ProjectBinariesDao.findById(Authorization.All, id).map { projectBinary =>
+        projectBinariesDao.findById(Authorization.All, id).map { projectBinary =>
           resolveBinary(projectBinary).map { binary =>
-            ProjectBinariesDao.setBinary(MainActor.SystemUser, projectBinary, binary)
+            projectBinariesDao.setBinary(SystemUser, projectBinary, binary)
           }
         }
         processPendingSync(project)
       }
     }
   }
-  
+
   def processPendingSync(project: Project) {
     dependenciesPendingCompletion(project) match {
       case Nil => {
         println(s" -- project[${project.name}] id[${project.id}] dependencies satisfied")
-        RecommendationsDao.sync(MainActor.SystemUser, project)
-        SyncsDao.recordCompleted(MainActor.SystemUser, "project", project.id)
+        recommendationsDao.sync(SystemUser, project)
+        syncsDao.recordCompleted(SystemUser, "project", project.id)
       }
       case deps => {
         println(s" -- project[${project.name}] id[${project.id}] waiting on dependencies to sync: " + deps.mkString(", "))
@@ -278,13 +288,13 @@ class ProjectActor @javax.inject.Inject() (
 
   // NB: We don't return ALL dependencies
   private[this] def dependenciesPendingCompletion(project: Project): Seq[String] = {
-    ProjectLibrariesDao.findAll(
+    projectLibrariesDao.findAll(
       Authorization.All,
       projectId = Some(project.id),
       isSynced = Some(false),
       limit = None
     ).map( lib => s"Library ${lib.groupId}.${lib.artifactId}" ) ++
-    ProjectBinariesDao.findAll(
+    projectBinariesDao.findAll(
       Authorization.All,
       projectId = Some(project.id),
       isSynced = Some(false)
@@ -292,7 +302,7 @@ class ProjectActor @javax.inject.Inject() (
   }
 
   private[this] def resolveLibrary(projectLibrary: ProjectLibrary): Option[Library] = {
-    LibrariesDao.findByGroupIdAndArtifactId(Authorization.All, projectLibrary.groupId, projectLibrary.artifactId) match {
+    librariesDao.findByGroupIdAndArtifactId(Authorization.All, projectLibrary.groupId, projectLibrary.artifactId) match {
       case Some(lib) => {
         Some(lib)
       }
@@ -306,8 +316,8 @@ class ProjectActor @javax.inject.Inject() (
             None
           }
           case Some(resolution) => {
-            LibrariesDao.upsert(
-              MainActor.SystemUser,
+            librariesDao.upsert(
+              SystemUser,
               form = LibraryForm(
                 organizationId = projectLibrary.project.organization.id,
                 groupId = projectLibrary.groupId,
@@ -332,8 +342,8 @@ class ProjectActor @javax.inject.Inject() (
   private[this] def resolveBinary(projectBinary: ProjectBinary): Option[Binary] = {
     BinaryType(projectBinary.name) match {
       case BinaryType.Scala | BinaryType.Sbt => {
-        BinariesDao.upsert(
-          MainActor.SystemUser,
+        binariesDao.upsert(
+          SystemUser,
           BinaryForm(
             organizationId = projectBinary.project.organization.id,
             name = BinaryType(projectBinary.name)

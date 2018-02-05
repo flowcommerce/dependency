@@ -1,5 +1,7 @@
 package io.flow.dependency.actors
 
+import javax.inject.Inject
+
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
 import play.api.Logger
@@ -18,17 +20,22 @@ object PeriodicActor {
 
 }
 
-class PeriodicActor extends Actor with Util {
+class PeriodicActor @Inject()(
+  syncsDao: SyncsDao,
+  projectsDao: ProjectsDao,
+  binariesDao: BinariesDao,
+  librariesDao: LibrariesDao
+) extends Actor with Util {
 
   def receive = {
 
     case m @ PeriodicActor.Messages.Purge => withErrorHandler(m) {
-      SyncsDao.purgeOld()
+      syncsDao.purgeOld()
     }
 
     case m @ PeriodicActor.Messages.SyncProjects => withErrorHandler(m) {
       Pager.create { offset =>
-        ProjectsDao.findAll(Authorization.All, offset = offset)
+        projectsDao.findAll(Authorization.All, offset = offset)
       }.foreach { project =>
         sender ! MainActor.Messages.ProjectSync(project.id)
       }
@@ -36,7 +43,7 @@ class PeriodicActor extends Actor with Util {
 
     case m @ PeriodicActor.Messages.SyncBinaries => withErrorHandler(m) {
       Pager.create { offset =>
-        BinariesDao.findAll(Authorization.All, offset = offset)
+        binariesDao.findAll(Authorization.All, offset = offset)
       }.foreach { bin =>
         sender ! MainActor.Messages.BinarySync(bin.id)
       }
@@ -44,7 +51,7 @@ class PeriodicActor extends Actor with Util {
 
     case m @ PeriodicActor.Messages.SyncLibraries => withErrorHandler(m) {
       Pager.create { offset =>
-        LibrariesDao.findAll(Authorization.All, offset = offset)
+        librariesDao.findAll(Authorization.All, offset = offset)
       }.foreach { library =>
         sender ! MainActor.Messages.LibrarySync(library.id)
       }

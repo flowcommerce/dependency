@@ -1,5 +1,7 @@
 package io.flow.dependency.actors
 
+import javax.inject.Inject
+
 import io.flow.dependency.v0.models.{Library, LibraryForm, VersionForm}
 import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
 import io.flow.postgresql.Pager
@@ -17,27 +19,35 @@ object LibraryActor {
 
 }
 
-class LibraryActor extends Actor with Util {
+class LibraryActor @Inject()
+(
+  librariesDao: LibrariesDao,
+  syncsDao: SyncsDao,
+  resolversDao: ResolversDao,
+  libraryVersionsDao: LibraryVersionsDao,
+  itemsDao: ItemsDao,
+  projectLibrariesDao: ProjectLibrariesDao
+) extends Actor with Util {
 
   var dataLibrary: Option[Library] = None
 
   def receive = {
 
     case m @ LibraryActor.Messages.Data(id: String) => withErrorHandler(m) {
-      dataLibrary = LibrariesDao.findById(Authorization.All, id)
+      dataLibrary = librariesDao.findById(Authorization.All, id)
     }
 
     case m @ LibraryActor.Messages.Sync => withErrorHandler(m) {
       dataLibrary.foreach { lib =>
-        SyncsDao.withStartedAndCompleted(MainActor.SystemUser, "library", lib.id) {
-          ResolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
+        syncsDao.withStartedAndCompleted(MainActor.SystemUser, "library", lib.id) {
+          resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
             DefaultLibraryArtifactProvider().resolve(
               resolver = resolver,
               groupId = lib.groupId,
               artifactId = lib.artifactId
             ).map { resolution =>
               resolution.versions.foreach { version =>
-                LibraryVersionsDao.upsert(
+                libraryVersionsDao.upsert(
                   createdBy = MainActor.SystemUser,
                   libraryId = lib.id,
                   form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
@@ -54,12 +64,12 @@ class LibraryActor extends Actor with Util {
 
     case m @ LibraryActor.Messages.Deleted => withErrorHandler(m) {
       dataLibrary.foreach { lib =>
-        ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, lib.id)
+        itemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, lib.id)
 
         Pager.create { offset =>
-          ProjectLibrariesDao.findAll(Authorization.All, libraryId = Some(lib.id), limit = Some(100), offset = offset)
+          projectLibrariesDao.findAll(Authorization.All, libraryId = Some(lib.id), limit = Some(100), offset = offset)
         }.foreach { projectLibrary =>
-          ProjectLibrariesDao.removeLibrary(MainActor.SystemUser, projectLibrary)
+          projectLibrariesDao.removeLibrary(MainActor.SystemUser, projectLibrary)
           sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
         }
       }

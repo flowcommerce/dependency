@@ -1,5 +1,7 @@
 package io.flow.dependency.actors
 
+import javax.inject.Inject
+
 import io.flow.dependency.v0.models.{Binary, BinaryForm}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
@@ -17,21 +19,28 @@ object BinaryActor {
 
 }
 
-class BinaryActor extends Actor with Util {
+class BinaryActor @Inject() (
+  binariesDao: BinariesDao,
+  syncsDao: SyncsDao,
+  binaryVersionsDao: BinaryVersionsDao,
+  usersDao: UsersDao,
+  itemsDao: ItemsDao,
+  projectBinariesDao: ProjectBinariesDao
+) extends Actor with Util {
 
   var dataBinary: Option[Binary] = None
 
   def receive = {
 
     case m @ BinaryActor.Messages.Data(id: String) => withErrorHandler(m) {
-      dataBinary = BinariesDao.findById(Authorization.All, id)
+      dataBinary = binariesDao.findById(Authorization.All, id)
     }
 
     case m @ BinaryActor.Messages.Sync => withErrorHandler(m) {
       dataBinary.foreach { binary =>
-        SyncsDao.withStartedAndCompleted(MainActor.SystemUser, "binary", binary.id) {
+        syncsDao.withStartedAndCompleted(MainActor.SystemUser, "binary", binary.id) {
           DefaultBinaryVersionProvider.versions(binary.name).foreach { version =>
-            BinaryVersionsDao.upsert(UsersDao.systemUser, binary.id, version.value)
+            binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
           }
         }
 
@@ -41,12 +50,12 @@ class BinaryActor extends Actor with Util {
 
     case m @ BinaryActor.Messages.Deleted => withErrorHandler(m) {
       dataBinary.foreach { binary =>
-        ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, binary.id)
+        itemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, binary.id)
 
         Pager.create { offset =>
-          ProjectBinariesDao.findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
+          projectBinariesDao.findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
         }.foreach { projectBinary =>
-          ProjectBinariesDao.removeBinary(MainActor.SystemUser, projectBinary)
+          projectBinariesDao.removeBinary(MainActor.SystemUser, projectBinary)
           sender ! MainActor.Messages.ProjectBinarySync(projectBinary.project.id, projectBinary.id)
         }
       }
