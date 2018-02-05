@@ -1,15 +1,11 @@
 package io.flow.dependency.api.lib
 
-import org.scalatest._
-import play.api.test._
-import play.api.test.Helpers._
-import org.scalatestplus.play._
-
-import io.flow.dependency.v0.models.{Library, OrganizationSummary}
-import org.joda.time.DateTime
 import java.util.UUID
 
-class LibraryArtifactProviderSpec extends PlaySpec with OneAppPerSuite with Factories {
+import io.flow.dependency.v0.models.{Library, OrganizationSummary}
+import util.DependencySpec
+
+class LibraryArtifactProviderSpec extends DependencySpec {
 
   def makeLibrary(
     org: OrganizationSummary,
@@ -33,7 +29,7 @@ class LibraryArtifactProviderSpec extends PlaySpec with OneAppPerSuite with Fact
 
   "parseUri" in {
     val library = makeLibrary(org = orgSummary, groupId = "com.github.tototoshi", artifactId = "scala-csv")
-    val resolution = provider.resolve(resolversDao = resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
+    val resolution = provider.resolve(resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
       sys.error("Could not find scala-csv library")
     }
     resolution.versions.find { v =>
@@ -43,7 +39,7 @@ class LibraryArtifactProviderSpec extends PlaySpec with OneAppPerSuite with Fact
 
   "swagger" in {
     val library = makeLibrary(org = orgSummary, groupId = "io.swagger", artifactId = "swagger-parser")
-    val resolution = provider.resolve(resolversDao = resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
+    val resolution = provider.resolve(resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
       sys.error("Could not find swagger-parser library")
     }
     val tags = resolution.versions.map(_.tag.value)

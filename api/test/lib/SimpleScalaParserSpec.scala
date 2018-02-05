@@ -1,36 +1,36 @@
 package io.flow.dependency.api.lib
 
-import io.flow.dependency.v0.models.BinaryForm
-import org.specs2.mutable._
+import io.flow.dependency.api.lib.SimpleScalaParserUtil
+import util.DependencySpec
 
-class SimpleScalaParserSpec extends Specification {
+class SimpleScalaParserSpec extends DependencySpec {
 
   "definesVariable" in {
-    SimpleScalaParserUtil.toVariable("var foo = 3") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("var foo = 3") must be (
       Some(SimpleScalaParserUtil.Variable("foo", "3"))
     )
 
-    SimpleScalaParserUtil.toVariable("val foo = 3") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("val foo = 3") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "3"))
     )
 
-    SimpleScalaParserUtil.toVariable("lazy var foo = 3") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("lazy var foo = 3") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "3"))
     )
 
-    SimpleScalaParserUtil.toVariable("lazy val foo = 3") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("lazy val foo = 3") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "3"))
     )
 
-    SimpleScalaParserUtil.toVariable("foo := 3") should be(None)
+    SimpleScalaParserUtil.toVariable("foo := 3") must be(None)
   }
 
   "toVariable tolerates spaces" in {
-    SimpleScalaParserUtil.toVariable("""   val     foo = "bar"""") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("""   val     foo = "bar"""") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "bar"))
     )
 
-    SimpleScalaParserUtil.toVariable("""   lazy  val     foo = "bar"""") should beEqualTo(
+    SimpleScalaParserUtil.toVariable("""   lazy  val     foo = "bar"""") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "bar"))
     )
   }

@@ -182,7 +182,7 @@ object VersionParser {
     }
   }
 
-  private[lib] def isDate(value: Long): Boolean = {
+  protected[lib] def isDate(value: Long): Boolean = {
     value.toString.length >= 8 && value.toString.substring(0, 4).toInt >= 1900
   }
 

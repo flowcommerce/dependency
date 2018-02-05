@@ -148,7 +148,7 @@ class ItemsDao @Inject()(
     )
   }
 
-  private[db] def replace(user: UserReference, form: ItemForm): Item = {
+  def replace(user: UserReference, form: ItemForm): Item = {
     db.withConnection { implicit c =>
       findByObjectId(Authorization.All, objectId(form.summary)).map { item =>
         deleteWithConnection(user, item)(c)

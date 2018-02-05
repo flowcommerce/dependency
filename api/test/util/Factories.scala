@@ -1,7 +1,8 @@
-package io.flow.dependency.api.lib
+package util
 
-import io.flow.dependency.v0.models.{ProjectSummary, OrganizationSummary, ResolverSummary, Visibility}
 import java.util.UUID
+
+import io.flow.dependency.v0.models.{OrganizationSummary, ProjectSummary, ResolverSummary, Visibility}
 
 trait Factories {
 
