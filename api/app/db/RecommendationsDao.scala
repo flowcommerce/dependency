@@ -13,8 +13,11 @@ import play.api.Play.current
 @Singleton
 class RecommendationsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers]
-){
+  dbHelpersProvider: Provider[DbHelpers],
+  libraryRecommendationsDaoProvider: Provider[LibraryRecommendationsDao],
+  binaryRecommendationsDaorovider: Provider[BinaryRecommendationsDao],
+  recommendationsDaoProvider: Provider[RecommendationsDao]
+) {
 
   private[this] case class RecommendationForm(
     projectId: String,
@@ -52,7 +55,7 @@ class RecommendationsDao @Inject()(
   """
 
   def sync(user: UserReference, project: Project) {
-    val libraries = LibraryRecommendationsDao.forProject(project).map { rec =>
+    val libraries = libraryRecommendationsDaoProvider.get.forProject(project).map { rec =>
       RecommendationForm(
         projectId = project.id,
         `type` = RecommendationType.Library,
@@ -63,7 +66,7 @@ class RecommendationsDao @Inject()(
       )
     }
 
-    val binaries = BinaryRecommendationsDao.forProject(project).map { rec =>
+    val binaries = binaryRecommendationsDaorovider.get.forProject(project).map { rec =>
       RecommendationForm(
         projectId = project.id,
         `type` = RecommendationType.Binary,
@@ -77,7 +80,7 @@ class RecommendationsDao @Inject()(
     val newRecords = libraries ++ binaries
 
     val existing = Pager.create { offset =>
-      RecommendationsDao.findAll(Authorization.All, projectId = Some(project.id), limit = 1000, offset = offset)
+      recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), limit = 1000, offset = offset)
     }.toSeq
 
     val toAdd = newRecords.filter { rec => !existing.map(toForm).contains(rec) }

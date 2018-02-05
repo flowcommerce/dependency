@@ -17,7 +17,10 @@ import play.api.libs.json._
 
 class ResolversDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers]
+  dbHelpersProvider: Provider[DbHelpers],
+  membershipsDaoProvider: Provider[MembershipsDao],
+  librariesDaoProvider: Provider[LibrariesDao],
+  organizationsDaoProvider: Provider[OrganizationsDao]
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
@@ -98,7 +101,7 @@ class ResolversDao @Inject()(
       }
     }
 
-    val organizationErrors = if (MembershipsDao.isMemberByOrgKey(form.organization, user)) {
+    val organizationErrors = if (membershipsDaoProvider.get.isMemberByOrgKey(form.organization, user)) {
       Nil
     } else {
       Seq("You do not have access to this organization")
@@ -117,7 +120,7 @@ class ResolversDao @Inject()(
   def create(createdBy: UserReference, form: ResolverForm): Either[Seq[String], Resolver] = {
     validate(createdBy, form) match {
       case Nil => {
-        val org = OrganizationsDao.findByKey(Authorization.All, form.organization).getOrElse {
+        val org = organizationsDaoProvider.get.findByKey(Authorization.All, form.organization).getOrElse {
           sys.error("Could not find organization with key[${form.organization}]")
         }
 
@@ -149,13 +152,13 @@ class ResolversDao @Inject()(
 
   def delete(deletedBy: UserReference, resolver: Resolver) {
     Pager.create { offset =>
-      LibrariesDao.findAll(
+      librariesDaoProvider.get.findAll(
         Authorization.All,
         resolverId = Some(resolver.id),
         offset = offset
       )
     }.foreach { library =>
-      LibrariesDao.delete(MainActor.SystemUser, library)
+      librariesDaoProvider.get.delete(MainActor.SystemUser, library)
     }
 
     MainActor.ref ! MainActor.Messages.ResolverDeleted(resolver.id)
