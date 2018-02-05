@@ -15,7 +15,8 @@ class Syncs @javax.inject.Inject()(
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  syncsDao: SyncsDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -26,7 +27,7 @@ class Syncs @javax.inject.Inject()(
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        SyncsDao.findAll(
+        syncsDao.findAll(
           objectId = objectId,
           event = event,
           limit = limit,

@@ -13,7 +13,8 @@ class ProjectBinaries @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  projectBinariesDao: ProjectBinariesDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -27,7 +28,7 @@ class ProjectBinaries @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ProjectBinariesDao.findAll(
+        projectBinariesDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),

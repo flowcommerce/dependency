@@ -13,7 +13,8 @@ class ProjectLibraries @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  projectLibrariesDao: ProjectLibrariesDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -27,7 +28,7 @@ class ProjectLibraries @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ProjectLibrariesDao.findAll(
+        projectLibrariesDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),

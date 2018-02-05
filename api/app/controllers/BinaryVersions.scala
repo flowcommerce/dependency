@@ -1,5 +1,6 @@
 package controllers
 
+import com.google.inject.Provider
 import db.{Authorization, BinaryVersionsDao}
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.common.v0.models.UserReference
@@ -14,7 +15,8 @@ import play.api.libs.json._
 class BinaryVersions @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  binaryVersionsDao: BinaryVersionsDao
 ) extends FlowController {
 
   def get(
@@ -27,7 +29,7 @@ class BinaryVersions @javax.inject.Inject()(
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        BinaryVersionsDao.findAll(
+        binaryVersionsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -49,7 +51,7 @@ class BinaryVersions @javax.inject.Inject()(
   def withBinaryVersion(user: UserReference, id: String)(
     f: BinaryVersion => Result
   ): Result = {
-    BinaryVersionsDao.findById(Authorization.User(user.id), id) match {
+    binaryVersionsDao.findById(Authorization.User(user.id), id) match {
       case None => {
         NotFound
       }

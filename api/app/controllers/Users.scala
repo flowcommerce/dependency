@@ -16,7 +16,9 @@ class Users @javax.inject.Inject()(
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  usersDao: UsersDao,
+  userIdentifiersDao: UserIdentifiersDao
 ) extends FlowController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,7 +33,7 @@ class Users @javax.inject.Inject()(
     } else {
       Ok(
         Json.toJson(
-          UsersDao.findAll(
+          usersDao.findAll(
             id = id,
             email = email,
             identifier = identifier,
@@ -51,7 +53,7 @@ class Users @javax.inject.Inject()(
 
   def getIdentifierById(id: String) = Identified { request =>
     withUser(id) { user =>
-      Ok(Json.toJson(UserIdentifiersDao.latestForUser(request.user, user)))
+      Ok(Json.toJson(userIdentifiersDao.latestForUser(request.user, user)))
     }
   }
 
@@ -62,7 +64,7 @@ class Users @javax.inject.Inject()(
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
         case s: JsSuccess[UserForm] => {
           request.user.map { userOption =>
-            UsersDao.create(Option(userOption), s.get) match {
+            usersDao.create(Option(userOption), s.get) match {
               case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
               case Right(user) => Created(Json.toJson(user))
             }
@@ -75,7 +77,7 @@ class Users @javax.inject.Inject()(
   def withUser(id: String)(
     f: User => Result
   ) = {
-    UsersDao.findById(id) match {
+    usersDao.findById(id) match {
       case None => {
         NotFound
       }

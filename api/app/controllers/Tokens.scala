@@ -14,7 +14,8 @@ class Tokens @javax.inject.Inject()(
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  tokensDao: TokensDao
 ) extends FlowController with BaseIdentifiedController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,7 +28,7 @@ class Tokens @javax.inject.Inject()(
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        TokensDao.findAll(
+        tokensDao.findAll(
           Authorization.User(request.user.id),
           ids = optionals(ids),
           userId = userId,
@@ -40,7 +41,7 @@ class Tokens @javax.inject.Inject()(
 
   def getById(id: String) = Identified { request =>
     withUserCreatedToken(request.user, id) { token =>
-      Ok(Json.toJson(TokensDao.addCleartextIfAvailable(request.user, token)))
+      Ok(Json.toJson(tokensDao.addCleartextIfAvailable(request.user, token)))
     }
   }
 
@@ -50,7 +51,7 @@ class Tokens @javax.inject.Inject()(
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[TokenForm] => {
-        TokensDao.create(request.user, InternalTokenForm.UserCreated(s.get)) match {
+        tokensDao.create(request.user, InternalTokenForm.UserCreated(s.get)) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(token) => Created(Json.toJson(token))
         }
@@ -60,7 +61,7 @@ class Tokens @javax.inject.Inject()(
 
   def deleteById(id: String) = Identified { request =>
     withUserCreatedToken(request.user, id) { token =>
-      TokensDao.delete(request.user, token)
+      tokensDao.delete(request.user, token)
       NoContent
     }
   }
@@ -68,7 +69,7 @@ class Tokens @javax.inject.Inject()(
   def withUserCreatedToken(user: UserReference, id: String)(
     f: Token => Result
   ) = {
-    TokensDao.findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1).headOption match {
+    tokensDao.findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1).headOption match {
       case None => {
         Results.NotFound
       }

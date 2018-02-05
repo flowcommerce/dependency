@@ -14,7 +14,8 @@ class Resolvers @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  resolversDao: ResolversDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -27,7 +28,7 @@ class Resolvers @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ResolversDao.findAll(
+        resolversDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -52,7 +53,7 @@ class Resolvers @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[ResolverForm] => {
-        ResolversDao.create(request.user, s.get) match {
+        resolversDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(resolver) => Created(Json.toJson(resolver))
         }
@@ -62,7 +63,7 @@ class Resolvers @javax.inject.Inject() (
 
   def deleteById(id: String) = Identified { request =>
     withResolver(request.user, id) { resolver =>
-      ResolversDao.delete(request.user, resolver)
+      resolversDao.delete(request.user, resolver)
       NoContent
     }
   }

@@ -1,5 +1,6 @@
 package controllers
 
+import com.google.inject.Provider
 import db.{LastEmailsDao, UsersDao}
 import io.flow.dependency.v0.models.Publication
 import io.flow.dependency.api.lib.{Email, Recipient}
@@ -14,7 +15,8 @@ class Emails @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  usersDao: UsersDao
 ) extends FlowController  with Helpers {
 
   private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
@@ -33,7 +35,7 @@ class Emails @javax.inject.Inject() (
     TestEmailAddress match {
       case None => Ok(s"Set the $TestEmailAddressName property to enable testing")
       case Some(email) => {
-        UsersDao.findByEmail("mbryzek@alum.mit.edu") match {
+        usersDao.findByEmail("mbryzek@alum.mit.edu") match {
           case None => Ok(s"No user with email address[$email] found")
           case Some(user) => {
             val recipient = Recipient.fromUser(user).getOrElse {

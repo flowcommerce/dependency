@@ -14,7 +14,8 @@ class Projects @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  projectsDao: ProjectsDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -33,7 +34,7 @@ class Projects @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ProjectsDao.findAll(
+        projectsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -64,7 +65,7 @@ class Projects @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[ProjectForm] => {
-        ProjectsDao.create(request.user, s.get) match {
+        projectsDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(project) => Created(Json.toJson(project))
         }
@@ -87,7 +88,7 @@ class Projects @javax.inject.Inject() (
             scms = patch.scms.getOrElse(project.scms),
             uri = patch.uri.getOrElse(project.uri)
           )
-          ProjectsDao.update(request.user, project, form) match {
+          projectsDao.update(request.user, project, form) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -103,7 +104,7 @@ class Projects @javax.inject.Inject() (
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
         }
         case s: JsSuccess[ProjectForm] => {
-          ProjectsDao.update(request.user, project, s.get) match {
+          projectsDao.update(request.user, project, s.get) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -114,7 +115,7 @@ class Projects @javax.inject.Inject() (
 
   def deleteById(id: String) = Identified { request =>
     withProject(request.user, id) { project =>
-      ProjectsDao.delete(request.user, project)
+      projectsDao.delete(request.user, project)
       NoContent
     }
   }

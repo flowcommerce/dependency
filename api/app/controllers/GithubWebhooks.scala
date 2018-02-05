@@ -15,11 +15,13 @@ class GithubWebhooks @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client ,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  projectsDao: ProjectsDao,
+  librariesDao: LibrariesDao
 ) extends FlowController with Helpers {
 
   def postByProjectId(projectId: String) = Action { request =>
-    ProjectsDao.findById(Authorization.All, projectId) match {
+    projectsDao.findById(Authorization.All, projectId) match {
       case None => {
         NotFound
       }
@@ -34,7 +36,7 @@ class GithubWebhooks @javax.inject.Inject() (
         // that artifact. We want to pick up that new version
         // reasonably quickly.
         Pager.create { offset =>
-          LibrariesDao.findAll(
+          librariesDao.findAll(
             Authorization.All,
             artifactId = Some(project.name),
             offset = offset

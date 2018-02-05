@@ -17,7 +17,9 @@ class Repositories @javax.inject.Inject() (
   val github: Github,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  projectsDao: ProjectsDao,
+  organizationsDao: OrganizationsDao
 ) extends FlowController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +38,7 @@ class Repositories @javax.inject.Inject() (
       }
     } else {
       val auth = Authorization.User(request.user.id)
-      val org = organizationId.flatMap { OrganizationsDao.findById(auth, _)}
+      val org = organizationId.flatMap { organizationsDao.findById(auth, _)}
 
       // Set limit to 1 if we are guaranteed at most 1 record back
       val actualLimit = if (offset == 0 && !name.isEmpty && !owner.isEmpty) { 1 } else { limit }
@@ -54,8 +56,8 @@ class Repositories @javax.inject.Inject() (
           case None => true
           case Some(org) => {
             existingProject.isEmpty ||
-            existingProject == Some(true) && !ProjectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty ||
-            existingProject == Some(false) && ProjectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty
+            existingProject == Some(true) && !projectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty ||
+            existingProject == Some(false) && projectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty
           }
         })
       }.map { results =>

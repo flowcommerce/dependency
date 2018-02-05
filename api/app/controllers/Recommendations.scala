@@ -14,7 +14,8 @@ class Recommendations @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  recommendationsDao: RecommendationsDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -26,7 +27,7 @@ class Recommendations @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        RecommendationsDao.findAll(
+        recommendationsDao.findAll(
           Authorization.User(request.user.id),
           organization = organization,
           projectId = projectId,

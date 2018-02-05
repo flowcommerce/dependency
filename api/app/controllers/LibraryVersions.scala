@@ -15,7 +15,8 @@ class LibraryVersions @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  libraryVersionsDao: LibraryVersionsDao
 ) extends FlowController {
 
   def get(
@@ -27,7 +28,7 @@ class LibraryVersions @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        LibraryVersionsDao.findAll(
+        libraryVersionsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -48,7 +49,7 @@ class LibraryVersions @javax.inject.Inject() (
   def withLibraryVersion(user: UserReference, id: String) (
     f: LibraryVersion => Result
   ): Result = {
-    LibraryVersionsDao.findById(
+    libraryVersionsDao.findById(
       Authorization.User(user.id),
       id
     ) match {

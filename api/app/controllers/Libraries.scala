@@ -15,7 +15,8 @@ class Libraries @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  librariesDao: LibrariesDao
 ) extends FlowController with BaseIdentifiedController {
 
   def get(
@@ -30,7 +31,7 @@ class Libraries @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        LibrariesDao.findAll(
+        librariesDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -57,7 +58,7 @@ class Libraries @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[LibraryForm] => {
-        LibrariesDao.create(request.user, s.get) match {
+        librariesDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(library) => Created(Json.toJson(library))
         }
@@ -67,7 +68,7 @@ class Libraries @javax.inject.Inject() (
 
   def deleteById(id: String) = Identified { request =>
     withLibrary(request.user, id) { library =>
-      LibrariesDao.delete(request.user, library)
+      librariesDao.delete(request.user, library)
       NoContent
     }
   }

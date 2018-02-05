@@ -18,7 +18,9 @@ class Subscriptions @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  usersDao: UsersDao,
+  subscriptionsDao: SubscriptionsDao
 ) extends FlowController{
 
   /**
@@ -39,7 +41,7 @@ class Subscriptions @javax.inject.Inject() (
       }
       case id :: Nil => {
         Future {
-          UsersDao.findAll(identifier = Some(id), limit = 1).headOption.map { u => UserReference(id = u.id) }
+          usersDao.findAll(identifier = Some(id), limit = 1).headOption.map { u => UserReference(id = u.id) }
         }
       }
       case multiple => {
@@ -60,7 +62,7 @@ class Subscriptions @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        SubscriptionsDao.findAll(
+        subscriptionsDao.findAll(
           id = id,
           ids = optionals(ids),
           userId = userId,
@@ -86,10 +88,10 @@ class Subscriptions @javax.inject.Inject() (
       }
       case s: JsSuccess[SubscriptionForm] => {
         val form = s.get
-        SubscriptionsDao.upsertByUserIdAndPublication(request.user, form) match {
+        subscriptionsDao.upsertByUserIdAndPublication(request.user, form) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(subscription) => {
-            val sub = SubscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).getOrElse {
+            val sub = subscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).getOrElse {
               sys.error("Failed to upsert subscription")
             }
             Created(Json.toJson(sub))
@@ -101,7 +103,7 @@ class Subscriptions @javax.inject.Inject() (
 
   def deleteById(id: String, identifier: Option[String]) = Identified { request =>
     withSubscription(id) { subscription =>
-      SubscriptionsDao.delete(request.user, subscription)
+      subscriptionsDao.delete(request.user, subscription)
       NoContent
     }
   }
@@ -109,7 +111,7 @@ class Subscriptions @javax.inject.Inject() (
   def withSubscription(id: String)(
     f: Subscription => Result
   ): Result = {
-    SubscriptionsDao.findById(id) match {
+    subscriptionsDao.findById(id) match {
       case None => {
         NotFound
       }

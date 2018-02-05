@@ -12,7 +12,8 @@ class Items @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client ,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  itemsDao: ItemsDao
 ) extends FlowController with BaseIdentifiedController {
 
   def get(
@@ -22,7 +23,7 @@ class Items @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ItemsDao.findAll(
+        itemsDao.findAll(
           authorization(request),
           q = q,
           limit = limit,

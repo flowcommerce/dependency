@@ -15,7 +15,8 @@ class Memberships @javax.inject.Inject() (
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  membershipsDao: MembershipsDao
 ) extends FlowController with Helpers {
 
   def get(
@@ -29,7 +30,7 @@ class Memberships @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        MembershipsDao.findAll(
+        membershipsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -55,7 +56,7 @@ class Memberships @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[MembershipForm] => {
-        MembershipsDao.create(request.user, s.get) match {
+        membershipsDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(membership) => Created(Json.toJson(membership))
         }
@@ -65,7 +66,7 @@ class Memberships @javax.inject.Inject() (
 
   def deleteById(id: String) = Identified { request =>
     withMembership(request.user, id) { membership =>
-      MembershipsDao.delete(request.user, membership)
+      membershipsDao.delete(request.user, membership)
       NoContent
     }
   }
@@ -73,7 +74,7 @@ class Memberships @javax.inject.Inject() (
   def withMembership(user: UserReference, id: String)(
     f: Membership => Result
   ): Result = {
-    MembershipsDao.findById(Authorization.User(user.id), id) match {
+    membershipsDao.findById(Authorization.User(user.id), id) match {
       case None => {
         Results.NotFound
       }

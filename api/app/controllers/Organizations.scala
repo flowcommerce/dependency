@@ -13,7 +13,8 @@ class Organizations @javax.inject.Inject()(
   tokenClient: io.flow.token.v0.interfaces.Client,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
+  organizationsDao: OrganizationsDao
 ) extends FlowController with BaseIdentifiedController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,7 +29,7 @@ class Organizations @javax.inject.Inject()(
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        OrganizationsDao.findAll(
+        organizationsDao.findAll(
           authorization(request),
           id = id,
           ids = optionals(ids),
@@ -49,7 +50,7 @@ class Organizations @javax.inject.Inject()(
 
   def getUsersByUserId(userId: String) = Identified { request =>
     withUser(userId) { user =>
-      Ok(Json.toJson(OrganizationsDao.upsertForUser(user)))
+      Ok(Json.toJson(organizationsDao.upsertForUser(user)))
     }
   }
 
@@ -59,7 +60,7 @@ class Organizations @javax.inject.Inject()(
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[OrganizationForm] => {
-        OrganizationsDao.create(request.user, s.get) match {
+        organizationsDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(organization) => Created(Json.toJson(organization))
         }
@@ -74,7 +75,7 @@ class Organizations @javax.inject.Inject()(
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
         }
         case s: JsSuccess[OrganizationForm] => {
-          OrganizationsDao.update(request.user, organization, s.get) match {
+          organizationsDao.update(request.user, organization, s.get) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -85,7 +86,7 @@ class Organizations @javax.inject.Inject()(
 
   def deleteById(id: String) = Identified { request =>
     withOrganization(request.user, id) { organization =>
-      OrganizationsDao.delete(request.user, organization)
+      organizationsDao.delete(request.user, organization)
       NoContent
     }
   }
