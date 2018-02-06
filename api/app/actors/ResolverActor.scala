@@ -23,9 +23,9 @@ object ResolverActor {
 }
 
 class ResolverActor @Inject()(
-  ResolversDao: ResolversDao,
-  LibrariesDao: LibrariesDao,
-  ProjectLibrariesDao: ProjectLibrariesDao,
+  resolversDao: ResolversDao,
+  librariesDao: LibrariesDao,
+  projectLibrariesDao: ProjectLibrariesDao,
   usersDao: UsersDao
 ) extends Actor with Util {
 
@@ -35,7 +35,7 @@ class ResolverActor @Inject()(
   def receive = {
 
     case m @ ResolverActor.Messages.Data(id) => withErrorHandler(m.toString) {
-      dataResolver = ResolversDao.findById(Authorization.All, id)
+      dataResolver = resolversDao.findById(Authorization.All, id)
     }
 
     case m @ ResolverActor.Messages.Created => withErrorHandler(m.toString) {
@@ -49,9 +49,9 @@ class ResolverActor @Inject()(
     case m @ ResolverActor.Messages.Deleted => withErrorHandler(m.toString) {
       dataResolver.foreach { resolver =>
         Pager.create { offset =>
-          LibrariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
+          librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
         }.foreach { library =>
-          LibrariesDao.delete(SystemUser, library)
+          librariesDao.delete(SystemUser, library)
         }
       }
 
@@ -75,7 +75,7 @@ class ResolverActor @Inject()(
       }
 
       Pager.create { offset =>
-        ProjectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
+        projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
       }.foreach { projectLibrary =>
         sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
       }

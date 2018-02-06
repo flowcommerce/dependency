@@ -5,7 +5,9 @@ import javax.inject.Inject
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
 import play.api.Logger
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+
+import scala.concurrent.ExecutionContext
 
 object PeriodicActor {
 
@@ -26,6 +28,7 @@ class PeriodicActor @Inject()(
   binariesDao: BinariesDao,
   librariesDao: LibrariesDao
 ) extends Actor with Util {
+
 
   def receive = {
 

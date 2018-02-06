@@ -7,7 +7,9 @@ import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, BinaryVersionsDao, ItemsDao, ProjectBinariesDao, SyncsDao, UsersDao}
 import play.api.Logger
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+
+import scala.concurrent.ExecutionContext
 
 object BinaryActor {
 

@@ -1,6 +1,6 @@
 package io.flow.dependency.actors
 
-import db.{Authorization, BinaryVersionsDao, LibraryVersionsDao}
+import db._
 import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
@@ -8,6 +8,7 @@ import akka.actor._
 import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -62,16 +63,46 @@ object MainActor {
 class MainActor @javax.inject.Inject() (
   projectFactory: ProjectActor.Factory,
   override val config: io.flow.play.util.Config,
-  system: ActorSystem
-) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport{
+  system: ActorSystem,
+  binariesDao: BinariesDao,
+  syncsDao: SyncsDao,
+  binaryVersionsDao: BinaryVersionsDao,
+  usersDao: UsersDao,
+  itemsDao: ItemsDao,
+  projectBinariesDao: ProjectBinariesDao,
+  organizationsDao: OrganizationsDao,
+  userIdentifiersDao: UserIdentifiersDao,
+  subscriptionsDao: SubscriptionsDao,
+  librariesDao: LibrariesDao,
+  resolversDao: ResolversDao,
+  libraryVersionsDao: LibraryVersionsDao,
+  projectLibrariesDao: ProjectLibrariesDao,
+  batchEmailProcessor: BatchEmailProcessor,
+  projectsDao: ProjectsDao
+) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
 
   private[this] val name = "main"
 
-  private[this] val emailActor = system.actorOf(Props[EmailActor], name = s"$name:emailActor")
-  private[this] val periodicActor = system.actorOf(Props[PeriodicActor], name = s"$name:periodicActor")
-  private[this] val searchActor = system.actorOf(Props[SearchActor], name = s"$name:SearchActor")
+  private[this] val emailActor = system.actorOf(Props(new EmailActor(
+    subscriptionsDao,
+    batchEmailProcessor,
+    config
+  )), name = s"$name:emailActor")
+  private[this] val periodicActor = system.actorOf(Props(new PeriodicActor(
+    syncsDao,
+    projectsDao,
+    binariesDao,
+    librariesDao
+  )), name = s"$name:periodicActor")
+  private[this] val searchActor = system.actorOf(Props(new SearchActor(
+    binariesDao: BinariesDao,
+    librariesDao,
+    projectsDao,
+    itemsDao,
+    usersDao
+  )), name = s"$name:SearchActor")
 
   private[this] val binaryActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val libraryActors = scala.collection.mutable.Map[String, ActorRef]()
@@ -168,7 +199,7 @@ class MainActor @javax.inject.Inject() (
         syncLibrary(id)
       }
     }
-      
+
     case m @ MainActor.Messages.LibrarySyncCompleted(id) => withErrorHandler(m) {
       projectBroadcast(ProjectActor.Messages.LibrarySynced(id))
     }
@@ -229,7 +260,12 @@ class MainActor @javax.inject.Inject() (
 
   def upsertUserActor(id: String): ActorRef = {
     userActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props[UserActor], name = s"$name:userActor:$id")
+      val ref = system.actorOf(Props(new UserActor(
+        organizationsDao,
+        userIdentifiersDao,
+        subscriptionsDao,
+        usersDao
+      )), name = s"$name:userActor:$id")
       ref ! UserActor.Messages.Data(id)
       userActors += (id -> ref)
       ref
@@ -246,7 +282,15 @@ class MainActor @javax.inject.Inject() (
 
   def upsertLibraryActor(id: String): ActorRef = {
     libraryActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props[LibraryActor], name = s"$name:libraryActor:$id")
+      val ref = system.actorOf(Props(new LibraryActor(
+        librariesDao,
+        syncsDao,
+        resolversDao,
+        libraryVersionsDao,
+        itemsDao,
+        projectLibrariesDao,
+        usersDao
+      )), name = s"$name:libraryActor:$id")
       ref ! LibraryActor.Messages.Data(id)
       libraryActors += (id -> ref)
       ref
@@ -255,7 +299,14 @@ class MainActor @javax.inject.Inject() (
 
   def upsertBinaryActor(id: String): ActorRef = {
     binaryActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props[BinaryActor], name = s"$name:binaryActor:$id")
+      val ref = system.actorOf(Props(new BinaryActor(
+        binariesDao,
+        syncsDao,
+        binaryVersionsDao,
+        usersDao,
+        itemsDao,
+        projectBinariesDao
+      )), name = s"$name:binaryActor:$id")
       ref ! BinaryActor.Messages.Data(id)
       binaryActors += (id -> ref)
       ref
@@ -264,7 +315,12 @@ class MainActor @javax.inject.Inject() (
 
   def upsertResolverActor(id: String): ActorRef = {
     resolverActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props[ResolverActor], name = s"$name:resolverActor:$id")
+      val ref = system.actorOf(Props(new ResolverActor(
+        resolversDao,
+        librariesDao,
+        projectLibrariesDao,
+        usersDao
+      )), name = s"$name:resolverActor:$id")
       ref ! ResolverActor.Messages.Data(id)
       resolverActors += (id -> ref)
       ref

@@ -2,15 +2,13 @@ package db
 
 import javax.inject.{Inject, Singleton}
 
-import io.flow.dependency.v0.models.{MembershipForm, Organization, OrganizationForm, Role}
-import io.flow.postgresql.{OrderBy, Pager, Query}
-import io.flow.play.util.{IdGenerator, Random, UrlKey}
-import io.flow.common.v0.models.{User, UserReference}
 import anorm._
 import com.google.inject.Provider
+import io.flow.common.v0.models.{User, UserReference}
+import io.flow.dependency.v0.models.{Organization, OrganizationForm, Role}
+import io.flow.play.util.{IdGenerator, Random, UrlKey}
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 @Singleton
 class OrganizationsDao @Inject()(

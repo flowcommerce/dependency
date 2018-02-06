@@ -11,7 +11,9 @@ import io.flow.dependency.lib.Urls
 import io.flow.dependency.api.lib.{Email, Recipient}
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logger
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+
+import scala.concurrent.ExecutionContext
 
 object EmailActor {
 
@@ -19,20 +21,21 @@ object EmailActor {
     case object ProcessDailySummary
   }
 
-  //TODO used for pattern matching, remove static injector later
-  val PreferredHourToSendEst: Int = {
-    val config = play.api.Play.current.injector.instanceOf[Config]
-    val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
-    assert( value >= 0 && value < 23 )
-    value
-  }
+
 
 }
 
 class EmailActor @Inject()(
   subscriptionsDao: SubscriptionsDao,
-  batchEmailProcessor: BatchEmailProcessor
+  batchEmailProcessor: BatchEmailProcessor,
+  config: Config
 ) extends Actor with Util {
+
+  val PreferredHourToSendEst: Int = {
+    val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
+    assert( value >= 0 && value < 23 )
+    value
+  }
 
   private[this] def currentHourEst(): Int = {
     (new DateTime()).toDateTime(DateTimeZone.forID("America/New_York")).getHourOfDay
@@ -56,7 +59,7 @@ class EmailActor @Inject()(
     case m @ EmailActor.Messages.ProcessDailySummary => withErrorHandler(m) {
       val hoursForPreferredTime = 2
       val hours = currentHourEst match {
-        case EmailActor.PreferredHourToSendEst => hoursForPreferredTime
+        case PreferredHourToSendEst => hoursForPreferredTime
         case _ => 24 + hoursForPreferredTime
       }
 
