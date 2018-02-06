@@ -5,10 +5,11 @@ import java.util.UUID
 import db._
 import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.dependency.v0.models._
-import io.flow.play.util.Random
+import io.flow.play.util.{Config, Random}
 import io.flow.test.utils.FlowPlaySpec
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.time.{Seconds, Span}
+import play.api.db.Database
 
 trait DependencySpec extends FlowPlaySpec with Factories {
 
@@ -33,6 +34,8 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit val libraryRecommendationsDao = init[LibraryRecommendationsDao]
   implicit val recommendationsDao = init[RecommendationsDao]
   implicit val userIdentifiersDao = init[UserIdentifiersDao]
+  implicit val config = init[Config]
+  implicit val db = init[Database]
 
   val random = Random()
 

@@ -1,5 +1,7 @@
 package io.flow.dependency.api.lib
 
+import javax.inject.Inject
+
 import db.{GithubUsersDao, InternalTokenForm, TokensDao, UsersDao}
 import io.flow.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
 import io.flow.common.v0.models.{Name, User, UserReference}
@@ -184,7 +186,7 @@ abstract class Github {
 }
 
 
-class DefaultGithub(
+class DefaultGithub @Inject() (
   wsClient: WSClient,
   config: Config,
   tokensDao: TokensDao) extends Github {

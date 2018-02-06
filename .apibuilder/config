@@ -1,7 +1,12 @@
 code:
   flow:
     common:
-      version: 0.1.59
+      version: latest
+      generators:
+        play_2_6_client: generated/app
+        anorm_2_6_parsers: api/app/generated
+    error:
+      version: latest
       generators:
         play_2_6_client: generated/app
         anorm_2_6_parsers: api/app/generated
@@ -26,16 +31,6 @@ code:
       version: latest
       generators:
         play_2_6_client: generated/app
-    delta:
-      version: 0.5.57-for-dependency-upgrade
-      generators:
-        anorm_2_6_parsers: api/app/generated
-        play_2_6_client: generated/app
-    delta-config:
-      version: latest
-      generators:
-        anorm_2_6_parsers: api/app/generated
-        play_2_x_json: generated/app
     dependency:
       version: latest
       generators:

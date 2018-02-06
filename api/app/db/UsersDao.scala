@@ -35,15 +35,16 @@ class UsersDao @Inject()(
            users.email,
            users.first_name as name_first,
            users.last_name as name_last,
-           users.avatar_url
+           users.avatar_url,
+           users.status
       from users
   """)
 
   private[this] val InsertQuery = """
     insert into users
-    (id, email, first_name, last_name, updated_by_user_id)
+    (id, email, first_name, last_name, updated_by_user_id, status)
     values
-    ({id}, {email}, {first_name}, {last_name}, {updated_by_user_id})
+    ({id}, {email}, {first_name}, {last_name}, {updated_by_user_id}, {status})
   """
 
   def validate(form: UserForm): Seq[String] = {
@@ -83,7 +84,8 @@ class UsersDao @Inject()(
             'email -> form.email.map(_.trim),
             'first_name -> Util.trimmedString(form.name.flatMap(_.first)),
             'last_name -> Util.trimmedString(form.name.flatMap(_.last)),
-            'updated_by_user_id -> createdBy.getOrElse(anonymousUser).id
+            'updated_by_user_id -> createdBy.getOrElse(anonymousUser).id,
+            'status -> Option("inactive")
           ).execute()
         }
 

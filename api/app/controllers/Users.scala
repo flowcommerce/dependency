@@ -57,22 +57,28 @@ class Users @javax.inject.Inject()(
     }
   }
 
+
   def post() = Anonymous.async(parse.json) { request =>
-    Future {
-      request.body.validate[UserForm] match {
-        case e: JsError =>
-          UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
-        case s: JsSuccess[UserForm] => {
-          request.user.map { userOption =>
-            usersDao.create(Option(userOption), s.get) match {
-              case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
-              case Right(user) => Created(Json.toJson(user))
+    request.body.validate[UserForm] match {
+      case e: JsError => Future {
+        UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
+      }
+      case s: JsSuccess[UserForm] => {
+
+        Future {
+          usersDao.create(request.user, s.get) match {
+            case Left(errors) => {
+              UnprocessableEntity(Json.toJson(Seq(Validation.errors(errors))))
             }
-          }.getOrElse(UnprocessableEntity("no user on request")) //todo: not sure how this worked before
+            case Right(user) => {
+              Created(Json.toJson(user))
+            }
+          }
         }
       }
     }
   }
+
 
   def withUser(id: String)(
     f: User => Result
