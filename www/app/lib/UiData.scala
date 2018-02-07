@@ -23,9 +23,10 @@ case class UiData(
   title: Option[String] = None,
   headTitle: Option[String] = None,
   user: Option[User] = None,
-  query: Option[String] = None
+  query: Option[String] = None,
+  config: FlowConfig
 ) {
 
-  lazy val urls = Urls(play.api.Play.current.injector.instanceOf[FlowConfig])
+  lazy val urls = Urls(config)
 
 }

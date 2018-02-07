@@ -1,21 +1,23 @@
 package controllers
 
-import io.flow.common.v0.models.ExpandableUserDiscriminator.UserReference
+import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.GithubAuthenticationForm
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.IdentifiedCookie._
+import io.flow.play.util.Config
 import play.api.i18n._
 import play.api.mvc._
 
+import scala.concurrent.ExecutionContext
+
 class LoginController @javax.inject.Inject()(
+  config: Config,
   val provider: DependencyClientProvider,
   val controllerComponents: ControllerComponents
-) extends play.api.mvc.BaseController with I18nSupport {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends play.api.mvc.BaseController with I18nSupport {
 
   def index(returnUrl: Option[String]) = Action { implicit request =>
-    Ok(views.html.login.index(UiData(requestPath = request.path), returnUrl))
+    Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl))
   }
 
   def githubCallback(
@@ -40,7 +42,7 @@ class LoginController @javax.inject.Inject()(
       Redirect(url).withIdentifiedCookieUser(user = UserReference(user.id))
     }.recover {
       case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-        Ok(views.html.login.index(UiData(requestPath = request.path), returnUrl, response.genericErrors.flatMap(_.messages)))
+        Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl, response.genericErrors.flatMap(_.messages)))
       }
     }
   }

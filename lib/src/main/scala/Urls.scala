@@ -42,7 +42,6 @@ case class Urls(
     wwwHost + rest
   }
 
-
   def recommendation(recommendation: Recommendation): String = {
     recommendation.`type` match {
       case RecommendationType.Library => library(recommendation.`object`.id)

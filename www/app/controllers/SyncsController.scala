@@ -5,14 +5,14 @@ import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
 
+import scala.concurrent.ExecutionContext
+
 class SyncsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-) extends BaseController(config, dependencyClientProvider) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   override def section = None
 

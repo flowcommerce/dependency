@@ -7,7 +7,7 @@ import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class BinariesController @javax.inject.Inject()(
   tokenClient: io.flow.token.v0.interfaces.Client,
@@ -15,9 +15,7 @@ class BinariesController @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-) extends BaseController(config, dependencyClientProvider) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 

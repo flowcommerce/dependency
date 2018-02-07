@@ -7,7 +7,7 @@ import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.Config
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object Subscriptions {
 
@@ -25,9 +25,7 @@ class SubscriptionsController @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-) extends BaseController(config, dependencyClientProvider) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   lazy val client = dependencyClientProvider.newClient(user = None)
 

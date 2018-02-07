@@ -1,21 +1,18 @@
 package controllers
 
 import io.flow.dependency.www.lib.DependencyClientProvider
-import io.flow.dependency.controllers.helpers.DependencyUiControllerHelper
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, PaginatedCollection, Pagination}
-import play.api._
-import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+
+import scala.concurrent.ExecutionContext
 
 class ApplicationController @javax.inject.Inject()(
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-) extends BaseController(config, dependencyClientProvider) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Dashboard)
 

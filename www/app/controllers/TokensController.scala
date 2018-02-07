@@ -9,7 +9,7 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class TokensController @javax.inject.Inject()(
   val tokenClient: io.flow.token.v0.interfaces.Client,
@@ -17,9 +17,7 @@ class TokensController @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-) extends BaseController(config, dependencyClientProvider) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   override def section = None
 

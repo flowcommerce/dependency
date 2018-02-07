@@ -32,7 +32,7 @@ class UserActionBuilder(
 abstract class BaseController(
   config: Config,
   dependencyClientProvider: DependencyClientProvider
-) extends FlowController with I18nSupport {
+)(implicit val ec: ExecutionContext) extends FlowController with I18nSupport {
 
   protected def onUnauthorized(requestHeader: RequestHeader): Result =
     Redirect(routes.LoginController.index(return_url = Some(requestHeader.path))).flashing("warning" -> "Please login")

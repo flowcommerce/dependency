@@ -11,7 +11,7 @@ services:
   - docker
 before_script:
   - docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-  - docker run -d -p 127.0.0.1:6119:5432 flowcommerce/dependency-postgresql:latest
+  - docker run -d -p 127.0.0.1:6119:5432 flowcommerce/dependency-postgresql-play26:latest
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean compile test
   # Tricks to avoid unnecessary cache updates
