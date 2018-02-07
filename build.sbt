@@ -48,6 +48,7 @@ lazy val www = project
   .aggregate(generated, lib)
   .enablePlugins(PlayScala)
   .enablePlugins(NewRelic)
+  .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
     routesImport += "io.flow.dependency.v0.Bindables._",
