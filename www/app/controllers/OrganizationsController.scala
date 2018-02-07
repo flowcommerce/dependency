@@ -1,32 +1,30 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.{Organization, OrganizationForm}
-import com.bryzek.dependency.www.lib.DependencyClientProvider
-import io.flow.play.util.{Pagination, PaginatedCollection}
-import scala.concurrent.Future
-
-import play.api._
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import play.api.data._
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.OrganizationForm
+import io.flow.dependency.www.lib.DependencyClientProvider
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.data.Forms._
+import play.api.data._
+import play.api.mvc._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class OrganizationsController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
- 
   override def section = None
 
   def redirectToDashboard(org: String) = Identified { implicit request =>
     Redirect(routes.ApplicationController.index(organization = Some(org)))
   }
 
-  def index(page: Int = 0) = Identified.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       organizations <- dependencyClient(request).organizations.get(
         limit = Pagination.DefaultLimit+1,
@@ -42,7 +40,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def show(key: String, projectsPage: Int = 0) = Identified.async { implicit request =>
+  def show(key: String, projectsPage: Int = 0) = User.async { implicit request =>
     withOrganization(request, key) { org =>
       for {
         projects <- dependencyClient(request).projects.get(
@@ -71,7 +69,7 @@ class OrganizationsController @javax.inject.Inject() (
     )
   }
 
-  def postCreate() = Identified.async { implicit request =>
+  def postCreate() = User.async { implicit request =>
     val boundForm = OrganizationsController.uiForm.bindFromRequest
     boundForm.fold (
 
@@ -83,15 +81,15 @@ class OrganizationsController @javax.inject.Inject() (
         dependencyClient(request).organizations.post(uiForm.organizationForm).map { organization =>
           Redirect(routes.OrganizationsController.show(organization.key)).flashing("success" -> "Organization created")
         }.recover {
-          case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
-            Ok(views.html.organizations.create(uiData(request), boundForm, response.errors.map(_.message)))
+          case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+            Ok(views.html.organizations.create(uiData(request), boundForm, response.genericErrors.flatMap(_.messages)))
           }
         }
       }
     )
   }
 
-  def edit(key: String) = Identified.async { implicit request =>
+  def edit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
       Future {
         Ok(
@@ -109,7 +107,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def postEdit(key: String) = Identified.async { implicit request =>
+  def postEdit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
       val boundForm = OrganizationsController.uiForm.bindFromRequest
       boundForm.fold (
@@ -122,8 +120,8 @@ class OrganizationsController @javax.inject.Inject() (
           dependencyClient(request).organizations.putById(organization.id, uiForm.organizationForm).map { updated =>
             Redirect(routes.OrganizationsController.show(updated.key)).flashing("success" -> "Organization updated")
           }.recover {
-            case response: com.bryzek.dependency.v0.errors.ErrorsResponse => {
-              Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.errors.map(_.message)))
+            case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+              Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.genericErrors.flatMap(_.messages)))
             }
           }
         }
@@ -131,7 +129,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def postDelete(key: String) = Identified.async { implicit request =>
+  def postDelete(key: String) = User.async { implicit request =>
     withOrganization(request, key) { org =>
       dependencyClient(request).organizations.deleteById(org.id).map { response =>
         Redirect(routes.OrganizationsController.index()).flashing("success" -> s"Organization deleted")

@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import scala.util.{Failure, Success, Try}
 import java.net.URI

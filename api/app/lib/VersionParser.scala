@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import scala.util.parsing.combinator._
 
@@ -182,7 +182,7 @@ object VersionParser {
     }
   }
 
-  private[lib] def isDate(value: Long): Boolean = {
+  protected[lib] def isDate(value: Long): Boolean = {
     value.toString.length >= 8 && value.toString.substring(0, 4).toInt >= 1900
   }
 

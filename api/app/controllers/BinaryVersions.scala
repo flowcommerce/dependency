@@ -1,20 +1,23 @@
 package controllers
 
+import com.google.inject.Provider
 import db.{Authorization, BinaryVersionsDao}
-import io.flow.play.controllers.IdentifiedRestController
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.Validation
-import com.bryzek.dependency.v0.models.BinaryVersion
-import com.bryzek.dependency.v0.models.json._
+import io.flow.play.util.{Config, Validation}
+import io.flow.dependency.v0.models.BinaryVersion
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
-class BinaryVersions @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController {
+class BinaryVersions @javax.inject.Inject()(
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  binaryVersionsDao: BinaryVersionsDao
+) extends FlowController {
 
   def get(
     id: Option[String],
@@ -26,7 +29,7 @@ class BinaryVersions @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        BinaryVersionsDao.findAll(
+        binaryVersionsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -48,7 +51,7 @@ class BinaryVersions @javax.inject.Inject() (
   def withBinaryVersion(user: UserReference, id: String)(
     f: BinaryVersion => Result
   ): Result = {
-    BinaryVersionsDao.findById(Authorization.User(user.id), id) match {
+    binaryVersionsDao.findById(Authorization.User(user.id), id) match {
       case None => {
         NotFound
       }

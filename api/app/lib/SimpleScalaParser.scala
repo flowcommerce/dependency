@@ -1,7 +1,7 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import play.api.Logger
-import com.bryzek.dependency.v0.models.{LibraryForm, ProjectSummary}
+import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary}
 
 trait SimpleScalaParser {
 

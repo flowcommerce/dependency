@@ -1,6 +1,6 @@
 package db
 
-import com.bryzek.dependency.v0.models.Visibility
+import io.flow.dependency.v0.models.Visibility
 
 trait Clause {
 

@@ -1,14 +1,13 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Credentials, CredentialsUndefinedType, UsernamePassword}
+import io.flow.dependency.v0.models.{CredentialsUndefinedType, UsernamePassword}
+import util.DependencySpec
 
-import org.specs2.mutable._
-
-class UtilSpec extends Specification {
+class UtilSpec extends DependencySpec {
 
   "maskCredentials" in {
-    Util.maskCredentials(UsernamePassword("foo")) must beEqualTo(Some(UsernamePassword("foo")))
-    Util.maskCredentials(UsernamePassword("foo", Some("bar"))) must beEqualTo(Some(UsernamePassword("foo", Some("masked"))))
+    Util.maskCredentials(UsernamePassword("foo")) must be(Some(UsernamePassword("foo")))
+    Util.maskCredentials(UsernamePassword("foo", Some("bar"))) must be(Some(UsernamePassword("foo", Some("masked"))))
     Util.maskCredentials(CredentialsUndefinedType("foo")) must be(None)
   }
 

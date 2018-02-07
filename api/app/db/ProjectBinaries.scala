@@ -1,11 +1,14 @@
 package db
 
-import com.bryzek.dependency.actors.MainActor
-import com.bryzek.dependency.api.lib.Version
-import com.bryzek.dependency.v0.models.{Binary, BinaryType, Project, ProjectBinary, SyncEvent}
-import io.flow.postgresql.{Query, OrderBy, Pager}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.actors.MainActor
+import io.flow.dependency.api.lib.Version
+import io.flow.dependency.v0.models.{Binary, BinaryType, Project, ProjectBinary, SyncEvent}
+import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
@@ -17,7 +20,14 @@ case class ProjectBinaryForm(
   path: String
 )
 
-object ProjectBinariesDao {
+@Singleton
+class ProjectBinariesDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers],
+  membershipsDaoProvider: Provider[MembershipsDao],
+  projectsDaoProvider: Provider[ProjectsDao],
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+){
 
   private[this] val BaseQuery = Query(s"""
     select project_binaries.id,
@@ -71,10 +81,10 @@ object ProjectBinariesDao {
       Nil
     }
 
-    val projectErrors = ProjectsDao.findById(Authorization.All, form.projectId) match {
+    val projectErrors = projectsDaoProvider.get.findById(Authorization.All, form.projectId) match {
       case None => Seq("Project not found")
       case Some(project) => {
-        MembershipsDao.isMemberByOrgId(project.organization.id, user) match {
+        membershipsDaoProvider.get.isMemberByOrgId(project.organization.id, user) match {
           case false => Seq("You are not authorized to edit this project")
           case true => Nil
         }
@@ -82,7 +92,7 @@ object ProjectBinariesDao {
     }
 
     val existsErrors = if (nameErrors.isEmpty && versionErrors.isEmpty) {
-      ProjectBinariesDao.findByProjectIdAndNameAndVersion(
+      findByProjectIdAndNameAndVersion(
         Authorization.All, form.projectId, form.name.toString, form.version
       ) match {
         case None => Nil
@@ -98,7 +108,7 @@ object ProjectBinariesDao {
   }
 
   def upsert(createdBy: UserReference, form: ProjectBinaryForm): Either[Seq[String], ProjectBinary] = {
-    ProjectBinariesDao.findByProjectIdAndNameAndVersion(
+    findByProjectIdAndNameAndVersion(
       Authorization.All, form.projectId, form.name.toString, form.version
     ) match {
       case None => {
@@ -115,7 +125,7 @@ object ProjectBinariesDao {
       case Nil => {
         val id = io.flow.play.util.IdGenerator("prb").randomId()
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'project_id -> form.projectId,
@@ -124,7 +134,7 @@ object ProjectBinariesDao {
             'path -> form.path.trim,
             'updated_by_user_id -> createdBy.id
           ).execute()
-          MainActor.ref ! MainActor.Messages.ProjectBinaryCreated(form.projectId, id)
+          mainActor ! MainActor.Messages.ProjectBinaryCreated(form.projectId, id)
         }
 
         Right(
@@ -138,7 +148,7 @@ object ProjectBinariesDao {
   }
 
   def removeBinary(user: UserReference, projectBinary: ProjectBinary) {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       SQL(RemoveBinaryQuery).on(
         'id -> projectBinary.id,
         'updated_by_user_id -> user.id
@@ -162,7 +172,7 @@ object ProjectBinariesDao {
   }
 
   def setBinary(user: UserReference, projectBinary: ProjectBinary, binary: Binary) {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       SQL(SetBinaryQuery).on(
         'id -> projectBinary.id,
         'binary_id -> binary.id,
@@ -172,8 +182,8 @@ object ProjectBinariesDao {
   }
 
   def delete(deletedBy: UserReference, binary: ProjectBinary) {
-    DbHelpers.delete("project_binaries", deletedBy.id, binary.id)
-    MainActor.ref ! MainActor.Messages.ProjectBinaryDeleted(binary.project.id, binary.id, binary.version)
+    dbHelpersProvider.get.delete("project_binaries", deletedBy.id, binary.id)
+    mainActor ! MainActor.Messages.ProjectBinaryDeleted(binary.project.id, binary.id, binary.version)
   }
 
   def findByProjectIdAndNameAndVersion(
@@ -209,7 +219,7 @@ object ProjectBinariesDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[ProjectBinary] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "project_binaries",
@@ -244,7 +254,7 @@ object ProjectBinariesDao {
         bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString)).
         nullBoolean("project_binaries.binary_id", hasBinary).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.ProjectBinary.parser().*
+          io.flow.dependency.v0.anorm.parsers.ProjectBinary.parser().*
         )
     }
   }

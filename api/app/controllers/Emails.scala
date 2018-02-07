@@ -1,24 +1,30 @@
 package controllers
 
-import db.{LastEmailsDao, UsersDao}
-import com.bryzek.dependency.v0.models.Publication
-import com.bryzek.dependency.api.lib.{Email, Recipient}
-import com.bryzek.dependency.actors._
-import io.flow.play.controllers.AnonymousController
+import com.google.inject.Provider
+import db.{LastEmailsDao, RecommendationsDao, UserIdentifiersDao, UsersDao}
+import io.flow.dependency.v0.models.Publication
+import io.flow.dependency.api.lib.{Email, Recipient}
+import io.flow.dependency.actors._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
 class Emails @javax.inject.Inject() (
-  val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with AnonymousController with Helpers {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  usersDao: UsersDao,
+  lastEmailsDao: LastEmailsDao,
+  recommendationsDao: RecommendationsDao,
+  userIdentifiersDao: UserIdentifiersDao
+) extends FlowController   {
 
-  private[this] val TestEmailAddressName = "com.bryzek.dependency.api.test.email"
+  private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
   private[this] lazy val TestEmailAddress = config.optionalString(TestEmailAddressName)
 
-  override def user(
+  def user(
     session: play.api.mvc.Session,
     headers: play.api.mvc.Headers,
     path: String,
@@ -31,19 +37,19 @@ class Emails @javax.inject.Inject() (
     TestEmailAddress match {
       case None => Ok(s"Set the $TestEmailAddressName property to enable testing")
       case Some(email) => {
-        UsersDao.findByEmail("mbryzek@alum.mit.edu") match {
+        usersDao.findByEmail("mbryzek@alum.mit.edu") match {
           case None => Ok(s"No user with email address[$email] found")
           case Some(user) => {
-            val recipient = Recipient.fromUser(user).getOrElse {
+            val recipient = Recipient.fromUser(userIdentifiersDao, usersDao, user).getOrElse {
               Recipient(email = "noemail@test.flow.io", name = user.name, userId = user.id, identifier = "TESTID")
             }
-            val generator = DailySummaryEmailMessage(recipient)
+            val generator = new DailySummaryEmailMessage(recipient)
 
             Ok(
               Seq(
-                "Subject: " + Email.subjectWithPrefix(generator.subject()),
+                "Subject: " + Email.subjectWithPrefix(config, generator.subject()),
                 "<br/><br/><hr size=1/>",
-                generator.body()
+                generator.body(lastEmailsDao, recommendationsDao, config)
               ).mkString("\n")
             ).as(HTML)
           }

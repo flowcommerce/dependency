@@ -1,26 +1,25 @@
 package controllers
 
-import com.bryzek.dependency.www.lib.DependencyClientProvider
-import io.flow.play.util.{Pagination, PaginatedCollection}
-
-import play.api._
-import play.api.i18n.MessagesApi
+import io.flow.dependency.www.lib.DependencyClientProvider
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
 
-class SearchController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+import scala.concurrent.ExecutionContext
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+class SearchController @javax.inject.Inject() (
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
   override def section = None
 
   def index(
     q: Option[String],
     page: Int
-  ) = Identified.async { implicit request =>
+  ) = User.async { implicit request =>
     for {
       items <- dependencyClient(request).items.get(
         q = q,

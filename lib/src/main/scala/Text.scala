@@ -1,4 +1,4 @@
-package com.bryzek.dependency.lib
+package io.flow.dependency.lib
 
 // From https://github.com/mbryzek/apidoc/blob/6186612993a0c913cfd0b7a36417bda45281825e/lib/src/main/scala/Text.scala
 object Text {

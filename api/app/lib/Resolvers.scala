@@ -1,5 +1,5 @@
 /*
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 object Resolvers {
 

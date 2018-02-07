@@ -1,5 +1,5 @@
-@(data: com.bryzek.dependency.www.lib.UiData,
-  token: com.bryzek.dependency.v0.models.Token
+@(data: io.flow.dependency.www.lib.UiData,
+  token: io.flow.dependency.v0.models.Token
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some("Token: " + token.masked))) {

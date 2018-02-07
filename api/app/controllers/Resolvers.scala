@@ -1,19 +1,22 @@
 package controllers
 
 import db.{Authorization, ResolversDao}
-import io.flow.play.controllers.IdentifiedRestController
-import io.flow.play.util.Validation
-import com.bryzek.dependency.v0.models.{Resolver, ResolverForm, Visibility}
-import com.bryzek.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.common.v0.models.UserReference
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
+import io.flow.dependency.v0.models.{Resolver, ResolverForm, Visibility}
+import io.flow.dependency.v0.models.json._
+import io.flow.error.v0.models.json._
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
 class Resolvers @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController with Helpers {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  resolversDao: ResolversDao
+) extends FlowController  {
 
   def get(
     id: Option[String],
@@ -25,7 +28,7 @@ class Resolvers @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ResolversDao.findAll(
+        resolversDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -50,7 +53,7 @@ class Resolvers @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[ResolverForm] => {
-        ResolversDao.create(request.user, s.get) match {
+        resolversDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(resolver) => Created(Json.toJson(resolver))
         }
@@ -60,8 +63,21 @@ class Resolvers @javax.inject.Inject() (
 
   def deleteById(id: String) = Identified { request =>
     withResolver(request.user, id) { resolver =>
-      ResolversDao.delete(request.user, resolver)
+      resolversDao.delete(request.user, resolver)
       NoContent
+    }
+  }
+
+  def withResolver(user: UserReference, id: String)(
+    f: Resolver => Result
+  ): Result = {
+    resolversDao.findById(Authorization.User(user.id), id) match {
+      case None => {
+        Results.NotFound
+      }
+      case Some(resolver) => {
+        f(resolver)
+      }
     }
   }
 

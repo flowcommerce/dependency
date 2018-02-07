@@ -1,6 +1,6 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  org: com.bryzek.dependency.v0.models.Organization,
+  data: io.flow.dependency.www.lib.UiData,
+  org: io.flow.dependency.v0.models.Organization,
   form: Form[controllers.MembersController.UiForm],
   errorMessages: Seq[String] = Nil
 )(implicit flash: Flash, messages: Messages)
@@ -21,7 +21,7 @@
 
           @helper.select(
               form("role"),
-              options = com.bryzek.dependency.v0.models.Role.all.map( r => (r.toString, r.toString) ),
+              options = io.flow.dependency.v0.models.Role.all.map( r => (r.toString, r.toString) ),
               '_label -> "Role",
               '_error -> form("role")
           )

@@ -1,19 +1,15 @@
 package db
 
-import com.bryzek.dependency.v0.models.{UsernamePassword, Visibility}
-import org.scalatest._
-import play.api.test._
-import play.api.test.Helpers._
-import org.scalatestplus.play._
 import java.util.UUID
 
-class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
+import io.flow.dependency.v0.models.{UsernamePassword, Visibility}
+import util.DependencySpec
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+class ResolversDaoSpec extends DependencySpec {
 
   private[this] lazy val org = createOrganization()
 
-  private[this] lazy val publicResolver = ResolversDao.findAll(
+  private[this] lazy val publicResolver = resolversDao.findAll(
     Authorization.All,
     visibility = Some(Visibility.Public),
     uri = Some("http://jcenter.bintray.com/"),
@@ -24,33 +20,33 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
 
   "upsert" in {
     val form = createResolverForm(org)
-    val resolver1 = ResolversDao.create(systemUser, form).right.get
+    val resolver1 = resolversDao.create(systemUser, form).right.get
 
-    val resolver2 = ResolversDao.upsert(systemUser, form).right.get
+    val resolver2 = resolversDao.upsert(systemUser, form).right.get
     resolver1.id must be(resolver2.id)
 
     val resolver3 = createResolver(org)
 
-    resolver2.id must not be(resolver3.id)
+    resolver2.id must not be (resolver3.id)
   }
 
   "findById" in {
     val resolver = createResolver(org)
-    ResolversDao.findById(Authorization.All, resolver.id).map(_.id) must be(
+    resolversDao.findById(Authorization.All, resolver.id).map(_.id) must be(
       Some(resolver.id)
     )
 
-    ResolversDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
+    resolversDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
   }
 
   "findByOrganizationIdAndUri" in {
     val resolver = createResolver(org)(createResolverForm(org))
-    ResolversDao.findByOrganizationAndUri(Authorization.All, org.key, resolver.uri).map(_.id) must be(
+    resolversDao.findByOrganizationAndUri(Authorization.All, org.key, resolver.uri).map(_.id) must be(
       Some(resolver.id)
     )
 
-    ResolversDao.findByOrganizationAndUri(Authorization.All, createTestKey(), resolver.uri).map(_.id) must be(None)
-    ResolversDao.findByOrganizationAndUri(Authorization.All, org.key, UUID.randomUUID.toString).map(_.id) must be(None)
+    resolversDao.findByOrganizationAndUri(Authorization.All, createTestKey(), resolver.uri).map(_.id) must be(None)
+    resolversDao.findByOrganizationAndUri(Authorization.All, org.key, UUID.randomUUID.toString).map(_.id) must be(None)
   }
 
   "findAll" must {
@@ -59,33 +55,33 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
       val resolver1 = createResolver(org)
       val resolver2 = createResolver(org)
 
-      ResolversDao.findAll(Authorization.All, ids = Some(Seq(resolver1.id, resolver2.id))).map(_.id).sorted must be(
+      resolversDao.findAll(Authorization.All, ids = Some(Seq(resolver1.id, resolver2.id))).map(_.id).sorted must be(
         Seq(resolver1.id, resolver2.id).sorted
       )
 
-      ResolversDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
-      ResolversDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-      ResolversDao.findAll(Authorization.All, ids = Some(Seq(resolver1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(resolver1.id))
+      resolversDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
+      resolversDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
+      resolversDao.findAll(Authorization.All, ids = Some(Seq(resolver1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(resolver1.id))
     }
 
     "find by organizationId" in {
       val resolver = createResolver(org)
 
-      ResolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(org.id)).map(_.id).sorted must be(
+      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(org.id)).map(_.id).sorted must be(
         Seq(resolver.id)
       )
 
-      ResolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(createOrganization().id)) must be(Nil)
+      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(createOrganization().id)) must be(Nil)
     }
 
     "find by org" in {
       val resolver = createResolver(org)
 
-      ResolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(org.key)).map(_.id).sorted must be(
+      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(org.key)).map(_.id).sorted must be(
         Seq(resolver.id)
       )
 
-      ResolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(createOrganization().key)) must be(Nil)
+      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(createOrganization().key)) must be(Nil)
     }
 
   }
@@ -106,7 +102,7 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
   "private resolvers sort after public" in {
     val resolver = createResolver(org)(createResolverForm(org = org, visibility = Visibility.Private))
 
-    ResolversDao.findAll(
+    resolversDao.findAll(
       Authorization.All,
       ids = Some(Seq(publicResolver.id, resolver.id))
     ).map(_.id) must be(Seq(publicResolver.id, resolver.id))
@@ -119,17 +115,17 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
       visibility = Visibility.Private
     ))
 
-    ResolversDao.findAll(
+    resolversDao.findAll(
       Authorization.All,
       id = Some(resolver.id)
     ).map(_.id) must be(Seq(resolver.id))
 
-    ResolversDao.findAll(
+    resolversDao.findAll(
       Authorization.Organization(organization.id),
       id = Some(resolver.id)
     ).map(_.id) must be(Seq(resolver.id))
 
-    ResolversDao.findAll(
+    resolversDao.findAll(
       Authorization.PublicOnly,
       id = Some(resolver.id)
     ) must be(Nil)
@@ -147,7 +143,7 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
       )
     )
     //resolver.credentials must be(Some(UsernamePassword(credentials.username, None)))
-    ResolversDao.credentials(resolver) must be(Some(credentials))
+    resolversDao.credentials(resolver) must be(Some(credentials))
   }
 
   "with username and password" in {
@@ -167,18 +163,18 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
       password = Some("masked")
     )))
 
-    ResolversDao.credentials(resolver) must be(Some(credentials))
+    resolversDao.credentials(resolver) must be(Some(credentials))
   }
 
   "validates bad URL" in {
-    ResolversDao.validate(
+    resolversDao.validate(
       systemUser,
       createResolverForm(org).copy(uri = "foo")
     ) must be(Seq("URI must start with http"))
   }
 
   "validates duplicate public resolver" in {
-    ResolversDao.validate(
+    resolversDao.validate(
       systemUser,
       createResolverForm(org).copy(
         visibility = Visibility.Public,
@@ -192,7 +188,7 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
     val resolver = createResolver(org)(
       createResolverForm(org = org)
     )
-    ResolversDao.validate(
+    resolversDao.validate(
       systemUser,
       createResolverForm(org).copy(
         visibility = Visibility.Private,
@@ -203,7 +199,7 @@ class ResolversDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
   }
 
   "validates access to org" in {
-    ResolversDao.validate(
+    resolversDao.validate(
       createUser(),
       createResolverForm(org).copy(
         visibility = Visibility.Private

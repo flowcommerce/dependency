@@ -1,21 +1,24 @@
 package controllers
 
 import db.{Authorization, OrganizationsDao, ProjectsDao}
-import com.bryzek.dependency.api.lib.Github
-import com.bryzek.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.dependency.api.lib.Github
+import io.flow.error.v0.models.json._
 import io.flow.github.v0.models.json._
-import io.flow.play.controllers.IdentifiedRestController
-import io.flow.play.util.Validation
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
 import play.api.mvc._
 import play.api.libs.json._
+
 import scala.concurrent.Future
 
 class Repositories @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  val github: Github
-) extends Controller with IdentifiedRestController {
+  val github: Github,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  projectsDao: ProjectsDao,
+  organizationsDao: OrganizationsDao
+) extends FlowController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -33,7 +36,7 @@ class Repositories @javax.inject.Inject() (
       }
     } else {
       val auth = Authorization.User(request.user.id)
-      val org = organizationId.flatMap { OrganizationsDao.findById(auth, _)}
+      val org = organizationId.flatMap { organizationsDao.findById(auth, _)}
 
       // Set limit to 1 if we are guaranteed at most 1 record back
       val actualLimit = if (offset == 0 && !name.isEmpty && !owner.isEmpty) { 1 } else { limit }
@@ -51,8 +54,8 @@ class Repositories @javax.inject.Inject() (
           case None => true
           case Some(org) => {
             existingProject.isEmpty ||
-            existingProject == Some(true) && !ProjectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty ||
-            existingProject == Some(false) && ProjectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty
+            existingProject == Some(true) && !projectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty ||
+            existingProject == Some(false) && projectsDao.findByOrganizationKeyAndName(auth, org.id, r.name).isEmpty
           }
         })
       }.map { results =>

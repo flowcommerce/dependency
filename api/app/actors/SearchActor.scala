@@ -1,9 +1,13 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
-import db.{Authorization, BinariesDao, ItemForm, ItemsDao, LibrariesDao, ProjectsDao}
+import javax.inject.Inject
+
+import io.flow.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
+import db._
 import play.api.Logger
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
+
+import scala.concurrent.ExecutionContext
 
 object SearchActor {
 
@@ -17,29 +21,39 @@ object SearchActor {
 
 }
 
-class SearchActor extends Actor with Util {
+class SearchActor @Inject()(
+  binariesDao: BinariesDao,
+  librariesDao: LibrariesDao,
+  projectsDao: ProjectsDao,
+  itemsDao: ItemsDao,
+  usersDao: UsersDao
+) extends Actor with Util {
+
+
+  lazy val SystemUser = usersDao.systemUser
 
   def receive = {
 
+
     case m @ SearchActor.Messages.SyncBinary(id) => withErrorHandler(m) {
       println(s"SearchActor.Messages.SyncBinary($id)")
-      BinariesDao.findById(Authorization.All, id) match {
-        case None => ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, id)
-        case Some(binary) => ItemsDao.replaceBinary(MainActor.SystemUser, binary)
+      binariesDao.findById(Authorization.All, id) match {
+        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
+        case Some(binary) => itemsDao.replaceBinary(SystemUser, binary)
       }
     }
 
     case m @ SearchActor.Messages.SyncLibrary(id) => withErrorHandler(m) {
-      LibrariesDao.findById(Authorization.All, id) match {
-        case None => ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, id)
-        case Some(library) => ItemsDao.replaceLibrary(MainActor.SystemUser, library)
+      librariesDao.findById(Authorization.All, id) match {
+        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
+        case Some(library) => itemsDao.replaceLibrary(SystemUser, library)
       }
     }
 
     case m @ SearchActor.Messages.SyncProject(id) => withErrorHandler(m) {
-      ProjectsDao.findById(Authorization.All, id) match {
-        case None => ItemsDao.deleteByObjectId(Authorization.All, MainActor.SystemUser, id)
-        case Some(project) => ItemsDao.replaceProject(MainActor.SystemUser, project)
+      projectsDao.findById(Authorization.All, id) match {
+        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
+        case Some(project) => itemsDao.replaceProject(SystemUser, project)
       }
     }
 

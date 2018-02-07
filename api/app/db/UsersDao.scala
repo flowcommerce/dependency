@@ -1,14 +1,20 @@
 package db
 
-import com.bryzek.dependency.v0.models.UserForm
-import com.bryzek.dependency.actors.MainActor
-import io.flow.postgresql.{Query, OrderBy}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.v0.models.UserForm
+import io.flow.dependency.actors.MainActor
+import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.{Name, User, UserReference}
 import anorm._
 import play.api.db._
 import play.api.Play.current
 
-object UsersDao {
+@Singleton
+class UsersDao @Inject()(
+  db: Database,
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+){
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
   private[db] val AnonymousEmailAddress = "anonymous@bryzek.com"
@@ -30,15 +36,16 @@ object UsersDao {
            users.email,
            users.first_name as name_first,
            users.last_name as name_last,
-           users.avatar_url
+           users.avatar_url,
+           users.status
       from users
   """)
 
   private[this] val InsertQuery = """
     insert into users
-    (id, email, first_name, last_name, updated_by_user_id)
+    (id, email, first_name, last_name, updated_by_user_id, status)
     values
-    ({id}, {email}, {first_name}, {last_name}, {updated_by_user_id})
+    ({id}, {email}, {first_name}, {last_name}, {updated_by_user_id}, {status})
   """
 
   def validate(form: UserForm): Seq[String] = {
@@ -54,7 +61,7 @@ object UsersDao {
           Seq("Please enter a valid email address")
 
         } else {
-          UsersDao.findByEmail(email) match {
+          findByEmail(email) match {
             case None => Nil
             case Some(_) => Seq("Email is already registered")
           }
@@ -72,17 +79,18 @@ object UsersDao {
       case Nil => {
         val id = io.flow.play.util.IdGenerator("usr").randomId()
 
-        DB.withConnection { implicit c =>
+        db.withConnection { implicit c =>
           SQL(InsertQuery).on(
             'id -> id,
             'email -> form.email.map(_.trim),
             'first_name -> Util.trimmedString(form.name.flatMap(_.first)),
             'last_name -> Util.trimmedString(form.name.flatMap(_.last)),
-            'updated_by_user_id -> createdBy.getOrElse(UsersDao.anonymousUser).id
+            'updated_by_user_id -> createdBy.getOrElse(anonymousUser).id,
+            'status -> Option("inactive")
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.UserCreated(id.toString)
+        mainActor ! MainActor.Messages.UserCreated(id.toString)
 
         Right(
           findById(id).getOrElse {
@@ -121,7 +129,7 @@ object UsersDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[User] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "users",

@@ -1,9 +1,12 @@
-package com.bryzek.dependency.actors
+package io.flow.dependency.actors
 
-import com.bryzek.dependency.v0.models.{Resolver, Visibility}
+import javax.inject.Inject
+
+import io.flow.dependency.v0.models.{Resolver, Visibility}
 import io.flow.postgresql.Pager
-import db.{Authorization, LibrariesDao, ProjectLibrariesDao, OrganizationsDao, SubscriptionsDao, ResolversDao}
+import db._
 import akka.actor.Actor
+
 import scala.concurrent.ExecutionContext
 
 object ResolverActor {
@@ -19,14 +22,20 @@ object ResolverActor {
 
 }
 
-class ResolverActor extends Actor with Util {
+class ResolverActor @Inject()(
+  resolversDao: ResolversDao,
+  librariesDao: LibrariesDao,
+  projectLibrariesDao: ProjectLibrariesDao,
+  usersDao: UsersDao
+) extends Actor with Util {
 
   var dataResolver: Option[Resolver] = None
+  lazy val SystemUser = usersDao.systemUser
 
   def receive = {
 
     case m @ ResolverActor.Messages.Data(id) => withErrorHandler(m.toString) {
-      dataResolver = ResolversDao.findById(Authorization.All, id)
+      dataResolver = resolversDao.findById(Authorization.All, id)
     }
 
     case m @ ResolverActor.Messages.Created => withErrorHandler(m.toString) {
@@ -40,9 +49,9 @@ class ResolverActor extends Actor with Util {
     case m @ ResolverActor.Messages.Deleted => withErrorHandler(m.toString) {
       dataResolver.foreach { resolver =>
         Pager.create { offset =>
-          LibrariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
+          librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
         }.foreach { library =>
-          LibrariesDao.delete(MainActor.SystemUser, library)
+          librariesDao.delete(SystemUser, library)
         }
       }
 
@@ -66,7 +75,7 @@ class ResolverActor extends Actor with Util {
       }
 
       Pager.create { offset =>
-        ProjectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
+        projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
       }.foreach { projectLibrary =>
         sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
       }

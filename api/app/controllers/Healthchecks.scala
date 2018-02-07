@@ -1,18 +1,24 @@
 package controllers
 
-import io.flow.common.v0.models.Healthcheck
-import io.flow.common.v0.models.json._
+import javax.inject.{Inject, Singleton}
 
-import play.api._
+import io.flow.healthcheck.v0.models.json._
+import io.flow.healthcheck.v0.models.Healthcheck
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
-class Healthchecks extends Controller {
+@Singleton
+class Healthchecks @Inject() (
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends FlowController {
 
   private val HealthyJson = Json.toJson(Healthcheck(status = "healthy"))
 
-  def getHealthcheck() = Action { request =>
-    com.bryzek.dependency.actors.MainActor.ref
+  def getHealthcheck() = Action { _ =>
     Ok(HealthyJson)
   }
 

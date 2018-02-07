@@ -1,12 +1,15 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Sync, SyncEvent}
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.v0.models.{Sync, SyncEvent}
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy}
+import io.flow.postgresql.{OrderBy, Query}
 import anorm._
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
+
 import scala.util.{Failure, Success, Try}
 
 case class SyncForm(
@@ -15,7 +18,10 @@ case class SyncForm(
   event: SyncEvent
 )
 
-object SyncsDao {
+@Singleton
+class SyncsDao @Inject()(
+  db: Database
+) {
 
   private[this] val BaseQuery = Query(s"""
     select syncs.id,
@@ -66,7 +72,7 @@ object SyncsDao {
   private[this] def createInternal(createdBy: UserReference, form: SyncForm): String = {
     val id = io.flow.play.util.IdGenerator("syn").randomId()
 
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       SQL(InsertQuery).on(
         'id -> id,
         'type -> form.`type`,
@@ -80,7 +86,7 @@ object SyncsDao {
   }
 
   def purgeOld() {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       SQL(PurgeQuery).execute()
     }
   }
@@ -98,7 +104,7 @@ object SyncsDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Sync] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       Standards.query(
         BaseQuery,
         tableName = "syncs",
@@ -112,7 +118,7 @@ object SyncsDao {
         equals("syncs.object_id", objectId).
         optionalText("syncs.event", event).
         as(
-          com.bryzek.dependency.v0.anorm.parsers.Sync.parser().*
+          io.flow.dependency.v0.anorm.parsers.Sync.parser().*
         )
     }
   }

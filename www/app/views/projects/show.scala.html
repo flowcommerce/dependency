@@ -1,19 +1,19 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  project: com.bryzek.dependency.v0.models.Project,
-  recommendations: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Recommendation],
-  binaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectBinary],
-  libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectLibrary],
-  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+  data: io.flow.dependency.www.lib.UiData,
+  project: io.flow.dependency.v0.models.Project,
+  recommendations: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Recommendation],
+  binaries: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.ProjectBinary],
+  libraries: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.ProjectLibrary],
+  lastCompletedSync: Option[io.flow.dependency.v0.models.Sync]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some(project.name))) {
 
   <div class="pull-right">
-    @if(com.bryzek.dependency.www.lib.Permissions.Project.edit(project, data.user)) {
+    @if(io.flow.dependency.www.lib.Permissions.Project.edit(project, data.user)) {
       <a href="@routes.ProjectsController.edit(project.id)">Edit</a>
     }
-    @if(com.bryzek.dependency.www.lib.Permissions.Project.delete(project, data.user)) {
+    @if(io.flow.dependency.www.lib.Permissions.Project.delete(project, data.user)) {
       | <a class="delete" data-confirm="Are you sure?" href="@routes.ProjectsController.postDelete(project.id)">Delete</a>
     }
 
@@ -50,7 +50,7 @@
 	</thead>
         @recommendations.items.map { rec =>
           <tr>
-            <td><a href="@data.urls.recommendation(rec)">@com.bryzek.dependency.lib.Text.truncate(rec.name, 50)</a></td>
+            <td><a href="@data.urls.recommendation(rec)">@io.flow.dependency.lib.Text.truncate(rec.name, 50)</a></td>
             <td>@rec.from</td>
             <td>@rec.to</td>
           </tr>
@@ -83,7 +83,7 @@
 	      }
             </td>
             <td>@pb.version</td>
-            <td><a href="@com.bryzek.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, pb.path)">@pb.path</a></td>
+            <td><a href="@io.flow.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, pb.path)">@pb.path</a></td>
           </tr>
         }
         </table>
@@ -123,7 +123,7 @@
             </td>
             <td>@lib.version</td>
             <td>@lib.crossBuildVersion.getOrElse("-")</td>
-            <td><a href="@com.bryzek.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, lib.path)">@lib.path</a></td>
+            <td><a href="@io.flow.dependency.www.lib.Config.scmsUrl(project.scms, project.uri, lib.path)">@lib.path</a></td>
           </tr>
         }
         </table>

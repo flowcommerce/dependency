@@ -1,6 +1,6 @@
-package com.bryzek.dependency.www.lib
+package io.flow.dependency.www.lib
 
-import com.bryzek.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, ProjectSummary, Recommendation, RecommendationType, Scms}
+import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, ProjectSummary, Recommendation, RecommendationType, Scms}
 import io.flow.play.util.{Config => FlowConfig}
 import java.net.URLEncoder
 

@@ -1,13 +1,13 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  resolver: com.bryzek.dependency.v0.models.Resolver,
-  libraries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Library]
+  data: io.flow.dependency.www.lib.UiData,
+  resolver: io.flow.dependency.v0.models.Resolver,
+  libraries: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Library]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some("Resolver"))) {
 
   <div class="pull-right">
-    @if(com.bryzek.dependency.www.lib.Permissions.Resolver.delete(resolver, data.user)) {
+    @if(io.flow.dependency.www.lib.Permissions.Resolver.delete(resolver, data.user)) {
       <a class="delete" data-confirm="Are you sure?" href="@routes.ResolversController.postDelete(resolver.id)">Delete</a>
     }
   </div>
@@ -25,9 +25,9 @@
         N/A
       } else {
         @{resolver.credentials.get match {
-          case com.bryzek.dependency.v0.models.UsernamePassword(username, None) => s"Username: $username"
-          case com.bryzek.dependency.v0.models.UsernamePassword(username, Some(_)) => s"Username: $username, password: masked"
-          case com.bryzek.dependency.v0.models.CredentialsUndefinedType(_) => "N/A"
+          case io.flow.dependency.v0.models.UsernamePassword(username, None) => s"Username: $username"
+          case io.flow.dependency.v0.models.UsernamePassword(username, Some(_)) => s"Username: $username, password: masked"
+          case io.flow.dependency.v0.models.CredentialsUndefinedType(_) => "N/A"
         }}
       }
     </li>

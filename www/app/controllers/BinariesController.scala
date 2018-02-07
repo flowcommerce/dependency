@@ -1,29 +1,28 @@
 package controllers
 
-import com.bryzek.dependency.v0.errors.UnitResponse
-import com.bryzek.dependency.v0.models.{Binary, SyncEvent}
-import com.bryzek.dependency.www.lib.{Config, DependencyClientProvider}
-import io.flow.play.util.{Pagination, PaginatedCollection}
-import scala.concurrent.Future
-
-import play.api._
-import play.api.i18n.MessagesApi
+import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.models.{Binary, SyncEvent}
+import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
+import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
 
-class BinariesController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+import scala.concurrent.{ExecutionContext, Future}
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+class BinariesController @javax.inject.Inject()(
+  tokenClient: io.flow.token.v0.interfaces.Client,
+  dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section = Some(com.bryzek.dependency.www.lib.Section.Binaries)
+  override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 
-  def index(page: Int = 0) = Identified.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       binaries <- dependencyClient(request).binaries.get(
-        limit = Pagination.DefaultLimit+1,
+        limit = Pagination.DefaultLimit + 1,
         offset = page * Pagination.DefaultLimit
       )
     } yield {
@@ -40,17 +39,17 @@ class BinariesController @javax.inject.Inject() (
     id: String,
     versionsPage: Int = 0,
     projectsPage: Int = 0
-  ) = Identified.async { implicit request =>
+  ) = User.async { implicit request =>
     withBinary(request, id) { binary =>
       for {
         versions <- dependencyClient(request).binaryVersions.get(
           binaryId = Some(id),
-          limit = Config.VersionsPerPage+1,
+          limit = Config.VersionsPerPage + 1,
           offset = versionsPage * Config.VersionsPerPage
         )
         projectBinaries <- dependencyClient(request).projectBinaries.get(
           binaryId = Some(id),
-          limit = Pagination.DefaultLimit+1,
+          limit = Pagination.DefaultLimit + 1,
           offset = projectsPage * Pagination.DefaultLimit
         )
         syncs <- dependencyClient(request).syncs.get(

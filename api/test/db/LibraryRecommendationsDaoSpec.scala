@@ -1,28 +1,22 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Project, LibraryForm, LibraryVersion, VersionForm}
-import play.api.test._
-import play.api.test.Helpers._
-import org.scalatest._
-import org.scalatestplus.play._
+import util.DependencySpec
 
-class LibraryRecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with Helpers {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+class LibraryRecommendationsDaoSpec extends  DependencySpec {
 
   lazy val org = createOrganization()
 
   def verify(actual: Seq[LibraryRecommendation], expected: Seq[LibraryRecommendation]) {
-    (actual == expected) match {
+    actual == expected match {
       case true => {}
       case false => {
-        (actual.size == expected.size) match {
+        actual.size == expected.size match {
           case false => {
             sys.error(s"Expected[${expected.size}] recommendations but got [${actual.size}]")
           }
           case true => {
-            (actual zip expected).map { case (a, b) =>
-              (a == b) match {
+            (actual zip expected).foreach { case (a, b) =>
+              a == b match {
                 case true => {}
                 case false => {
                   sys.error(s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]")
@@ -37,14 +31,14 @@ class LibraryRecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with He
   
   "no-op if nothing to upgrade" in {
     val project = createProject(org)
-    LibraryRecommendationsDao.forProject(project) must be(Nil)
+    libraryRecommendationsDao.forProject(project) must be(Nil)
   }
 
   "ignores earlier versions of library" in {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.last)
-    LibraryRecommendationsDao.forProject(project) must be(Nil)
+    libraryRecommendationsDao.forProject(project) must be(Nil)
   }
 
   "with library to upgrade" in {
@@ -52,7 +46,7 @@ class LibraryRecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with He
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     verify(
-      LibraryRecommendationsDao.forProject(project),
+      libraryRecommendationsDao.forProject(project),
       Seq(
         LibraryRecommendation(
           library = library,
@@ -71,7 +65,7 @@ class LibraryRecommendationsDaoSpec extends PlaySpec with OneAppPerSuite with He
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     verify(
-      LibraryRecommendationsDao.forProject(project),
+      libraryRecommendationsDao.forProject(project),
       Seq(
         LibraryRecommendation(
           library = library,

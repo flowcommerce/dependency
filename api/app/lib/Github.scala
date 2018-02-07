@@ -1,7 +1,9 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
+
+import javax.inject.Inject
 
 import db.{GithubUsersDao, InternalTokenForm, TokensDao, UsersDao}
-import com.bryzek.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
+import io.flow.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
 import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.play.util.{Config, IdGenerator}
 import io.flow.github.oauth.v0.{Client => GithubOauthClient}
@@ -9,8 +11,10 @@ import io.flow.github.oauth.v0.models.AccessTokenForm
 import io.flow.github.v0.{Client => GithubClient}
 import io.flow.github.v0.errors.UnitResponse
 import io.flow.github.v0.models.{Repository => GithubRepository, User => GithubUser}
+
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logger
+import play.api.libs.ws.WSClient
 
 case class GithubUserData(
   githubId: Long,
@@ -23,8 +27,9 @@ case class GithubUserData(
 
 object GithubHelper {
 
-  def apiClient(oauthToken: String): GithubClient = {
+  def apiClient(wsClient: WSClient, oauthToken: String): GithubClient = {
     new GithubClient(
+      wsClient,
       baseUrl = "https://api.github.com",
       defaultHeaders = Seq(
         ("Authorization" -> s"token $oauthToken")
@@ -47,7 +52,8 @@ object GithubHelper {
 
 }
 
-trait Github {
+
+abstract class Github {
 
   /**
     * Fetches the contents of the file at the specified path from the
@@ -70,23 +76,27 @@ trait Github {
     * 
     * @param code The oauth authorization code from github
     */
-  def getUserFromCode(code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], User]] = {
+  def getUserFromCode(
+    usersDao: UsersDao,
+    githubUsersDao: GithubUsersDao,
+    tokensDao: TokensDao,
+    code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], User]] = {
     getGithubUserFromCode(code).map {
       case Left(errors) => Left(errors)
       case Right(githubUserWithToken) => {
-        val userResult: Either[Seq[String], User] = UsersDao.findByGithubUserId(githubUserWithToken.githubId) match {
+        val userResult: Either[Seq[String], User] = usersDao.findByGithubUserId(githubUserWithToken.githubId) match {
           case Some(user) => {
             Right(user)
           }
           case None => {
             githubUserWithToken.emails.headOption flatMap { email =>
-              UsersDao.findByEmail(email)
+              usersDao.findByEmail(email)
             } match {
               case Some(user) => {
                 Right(user)
               }
               case None => {
-                UsersDao.create(
+                usersDao.create(
                   createdBy = None,
                   form = UserForm(
                     email = githubUserWithToken.emails.headOption,
@@ -103,7 +113,7 @@ trait Github {
             Left(errors)
           }
           case Right(user) => {
-            GithubUsersDao.upsertById(
+            githubUsersDao.upsertById(
               createdBy = None,
               form = GithubUserForm(
                 userId = user.id,
@@ -112,7 +122,7 @@ trait Github {
               )
             )
 
-            TokensDao.setLatestByTag(
+            tokensDao.setLatestByTag(
               createdBy = UserReference(id = user.id),
               form = InternalTokenForm.GithubOauth(
                 userId = user.id,
@@ -175,13 +185,17 @@ trait Github {
 
 }
 
-case class DefaultGithub() extends Github {
 
-  private[this] lazy val config = play.api.Play.current.injector.instanceOf[Config]
+class DefaultGithub @Inject() (
+  wsClient: WSClient,
+  config: Config,
+  tokensDao: TokensDao) extends Github {
+
   private[this] lazy val clientId = config.requiredString("github.dependency.client.id")
   private[this] lazy val clientSecret = config.requiredString("github.dependency.client.secret")
 
   private[this] lazy val oauthClient = new GithubOauthClient(
+    wsClient,
     baseUrl = "https://github.com",
     defaultHeaders = Seq(
       ("Accept" -> "application/json")
@@ -196,7 +210,7 @@ case class DefaultGithub() extends Github {
         code = code
       )
     ).flatMap { response =>
-      val client = GithubHelper.apiClient(response.accessToken)
+      val client = GithubHelper.apiClient(wsClient, response.accessToken)
       for {
         githubUser <- client.users.getUser()
         emails <- client.userEmails.get()
@@ -225,13 +239,13 @@ case class DefaultGithub() extends Github {
     oauthToken(user) match {
       case None => Future { Nil }
       case Some(token) => {
-        GithubHelper.apiClient(token).repositories.getUserAndRepos(page)
+        GithubHelper.apiClient(wsClient, token).repositories.getUserAndRepos(page)
       }
     }
   }
 
   override def oauthToken(user: UserReference): Option[String] = {
-    TokensDao.getCleartextGithubOauthTokenByUserId(user.id)
+    tokensDao.getCleartextGithubOauthTokenByUserId(user.id)
   }
 
   override def file(
@@ -251,7 +265,7 @@ case class DefaultGithub() extends Github {
             None
           }
           case Some(token) => {
-            GithubHelper.apiClient(token).contents.getContentsByPath(
+            GithubHelper.apiClient(wsClient, token).contents.getContentsByPath(
               owner = repo.owner,
               repo = repo.project,
               path = path

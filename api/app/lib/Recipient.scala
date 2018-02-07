@@ -1,4 +1,4 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import db.{UserIdentifiersDao, UsersDao}
 import io.flow.common.v0.models.{Name, User}
@@ -23,13 +23,13 @@ case class Recipient(
 
 object Recipient {
 
-  def fromUser(user: User): Option[Recipient] = {
+  def fromUser(userIdentifiersDao: UserIdentifiersDao, usersDao: UsersDao, user: User): Option[Recipient] = {
     user.email.map { email =>
       Recipient(
         email = email,
         name = user.name,
         userId = user.id,
-        identifier = UserIdentifiersDao.latestForUser(UsersDao.systemUser, user).value
+        identifier = userIdentifiersDao.latestForUser(usersDao.systemUser, user).value
       )
     }
   }

@@ -1,19 +1,27 @@
 package controllers
 
+import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
 import db.SyncsDao
-import com.bryzek.dependency.actors.MainActor
-import io.flow.play.controllers.IdentifiedRestController
-import com.bryzek.dependency.v0.models.SyncEvent
-import com.bryzek.dependency.v0.models.json._
+import io.flow.dependency.actors.MainActor
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.dependency.v0.models.SyncEvent
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
+import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
-class Syncs @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController with Helpers {
+class Syncs @javax.inject.Inject()(
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  syncsDao: SyncsDao,
+  librariesHelper: LibrariesHelper,
+  binaryHelper: BinaryHelper,
+  projectHelper: ProjectHelper,
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+) extends FlowController {
 
   def get(
     objectId: Option[String],
@@ -23,7 +31,7 @@ class Syncs @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        SyncsDao.findAll(
+        syncsDao.findAll(
           objectId = objectId,
           event = event,
           limit = limit,
@@ -34,22 +42,22 @@ class Syncs @javax.inject.Inject() (
   }
 
   def postBinariesById(id: String) = Identified { request =>
-    withBinary(request.user, id) { binary =>
-      MainActor.ref ! MainActor.Messages.BinarySync(binary.id)
+    binaryHelper.withBinary(request.user, id) { binary =>
+      mainActor ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }
   }
 
   def postLibrariesById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
-      MainActor.ref ! MainActor.Messages.LibrarySync(library.id)
+    librariesHelper.withLibrary(request.user, id) { library =>
+      mainActor ! MainActor.Messages.LibrarySync(library.id)
       NoContent
     }
   }
 
   def postProjectsById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
-      MainActor.ref ! MainActor.Messages.ProjectSync(id)
+    projectHelper.withProject(request.user, id) { project =>
+      mainActor ! MainActor.Messages.ProjectSync(id)
       NoContent
     }
   }

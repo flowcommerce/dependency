@@ -1,9 +1,9 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  binary: com.bryzek.dependency.v0.models.Binary,
-  versions: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.BinaryVersion],
-  projectBinaries: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.ProjectBinary],
-  lastCompletedSync: Option[com.bryzek.dependency.v0.models.Sync]
+  data: io.flow.dependency.www.lib.UiData,
+  binary: io.flow.dependency.v0.models.Binary,
+  versions: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.BinaryVersion],
+  projectBinaries: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.ProjectBinary],
+  lastCompletedSync: Option[io.flow.dependency.v0.models.Sync]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some(s"Binary: ${binary.name}"))) {

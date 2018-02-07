@@ -1,15 +1,19 @@
 package controllers
 
 import db.ItemsDao
-import com.bryzek.dependency.v0.models.json._
+import io.flow.dependency.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
 class Items @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  itemsDao: ItemsDao
+) extends FlowController with BaseIdentifiedController {
 
   def get(
     q: Option[String],
@@ -18,7 +22,7 @@ class Items @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ItemsDao.findAll(
+        itemsDao.findAll(
           authorization(request),
           q = q,
           limit = limit,

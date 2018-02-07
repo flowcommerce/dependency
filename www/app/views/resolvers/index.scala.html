@@ -1,6 +1,6 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  resolvers: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Resolver]
+  data: io.flow.dependency.www.lib.UiData,
+  resolvers: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Resolver]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some("Resolvers"))) {

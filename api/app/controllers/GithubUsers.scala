@@ -1,19 +1,27 @@
 package controllers
 
-import com.bryzek.dependency.api.lib.Github
-import com.bryzek.dependency.v0.models.GithubAuthenticationForm
-import com.bryzek.dependency.v0.models.json._
+import db.{GithubUsersDao, TokensDao, UsersDao}
+import io.flow.dependency.api.lib.Github
+import io.flow.dependency.v0.models.GithubAuthenticationForm
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
-import io.flow.play.util.Validation
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
 import play.api.mvc._
 import play.api.libs.json._
+import io.flow.error.v0.models.json._
+
 import scala.concurrent.Future
 
 class GithubUsers @javax.inject.Inject() (
-  val config: io.flow.play.util.Config,
-  val tokenClient: io.flow.token.v0.interfaces.Client,
-  val github: Github
-) extends Controller {
+  github: Github,
+  val config: Config,
+  usersDao: UsersDao,
+  githubUsersDao: GithubUsersDao,
+  tokensDao: TokensDao,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends FlowController  {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -24,7 +32,7 @@ class GithubUsers @javax.inject.Inject() (
       }
       case s: JsSuccess[GithubAuthenticationForm] => {
         val form = s.get
-        github.getUserFromCode(form.code).map {
+        github.getUserFromCode(usersDao, githubUsersDao, tokensDao, form.code).map {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(user) => Ok(Json.toJson(user))
         }

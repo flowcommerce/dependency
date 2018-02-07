@@ -1,12 +1,14 @@
 package db
 
-import com.bryzek.dependency.v0.models.Reference
-import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy}
-import com.bryzek.dependency.v0.models.Publication
-import org.joda.time.DateTime
+import javax.inject.{Inject, Singleton}
 
+import io.flow.dependency.v0.models.Reference
+import io.flow.common.v0.models.UserReference
+import io.flow.postgresql.{OrderBy, Query}
+import io.flow.dependency.v0.models.Publication
+import org.joda.time.DateTime
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
@@ -23,7 +25,11 @@ case class LastEmail(
   createdAt: DateTime
 )
 
-object LastEmailsDao {
+@Singleton
+class LastEmailsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers]
+){
 
   private[this] val BaseQuery = Query(s"""
     select last_emails.*
@@ -41,9 +47,9 @@ object LastEmailsDao {
     createdBy: UserReference,
     form: LastEmailForm
   ): LastEmail = {
-    val id = DB.withTransaction { implicit c =>
+    val id = db.withTransaction { implicit c =>
       findByUserIdAndPublication(form.userId, form.publication).foreach { rec =>
-        DbHelpers.delete(c, "last_emails", createdBy.id, rec.id)
+        dbHelpersProvider.get.delete(c, "last_emails", createdBy.id, rec.id)
       }
       create(createdBy, form)
     }
@@ -53,7 +59,7 @@ object LastEmailsDao {
   }
 
   def delete(deletedBy: UserReference, rec: LastEmail) {
-    DbHelpers.delete("last_emails", deletedBy.id, rec.id)
+    dbHelpersProvider.get.delete("last_emails", deletedBy.id, rec.id)
   }
 
   private[this] def create(
@@ -90,7 +96,7 @@ object LastEmailsDao {
     offset: Long = 0
   ): Seq[LastEmail] = {
 
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       BaseQuery.
         equals("last_emails.id", id).
         optionalIn("last_emails.id", ids).
@@ -105,8 +111,8 @@ object LastEmailsDao {
 
   private[this] val parser: RowParser[LastEmail] = {
     SqlParser.str("id") ~
-    com.bryzek.dependency.v0.anorm.parsers.Reference.parser("user_id") ~
-    com.bryzek.dependency.v0.anorm.parsers.Publication.parser() ~
+    io.flow.dependency.v0.anorm.parsers.Reference.parser("user_id") ~
+    io.flow.dependency.v0.anorm.parsers.Publication.parser() ~
     SqlParser.get[DateTime]("created_at") map {
       case id ~ user ~ publication ~ createdAt => {
         LastEmail(

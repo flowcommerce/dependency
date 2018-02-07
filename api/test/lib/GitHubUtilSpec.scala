@@ -1,22 +1,22 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
 import io.flow.common.v0.models.Name
-import org.specs2.mutable._
+import util.DependencySpec
 
-class GithubUtilSpec extends Specification {
+class GithubUtilSpec extends DependencySpec {
 
   "GithubHelper.parseName" in {
-    GithubHelper.parseName("") must beEqualTo(Name())
-    GithubHelper.parseName("  ") must beEqualTo(Name())
-    GithubHelper.parseName("mike") must beEqualTo(Name(first = Some("mike")))
-    GithubHelper.parseName("mike bryzek") must beEqualTo(Name(first = Some("mike"), last = Some("bryzek")))
-    GithubHelper.parseName("   mike    maciej    bryzek  ") must beEqualTo(
+    GithubHelper.parseName("") must be(Name())
+    GithubHelper.parseName("  ") must be(Name())
+    GithubHelper.parseName("mike") must be(Name(first = Some("mike")))
+    GithubHelper.parseName("mike bryzek") must be(Name(first = Some("mike"), last = Some("bryzek")))
+    GithubHelper.parseName("   mike    maciej    bryzek  ") must be(
       Name(first = Some("mike"), last = Some("maciej bryzek"))
     )
   }
 
   "parseUri" in {
-    GithubUtil.parseUri("http://github.com/mbryzek/apidoc") must beEqualTo(
+    GithubUtil.parseUri("http://github.com/mbryzek/apidoc") must be(
       Right(
         GithubUtil.Repository("mbryzek", "apidoc")
       )
@@ -24,19 +24,19 @@ class GithubUtilSpec extends Specification {
   }
 
   "parseUri for invalid URLs" in {
-    GithubUtil.parseUri("   ") must beEqualTo(
+    GithubUtil.parseUri("   ") must be(
       Left(s"URI cannot be an empty string")
     )
 
-    GithubUtil.parseUri("http://github.com") must beEqualTo(
+    GithubUtil.parseUri("http://github.com") must be(
       Left("URI path cannot be empty for uri[http://github.com]")
     )
 
-    GithubUtil.parseUri("http://github.com/mbryzek") must beEqualTo(
+    GithubUtil.parseUri("http://github.com/mbryzek") must be(
       Left("Invalid uri path[http://github.com/mbryzek] missing project name")
     )
 
-    GithubUtil.parseUri("http://github.com/mbryzek/apidoc/other") must beEqualTo(
+    GithubUtil.parseUri("http://github.com/mbryzek/apidoc/other") must be(
       Left("Invalid uri path[http://github.com/mbryzek/apidoc/other] - expected exactly two path components")
     )
   }

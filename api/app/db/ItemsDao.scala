@@ -1,14 +1,18 @@
 package db
 
-import com.bryzek.dependency.v0.models.{Binary, BinarySummary, Item, ItemSummary, ItemSummaryUndefinedType, Library, LibrarySummary}
-import com.bryzek.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, ResolverSummary, Visibility}
-import com.bryzek.dependency.v0.models.json._
+import javax.inject.{Inject, Singleton}
+
+import io.flow.dependency.v0.models.{Binary, BinarySummary, Item, ItemSummary, ItemSummaryUndefinedType, Library, LibrarySummary}
+import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, ResolverSummary, Visibility}
+import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
-import io.flow.postgresql.{Query, OrderBy}
+import io.flow.postgresql.{OrderBy, Query}
 import anorm._
+import com.google.inject.Provider
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
+
 import scala.util.{Failure, Success, Try}
 
 case class ItemForm(
@@ -18,7 +22,14 @@ case class ItemForm(
   contents: String
 )
 
-object ItemsDao {
+@Singleton
+class ItemsDao @Inject()(
+  db: Database,
+  dbHelpersProvider: Provider[DbHelpers],
+  librariesDaoProvider: Provider[LibrariesDao],
+  projectsDaoProvider: Provider[ProjectsDao],
+  resolversDaoProvider: Provider[ResolversDao]
+){
 
   private[this] val BaseQuery = Query(s"""
     select items.id,
@@ -67,10 +78,10 @@ object ItemsDao {
         Visibility.Public
       }
       case LibrarySummary(id, org, groupId, artifactId) => {
-        LibrariesDao.findById(Authorization.All, id).map(_.resolver.visibility).getOrElse(Visibility.Private)
+        librariesDaoProvider.get.findById(Authorization.All, id).map(_.resolver.visibility).getOrElse(Visibility.Private)
       }
       case ProjectSummary(id, org, name) => {
-        ProjectsDao.findById(Authorization.All, id).map(_.visibility).getOrElse(Visibility.Private)
+        projectsDaoProvider.get.findById(Authorization.All, id).map(_.visibility).getOrElse(Visibility.Private)
       }
       case ItemSummaryUndefinedType(name) => {
         Visibility.Private
@@ -79,7 +90,7 @@ object ItemsDao {
   }
 
   private[this] def visibility(resolver: ResolverSummary): Visibility = {
-    ResolversDao.findById(Authorization.All, resolver.id).map(_.visibility).getOrElse(Visibility.Private)
+    resolversDaoProvider.get.findById(Authorization.All, resolver.id).map(_.visibility).getOrElse(Visibility.Private)
   }
 
   def replaceBinary(user: UserReference, binary: Binary): Item = {
@@ -137,8 +148,8 @@ object ItemsDao {
     )
   }
 
-  private[db] def replace(user: UserReference, form: ItemForm): Item = {
-    DB.withConnection { implicit c =>
+  def replace(user: UserReference, form: ItemForm): Item = {
+    db.withConnection { implicit c =>
       findByObjectId(Authorization.All, objectId(form.summary)).map { item =>
         deleteWithConnection(user, item)(c)
       }
@@ -175,7 +186,7 @@ object ItemsDao {
   }
 
   def delete(deletedBy: UserReference, item: Item) {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       deleteWithConnection(deletedBy, item)(c)
     }
   }
@@ -183,7 +194,7 @@ object ItemsDao {
   private[this] def deleteWithConnection(deletedBy: UserReference, item: Item)(
     implicit c: java.sql.Connection
   ) {
-    DbHelpers.delete("items", deletedBy.id, item.id)
+    dbHelpersProvider.get.delete("items", deletedBy.id, item.id)
   }
 
   def deleteByObjectId(auth: Authorization, deletedBy: UserReference, objectId: String) {
@@ -210,7 +221,7 @@ object ItemsDao {
     limit: Long = 25,
     offset: Long = 0
   ): Seq[Item] = {
-    DB.withConnection { implicit c =>
+    db.withConnection { implicit c =>
       BaseQuery.
         and(auth.organizations("items.organization_id", Some("items.visibility")).sql).
         equals("items.id", id).
@@ -226,15 +237,15 @@ object ItemsDao {
     }
   }
 
-  private[this] def parser(): RowParser[com.bryzek.dependency.v0.models.Item] = {
+  private[this] def parser(): RowParser[io.flow.dependency.v0.models.Item] = {
     SqlParser.str("id") ~
-    com.bryzek.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization") ~
-    com.bryzek.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
+    io.flow.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization") ~
+    io.flow.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
     SqlParser.str("summary") ~
     SqlParser.str("label") ~
     SqlParser.str("description").? map {
       case id ~ organization ~ visibility ~ summary ~ label ~ description => {
-        com.bryzek.dependency.v0.models.Item(
+        io.flow.dependency.v0.models.Item(
           id = id,
           organization = organization,
           visibility = visibility,

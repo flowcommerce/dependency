@@ -1,19 +1,23 @@
 package controllers
 
+import controllers.helpers.ProjectHelper
 import db.{Authorization, ProjectsDao}
-import io.flow.play.controllers.IdentifiedRestController
-import io.flow.play.util.Validation
-import com.bryzek.dependency.v0.models.{Project, ProjectForm, ProjectPatchForm}
-import com.bryzek.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import play.api.mvc._
+import io.flow.dependency.v0.models.json._
+import io.flow.dependency.v0.models.{ProjectForm, ProjectPatchForm}
+import io.flow.error.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
+import play.api.mvc._
 
 @javax.inject.Singleton
 class Projects @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with IdentifiedRestController with Helpers {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  projectsDao: ProjectsDao,
+  projectHelper: ProjectHelper
+) extends FlowController {
 
   def get(
     id: Option[String],
@@ -31,7 +35,7 @@ class Projects @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        ProjectsDao.findAll(
+        projectsDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -51,7 +55,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       Ok(Json.toJson(project))
     }
   }
@@ -62,7 +66,7 @@ class Projects @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[ProjectForm] => {
-        ProjectsDao.create(request.user, s.get) match {
+        projectsDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(project) => Created(Json.toJson(project))
         }
@@ -71,7 +75,7 @@ class Projects @javax.inject.Inject() (
   }
 
   def patchById(id: String) = Identified(parse.json) { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectPatchForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -85,7 +89,7 @@ class Projects @javax.inject.Inject() (
             scms = patch.scms.getOrElse(project.scms),
             uri = patch.uri.getOrElse(project.uri)
           )
-          ProjectsDao.update(request.user, project, form) match {
+          projectsDao.update(request.user, project, form) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -95,13 +99,13 @@ class Projects @javax.inject.Inject() (
   }
 
   def putById(id: String) = Identified(parse.json) { request =>
-    withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
         }
         case s: JsSuccess[ProjectForm] => {
-          ProjectsDao.update(request.user, project, s.get) match {
+          projectsDao.update(request.user, project, s.get) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -111,8 +115,8 @@ class Projects @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withProject(request.user, id) { project =>
-      ProjectsDao.delete(request.user, project)
+    projectHelper.withProject(request.user, id) { project =>
+      projectsDao.delete(request.user, project)
       NoContent
     }
   }

@@ -1,9 +1,8 @@
-package com.bryzek.dependency.api.lib
+package io.flow.dependency.api.lib
 
-import com.bryzek.dependency.v0.models.BinaryForm
-import org.specs2.mutable._
+import util.DependencySpec
 
-class ProjectPluginsSbtScalaParserSpec extends Specification with Factories {
+class ProjectPluginsSbtScalaParserSpec extends DependencySpec {
 
   lazy val projectSummary = makeProjectSummary()
 
@@ -16,8 +15,8 @@ logLevel := Level.Warn
 
     "parse dependencies" in {
       val result = ProjectPluginsSbtScalaParser(projectSummary, "test.sbt", contents)
-      result.resolverUris must beEqualTo(Nil)
-      result.plugins must beEqualTo(Nil)
+      result.resolverUris must be(Nil)
+      result.plugins must be(Nil)
     }
 
   }
@@ -30,8 +29,8 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 
     "parse dependencies" in {
       val result = ProjectPluginsSbtScalaParser(projectSummary, "test.sbt", contents)
-      result.resolverUris must beEqualTo(Seq("http://repo.typesafe.com/typesafe/releases/"))
-      result.plugins must beEqualTo(Nil)
+      result.resolverUris must contain theSameElementsAs Seq("http://repo.typesafe.com/typesafe/releases/")
+      result.plugins must be(Nil)
     }
 
   }
@@ -50,17 +49,13 @@ addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "1.0.1")
 
     "parse dependencies" in {
       val result = ProjectPluginsSbtScalaParser(projectSummary, "test.sbt", contents)
-      result.resolverUris must beEqualTo(
-        Seq(
-          "http://repo.typesafe.com/typesafe/releases/",
-          "https://dl.bintray.com/sksamuel/sbt-plugins/"
-        )
+      result.resolverUris must contain theSameElementsAs Seq(
+        "http://repo.typesafe.com/typesafe/releases/",
+        "https://dl.bintray.com/sksamuel/sbt-plugins/"
       )
-      result.plugins must beEqualTo(
-        Seq(
-          Artifact(projectSummary, "test.sbt", "com.typesafe.play", "sbt-plugin", "2.4.3", false),
-          Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true)
-        )
+      result.plugins must contain theSameElementsAs Seq(
+        Artifact(projectSummary, "test.sbt", "com.typesafe.play", "sbt-plugin", "2.4.3", false),
+        Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true)
       )
     }
 

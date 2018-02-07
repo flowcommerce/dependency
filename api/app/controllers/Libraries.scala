@@ -1,19 +1,23 @@
 package controllers
 
+import controllers.helpers.LibrariesHelper
 import db.{Authorization, LibrariesDao}
-import io.flow.play.util.Validation
-import io.flow.common.v0.models.UserReference
-import com.bryzek.dependency.v0.models.{Library, LibraryForm}
-import com.bryzek.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import play.api.mvc._
+import io.flow.dependency.v0.models.LibraryForm
+import io.flow.dependency.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
+import play.api.mvc._
+import io.flow.error.v0.models.json._
 
 @javax.inject.Singleton
 class Libraries @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  librariesDao: LibrariesDao,
+  librariesHelper: LibrariesHelper
+) extends FlowController with BaseIdentifiedController {
 
   def get(
     id: Option[String],
@@ -27,7 +31,7 @@ class Libraries @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        LibrariesDao.findAll(
+        librariesDao.findAll(
           Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
@@ -43,7 +47,7 @@ class Libraries @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
+    librariesHelper.withLibrary(request.user, id) { library =>
       Ok(Json.toJson(library))
     }
   }
@@ -54,8 +58,8 @@ class Libraries @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[LibraryForm] => {
-        LibrariesDao.create(request.user, s.get) match {
-          case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+        librariesDao.create(request.user, s.get) match {
+          case Left(errors) => UnprocessableEntity(Json.toJson(Seq(Validation.errors(errors))))
           case Right(library) => Created(Json.toJson(library))
         }
       }
@@ -63,8 +67,8 @@ class Libraries @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withLibrary(request.user, id) { library =>
-      LibrariesDao.delete(request.user, library)
+    librariesHelper.withLibrary(request.user, id) { library =>
+      librariesDao.delete(request.user, library)
       NoContent
     }
   }

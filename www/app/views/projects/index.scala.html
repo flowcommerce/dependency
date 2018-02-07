@@ -1,6 +1,6 @@
 @(
-  data: com.bryzek.dependency.www.lib.UiData,
-  projects: io.flow.play.util.PaginatedCollection[com.bryzek.dependency.v0.models.Project]
+  data: io.flow.dependency.www.lib.UiData,
+  projects: io.flow.play.util.PaginatedCollection[io.flow.dependency.v0.models.Project]
 )(implicit flash: Flash, messages: Messages)
 
 @main(data.copy(title = Some("Projects"))) {

@@ -1,19 +1,24 @@
 package controllers
 
+import controllers.helpers.{OrganizationsHelper, UsersHelper}
 import db.OrganizationsDao
-import io.flow.play.util.Validation
-import com.bryzek.dependency.v0.models.{Organization, OrganizationForm}
-import com.bryzek.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import play.api.mvc._
+import io.flow.dependency.v0.models.OrganizationForm
+import io.flow.dependency.v0.models.json._
+import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
+import io.flow.error.v0.models.json._
+import play.api.mvc._
+import io.flow.error.v0.models.json._
 
-class Organizations @javax.inject.Inject() (
-  override val config: io.flow.play.util.Config,
-  override val tokenClient: io.flow.token.v0.interfaces.Client
-) extends Controller with BaseIdentifiedController {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+class Organizations @javax.inject.Inject()(
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  organizationsDao: OrganizationsDao,
+  organizationsHelper: OrganizationsHelper,
+  usersHelper: UsersHelper
+) extends FlowController with BaseIdentifiedController {
 
   def get(
     id: Option[String],
@@ -25,7 +30,7 @@ class Organizations @javax.inject.Inject() (
   ) = Identified { request =>
     Ok(
       Json.toJson(
-        OrganizationsDao.findAll(
+        organizationsDao.findAll(
           authorization(request),
           id = id,
           ids = optionals(ids),
@@ -39,14 +44,14 @@ class Organizations @javax.inject.Inject() (
   }
 
   def getById(id: String) = Identified { request =>
-    withOrganization(request.user, id) { organization =>
+    organizationsHelper.withOrganization(request.user, id) { organization =>
       Ok(Json.toJson(organization))
     }
   }
 
   def getUsersByUserId(userId: String) = Identified { request =>
-    withUser(userId) { user =>
-      Ok(Json.toJson(OrganizationsDao.upsertForUser(user)))
+    usersHelper.withUser(userId) { user =>
+      Ok(Json.toJson(organizationsDao.upsertForUser(user)))
     }
   }
 
@@ -56,7 +61,7 @@ class Organizations @javax.inject.Inject() (
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
       }
       case s: JsSuccess[OrganizationForm] => {
-        OrganizationsDao.create(request.user, s.get) match {
+        organizationsDao.create(request.user, s.get) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(organization) => Created(Json.toJson(organization))
         }
@@ -65,13 +70,13 @@ class Organizations @javax.inject.Inject() (
   }
 
   def putById(id: String) = Identified(parse.json) { request =>
-    withOrganization(request.user, id) { organization =>
+    organizationsHelper.withOrganization(request.user, id) { organization =>
       request.body.validate[OrganizationForm] match {
         case e: JsError => {
           UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
         }
         case s: JsSuccess[OrganizationForm] => {
-          OrganizationsDao.update(request.user, organization, s.get) match {
+          organizationsDao.update(request.user, organization, s.get) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             case Right(updated) => Ok(Json.toJson(updated))
           }
@@ -81,8 +86,8 @@ class Organizations @javax.inject.Inject() (
   }
 
   def deleteById(id: String) = Identified { request =>
-    withOrganization(request.user, id) { organization =>
-      OrganizationsDao.delete(request.user, organization)
+    organizationsHelper.withOrganization(request.user, id) { organization =>
+      organizationsDao.delete(request.user, organization)
       NoContent
     }
   }
