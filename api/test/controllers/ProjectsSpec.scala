@@ -24,5 +24,5 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
       identifiedClient().projects.get(id = Option(UUID.randomUUID.toString))
     ).map(_.id) must be(Nil)
   }
-  
+
 }
