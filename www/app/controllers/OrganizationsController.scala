@@ -20,7 +20,7 @@ class OrganizationsController @javax.inject.Inject() (
 
   override def section = None
 
-  def redirectToDashboard(org: String) = Identified { implicit request =>
+  def redirectToDashboard(org: String) = User { implicit request =>
     Redirect(routes.ApplicationController.index(organization = Some(org)))
   }
 
@@ -60,7 +60,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def create() = Identified { implicit request =>
+  def create() = User { implicit request =>
     Ok(
       views.html.organizations.create(
         uiData(request),

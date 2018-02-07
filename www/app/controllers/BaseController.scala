@@ -82,7 +82,7 @@ abstract class BaseController(
     implicit ec: ExecutionContext
   ): UiData = {
     val user = Await.result(
-      client.users.get(id = Some(request.user.id)),
+      dependencyClient(request).users.get(id = Some(request.user.id)),
       Duration(1, "seconds")
     ).headOption
 
