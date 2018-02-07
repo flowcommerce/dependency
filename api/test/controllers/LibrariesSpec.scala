@@ -2,6 +2,7 @@ package controllers
 
 import java.util.UUID
 
+import io.flow.common.v0.models.UserReference
 import play.api.test._
 import util.{DependencySpec, MockDependencyClient}
 
@@ -12,16 +13,17 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
   lazy val org = createOrganization()
   lazy val library1 = createLibrary(org)()
   lazy val library2 = createLibrary(org)()
+  lazy val client = identifiedClient(UserReference(systemUser.id))
 
   "GET /libraries by id" in  {
     await(
-      identifiedClient().libraries.get(id = Some(library1.id))
+      client.libraries.get(id = Some(library1.id))
     ).map(_.id) must contain theSameElementsAs (
       Seq(library1.id)
       )
 
     await(
-      identifiedClient().libraries.get(id = Some(UUID.randomUUID.toString))
+      client.libraries.get(id = Some(UUID.randomUUID.toString))
     ).map(_.id) must be(
       Nil
     )
@@ -29,13 +31,13 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
 
   "GET /libraries by groupId" in  {
     await(
-      identifiedClient().libraries.get(groupId = Some(library1.groupId))
+      client.libraries.get(groupId = Some(library1.groupId))
     ).map(_.groupId) must contain theSameElementsAs (
       Seq(library1.groupId)
       )
 
     await(
-      identifiedClient().libraries.get(groupId = Some(UUID.randomUUID.toString))
+      client.libraries.get(groupId = Some(UUID.randomUUID.toString))
     ) must be(
       Nil
     )
@@ -43,35 +45,35 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
 
   "GET /libraries by artifactId" in  {
     await(
-      identifiedClient().libraries.get(artifactId = Some(library1.artifactId))
+      client.libraries.get(artifactId = Some(library1.artifactId))
     ).map(_.artifactId) must contain theSameElementsAs Seq(library1.artifactId)
 
     await(
-      identifiedClient().libraries.get(artifactId = Some(UUID.randomUUID.toString))
+      client.libraries.get(artifactId = Some(UUID.randomUUID.toString))
     ) must be(
       Nil
     )
   }
 
   "GET /libraries/:id" in  {
-    await(identifiedClient().libraries.getById(library1.id)).id must be(library1.id)
-    await(identifiedClient().libraries.getById(library2.id)).id must be(library2.id)
+    await(client.libraries.getById(library1.id)).id must be(library1.id)
+    await(client.libraries.getById(library2.id)).id must be(library2.id)
 
     expectNotFound {
-      identifiedClient().libraries.getById(UUID.randomUUID.toString)
+      client.libraries.getById(UUID.randomUUID.toString)
     }
   }
 
   "POST /libraries" in  {
     val form = createLibraryForm(org)()
-    val library = await(identifiedClient().libraries.post(form))
+    val library = await(client.libraries.post(form))
     library.groupId must be(form.groupId)
     library.artifactId must be(form.artifactId)
   }
 
   "POST /libraries validates duplicate" in  {
     expectErrors(
-      identifiedClient().libraries.post(
+      client.libraries.post(
         createLibraryForm(org)().copy(
           groupId = library1.groupId,
           artifactId = library1.artifactId
@@ -83,15 +85,15 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
   "DELETE /libraries" in  {
     val library = createLibrary(org)()
     await(
-      identifiedClient().libraries.deleteById(library.id)
+      client.libraries.deleteById(library.id)
     ) must be(())
 
     expectNotFound(
-      identifiedClient().libraries.getById(library.id)
+      client.libraries.getById(library.id)
     )
 
     expectNotFound(
-      identifiedClient().libraries.deleteById(library.id)
+      client.libraries.deleteById(library.id)
     )
   }
 
