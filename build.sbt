@@ -33,9 +33,9 @@ lazy val api = project
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       jdbc,      
-      "io.flow" %% "lib-postgresql" % "0.0.60",
+      "io.flow" %% "lib-postgresql" % "0.0.61",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
-      "org.postgresql" % "postgresql" % "42.2.0",
+      "org.postgresql" % "postgresql" % "42.2.1",
       "com.sendgrid"   %  "sendgrid-java" % "4.1.2"
     )
   )
@@ -52,9 +52,9 @@ lazy val www = project
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       "org.webjars" %% "webjars-play" % "2.6.2",
-      "org.webjars" % "bootstrap" % "3.3.7",
+      "org.webjars" % "bootstrap" % "4.0.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "org.webjars" % "font-awesome" % "5.0.2",
+      "org.webjars" % "font-awesome" % "5.0.6",
       "org.webjars" % "jquery" % "2.1.4"
     )
   )
