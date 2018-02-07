@@ -56,7 +56,7 @@ class Binaries @javax.inject.Inject()(
       case s: JsSuccess[BinaryForm] => {
         val form = s.get
         binariesDao.create(request.user, form) match {
-          case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+          case Left(errors) => UnprocessableEntity(Json.toJson(Seq(Validation.errors(errors))))
           case Right(binary) => Created(Json.toJson(binary))
         }
       }
