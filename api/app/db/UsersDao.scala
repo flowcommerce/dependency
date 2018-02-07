@@ -12,7 +12,8 @@ import play.api.Play.current
 
 @Singleton
 class UsersDao @Inject()(
-  db: Database
+  db: Database,
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
@@ -89,7 +90,7 @@ class UsersDao @Inject()(
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.UserCreated(id.toString)
+        mainActor ! MainActor.Messages.UserCreated(id.toString)
 
         Right(
           findById(id).getOrElse {

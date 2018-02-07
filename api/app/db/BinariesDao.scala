@@ -15,8 +15,8 @@ import play.api.Play.current
 class BinariesDao @Inject()(
   db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
-  dbHelpersProvider: Provider[DbHelpers]
-
+  dbHelpersProvider: Provider[DbHelpers],
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) {
 
   private[this] val BaseQuery = Query(s"""
@@ -70,7 +70,7 @@ class BinariesDao @Inject()(
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.BinaryCreated(id)
+        mainActor ! MainActor.Messages.BinaryCreated(id)
 
         Right(
           findById(Authorization.All, id).getOrElse {
@@ -88,7 +88,7 @@ class BinariesDao @Inject()(
     }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
 
     dbHelpersProvider.get.delete("binaries", deletedBy.id, binary.id)
-    MainActor.ref ! MainActor.Messages.BinaryDeleted(binary.id)
+    mainActor ! MainActor.Messages.BinaryDeleted(binary.id)
   }
 
   def findByName(auth: Authorization, name: String): Option[Binary] = {

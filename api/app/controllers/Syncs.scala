@@ -19,7 +19,8 @@ class Syncs @javax.inject.Inject()(
   syncsDao: SyncsDao,
   librariesHelper: LibrariesHelper,
   binaryHelper: BinaryHelper,
-  projectHelper: ProjectHelper
+  projectHelper: ProjectHelper,
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) extends FlowController {
 
   def get(
@@ -42,21 +43,21 @@ class Syncs @javax.inject.Inject()(
 
   def postBinariesById(id: String) = Identified { request =>
     binaryHelper.withBinary(request.user, id) { binary =>
-      MainActor.ref ! MainActor.Messages.BinarySync(binary.id)
+      mainActor ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }
   }
 
   def postLibrariesById(id: String) = Identified { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
-      MainActor.ref ! MainActor.Messages.LibrarySync(library.id)
+      mainActor ! MainActor.Messages.LibrarySync(library.id)
       NoContent
     }
   }
 
   def postProjectsById(id: String) = Identified { request =>
     projectHelper.withProject(request.user, id) { project =>
-      MainActor.ref ! MainActor.Messages.ProjectSync(id)
+      mainActor ! MainActor.Messages.ProjectSync(id)
       NoContent
     }
   }

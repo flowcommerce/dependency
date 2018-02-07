@@ -21,7 +21,8 @@ class ResolversDao @Inject()(
   membershipsDaoProvider: Provider[MembershipsDao],
   librariesDaoProvider: Provider[LibrariesDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
-  usersDaoProvider: Provider[UsersDao]
+  usersDaoProvider: Provider[UsersDao],
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
@@ -139,7 +140,7 @@ class ResolversDao @Inject()(
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.ResolverCreated(id)
+        mainActor ! MainActor.Messages.ResolverCreated(id)
 
         Right(
           findById(Authorization.All, id).getOrElse {
@@ -162,7 +163,7 @@ class ResolversDao @Inject()(
       librariesDaoProvider.get.delete(usersDaoProvider.get.systemUser, library)
     }
 
-    MainActor.ref ! MainActor.Messages.ResolverDeleted(resolver.id)
+    mainActor ! MainActor.Messages.ResolverDeleted(resolver.id)
     dbHelpersProvider.get.delete("resolvers", deletedBy.id, resolver.id)
   }
 

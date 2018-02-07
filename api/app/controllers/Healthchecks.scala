@@ -18,8 +18,7 @@ class Healthchecks @Inject() (
 
   private val HealthyJson = Json.toJson(Healthcheck(status = "healthy"))
 
-  def getHealthcheck() = Action { request =>
-    io.flow.dependency.actors.MainActor.ref
+  def getHealthcheck() = Action { _ =>
     Ok(HealthyJson)
   }
 

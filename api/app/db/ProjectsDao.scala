@@ -21,7 +21,8 @@ class ProjectsDao @Inject()(
   projectLibrariesDaoProvider: Provider[ProjectLibrariesDao],
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
   recommendationsDaoProvider: Provider[RecommendationsDao],
-  organizationsDaoProvider: Provider[OrganizationsDao]
+  organizationsDaoProvider: Provider[OrganizationsDao],
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
 
   private[this] val BaseQuery = Query(s"""
@@ -140,7 +141,7 @@ class ProjectsDao @Inject()(
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.ProjectCreated(id)
+        mainActor ! MainActor.Messages.ProjectCreated(id)
 
         Right(
           findById(Authorization.All, id).getOrElse {
@@ -173,7 +174,7 @@ class ProjectsDao @Inject()(
           ).execute()
         }
 
-        MainActor.ref ! MainActor.Messages.ProjectUpdated(project.id)
+        mainActor ! MainActor.Messages.ProjectUpdated(project.id)
 
         Right(
           findById(Authorization.All, project.id).getOrElse {
@@ -199,7 +200,7 @@ class ProjectsDao @Inject()(
     }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
 
     dbHelpersProvider.get.delete("projects", deletedBy.id, project.id)
-    MainActor.ref ! MainActor.Messages.ProjectDeleted(project.id)
+    mainActor ! MainActor.Messages.ProjectDeleted(project.id)
   }
 
   def findByOrganizationKeyAndName(auth: Authorization, organizationKey: String, name: String): Option[Project] = {

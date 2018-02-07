@@ -100,7 +100,8 @@ class SubscriptionsController @javax.inject.Inject()(
     UiData(
       requestPath = request.path,
       user = user,
-      section = Some(io.flow.dependency.www.lib.Section.Subscriptions)
+      section = Some(io.flow.dependency.www.lib.Section.Subscriptions),
+      config = config
     )
   }
 

@@ -14,12 +14,6 @@ import scala.concurrent.duration._
 
 object MainActor {
 
-  def ref() = {
-    MainActorProvider.ref()
-  }
-
-//  lazy val SystemUser = UsersDao.systemUser
-
   object Messages {
 
     case class ProjectCreated(id: String)

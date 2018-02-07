@@ -89,7 +89,8 @@ abstract class BaseController(
     UiData(
       requestPath = request.path,
       user = user,
-      section = section
+      section = section,
+      config = config
     )
   }
 
@@ -108,7 +109,8 @@ abstract class BaseController(
     UiData(
       requestPath = request.path,
       user = user,
-      section = section
+      section = section,
+      config = config
     )
   }
 
