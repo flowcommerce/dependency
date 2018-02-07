@@ -41,7 +41,7 @@ abstract class BaseController(
     new UserActionBuilder(controllerComponents.parsers.default, onUnauthorized = onUnauthorized)
   protected def User = UserActionBuilder
 
-  private[this] lazy val client = dependencyClientProvider.newClient(user = None)
+  private[this] lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 
   def section: Option[Section]
 
@@ -115,7 +115,7 @@ abstract class BaseController(
   }
 
   def dependencyClient[T](request: IdentifiedRequest[T]): Client = {
-    dependencyClientProvider.newClient(user = Some(request.user))
+    dependencyClientProvider.newClient(user = Some(request.user), requestId = Some(request.auth.requestId))
   }
 
 }

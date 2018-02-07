@@ -1,6 +1,6 @@
 package controllers
 
-import io.flow.common.v0.models.User
+import io.flow.common.v0.models.{User, UserReference}
 import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.FlowControllerComponents
@@ -27,13 +27,13 @@ class SubscriptionsController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  lazy val client = dependencyClientProvider.newClient(user = None)
+  lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 
   // needs to specify a section for BaseController
   override def section = None
 
   def index() = User.async { implicit request =>
-    dependencyClientProvider.newClient(user = Some(request.user)).users.getIdentifierById(request.user.id).map { id =>
+    dependencyClientProvider.newClient(user = Some(request.user), requestId = None).users.getIdentifierById(request.user.id).map { id =>
       Redirect(routes.SubscriptionsController.identifier(id.value))
     }
   }
@@ -43,7 +43,7 @@ class SubscriptionsController @javax.inject.Inject()(
       users <- client.users.get(
         identifier = Some(identifier)
       )
-      subscriptions <- client.subscriptions.get(
+      subscriptions <- dependencyClientProvider.newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None).subscriptions.get(
         identifier = Some(identifier),
         limit = Publication.all.size + 1
       )
@@ -65,13 +65,14 @@ class SubscriptionsController @javax.inject.Inject()(
           Redirect(routes.SubscriptionsController.index()).flashing("warning" -> "User could not be found")
         }
         case Some(user) => {
-          client.subscriptions.get(
+          val identifiedClient = dependencyClientProvider.newClient(user = Some(UserReference(user.id)), requestId = None)
+          identifiedClient.subscriptions.get(
             identifier = Some(identifier),
             publication = Some(publication)
           ).flatMap { subscriptions =>
             subscriptions.headOption match {
               case None => {
-                client.subscriptions.post(
+                identifiedClient.subscriptions.post(
                   SubscriptionForm(
                     userId = user.id,
                     publication = publication
@@ -82,7 +83,7 @@ class SubscriptionsController @javax.inject.Inject()(
                 }
               }
               case Some(subscription) => {
-                client.subscriptions.deleteById(
+                identifiedClient.subscriptions.deleteById(
                   subscription.id,
                   identifier = Some(identifier)
                 ).map { _ =>
