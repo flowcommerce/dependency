@@ -1,13 +1,12 @@
 package controllers
 
 import io.flow.dependency.www.lib.UiData
-import play.api._
-import play.api.i18n.{MessagesApi, I18nSupport}
-import play.api.mvc.{Action, Controller}
+import play.api.i18n.I18nSupport
+import play.api.mvc.ControllerComponents
 
 class LogoutController @javax.inject.Inject() (
-  val messagesApi: MessagesApi
-) extends Controller with I18nSupport {
+  val controllerComponents: ControllerComponents
+) extends play.api.mvc.BaseController with I18nSupport {
 
   def logged_out = Action { implicit request =>
     Ok(

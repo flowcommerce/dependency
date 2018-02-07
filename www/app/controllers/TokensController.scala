@@ -3,30 +3,30 @@ package controllers
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Token, TokenForm}
 import io.flow.dependency.www.lib.DependencyClientProvider
-import io.flow.common.v0.models.User
-import io.flow.play.util.{Pagination, PaginatedCollection}
+import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import play.api.data.Forms._
+import play.api.data._
+import play.api.mvc._
+
 import scala.concurrent.Future
 
-import play.api._
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-
-class TokensController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+class TokensController @javax.inject.Inject()(
+  val tokenClient: io.flow.token.v0.interfaces.Client,
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def section = None
 
-  def index(page: Int = 0) = Identified.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       tokens <- dependencyClient(request).tokens.get(
-        limit = Pagination.DefaultLimit+1,
+        limit = Pagination.DefaultLimit + 1,
         offset = page * Pagination.DefaultLimit
       )
     } yield {
@@ -34,7 +34,7 @@ class TokensController @javax.inject.Inject() (
     }
   }
 
-  def show(id: String) = Identified.async { implicit request =>
+  def show(id: String) = User.async { implicit request =>
     withToken(request, id) { token =>
       Future {
         Ok(views.html.tokens.show(uiData(request), token))
@@ -46,9 +46,9 @@ class TokensController @javax.inject.Inject() (
     Ok(views.html.tokens.create(uiData(request), TokensController.tokenForm))
   }
 
-  def postCreate = Identified.async { implicit request =>
+  def postCreate = User.async { implicit request =>
     val form = TokensController.tokenForm.bindFromRequest
-    form.fold (
+    form.fold(
 
       errors => Future {
         Ok(views.html.tokens.create(uiData(request), errors))
@@ -63,8 +63,8 @@ class TokensController @javax.inject.Inject() (
         ).map { token =>
           Redirect(routes.TokensController.show(token.id)).flashing("success" -> "Token created")
         }.recover {
-          case r: io.flow.dependency.v0.errors.ErrorsResponse => {
-            Ok(views.html.tokens.create(uiData(request), form, r.errors.map(_.message)))
+          case r: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+            Ok(views.html.tokens.create(uiData(request), form, r.genericErrors.flatMap(_.messages)))
           }
         }
       }
@@ -72,7 +72,7 @@ class TokensController @javax.inject.Inject() (
     )
   }
 
-  def postDelete(id: String) = Identified.async { implicit request =>
+  def postDelete(id: String) = User.async { implicit request =>
     dependencyClient(request).tokens.deleteById(id).map { response =>
       Redirect(routes.TokensController.index()).flashing("success" -> s"Token deleted")
     }.recover {

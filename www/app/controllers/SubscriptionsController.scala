@@ -1,15 +1,13 @@
 package controllers
 
+import io.flow.common.v0.models.User
 import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
-import io.flow.common.v0.models.User
-import scala.concurrent.Future
-
-import play.api._
-import play.api.i18n._
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.Config
 import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
+
+import scala.concurrent.Future
 
 object Subscriptions {
 
@@ -22,30 +20,23 @@ object Subscriptions {
 
 }
 
-class SubscriptionsController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  val tokenClient: io.flow.token.v0.interfaces.Client,
-  val dependencyClientProvider: DependencyClientProvider
-) extends Controller
-    with I18nSupport
-{
+class SubscriptionsController @javax.inject.Inject()(
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   lazy val client = dependencyClientProvider.newClient(user = None)
 
-  def index() = Action.async { implicit request =>
-    Helpers.userFromSession(tokenClient, request.session).flatMap { userOption =>
-      userOption match {
-        case None => Future {
-          Redirect(routes.LoginController.index(return_url = Some(request.path)))
-        }
-        case Some(user) => {
-          dependencyClientProvider.newClient(user = Some(user)).users.getIdentifierById(user.id).map { id =>
-            Redirect(routes.SubscriptionsController.identifier(id.value))
-          }
-        }
-      }
+  // needs to specify a section for BaseController
+  override def section = None
+
+  def index() = User.async { implicit request =>
+    dependencyClientProvider.newClient(user = Some(request.user)).users.getIdentifierById(request.user.id).map { id =>
+      Redirect(routes.SubscriptionsController.identifier(id.value))
     }
   }
 
@@ -63,7 +54,7 @@ class SubscriptionsController @javax.inject.Inject() (
         Subscriptions.UserPublication(
           publication = p,
           isSubscribed = !subscriptions.find(_.publication == p).isEmpty
-            )
+        )
       }
       Ok(views.html.subscriptions.identifier(uiData(request, users.headOption), identifier, userPublications))
     }

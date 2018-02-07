@@ -3,6 +3,8 @@ package io.flow.dependency.www.lib
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.{Authorization, Client}
 import io.flow.dependency.v0.errors.UnitResponse
+import play.api.libs.ws.WSClient
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
@@ -14,13 +16,13 @@ trait DependencyClientProvider {
 
 @javax.inject.Singleton
 class DefaultDependencyClientProvider @javax.inject.Inject() (
-  config: io.flow.play.util.Config
+  config: io.flow.play.util.Config,
+  wsClient: WSClient
 ) extends DependencyClientProvider {
 
   def host: String = config.requiredString("dependency.api.host")
-  def token: String = config.requiredString("dependency.api.token")
 
-  private[this] lazy val client = new Client(host)
+  private[this] lazy val client = new Client(wsClient, host)
 
   override def newClient(user: Option[UserReference]): Client = {
     user match {
@@ -29,6 +31,7 @@ class DefaultDependencyClientProvider @javax.inject.Inject() (
       }
       case Some(u) => {
         new Client(
+          ws = wsClient,
           baseUrl = host,
           auth = Some(
             Authorization.Basic(

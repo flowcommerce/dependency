@@ -1,17 +1,16 @@
 package controllers
 
-import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
+import io.flow.common.v0.models.ExpandableUserDiscriminator.UserReference
 import io.flow.dependency.v0.models.GithubAuthenticationForm
-import play.api._
+import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
+import io.flow.play.controllers.IdentifiedCookie._
 import play.api.i18n._
 import play.api.mvc._
 
-class LoginController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  val provider: DependencyClientProvider
-) extends Controller
-    with I18nSupport
-{
+class LoginController @javax.inject.Inject()(
+  val provider: DependencyClientProvider,
+  val controllerComponents: ControllerComponents
+) extends play.api.mvc.BaseController with I18nSupport {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -38,10 +37,10 @@ class LoginController @javax.inject.Inject() (
           u
         }
       }
-      Redirect(url).withSession { "user_id" -> user.id.toString }
+      Redirect(url).withIdentifiedCookieUser(user = UserReference(user.id))
     }.recover {
-      case response: io.flow.dependency.v0.errors.ErrorsResponse => {
-        Ok(views.html.login.index(UiData(requestPath = request.path), returnUrl, response.errors.map(_.message)))
+      case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+        Ok(views.html.login.index(UiData(requestPath = request.path), returnUrl, response.genericErrors.flatMap(_.messages)))
       }
     }
   }

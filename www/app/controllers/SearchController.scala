@@ -1,17 +1,16 @@
 package controllers
 
 import io.flow.dependency.www.lib.DependencyClientProvider
-import io.flow.play.util.{Pagination, PaginatedCollection}
-
-import play.api._
-import play.api.i18n.MessagesApi
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
 
 class SearchController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

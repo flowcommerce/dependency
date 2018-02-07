@@ -1,28 +1,28 @@
 package controllers
 
 import io.flow.dependency.v0.errors.UnitResponse
-import io.flow.dependency.v0.models.{Organization, Resolver, ResolverForm, UsernamePassword, Visibility}
+import io.flow.dependency.v0.models.{Resolver, ResolverForm, UsernamePassword, Visibility}
 import io.flow.dependency.www.lib.DependencyClientProvider
-import io.flow.play.util.{Pagination, PaginatedCollection}
+import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import play.api.data.Forms._
+import play.api.data._
+import play.api.mvc._
+
 import scala.concurrent.Future
 
-import play.api._
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-
 class ResolversController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def section = Some(io.flow.dependency.www.lib.Section.Resolvers)
 
-  def index(page: Int = 0) = Identified.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       resolvers <- dependencyClient(request).resolvers.get(
         limit = Pagination.DefaultLimit+1,
@@ -38,7 +38,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def show(id: String, librariesPage: Int = 0) = Identified.async { implicit request =>
+  def show(id: String, librariesPage: Int = 0) = User.async { implicit request =>
     withResolver(request, id) { resolver =>
       for {
         libraries <- dependencyClient(request).libraries.get(
@@ -58,7 +58,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def create() = Identified.async { implicit request =>
+  def create() = User.async { implicit request =>
     organizations(request).map { orgs =>
       Ok(
         views.html.resolvers.create(
@@ -68,7 +68,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def postCreate() = Identified.async { implicit request =>
+  def postCreate() = User.async { implicit request =>
     val boundForm = ResolversController.uiForm.bindFromRequest
 
     organizations(request).flatMap { orgs =>
@@ -84,8 +84,8 @@ class ResolversController @javax.inject.Inject() (
           ).map { resolver =>
             Redirect(routes.ResolversController.show(resolver.id)).flashing("success" -> "Resolver created")
           }.recover {
-            case response: io.flow.dependency.v0.errors.ErrorsResponse => {
-              Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.errors.map(_.message)))
+            case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+              Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericErrors.flatMap(_.messages)))
             }
           }
         }
@@ -108,7 +108,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def postDelete(id: String) = Identified.async { implicit request =>
+  def postDelete(id: String) = User.async { implicit request =>
     dependencyClient(request).resolvers.deleteById(id).map { response =>
       Redirect(routes.ResolversController.index()).flashing("success" -> s"Resolver deleted")
     }.recover {

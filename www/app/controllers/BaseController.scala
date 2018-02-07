@@ -1,57 +1,49 @@
 package controllers
 
+import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.Client
 import io.flow.dependency.v0.models.Organization
 import io.flow.dependency.www.lib.{DependencyClientProvider, Section, UiData}
-import io.flow.common.v0.models.{User, UserReference}
-import io.flow.token.v0.interfaces.{Client => TokenClient}
-import io.flow.play.controllers.IdentifiedController
-import scala.concurrent.{ExecutionContext, Future}
-import play.api._
+import io.flow.play.controllers.IdentifiedCookie._
+import io.flow.play.controllers._
+import io.flow.play.util.{AuthHeaders, Config}
 import play.api.i18n._
 import play.api.mvc._
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-object Helpers {
+class UserActionBuilder(
+  val parser: BodyParser[AnyContent],
+  onUnauthorized: RequestHeader => Result
+)(
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[IdentifiedRequest, AnyContent] {
 
-  def userFromSession(
-    tokenClient: TokenClient,
-    session: play.api.mvc.Session
-  ) (
-    implicit ec: scala.concurrent.ExecutionContext
-  ): scala.concurrent.Future[Option[UserReference]] = {
-    session.get("user_id") match {
-      case None => {
-        Future { None }
-      }
-
-      case Some(userId) => {
-        tokenClient.tokens.get(token = Some(userId)).map { result =>
-          result.headOption.map(_.user)
-        }
-      }
+  def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
+    request.session.get(UserKey) match {
+      case None => Future.successful(onUnauthorized(request))
+      case Some(userId) =>
+        val auth = AuthHeaders.user(UserReference(id = userId))
+        block(new IdentifiedRequest(auth, request))
     }
-  }
-
 }
 
 abstract class BaseController(
-  val tokenClient: io.flow.token.v0.interfaces.Client,
-  val dependencyClientProvider: DependencyClientProvider
-) extends Controller
-    with IdentifiedController
-    with I18nSupport
-{
+  config: Config,
+  dependencyClientProvider: DependencyClientProvider
+) extends FlowController with I18nSupport {
+
+  protected def onUnauthorized(requestHeader: RequestHeader): Result =
+    Redirect(routes.LoginController.index(return_url = Some(requestHeader.path))).flashing("warning" -> "Please login")
+
+  private lazy val UserActionBuilder =
+    new UserActionBuilder(controllerComponents.parsers.default, onUnauthorized = onUnauthorized)
+  protected def User = UserActionBuilder
 
   private[this] lazy val client = dependencyClientProvider.newClient(user = None)
 
   def section: Option[Section]
-
-  override def unauthorized[A](request: Request[A]): Result = {
-    Redirect(routes.LoginController.index(return_url = Some(request.path))).flashing("warning" -> "Please login")
-  }
 
   def withOrganization[T](
     request: IdentifiedRequest[T],
@@ -82,17 +74,6 @@ abstract class BaseController(
       userId = Some(request.user.id),
       limit = 100
     )
-  }
-
-  override def user(
-    session: play.api.mvc.Session,
-    headers: play.api.mvc.Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
-  ) (
-    implicit ec: scala.concurrent.ExecutionContext
-  ): scala.concurrent.Future[Option[UserReference]] = {
-    Helpers.userFromSession(tokenClient, session)
   }
 
   def uiData[T](

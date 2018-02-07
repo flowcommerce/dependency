@@ -3,32 +3,31 @@ package controllers
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Membership, MembershipForm, Role}
 import io.flow.dependency.www.lib.DependencyClientProvider
-import io.flow.common.v0.models.User
-import io.flow.play.util.{Pagination, PaginatedCollection}
+import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import play.api.data.Forms._
+import play.api.data._
+import play.api.mvc._
+
 import scala.concurrent.Future
 
-import play.api._
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-
-class MembersController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+class MembersController @javax.inject.Inject()(
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def section = Some(io.flow.dependency.www.lib.Section.Members)
 
-  def index(orgKey: String, page: Int = 0) = Identified.async { implicit request =>
+  def index(orgKey: String, page: Int = 0) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       for {
         memberships <- dependencyClient(request).memberships.get(
           organization = Some(org.key),
-          limit = Pagination.DefaultLimit+1,
+          limit = Pagination.DefaultLimit + 1,
           offset = page * Pagination.DefaultLimit
         )
       } yield {
@@ -38,12 +37,12 @@ class MembersController @javax.inject.Inject() (
             org,
             PaginatedCollection(page, memberships)
           )
-      )
+        )
       }
     }
   }
 
-  def create(orgKey: String) = Identified.async { implicit request =>
+  def create(orgKey: String) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       Future {
         Ok(
@@ -57,12 +56,12 @@ class MembersController @javax.inject.Inject() (
     }
   }
 
-  def postCreate(orgKey: String) = Identified.async { implicit request =>
+  def postCreate(orgKey: String) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       val boundForm = MembersController.uiForm.bindFromRequest
 
       organizations(request).flatMap { orgs =>
-        boundForm.fold (
+        boundForm.fold(
 
           formWithErrors => Future {
             Ok(views.html.members.create(uiData(request).copy(organization = Some(org.key)), org, formWithErrors))
@@ -86,9 +85,9 @@ class MembersController @javax.inject.Inject() (
                   ).map { membership =>
                     Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"User added as ${membership.role}")
                   }.recover {
-                    case response: io.flow.dependency.v0.errors.ErrorsResponse => {
+                    case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
                       Ok(views.html.members.create(
-                        uiData(request).copy(organization = Some(org.key)), org, boundForm, response.errors.map(_.message))
+                        uiData(request).copy(organization = Some(org.key)), org, boundForm, response.genericErrors.flatMap(_.messages))
                       )
                     }
                   }
@@ -101,7 +100,7 @@ class MembersController @javax.inject.Inject() (
     }
   }
 
-  def postDelete(orgKey: String, id: String) = Identified.async { implicit request =>
+  def postDelete(orgKey: String, id: String) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       dependencyClient(request).memberships.deleteById(id).map { response =>
         Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"Membership deleted")
@@ -113,11 +112,11 @@ class MembersController @javax.inject.Inject() (
     }
   }
 
-  def postMakeMember(orgKey: String, id: String) = Identified.async { implicit request =>
+  def postMakeMember(orgKey: String, id: String) = User.async { implicit request =>
     makeRole(request, orgKey, id, Role.Member)
   }
 
-  def postMakeAdmin(orgKey: String, id: String) = Identified.async { implicit request =>
+  def postMakeAdmin(orgKey: String, id: String) = User.async { implicit request =>
     makeRole(request, orgKey, id, Role.Admin)
   }
 
@@ -138,8 +137,9 @@ class MembersController @javax.inject.Inject() (
         ).map { membership =>
           Redirect(routes.MembersController.index(membership.organization.key)).flashing("success" -> s"User added as ${membership.role}")
         }.recover {
-          case response: io.flow.dependency.v0.errors.ErrorsResponse => {
-            Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.errors.map(_.message).mkString(", "))
+          case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+
+            Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.genericErrors.flatMap(_.messages).mkString(", "))
           }
         }
       }

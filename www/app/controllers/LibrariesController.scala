@@ -1,28 +1,27 @@
 package controllers
 
 import io.flow.dependency.v0.errors.UnitResponse
-import io.flow.dependency.v0.models.{Library, LibraryForm, SyncEvent}
+import io.flow.dependency.v0.models.{Library, SyncEvent}
 import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
-import io.flow.play.util.{Pagination, PaginatedCollection}
+import io.flow.dependency.controllers.helpers.DependencyUiControllerHelper
+import io.flow.play.controllers.{FlowController, FlowControllerComponents, IdentifiedRequest}
+import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import play.api.mvc._
+
 import scala.concurrent.Future
 
-import play.api._
-import play.api.i18n.MessagesApi
-import play.api.mvc._
-import play.api.data._
-import play.api.data.Forms._
-
 class LibrariesController @javax.inject.Inject() (
-  val messagesApi: MessagesApi,
-  override val tokenClient: io.flow.token.v0.interfaces.Client,
-  override val dependencyClientProvider: DependencyClientProvider
-) extends BaseController(tokenClient, dependencyClientProvider) {
+  val dependencyClientProvider: DependencyClientProvider,
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents
+) extends BaseController(config, dependencyClientProvider) {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override def section = Some(io.flow.dependency.www.lib.Section.Libraries)
 
-  def index(page: Int = 0) = Identified.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       libraries <- dependencyClient(request).libraries.get(
         limit = Pagination.DefaultLimit+1,
@@ -42,7 +41,7 @@ class LibrariesController @javax.inject.Inject() (
     id: String,
     versionsPage: Int = 0,
     projectsPage: Int = 0
-  ) = Identified.async { implicit request =>
+  ) = User.async { implicit request =>
     withLibrary(request, id) { library =>
       for {
         versions <- dependencyClient(request).libraryVersions.get(
