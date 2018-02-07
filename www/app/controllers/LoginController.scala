@@ -25,7 +25,7 @@ class LoginController @javax.inject.Inject()(
     state: Option[String],
     returnUrl: Option[String]
   ) = Action.async { implicit request =>
-    provider.newClient(None).githubUsers.postGithub(
+    provider.newClient(user = None, requestId = None).githubUsers.postGithub(
       GithubAuthenticationForm(
         code = code
       )
