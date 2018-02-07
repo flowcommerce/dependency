@@ -1,7 +1,5 @@
 package io.flow.dependency.www.lib
 
-import io.flow.play.clients.DefaultTokenClient
-import io.flow.token.v0.interfaces.{Client => TokenClient}
 import play.api.{Configuration, Environment, Mode}
 import play.api.inject.Module
 

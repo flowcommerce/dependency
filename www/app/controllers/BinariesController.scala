@@ -10,7 +10,6 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
 class BinariesController @javax.inject.Inject()(
-  tokenClient: io.flow.token.v0.interfaces.Client,
   dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
