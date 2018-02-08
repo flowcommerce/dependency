@@ -11,10 +11,8 @@ import play.api.libs.json._
 
 @Singleton
 class Healthchecks @Inject() (
-  val config: Config,
-  val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
-) extends FlowController {
+  val controllerComponents: ControllerComponents
+) extends BaseController {
 
   private val HealthyJson = Json.toJson(Healthcheck(status = "healthy"))
 

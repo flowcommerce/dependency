@@ -3,7 +3,6 @@ package io.flow.dependency.api.lib
 import play.api.inject.Module
 import play.api.{Configuration, Environment, Mode}
 
-
 class GithubModule extends Module {
 
   def bindings(env: Environment, conf: Configuration) = {

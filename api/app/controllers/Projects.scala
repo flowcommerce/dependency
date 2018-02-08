@@ -5,7 +5,7 @@ import db.{Authorization, ProjectsDao}
 import io.flow.dependency.v0.models.json._
 import io.flow.dependency.v0.models.{ProjectForm, ProjectPatchForm}
 import io.flow.error.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
 import play.api.mvc._
@@ -16,8 +16,9 @@ class Projects @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
-  projectHelper: ProjectHelper
-) extends FlowController {
+  projectHelper: ProjectHelper,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
@@ -32,7 +33,7 @@ class Projects @javax.inject.Inject() (
     binaryId: _root_.scala.Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         projectsDao.findAll(
@@ -54,13 +55,13 @@ class Projects @javax.inject.Inject() (
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
       Ok(Json.toJson(project))
     }
   }
 
-  def post() = Identified(parse.json) { request =>
+  def post() = IdentifiedWithFallback(parse.json) { request =>
     request.body.validate[ProjectForm] match {
       case e: JsError => {
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -74,7 +75,7 @@ class Projects @javax.inject.Inject() (
     }
   }
 
-  def patchById(id: String) = Identified(parse.json) { request =>
+  def patchById(id: String) = IdentifiedWithFallback(parse.json) { request =>
     projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectPatchForm] match {
         case e: JsError => {
@@ -98,7 +99,7 @@ class Projects @javax.inject.Inject() (
     }
   }
 
-  def putById(id: String) = Identified(parse.json) { request =>
+  def putById(id: String) = IdentifiedWithFallback(parse.json) { request =>
     projectHelper.withProject(request.user, id) { project =>
       request.body.validate[ProjectForm] match {
         case e: JsError => {
@@ -114,7 +115,7 @@ class Projects @javax.inject.Inject() (
     }
   }
 
-  def deleteById(id: String) = Identified { request =>
+  def deleteById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
       projectsDao.delete(request.user, project)
       NoContent

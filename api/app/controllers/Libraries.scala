@@ -4,11 +4,11 @@ import controllers.helpers.LibrariesHelper
 import db.{Authorization, LibrariesDao}
 import io.flow.dependency.v0.models.LibraryForm
 import io.flow.dependency.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.error.v0.models.json._
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
 import play.api.mvc._
-import io.flow.error.v0.models.json._
 
 @javax.inject.Singleton
 class Libraries @javax.inject.Inject() (
@@ -16,8 +16,9 @@ class Libraries @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   librariesDao: LibrariesDao,
-  librariesHelper: LibrariesHelper
-) extends FlowController with BaseIdentifiedController {
+  librariesHelper: LibrariesHelper,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
 
   def get(
     id: Option[String],
@@ -28,7 +29,7 @@ class Libraries @javax.inject.Inject() (
     resolverId: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         librariesDao.findAll(
@@ -46,13 +47,13 @@ class Libraries @javax.inject.Inject() (
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
       Ok(Json.toJson(library))
     }
   }
 
-  def post() = Identified(parse.json) { request =>
+  def post() = IdentifiedWithFallback(parse.json) { request =>
     request.body.validate[LibraryForm] match {
       case e: JsError => {
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -66,7 +67,7 @@ class Libraries @javax.inject.Inject() (
     }
   }
 
-  def deleteById(id: String) = Identified { request =>
+  def deleteById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
       librariesDao.delete(request.user, library)
       NoContent

@@ -1,22 +1,22 @@
 package controllers
 
 import db.{Authorization, LibraryVersionsDao}
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.{Config, Validation}
 import io.flow.dependency.v0.models.LibraryVersion
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import play.api.mvc._
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.Config
 import play.api.libs.json._
+import play.api.mvc._
 
 @javax.inject.Singleton
 class LibraryVersions @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  libraryVersionsDao: LibraryVersionsDao
-) extends FlowController {
+  libraryVersionsDao: LibraryVersionsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
@@ -24,7 +24,7 @@ class LibraryVersions @javax.inject.Inject() (
     libraryId: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         libraryVersionsDao.findAll(
@@ -39,7 +39,7 @@ class LibraryVersions @javax.inject.Inject() (
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     withLibraryVersion(request.user, id) { library =>
       Ok(Json.toJson(library))
     }

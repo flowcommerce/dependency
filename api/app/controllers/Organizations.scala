@@ -4,12 +4,11 @@ import controllers.helpers.{OrganizationsHelper, UsersHelper}
 import db.OrganizationsDao
 import io.flow.dependency.v0.models.OrganizationForm
 import io.flow.dependency.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.error.v0.models.json._
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, Validation}
 import play.api.libs.json._
-import io.flow.error.v0.models.json._
 import play.api.mvc._
-import io.flow.error.v0.models.json._
 
 class Organizations @javax.inject.Inject()(
   val config: Config,
@@ -17,8 +16,9 @@ class Organizations @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents,
   organizationsDao: OrganizationsDao,
   organizationsHelper: OrganizationsHelper,
-  usersHelper: UsersHelper
-) extends FlowController with BaseIdentifiedController {
+  usersHelper: UsersHelper,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
 
   def get(
     id: Option[String],
@@ -27,7 +27,7 @@ class Organizations @javax.inject.Inject()(
     key: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         organizationsDao.findAll(
@@ -43,19 +43,19 @@ class Organizations @javax.inject.Inject()(
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     organizationsHelper.withOrganization(request.user, id) { organization =>
       Ok(Json.toJson(organization))
     }
   }
 
-  def getUsersByUserId(userId: String) = Identified { request =>
+  def getUsersByUserId(userId: String) = IdentifiedWithFallback { request =>
     usersHelper.withUser(userId) { user =>
       Ok(Json.toJson(organizationsDao.upsertForUser(user)))
     }
   }
 
-  def post() = Identified(parse.json) { request =>
+  def post() = IdentifiedWithFallback(parse.json) { request =>
     request.body.validate[OrganizationForm] match {
       case e: JsError => {
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -69,7 +69,7 @@ class Organizations @javax.inject.Inject()(
     }
   }
 
-  def putById(id: String) = Identified(parse.json) { request =>
+  def putById(id: String) = IdentifiedWithFallback(parse.json) { request =>
     organizationsHelper.withOrganization(request.user, id) { organization =>
       request.body.validate[OrganizationForm] match {
         case e: JsError => {
@@ -85,7 +85,7 @@ class Organizations @javax.inject.Inject()(
     }
   }
 
-  def deleteById(id: String) = Identified { request =>
+  def deleteById(id: String) = IdentifiedWithFallback { request =>
     organizationsHelper.withOrganization(request.user, id) { organization =>
       organizationsDao.delete(request.user, organization)
       NoContent

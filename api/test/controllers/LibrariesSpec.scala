@@ -4,7 +4,7 @@ import java.util.UUID
 
 import io.flow.common.v0.models.UserReference
 import play.api.test._
-import util.{DependencySpec, MockDependencyClient}
+import _root_.util.{DependencySpec, MockDependencyClient}
 
 class LibrariesSpec extends DependencySpec with MockDependencyClient {
 

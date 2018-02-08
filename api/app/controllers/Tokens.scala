@@ -15,17 +15,16 @@ class Tokens @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  tokensDao: TokensDao
-) extends FlowController with BaseIdentifiedController {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+  tokensDao: TokensDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
 
   def get(
     ids: Option[Seq[String]],
     userId: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         tokensDao.findAll(
@@ -39,13 +38,13 @@ class Tokens @javax.inject.Inject()(
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     withUserCreatedToken(request.user, id) { token =>
       Ok(Json.toJson(tokensDao.addCleartextIfAvailable(request.user, token)))
     }
   }
 
-  def post() = Identified(parse.json) { request =>
+  def post() = IdentifiedWithFallback(parse.json) { request =>
     request.body.validate[TokenForm] match {
       case e: JsError => {
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -59,7 +58,7 @@ class Tokens @javax.inject.Inject()(
     }
   }
 
-  def deleteById(id: String) = Identified { request =>
+  def deleteById(id: String) = IdentifiedWithFallback { request =>
     withUserCreatedToken(request.user, id) { token =>
       tokensDao.delete(request.user, token)
       NoContent
