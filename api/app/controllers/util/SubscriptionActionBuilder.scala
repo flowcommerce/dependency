@@ -7,13 +7,13 @@ import io.flow.common.v0.models.UserReference
 import io.flow.play.controllers.{AuthorizationImpl, IdentifiedRequest}
 import io.flow.play.util.{AuthData, Config}
 import play.api.Logger
-import play.api.mvc.{AnyContent, BodyParser, Request, Result}
+import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @javax.inject.Singleton
 class SubscriptionActionBuilder @javax.inject.Inject() (
-  override val parser: BodyParser[AnyContent],
+  override val parser: BodyParsers.Default,
   override val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,

@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 // Custom implementation based on FlowController.Identified but with database fallback for auth
 @Singleton
 class IdentificationWithFallback @Inject()(
-  val parser: BodyParser[AnyContent],
+  val parser: BodyParsers.Default,
   val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
