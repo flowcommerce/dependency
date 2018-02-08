@@ -13,8 +13,9 @@ class ProjectLibraries @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  projectLibrariesDao: ProjectLibrariesDao
-) extends FlowController  {
+  projectLibrariesDao: ProjectLibrariesDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback  {
 
   def get(
     id: Option[String],
@@ -24,7 +25,7 @@ class ProjectLibraries @javax.inject.Inject() (
     isSynced: Option[Boolean],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         projectLibrariesDao.findAll(

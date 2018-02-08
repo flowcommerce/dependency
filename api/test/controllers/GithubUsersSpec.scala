@@ -3,7 +3,7 @@ package controllers
 import io.flow.dependency.api.lib.MockGithubData
 import io.flow.dependency.v0.models.GithubAuthenticationForm
 import io.flow.github.v0.models.{OwnerType, User => GithubUser}
-import util.{DependencySpec, MockDependencyClient}
+import _root_.util.{DependencySpec, MockDependencyClient}
 
 class GithubUsersSpec extends DependencySpec with MockDependencyClient {
 

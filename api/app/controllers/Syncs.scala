@@ -20,15 +20,16 @@ class Syncs @javax.inject.Inject()(
   librariesHelper: LibrariesHelper,
   binaryHelper: BinaryHelper,
   projectHelper: ProjectHelper,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
-) extends FlowController {
+  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     objectId: Option[String],
     event: Option[SyncEvent],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         syncsDao.findAll(
@@ -41,21 +42,21 @@ class Syncs @javax.inject.Inject()(
     )
   }
 
-  def postBinariesById(id: String) = Identified { request =>
+  def postBinariesById(id: String) = IdentifiedWithFallback { request =>
     binaryHelper.withBinary(request.user, id) { binary =>
       mainActor ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }
   }
 
-  def postLibrariesById(id: String) = Identified { request =>
+  def postLibrariesById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
       mainActor ! MainActor.Messages.LibrarySync(library.id)
       NoContent
     }
   }
 
-  def postProjectsById(id: String) = Identified { request =>
+  def postProjectsById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
       mainActor ! MainActor.Messages.ProjectSync(id)
       NoContent

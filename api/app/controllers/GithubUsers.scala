@@ -1,27 +1,24 @@
 package controllers
 
 import db.{GithubUsersDao, TokensDao, UsersDao}
+import io.flow.common.v0.models.json._
 import io.flow.dependency.api.lib.Github
 import io.flow.dependency.v0.models.GithubAuthenticationForm
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
-import play.api.mvc._
-import play.api.libs.json._
 import io.flow.error.v0.models.json._
+import io.flow.play.util.Validation
+import play.api.libs.json._
+import play.api.mvc._
 
 import scala.concurrent.Future
 
 class GithubUsers @javax.inject.Inject() (
   github: Github,
-  val config: Config,
   usersDao: UsersDao,
   githubUsersDao: GithubUsersDao,
   tokensDao: TokensDao,
-  val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
-) extends FlowController  {
+  val controllerComponents: ControllerComponents
+) extends BaseController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

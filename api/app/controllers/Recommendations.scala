@@ -1,21 +1,24 @@
 package controllers
 
-import db.{Authorization, RecommendationsDao}
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import db.{Authorization, RecommendationsDao, TokensDao, UsersDao}
 import io.flow.dependency.v0.models.RecommendationType
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.play.controllers.{AuthorizationImpl, FlowControllerComponents}
 import io.flow.play.util.Config
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
 
 @javax.inject.Singleton
 class Recommendations @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  recommendationsDao: RecommendationsDao
-) extends FlowController  {
+  val authorization: AuthorizationImpl,
+  val tokensDao: TokensDao,
+  val usersDao: UsersDao,
+  recommendationsDao: RecommendationsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     organization: Option[String],
@@ -23,7 +26,7 @@ class Recommendations @javax.inject.Inject() (
     `type`: Option[RecommendationType],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         recommendationsDao.findAll(

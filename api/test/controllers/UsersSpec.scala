@@ -4,7 +4,7 @@ import java.util.UUID
 
 import io.flow.common.v0.models.Name
 import io.flow.dependency.v0.models.UserForm
-import util.{DependencySpec, MockDependencyClient}
+import _root_.util.{DependencySpec, MockDependencyClient}
 
 class UsersSpec extends DependencySpec with MockDependencyClient {
 

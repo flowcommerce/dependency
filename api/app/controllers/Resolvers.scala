@@ -15,8 +15,9 @@ class Resolvers @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  resolversDao: ResolversDao
-) extends FlowController  {
+  resolversDao: ResolversDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
@@ -25,7 +26,7 @@ class Resolvers @javax.inject.Inject() (
     visibility: Option[Visibility],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         resolversDao.findAll(
@@ -41,13 +42,13 @@ class Resolvers @javax.inject.Inject() (
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     withResolver(request.user, id) { resolver =>
       Ok(Json.toJson(resolver))
     }
   }
 
-  def post() = Identified(parse.json) { request =>
+  def post() = IdentifiedWithFallback(parse.json) { request =>
     request.body.validate[ResolverForm] match {
       case e: JsError => {
         UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
@@ -61,7 +62,7 @@ class Resolvers @javax.inject.Inject() (
     }
   }
 
-  def deleteById(id: String) = Identified { request =>
+  def deleteById(id: String) = IdentifiedWithFallback { request =>
     withResolver(request.user, id) { resolver =>
       resolversDao.delete(request.user, resolver)
       NoContent

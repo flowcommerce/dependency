@@ -12,13 +12,11 @@ import play.api.libs.json._
 
 @javax.inject.Singleton
 class GithubWebhooks @javax.inject.Inject() (
-  val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
   librariesDao: LibrariesDao,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
-) extends FlowController  {
+) extends BaseController {
 
   def postByProjectId(projectId: String) = Action { request =>
     projectsDao.findById(Authorization.All, projectId) match {

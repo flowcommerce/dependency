@@ -1,8 +1,8 @@
 package controllers
 
 import com.google.inject.Provider
-import db.{Authorization, BinaryVersionsDao}
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import db.{Authorization, BinaryVersionsDao, TokensDao, UsersDao}
+import io.flow.play.controllers.{AuthorizationImpl, FlowController, FlowControllerComponents}
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.{Config, Validation}
 import io.flow.dependency.v0.models.BinaryVersion
@@ -16,8 +16,9 @@ class BinaryVersions @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  binaryVersionsDao: BinaryVersionsDao
-) extends FlowController {
+  binaryVersionsDao: BinaryVersionsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
@@ -26,7 +27,7 @@ class BinaryVersions @javax.inject.Inject()(
     projectId: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified { request =>
+  ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
         binaryVersionsDao.findAll(
@@ -42,7 +43,7 @@ class BinaryVersions @javax.inject.Inject()(
     )
   }
 
-  def getById(id: String) = Identified { request =>
+  def getById(id: String) = IdentifiedWithFallback { request =>
     withBinaryVersion(request.user, id) { binary =>
       Ok(Json.toJson(binary))
     }

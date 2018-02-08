@@ -2,7 +2,7 @@ package controllers
 
 import java.util.UUID
 
-import util.{DependencySpec, MockDependencyClient}
+import _root_.util.{DependencySpec, MockDependencyClient}
 
 class BinariesSpec extends DependencySpec with MockDependencyClient {
 

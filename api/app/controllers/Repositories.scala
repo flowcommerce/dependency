@@ -4,12 +4,12 @@ import db.{Authorization, OrganizationsDao, ProjectsDao}
 import io.flow.dependency.api.lib.Github
 import io.flow.error.v0.models.json._
 import io.flow.github.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{Config, Validation}
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class Repositories @javax.inject.Inject() (
   val github: Github,
@@ -17,10 +17,9 @@ class Repositories @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
-  organizationsDao: OrganizationsDao
-) extends FlowController {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
+  organizationsDao: OrganizationsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+)(implicit val ec: ExecutionContext) extends BaseIdentifiedControllerWithFallback {
 
   def getGithub(
     owner: Option[String] = None, // Ex: flowcommerce
@@ -29,7 +28,7 @@ class Repositories @javax.inject.Inject() (
     existingProject: Option[Boolean] = None,
     limit: Long = 25,
     offset: Long = 0
-  ) = Identified.async { request =>
+  ) = IdentifiedWithFallback.async { request =>
     if (!existingProject.isEmpty && organizationId.isEmpty) {
       Future {
         UnprocessableEntity(Json.toJson(Validation.error("When filtering by existing projects, you must also provide the organization_id")))
