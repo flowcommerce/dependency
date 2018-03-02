@@ -29,7 +29,8 @@ lazy val api = project
   .enablePlugins(NewRelic)
   .settings(commonSettings: _*)
   .settings(
-    routesImport += "io.flow.dependency.v0.Bindables._",
+    routesImport += "io.flow.dependency.v0.Bindables.Core._",
+    routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       jdbc,
@@ -51,7 +52,8 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    routesImport += "io.flow.dependency.v0.Bindables._",
+    routesImport += "io.flow.dependency.v0.Bindables.Core._",
+    routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
     libraryDependencies ++= Seq(
       ws,
