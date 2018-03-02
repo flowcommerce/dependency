@@ -2,37 +2,37 @@
 flow:
   common:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowCommonV0Client.scala"
+    - generated/app/FlowCommonV0Client.scala
     anorm_2_6_parsers:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowCommonV0Conversions.scala"
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowCommonV0Parsers.scala"
+    - api/app/generated/FlowCommonV0Conversions.scala
+    - api/app/generated/FlowCommonV0Parsers.scala
   error:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowErrorV0Client.scala"
+    - generated/app/FlowErrorV0Client.scala
     anorm_2_6_parsers:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowErrorV0Conversions.scala"
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowErrorV0Parsers.scala"
+    - api/app/generated/FlowErrorV0Conversions.scala
+    - api/app/generated/FlowErrorV0Parsers.scala
   healthcheck:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowHealthcheckV0Client.scala"
+    - generated/app/FlowHealthcheckV0Client.scala
   docker-registry:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowDockerRegistryV0Client.scala"
+    - generated/app/FlowDockerRegistryV0Client.scala
   docker-hub:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowDockerHubV0Client.scala"
+    - generated/app/FlowDockerHubV0Client.scala
   github:
     anorm_2_6_parsers:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowGithubV0Conversions.scala"
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowGithubV0Parsers.scala"
+    - api/app/generated/FlowGithubV0Conversions.scala
+    - api/app/generated/FlowGithubV0Parsers.scala
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowGithubV0Client.scala"
+    - generated/app/FlowGithubV0Client.scala
   github-oauth:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowGithubOauthV0Client.scala"
+    - generated/app/FlowGithubOauthV0Client.scala
   dependency:
     play_2_6_client:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/generated/app/FlowDependencyV0Client.scala"
+    - generated/app/FlowDependencyV0Client.scala
     anorm_2_6_parsers:
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowDependencyV0Conversions.scala"
-    - "/Users/m3/work/src/github.com/flowcommerce/gitcheckouts_for_upgrade/flowcommerce/dependency/api/app/generated/FlowDependencyV0Parsers.scala"
+    - api/app/generated/FlowDependencyV0Conversions.scala
+    - api/app/generated/FlowDependencyV0Parsers.scala
