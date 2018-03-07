@@ -170,11 +170,11 @@ package io.flow.error.v0 {
     import Models._
 
     object Core {
-      implicit val pathBindableDateTimeIso8601: PathBindable[_root_.org.joda.time.DateTime] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
-      implicit val queryStringBindableDateTimeIso8601: QueryStringBindable[_root_.org.joda.time.DateTime] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def pathBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.DateTime] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def queryStringBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.DateTime] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
 
-      implicit val pathBindableDateIso8601: PathBindable[_root_.org.joda.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
-      implicit val queryStringBindableDateIso8601: QueryStringBindable[_root_.org.joda.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
+      implicit def pathBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
+      implicit def queryStringBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
     }
 
     object Models {
@@ -186,8 +186,8 @@ package io.flow.error.v0 {
         override def example: io.flow.error.v0.models.GenericErrorCode = io.flow.error.v0.models.GenericErrorCode.GenericError
         override def validValues: Seq[io.flow.error.v0.models.GenericErrorCode] = io.flow.error.v0.models.GenericErrorCode.all
       }
-      implicit val pathBindableGenericErrorCode: PathBindable[io.flow.error.v0.models.GenericErrorCode] = ApibuilderPathBindable(genericErrorCodeConverter)
-      implicit val queryStringBindableGenericErrorCode: QueryStringBindable[io.flow.error.v0.models.GenericErrorCode] = ApibuilderQueryStringBindable(genericErrorCodeConverter)
+      implicit def pathBindableGenericErrorCode(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.error.v0.models.GenericErrorCode] = ApibuilderPathBindable(genericErrorCodeConverter)
+      implicit def queryStringBindableGenericErrorCode(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.error.v0.models.GenericErrorCode] = ApibuilderQueryStringBindable(genericErrorCodeConverter)
     }
 
     trait ApibuilderTypeConverter[T] {
