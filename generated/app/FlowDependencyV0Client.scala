@@ -2012,11 +2012,11 @@ package io.flow.dependency.v0 {
     import Models._
 
     object Core {
-      implicit val pathBindableDateTimeIso8601: PathBindable[_root_.org.joda.time.DateTime] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
-      implicit val queryStringBindableDateTimeIso8601: QueryStringBindable[_root_.org.joda.time.DateTime] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def pathBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.DateTime] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def queryStringBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.DateTime] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
 
-      implicit val pathBindableDateIso8601: PathBindable[_root_.org.joda.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
-      implicit val queryStringBindableDateIso8601: QueryStringBindable[_root_.org.joda.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
+      implicit def pathBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
+      implicit def queryStringBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
     }
 
     object Models {
@@ -2028,8 +2028,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.BinaryType = io.flow.dependency.v0.models.BinaryType.Scala
         override def validValues: Seq[io.flow.dependency.v0.models.BinaryType] = io.flow.dependency.v0.models.BinaryType.all
       }
-      implicit val pathBindableBinaryType: PathBindable[io.flow.dependency.v0.models.BinaryType] = ApibuilderPathBindable(binaryTypeConverter)
-      implicit val queryStringBindableBinaryType: QueryStringBindable[io.flow.dependency.v0.models.BinaryType] = ApibuilderQueryStringBindable(binaryTypeConverter)
+      implicit def pathBindableBinaryType(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.BinaryType] = ApibuilderPathBindable(binaryTypeConverter)
+      implicit def queryStringBindableBinaryType(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.BinaryType] = ApibuilderQueryStringBindable(binaryTypeConverter)
 
       val publicationConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.Publication] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.Publication] {
         override def convert(value: String): io.flow.dependency.v0.models.Publication = io.flow.dependency.v0.models.Publication(value)
@@ -2037,8 +2037,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.Publication = io.flow.dependency.v0.models.Publication.DailySummary
         override def validValues: Seq[io.flow.dependency.v0.models.Publication] = io.flow.dependency.v0.models.Publication.all
       }
-      implicit val pathBindablePublication: PathBindable[io.flow.dependency.v0.models.Publication] = ApibuilderPathBindable(publicationConverter)
-      implicit val queryStringBindablePublication: QueryStringBindable[io.flow.dependency.v0.models.Publication] = ApibuilderQueryStringBindable(publicationConverter)
+      implicit def pathBindablePublication(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.Publication] = ApibuilderPathBindable(publicationConverter)
+      implicit def queryStringBindablePublication(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.Publication] = ApibuilderQueryStringBindable(publicationConverter)
 
       val recommendationTypeConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.RecommendationType] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.RecommendationType] {
         override def convert(value: String): io.flow.dependency.v0.models.RecommendationType = io.flow.dependency.v0.models.RecommendationType(value)
@@ -2046,8 +2046,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.RecommendationType = io.flow.dependency.v0.models.RecommendationType.Library
         override def validValues: Seq[io.flow.dependency.v0.models.RecommendationType] = io.flow.dependency.v0.models.RecommendationType.all
       }
-      implicit val pathBindableRecommendationType: PathBindable[io.flow.dependency.v0.models.RecommendationType] = ApibuilderPathBindable(recommendationTypeConverter)
-      implicit val queryStringBindableRecommendationType: QueryStringBindable[io.flow.dependency.v0.models.RecommendationType] = ApibuilderQueryStringBindable(recommendationTypeConverter)
+      implicit def pathBindableRecommendationType(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.RecommendationType] = ApibuilderPathBindable(recommendationTypeConverter)
+      implicit def queryStringBindableRecommendationType(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.RecommendationType] = ApibuilderQueryStringBindable(recommendationTypeConverter)
 
       val roleConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.Role] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.Role] {
         override def convert(value: String): io.flow.dependency.v0.models.Role = io.flow.dependency.v0.models.Role(value)
@@ -2055,8 +2055,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.Role = io.flow.dependency.v0.models.Role.Member
         override def validValues: Seq[io.flow.dependency.v0.models.Role] = io.flow.dependency.v0.models.Role.all
       }
-      implicit val pathBindableRole: PathBindable[io.flow.dependency.v0.models.Role] = ApibuilderPathBindable(roleConverter)
-      implicit val queryStringBindableRole: QueryStringBindable[io.flow.dependency.v0.models.Role] = ApibuilderQueryStringBindable(roleConverter)
+      implicit def pathBindableRole(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.Role] = ApibuilderPathBindable(roleConverter)
+      implicit def queryStringBindableRole(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.Role] = ApibuilderQueryStringBindable(roleConverter)
 
       val scmsConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.Scms] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.Scms] {
         override def convert(value: String): io.flow.dependency.v0.models.Scms = io.flow.dependency.v0.models.Scms(value)
@@ -2064,8 +2064,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.Scms = io.flow.dependency.v0.models.Scms.Github
         override def validValues: Seq[io.flow.dependency.v0.models.Scms] = io.flow.dependency.v0.models.Scms.all
       }
-      implicit val pathBindableScms: PathBindable[io.flow.dependency.v0.models.Scms] = ApibuilderPathBindable(scmsConverter)
-      implicit val queryStringBindableScms: QueryStringBindable[io.flow.dependency.v0.models.Scms] = ApibuilderQueryStringBindable(scmsConverter)
+      implicit def pathBindableScms(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.Scms] = ApibuilderPathBindable(scmsConverter)
+      implicit def queryStringBindableScms(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.Scms] = ApibuilderQueryStringBindable(scmsConverter)
 
       val syncEventConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.SyncEvent] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.SyncEvent] {
         override def convert(value: String): io.flow.dependency.v0.models.SyncEvent = io.flow.dependency.v0.models.SyncEvent(value)
@@ -2073,8 +2073,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.SyncEvent = io.flow.dependency.v0.models.SyncEvent.Started
         override def validValues: Seq[io.flow.dependency.v0.models.SyncEvent] = io.flow.dependency.v0.models.SyncEvent.all
       }
-      implicit val pathBindableSyncEvent: PathBindable[io.flow.dependency.v0.models.SyncEvent] = ApibuilderPathBindable(syncEventConverter)
-      implicit val queryStringBindableSyncEvent: QueryStringBindable[io.flow.dependency.v0.models.SyncEvent] = ApibuilderQueryStringBindable(syncEventConverter)
+      implicit def pathBindableSyncEvent(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.SyncEvent] = ApibuilderPathBindable(syncEventConverter)
+      implicit def queryStringBindableSyncEvent(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.SyncEvent] = ApibuilderQueryStringBindable(syncEventConverter)
 
       val visibilityConverter: ApibuilderTypeConverter[io.flow.dependency.v0.models.Visibility] = new ApibuilderTypeConverter[io.flow.dependency.v0.models.Visibility] {
         override def convert(value: String): io.flow.dependency.v0.models.Visibility = io.flow.dependency.v0.models.Visibility(value)
@@ -2082,8 +2082,8 @@ package io.flow.dependency.v0 {
         override def example: io.flow.dependency.v0.models.Visibility = io.flow.dependency.v0.models.Visibility.Public
         override def validValues: Seq[io.flow.dependency.v0.models.Visibility] = io.flow.dependency.v0.models.Visibility.all
       }
-      implicit val pathBindableVisibility: PathBindable[io.flow.dependency.v0.models.Visibility] = ApibuilderPathBindable(visibilityConverter)
-      implicit val queryStringBindableVisibility: QueryStringBindable[io.flow.dependency.v0.models.Visibility] = ApibuilderQueryStringBindable(visibilityConverter)
+      implicit def pathBindableVisibility(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.dependency.v0.models.Visibility] = ApibuilderPathBindable(visibilityConverter)
+      implicit def queryStringBindableVisibility(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.dependency.v0.models.Visibility] = ApibuilderQueryStringBindable(visibilityConverter)
     }
 
     trait ApibuilderTypeConverter[T] {
