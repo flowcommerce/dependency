@@ -145,7 +145,7 @@ package io.flow.healthcheck.v0 {
       }
 
       override def unbind(key: String, value: T): String = {
-        converters.convert(value)
+        s"$key=${converters.convert(value)}"
       }
     }
 
