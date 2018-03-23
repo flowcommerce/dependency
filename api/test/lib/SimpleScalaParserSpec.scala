@@ -1,6 +1,5 @@
 package io.flow.dependency.api.lib
 
-import io.flow.dependency.api.lib.SimpleScalaParserUtil
 import util.DependencySpec
 
 class SimpleScalaParserSpec extends DependencySpec {

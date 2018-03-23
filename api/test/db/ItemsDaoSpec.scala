@@ -5,9 +5,9 @@ import java.util.UUID
 import io.flow.dependency.v0.models._
 import util.DependencySpec
 
-class ItemsDaoSpec extends  DependencySpec {
+class ItemsDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
+  private[this] lazy val org = createOrganization()
 
   "replace" in {
     val form = createItemForm(org)()
@@ -57,7 +57,7 @@ class ItemsDaoSpec extends  DependencySpec {
 
   "supports binaries" in {
     val binary = createBinary(org)()
-    val itemBinary = itemsDao.replaceBinary(systemUser, binary)
+    itemsDao.replaceBinary(systemUser, binary)
 
     val actual = itemsDao.findByObjectId(Authorization.All, binary.id).getOrElse {
       sys.error("Failed to create binary")
@@ -78,7 +78,7 @@ class ItemsDaoSpec extends  DependencySpec {
   "supports libraries" in {
     val library = createLibrary(org)()
 
-    val itemLibrary = itemsDao.replaceLibrary(systemUser, library)
+    itemsDao.replaceLibrary(systemUser, library)
     val actual = itemsDao.findByObjectId(Authorization.All, library.id).getOrElse {
       sys.error("Failed to create library")
     }
@@ -99,7 +99,7 @@ class ItemsDaoSpec extends  DependencySpec {
   "supports projects" in {
     val project = createProject(org)
 
-    val itemProject = itemsDao.replaceProject(systemUser, project)
+    itemsDao.replaceProject(systemUser, project)
     val actual = itemsDao.findByObjectId(Authorization.All, project.id).getOrElse {
       sys.error("Failed to create project")
     }
