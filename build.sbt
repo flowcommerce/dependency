@@ -27,8 +27,13 @@ lazy val api = project
   .aggregate(generated, lib)
   .enablePlugins(PlayScala)
   .enablePlugins(NewRelic)
+  .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
+    javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.13",
+    javaOptions in Universal += "-Dorg.aspectj.tracing.factory=default",
+    javaOptions in Test += "-Dkamon.modules.kamon-system-metrics.auto-start=false",
+    javaOptions in Test += "-Dkamon.show-aspectj-missing-warning=no",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -39,7 +44,8 @@ lazy val api = project
       "io.flow" %% "lib-postgresql-play26" % "0.0.64",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
       "org.postgresql" % "postgresql" % "42.2.2",
-      "com.sendgrid"   %  "sendgrid-java" % "4.1.2"
+      "com.sendgrid"   %  "sendgrid-java" % "4.1.2",
+      "io.flow" %% "lib-play-graphite-play26" % "0.0.15"
     )
   )
 
