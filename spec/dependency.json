@@ -2,10 +2,10 @@
   "name": "dependency",
 
   "imports": [
-    { "uri": "http://www.apidoc.me/flow/common/latest/service.json" },
-    { "uri": "http://www.apidoc.me/flow/error/latest/service.json" },
-    { "uri": "http://www.apidoc.me/flow/healthcheck/latest/service.json" },
-    { "uri": "http://www.apidoc.me/flow/github/0.0.3/service.json" }
+    { "uri": "https://app.apibuilder.io/flow/common/latest/service.json" },
+    { "uri": "https://app.apibuilder.io/flow/error/latest/service.json" },
+    { "uri": "https://app.apibuilder.io/flow/healthcheck/latest/service.json" },
+    { "uri": "https://app.apibuilder.io/flow/github/0.0.3/service.json" }
   ],
 
   "unions": {
