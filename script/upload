@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'pathname'
+
+ORGANIZATION = "apicollective"
+
+def assert_installed(cmd, url)
+  if !system("which %s > /dev/null" % cmd)
+    puts "** ERROR: Please install %s: %s" % [cmd, url]
+    exit(1)
+  end
+end
+
+assert_installed("sem-info", "https://github.com/mbryzek/schema-evolution-manager")
+assert_installed("apibuilder", "https://github.com/apicollective/apibuilder-cli")
+
+next_tag = `sem-info tag next micro`.strip
+
+file = Pathname.new(File.join(File.dirname(__FILE__) + "/../spec/dependency.json")).cleanpath
+cmd = "apibuilder upload #{ORGANIZATION} dependency #{file} --version #{next_tag}"
+puts "==> #{cmd}"
+if !system(cmd)
+  exit(1)
+end
