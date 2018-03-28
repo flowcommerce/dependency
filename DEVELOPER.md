@@ -1,7 +1,9 @@
 building docker images
 ======================
+```
 go run ~/go/src/github.com/flowcommerce/tools/dev.go tag --label micro
 go run ~/go/src/github.com/flowcommerce/tools/dev.go build_docker_image
+```
 
 api
 ===
