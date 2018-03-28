@@ -2,7 +2,7 @@
 
 require 'pathname'
 
-ORGANIZATION = "apicollective"
+ORGANIZATION = "flow"
 
 def assert_installed(cmd, url)
   if !system("which %s > /dev/null" % cmd)
