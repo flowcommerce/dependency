@@ -41,11 +41,11 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "io.flow" %% "lib-postgresql-play26" % "0.0.64",
+      "io.flow" %% "lib-postgresql-play26" % "0.0.65",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.21",
       "org.postgresql" % "postgresql" % "42.2.2",
       "com.sendgrid"   %  "sendgrid-java" % "4.1.2",
-      "io.flow" %% "lib-play-graphite-play26" % "0.0.15"
+      "io.flow" %% "lib-play-graphite-play26" % "0.0.16"
     )
   )
 
@@ -67,7 +67,7 @@ lazy val www = project
       "org.webjars" %% "webjars-play" % "2.6.3",
       "org.webjars" % "bootstrap" % "3.3.7",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "org.webjars" % "font-awesome" % "5.0.6",
+      "org.webjars" % "font-awesome" % "5.0.8",
       "org.webjars" % "jquery" % "2.1.4"
     )
   )
