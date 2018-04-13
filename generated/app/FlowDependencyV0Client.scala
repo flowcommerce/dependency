@@ -2244,8 +2244,8 @@ package io.flow.dependency.v0 {
         ids: _root_.scala.Option[Seq[String]] = None,
         projectId: _root_.scala.Option[String] = None,
         name: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Binary]] = {
         val queryParameters = Seq(
@@ -2309,8 +2309,8 @@ package io.flow.dependency.v0 {
         ids: _root_.scala.Option[Seq[String]] = None,
         binaryId: _root_.scala.Option[String] = None,
         projectId: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.BinaryVersion]] = {
         val queryParameters = Seq(
@@ -2383,8 +2383,8 @@ package io.flow.dependency.v0 {
     object Items extends Items {
       override def get(
         q: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Item]] = {
         val queryParameters = Seq(
@@ -2409,8 +2409,8 @@ package io.flow.dependency.v0 {
         groupId: _root_.scala.Option[String] = None,
         artifactId: _root_.scala.Option[String] = None,
         resolverId: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Library]] = {
         val queryParameters = Seq(
@@ -2475,8 +2475,8 @@ package io.flow.dependency.v0 {
         id: _root_.scala.Option[String] = None,
         ids: _root_.scala.Option[Seq[String]] = None,
         libraryId: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.LibraryVersion]] = {
         val queryParameters = Seq(
@@ -2514,8 +2514,8 @@ package io.flow.dependency.v0 {
         organization: _root_.scala.Option[String] = None,
         userId: _root_.scala.Option[String] = None,
         role: _root_.scala.Option[io.flow.dependency.v0.models.Role] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Membership]] = {
         val queryParameters = Seq(
@@ -2581,8 +2581,8 @@ package io.flow.dependency.v0 {
         ids: _root_.scala.Option[Seq[String]] = None,
         userId: _root_.scala.Option[String] = None,
         key: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Organization]] = {
         val queryParameters = Seq(
@@ -2674,8 +2674,8 @@ package io.flow.dependency.v0 {
         projectId: _root_.scala.Option[String] = None,
         binaryId: _root_.scala.Option[String] = None,
         isSynced: _root_.scala.Option[Boolean] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.ProjectBinary]] = {
         val queryParameters = Seq(
@@ -2703,8 +2703,8 @@ package io.flow.dependency.v0 {
         projectId: _root_.scala.Option[String] = None,
         libraryId: _root_.scala.Option[String] = None,
         isSynced: _root_.scala.Option[Boolean] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.ProjectLibrary]] = {
         val queryParameters = Seq(
@@ -2737,8 +2737,8 @@ package io.flow.dependency.v0 {
         libraryId: _root_.scala.Option[String] = None,
         binary: _root_.scala.Option[String] = None,
         binaryId: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Project]] = {
         val queryParameters = Seq(
@@ -2838,8 +2838,8 @@ package io.flow.dependency.v0 {
         organization: _root_.scala.Option[String] = None,
         projectId: _root_.scala.Option[String] = None,
         `type`: _root_.scala.Option[io.flow.dependency.v0.models.RecommendationType] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Recommendation]] = {
         val queryParameters = Seq(
@@ -2864,8 +2864,8 @@ package io.flow.dependency.v0 {
         name: _root_.scala.Option[String] = None,
         organizationId: _root_.scala.Option[String] = None,
         existingProject: _root_.scala.Option[Boolean] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.github.v0.models.Repository]] = {
         val queryParameters = Seq(
@@ -2892,8 +2892,8 @@ package io.flow.dependency.v0 {
         ids: _root_.scala.Option[Seq[String]] = None,
         organization: _root_.scala.Option[String] = None,
         visibility: _root_.scala.Option[io.flow.dependency.v0.models.Visibility] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Resolver]] = {
         val queryParameters = Seq(
@@ -2958,8 +2958,8 @@ package io.flow.dependency.v0 {
         userId: _root_.scala.Option[String] = None,
         identifier: _root_.scala.Option[String] = None,
         publication: _root_.scala.Option[io.flow.dependency.v0.models.Publication] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Subscription]] = {
         val queryParameters = Seq(
@@ -3032,8 +3032,8 @@ package io.flow.dependency.v0 {
       override def get(
         objectId: _root_.scala.Option[String] = None,
         event: _root_.scala.Option[io.flow.dependency.v0.models.SyncEvent] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Sync]] = {
         val queryParameters = Seq(
@@ -3088,8 +3088,8 @@ package io.flow.dependency.v0 {
       override def get(
         id: _root_.scala.Option[Seq[String]] = None,
         userId: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Token]] = {
         val queryParameters = Seq(
@@ -3345,8 +3345,8 @@ package io.flow.dependency.v0 {
       ids: _root_.scala.Option[Seq[String]] = None,
       projectId: _root_.scala.Option[String] = None,
       name: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Binary]]
 
@@ -3388,8 +3388,8 @@ package io.flow.dependency.v0 {
       ids: _root_.scala.Option[Seq[String]] = None,
       binaryId: _root_.scala.Option[String] = None,
       projectId: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.BinaryVersion]]
 
@@ -3438,8 +3438,8 @@ package io.flow.dependency.v0 {
      */
     def get(
       q: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Item]]
   }
@@ -3464,8 +3464,8 @@ package io.flow.dependency.v0 {
       groupId: _root_.scala.Option[String] = None,
       artifactId: _root_.scala.Option[String] = None,
       resolverId: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Library]]
 
@@ -3505,8 +3505,8 @@ package io.flow.dependency.v0 {
       id: _root_.scala.Option[String] = None,
       ids: _root_.scala.Option[Seq[String]] = None,
       libraryId: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.LibraryVersion]]
 
@@ -3535,8 +3535,8 @@ package io.flow.dependency.v0 {
       organization: _root_.scala.Option[String] = None,
       userId: _root_.scala.Option[String] = None,
       role: _root_.scala.Option[io.flow.dependency.v0.models.Role] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Membership]]
 
@@ -3572,8 +3572,8 @@ package io.flow.dependency.v0 {
       ids: _root_.scala.Option[Seq[String]] = None,
       userId: _root_.scala.Option[String] = None,
       key: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Organization]]
 
@@ -3639,8 +3639,8 @@ package io.flow.dependency.v0 {
       projectId: _root_.scala.Option[String] = None,
       binaryId: _root_.scala.Option[String] = None,
       isSynced: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.ProjectBinary]]
   }
@@ -3666,8 +3666,8 @@ package io.flow.dependency.v0 {
       projectId: _root_.scala.Option[String] = None,
       libraryId: _root_.scala.Option[String] = None,
       isSynced: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.ProjectLibrary]]
   }
@@ -3701,8 +3701,8 @@ package io.flow.dependency.v0 {
       libraryId: _root_.scala.Option[String] = None,
       binary: _root_.scala.Option[String] = None,
       binaryId: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Project]]
 
@@ -3760,8 +3760,8 @@ package io.flow.dependency.v0 {
       organization: _root_.scala.Option[String] = None,
       projectId: _root_.scala.Option[String] = None,
       `type`: _root_.scala.Option[io.flow.dependency.v0.models.RecommendationType] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Recommendation]]
   }
@@ -3784,8 +3784,8 @@ package io.flow.dependency.v0 {
       name: _root_.scala.Option[String] = None,
       organizationId: _root_.scala.Option[String] = None,
       existingProject: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.github.v0.models.Repository]]
   }
@@ -3806,8 +3806,8 @@ package io.flow.dependency.v0 {
       ids: _root_.scala.Option[Seq[String]] = None,
       organization: _root_.scala.Option[String] = None,
       visibility: _root_.scala.Option[io.flow.dependency.v0.models.Visibility] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Resolver]]
 
@@ -3851,8 +3851,8 @@ package io.flow.dependency.v0 {
       userId: _root_.scala.Option[String] = None,
       identifier: _root_.scala.Option[String] = None,
       publication: _root_.scala.Option[io.flow.dependency.v0.models.Publication] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Subscription]]
 
@@ -3893,8 +3893,8 @@ package io.flow.dependency.v0 {
     def get(
       objectId: _root_.scala.Option[String] = None,
       event: _root_.scala.Option[io.flow.dependency.v0.models.SyncEvent] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Sync]]
 
@@ -3924,8 +3924,8 @@ package io.flow.dependency.v0 {
     def get(
       id: _root_.scala.Option[Seq[String]] = None,
       userId: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Token]]
 
