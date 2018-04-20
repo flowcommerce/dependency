@@ -16,7 +16,7 @@ package io.flow.dependency.v0.models {
 
     case object UsernamePassword extends CredentialsDiscriminator { override def toString = "username_password" }
 
-    case class UNDEFINED(override val toString: String) extends CredentialsDiscriminator
+    final case class UNDEFINED(override val toString: String) extends CredentialsDiscriminator
 
     val all: scala.List[CredentialsDiscriminator] = scala.List(UsernamePassword)
 
@@ -41,7 +41,7 @@ package io.flow.dependency.v0.models {
     case object LibrarySummary extends ItemSummaryDiscriminator { override def toString = "library_summary" }
     case object ProjectSummary extends ItemSummaryDiscriminator { override def toString = "project_summary" }
 
-    case class UNDEFINED(override val toString: String) extends ItemSummaryDiscriminator
+    final case class UNDEFINED(override val toString: String) extends ItemSummaryDiscriminator
 
     val all: scala.List[ItemSummaryDiscriminator] = scala.List(BinarySummary, LibrarySummary, ProjectSummary)
 
@@ -53,24 +53,24 @@ package io.flow.dependency.v0.models {
 
   }
 
-  case class Binary(
+  final case class Binary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: io.flow.dependency.v0.models.BinaryType
   )
 
-  case class BinaryForm(
+  final case class BinaryForm(
     organizationId: String,
     name: io.flow.dependency.v0.models.BinaryType
   )
 
-  case class BinarySummary(
+  final case class BinarySummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: io.flow.dependency.v0.models.BinaryType
   ) extends ItemSummary
 
-  case class BinaryVersion(
+  final case class BinaryVersion(
     id: String,
     binary: io.flow.dependency.v0.models.Binary,
     version: String
@@ -79,18 +79,18 @@ package io.flow.dependency.v0.models {
   /**
    * Used to authenticate user based on the oauth code we receive from github
    */
-  case class GithubAuthenticationForm(
+  final case class GithubAuthenticationForm(
     code: String
   )
 
-  case class GithubUser(
+  final case class GithubUser(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     githubUserId: Long,
     login: String
   )
 
-  case class GithubUserForm(
+  final case class GithubUserForm(
     userId: String,
     githubUserId: Long,
     login: String
@@ -99,7 +99,7 @@ package io.flow.dependency.v0.models {
   /**
    * Defines a github hook
    */
-  case class GithubWebhook(
+  final case class GithubWebhook(
     id: Long
   )
 
@@ -108,7 +108,7 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this item.
    */
-  case class Item(
+  final case class Item(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -120,7 +120,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param resolver The resolver where we found this library
    */
-  case class Library(
+  final case class Library(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     groupId: String,
@@ -131,7 +131,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param version If provided, we automatically record this version of this library.
    */
-  case class LibraryForm(
+  final case class LibraryForm(
     organizationId: String,
     groupId: String,
     artifactId: String,
@@ -139,14 +139,14 @@ package io.flow.dependency.v0.models {
     version: _root_.scala.Option[io.flow.dependency.v0.models.VersionForm] = None
   )
 
-  case class LibrarySummary(
+  final case class LibrarySummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     groupId: String,
     artifactId: String
   ) extends ItemSummary
 
-  case class LibraryVersion(
+  final case class LibraryVersion(
     id: String,
     library: io.flow.dependency.v0.models.Library,
     version: String,
@@ -158,14 +158,14 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this membership
    */
-  case class Membership(
+  final case class Membership(
     id: String,
     user: io.flow.dependency.v0.models.UserSummary,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     role: io.flow.dependency.v0.models.Role
   )
 
-  case class MembershipForm(
+  final case class MembershipForm(
     userId: String,
     organization: String,
     role: io.flow.dependency.v0.models.Role = io.flow.dependency.v0.models.Role.Member
@@ -174,17 +174,17 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this organization
    */
-  case class Organization(
+  final case class Organization(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     key: String
   )
 
-  case class OrganizationForm(
+  final case class OrganizationForm(
     key: String
   )
 
-  case class OrganizationSummary(
+  final case class OrganizationSummary(
     id: String,
     key: String
   )
@@ -192,7 +192,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this project
    */
-  case class Project(
+  final case class Project(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     user: io.flow.common.v0.models.UserReference,
@@ -202,7 +202,7 @@ package io.flow.dependency.v0.models {
     uri: String
   )
 
-  case class ProjectBinary(
+  final case class ProjectBinary(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     name: String,
@@ -211,13 +211,13 @@ package io.flow.dependency.v0.models {
     binary: _root_.scala.Option[io.flow.dependency.v0.models.Reference] = None
   )
 
-  case class ProjectDetail(
+  final case class ProjectDetail(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: String
   )
 
-  case class ProjectForm(
+  final case class ProjectForm(
     organization: String,
     name: String,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -225,7 +225,7 @@ package io.flow.dependency.v0.models {
     uri: String
   )
 
-  case class ProjectLibrary(
+  final case class ProjectLibrary(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     groupId: String,
@@ -236,14 +236,14 @@ package io.flow.dependency.v0.models {
     library: _root_.scala.Option[io.flow.dependency.v0.models.Reference] = None
   )
 
-  case class ProjectPatchForm(
+  final case class ProjectPatchForm(
     name: _root_.scala.Option[String] = None,
     visibility: _root_.scala.Option[io.flow.dependency.v0.models.Visibility] = None,
     scms: _root_.scala.Option[io.flow.dependency.v0.models.Scms] = None,
     uri: _root_.scala.Option[String] = None
   )
 
-  case class ProjectSummary(
+  final case class ProjectSummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: String
@@ -257,7 +257,7 @@ package io.flow.dependency.v0.models {
    * @param from The current version
    * @param to The version to which we recommend upgrading
    */
-  case class Recommendation(
+  final case class Recommendation(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     `type`: io.flow.dependency.v0.models.RecommendationType,
@@ -268,11 +268,11 @@ package io.flow.dependency.v0.models {
     createdAt: _root_.org.joda.time.DateTime
   )
 
-  case class Reference(
+  final case class Reference(
     id: String
   )
 
-  case class Repository(
+  final case class Repository(
     name: String,
     visibility: io.flow.dependency.v0.models.Visibility,
     uri: String
@@ -282,7 +282,7 @@ package io.flow.dependency.v0.models {
    * @param organization The organization that created the resolver. If empty, indicates a globally
    *        public resolver
    */
-  case class Resolver(
+  final case class Resolver(
     id: String,
     visibility: io.flow.dependency.v0.models.Visibility,
     organization: _root_.scala.Option[io.flow.dependency.v0.models.OrganizationSummary] = None,
@@ -290,14 +290,14 @@ package io.flow.dependency.v0.models {
     credentials: _root_.scala.Option[io.flow.dependency.v0.models.Credentials] = None
   )
 
-  case class ResolverForm(
+  final case class ResolverForm(
     visibility: io.flow.dependency.v0.models.Visibility,
     organization: String,
     uri: String,
     credentials: _root_.scala.Option[io.flow.dependency.v0.models.Credentials] = None
   )
 
-  case class ResolverSummary(
+  final case class ResolverSummary(
     id: String,
     organization: _root_.scala.Option[io.flow.dependency.v0.models.OrganizationSummary] = None,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -309,13 +309,13 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Internal unique identifier for this subscription record
    */
-  case class Subscription(
+  final case class Subscription(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     publication: io.flow.dependency.v0.models.Publication
   )
 
-  case class SubscriptionForm(
+  final case class SubscriptionForm(
     userId: String,
     publication: io.flow.dependency.v0.models.Publication
   )
@@ -325,7 +325,7 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this item.
    */
-  case class Sync(
+  final case class Sync(
     id: String,
     objectId: String,
     event: io.flow.dependency.v0.models.SyncEvent,
@@ -335,7 +335,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param cleartext The cleartext token. Only available when the token is initially created
    */
-  case class Token(
+  final case class Token(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     masked: String,
@@ -343,34 +343,34 @@ package io.flow.dependency.v0.models {
     description: _root_.scala.Option[String] = None
   )
 
-  case class TokenForm(
+  final case class TokenForm(
     userId: String,
     description: _root_.scala.Option[String] = None
   )
 
-  case class UserForm(
+  final case class UserForm(
     email: _root_.scala.Option[String] = None,
     name: _root_.scala.Option[io.flow.common.v0.models.Name] = None
   )
 
-  case class UserIdentifier(
+  final case class UserIdentifier(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     value: String
   )
 
-  case class UserSummary(
+  final case class UserSummary(
     id: String,
     email: _root_.scala.Option[String] = None,
     name: io.flow.common.v0.models.Name
   )
 
-  case class UsernamePassword(
+  final case class UsernamePassword(
     username: String,
     password: _root_.scala.Option[String] = None
   ) extends Credentials
 
-  case class VersionForm(
+  final case class VersionForm(
     version: String,
     crossBuildVersion: _root_.scala.Option[String] = None
   )
@@ -383,7 +383,7 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class CredentialsUndefinedType(
+  final case class CredentialsUndefinedType(
     description: String
   ) extends Credentials
 
@@ -395,7 +395,7 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class ItemSummaryUndefinedType(
+  final case class ItemSummaryUndefinedType(
     description: String
   ) extends ItemSummary
 
@@ -421,7 +421,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends BinaryType
+    final case class UNDEFINED(override val toString: String) extends BinaryType
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -460,7 +460,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Publication
+    final case class UNDEFINED(override val toString: String) extends Publication
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -494,7 +494,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends RecommendationType
+    final case class UNDEFINED(override val toString: String) extends RecommendationType
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -528,7 +528,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Role
+    final case class UNDEFINED(override val toString: String) extends Role
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -561,7 +561,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Scms
+    final case class UNDEFINED(override val toString: String) extends Scms
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -595,7 +595,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends SyncEvent
+    final case class UNDEFINED(override val toString: String) extends SyncEvent
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -629,7 +629,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Visibility
+    final case class UNDEFINED(override val toString: String) extends Visibility
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -2122,7 +2122,7 @@ package io.flow.dependency.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -2145,7 +2145,7 @@ package io.flow.dependency.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -3298,7 +3298,7 @@ package io.flow.dependency.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -4003,16 +4003,16 @@ package io.flow.dependency.v0 {
     import io.flow.github.v0.models.json._
     import io.flow.healthcheck.v0.models.json._
 
-    case class GenericErrorsResponse(
+    final case class GenericErrorsResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
       lazy val genericErrors = _root_.io.flow.dependency.v0.Client.parseJson("Seq[io.flow.error.v0.models.GenericError]", response, _.validate[Seq[io.flow.error.v0.models.GenericError]])
     }
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 
