@@ -16,7 +16,7 @@ package io.flow.dependency.v0.models {
 
     case object UsernamePassword extends CredentialsDiscriminator { override def toString = "username_password" }
 
-    case class UNDEFINED(override val toString: String) extends CredentialsDiscriminator
+    final case class UNDEFINED(override val toString: String) extends CredentialsDiscriminator
 
     val all: scala.List[CredentialsDiscriminator] = scala.List(UsernamePassword)
 
@@ -41,7 +41,7 @@ package io.flow.dependency.v0.models {
     case object LibrarySummary extends ItemSummaryDiscriminator { override def toString = "library_summary" }
     case object ProjectSummary extends ItemSummaryDiscriminator { override def toString = "project_summary" }
 
-    case class UNDEFINED(override val toString: String) extends ItemSummaryDiscriminator
+    final case class UNDEFINED(override val toString: String) extends ItemSummaryDiscriminator
 
     val all: scala.List[ItemSummaryDiscriminator] = scala.List(BinarySummary, LibrarySummary, ProjectSummary)
 
@@ -53,24 +53,24 @@ package io.flow.dependency.v0.models {
 
   }
 
-  case class Binary(
+  final case class Binary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: io.flow.dependency.v0.models.BinaryType
   )
 
-  case class BinaryForm(
+  final case class BinaryForm(
     organizationId: String,
     name: io.flow.dependency.v0.models.BinaryType
   )
 
-  case class BinarySummary(
+  final case class BinarySummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: io.flow.dependency.v0.models.BinaryType
   ) extends ItemSummary
 
-  case class BinaryVersion(
+  final case class BinaryVersion(
     id: String,
     binary: io.flow.dependency.v0.models.Binary,
     version: String
@@ -79,18 +79,18 @@ package io.flow.dependency.v0.models {
   /**
    * Used to authenticate user based on the oauth code we receive from github
    */
-  case class GithubAuthenticationForm(
+  final case class GithubAuthenticationForm(
     code: String
   )
 
-  case class GithubUser(
+  final case class GithubUser(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     githubUserId: Long,
     login: String
   )
 
-  case class GithubUserForm(
+  final case class GithubUserForm(
     userId: String,
     githubUserId: Long,
     login: String
@@ -99,7 +99,7 @@ package io.flow.dependency.v0.models {
   /**
    * Defines a github hook
    */
-  case class GithubWebhook(
+  final case class GithubWebhook(
     id: Long
   )
 
@@ -108,7 +108,7 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this item.
    */
-  case class Item(
+  final case class Item(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -120,7 +120,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param resolver The resolver where we found this library
    */
-  case class Library(
+  final case class Library(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     groupId: String,
@@ -131,7 +131,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param version If provided, we automatically record this version of this library.
    */
-  case class LibraryForm(
+  final case class LibraryForm(
     organizationId: String,
     groupId: String,
     artifactId: String,
@@ -139,14 +139,14 @@ package io.flow.dependency.v0.models {
     version: _root_.scala.Option[io.flow.dependency.v0.models.VersionForm] = None
   )
 
-  case class LibrarySummary(
+  final case class LibrarySummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     groupId: String,
     artifactId: String
   ) extends ItemSummary
 
-  case class LibraryVersion(
+  final case class LibraryVersion(
     id: String,
     library: io.flow.dependency.v0.models.Library,
     version: String,
@@ -158,14 +158,14 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this membership
    */
-  case class Membership(
+  final case class Membership(
     id: String,
     user: io.flow.dependency.v0.models.UserSummary,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     role: io.flow.dependency.v0.models.Role
   )
 
-  case class MembershipForm(
+  final case class MembershipForm(
     userId: String,
     organization: String,
     role: io.flow.dependency.v0.models.Role = io.flow.dependency.v0.models.Role.Member
@@ -174,17 +174,17 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this organization
    */
-  case class Organization(
+  final case class Organization(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     key: String
   )
 
-  case class OrganizationForm(
+  final case class OrganizationForm(
     key: String
   )
 
-  case class OrganizationSummary(
+  final case class OrganizationSummary(
     id: String,
     key: String
   )
@@ -192,7 +192,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this project
    */
-  case class Project(
+  final case class Project(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     user: io.flow.common.v0.models.UserReference,
@@ -202,7 +202,7 @@ package io.flow.dependency.v0.models {
     uri: String
   )
 
-  case class ProjectBinary(
+  final case class ProjectBinary(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     name: String,
@@ -211,13 +211,13 @@ package io.flow.dependency.v0.models {
     binary: _root_.scala.Option[io.flow.dependency.v0.models.Reference] = None
   )
 
-  case class ProjectDetail(
+  final case class ProjectDetail(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: String
   )
 
-  case class ProjectForm(
+  final case class ProjectForm(
     organization: String,
     name: String,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -225,7 +225,7 @@ package io.flow.dependency.v0.models {
     uri: String
   )
 
-  case class ProjectLibrary(
+  final case class ProjectLibrary(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     groupId: String,
@@ -236,14 +236,14 @@ package io.flow.dependency.v0.models {
     library: _root_.scala.Option[io.flow.dependency.v0.models.Reference] = None
   )
 
-  case class ProjectPatchForm(
+  final case class ProjectPatchForm(
     name: _root_.scala.Option[String] = None,
     visibility: _root_.scala.Option[io.flow.dependency.v0.models.Visibility] = None,
     scms: _root_.scala.Option[io.flow.dependency.v0.models.Scms] = None,
     uri: _root_.scala.Option[String] = None
   )
 
-  case class ProjectSummary(
+  final case class ProjectSummary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: String
@@ -257,7 +257,7 @@ package io.flow.dependency.v0.models {
    * @param from The current version
    * @param to The version to which we recommend upgrading
    */
-  case class Recommendation(
+  final case class Recommendation(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
     `type`: io.flow.dependency.v0.models.RecommendationType,
@@ -268,11 +268,11 @@ package io.flow.dependency.v0.models {
     createdAt: _root_.org.joda.time.DateTime
   )
 
-  case class Reference(
+  final case class Reference(
     id: String
   )
 
-  case class Repository(
+  final case class Repository(
     name: String,
     visibility: io.flow.dependency.v0.models.Visibility,
     uri: String
@@ -282,7 +282,7 @@ package io.flow.dependency.v0.models {
    * @param organization The organization that created the resolver. If empty, indicates a globally
    *        public resolver
    */
-  case class Resolver(
+  final case class Resolver(
     id: String,
     visibility: io.flow.dependency.v0.models.Visibility,
     organization: _root_.scala.Option[io.flow.dependency.v0.models.OrganizationSummary] = None,
@@ -290,14 +290,14 @@ package io.flow.dependency.v0.models {
     credentials: _root_.scala.Option[io.flow.dependency.v0.models.Credentials] = None
   )
 
-  case class ResolverForm(
+  final case class ResolverForm(
     visibility: io.flow.dependency.v0.models.Visibility,
     organization: String,
     uri: String,
     credentials: _root_.scala.Option[io.flow.dependency.v0.models.Credentials] = None
   )
 
-  case class ResolverSummary(
+  final case class ResolverSummary(
     id: String,
     organization: _root_.scala.Option[io.flow.dependency.v0.models.OrganizationSummary] = None,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -309,13 +309,13 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Internal unique identifier for this subscription record
    */
-  case class Subscription(
+  final case class Subscription(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     publication: io.flow.dependency.v0.models.Publication
   )
 
-  case class SubscriptionForm(
+  final case class SubscriptionForm(
     userId: String,
     publication: io.flow.dependency.v0.models.Publication
   )
@@ -325,7 +325,7 @@ package io.flow.dependency.v0.models {
    * 
    * @param id Unique identifier for this item.
    */
-  case class Sync(
+  final case class Sync(
     id: String,
     objectId: String,
     event: io.flow.dependency.v0.models.SyncEvent,
@@ -335,7 +335,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param cleartext The cleartext token. Only available when the token is initially created
    */
-  case class Token(
+  final case class Token(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     masked: String,
@@ -343,34 +343,34 @@ package io.flow.dependency.v0.models {
     description: _root_.scala.Option[String] = None
   )
 
-  case class TokenForm(
+  final case class TokenForm(
     userId: String,
     description: _root_.scala.Option[String] = None
   )
 
-  case class UserForm(
+  final case class UserForm(
     email: _root_.scala.Option[String] = None,
     name: _root_.scala.Option[io.flow.common.v0.models.Name] = None
   )
 
-  case class UserIdentifier(
+  final case class UserIdentifier(
     id: String,
     user: io.flow.common.v0.models.UserReference,
     value: String
   )
 
-  case class UserSummary(
+  final case class UserSummary(
     id: String,
     email: _root_.scala.Option[String] = None,
     name: io.flow.common.v0.models.Name
   )
 
-  case class UsernamePassword(
+  final case class UsernamePassword(
     username: String,
     password: _root_.scala.Option[String] = None
   ) extends Credentials
 
-  case class VersionForm(
+  final case class VersionForm(
     version: String,
     crossBuildVersion: _root_.scala.Option[String] = None
   )
@@ -383,7 +383,7 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class CredentialsUndefinedType(
+  final case class CredentialsUndefinedType(
     description: String
   ) extends Credentials
 
@@ -395,7 +395,7 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class ItemSummaryUndefinedType(
+  final case class ItemSummaryUndefinedType(
     description: String
   ) extends ItemSummary
 
@@ -421,7 +421,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends BinaryType
+    final case class UNDEFINED(override val toString: String) extends BinaryType
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -460,7 +460,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Publication
+    final case class UNDEFINED(override val toString: String) extends Publication
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -494,7 +494,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends RecommendationType
+    final case class UNDEFINED(override val toString: String) extends RecommendationType
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -528,7 +528,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Role
+    final case class UNDEFINED(override val toString: String) extends Role
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -561,7 +561,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Scms
+    final case class UNDEFINED(override val toString: String) extends Scms
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -595,7 +595,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends SyncEvent
+    final case class UNDEFINED(override val toString: String) extends SyncEvent
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -629,7 +629,7 @@ package io.flow.dependency.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends Visibility
+    final case class UNDEFINED(override val toString: String) extends Visibility
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -905,11 +905,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyBinary: play.api.libs.json.Reads[Binary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
-      )(Binary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        name <- (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
+      } yield Binary(id, organization, name)
     }
 
     def jsObjectBinary(obj: io.flow.dependency.v0.models.Binary): play.api.libs.json.JsObject = {
@@ -929,10 +929,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyBinaryForm: play.api.libs.json.Reads[BinaryForm] = {
-      (
-        (__ \ "organization_id").read[String] and
-        (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
-      )(BinaryForm.apply _)
+      for {
+        organizationId <- (__ \ "organization_id").read[String]
+        name <- (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
+      } yield BinaryForm(organizationId, name)
     }
 
     def jsObjectBinaryForm(obj: io.flow.dependency.v0.models.BinaryForm): play.api.libs.json.JsObject = {
@@ -951,11 +951,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyBinarySummary: play.api.libs.json.Reads[BinarySummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
-      )(BinarySummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        name <- (__ \ "name").read[io.flow.dependency.v0.models.BinaryType]
+      } yield BinarySummary(id, organization, name)
     }
 
     def jsObjectBinarySummary(obj: io.flow.dependency.v0.models.BinarySummary): play.api.libs.json.JsObject = {
@@ -967,11 +967,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyBinaryVersion: play.api.libs.json.Reads[BinaryVersion] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "binary").read[io.flow.dependency.v0.models.Binary] and
-        (__ \ "version").read[String]
-      )(BinaryVersion.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        binary <- (__ \ "binary").read[io.flow.dependency.v0.models.Binary]
+        version <- (__ \ "version").read[String]
+      } yield BinaryVersion(id, binary, version)
     }
 
     def jsObjectBinaryVersion(obj: io.flow.dependency.v0.models.BinaryVersion): play.api.libs.json.JsObject = {
@@ -1009,12 +1009,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyGithubUser: play.api.libs.json.Reads[GithubUser] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "github_user_id").read[Long] and
-        (__ \ "login").read[String]
-      )(GithubUser.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        githubUserId <- (__ \ "github_user_id").read[Long]
+        login <- (__ \ "login").read[String]
+      } yield GithubUser(id, user, githubUserId, login)
     }
 
     def jsObjectGithubUser(obj: io.flow.dependency.v0.models.GithubUser): play.api.libs.json.JsObject = {
@@ -1035,11 +1035,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyGithubUserForm: play.api.libs.json.Reads[GithubUserForm] = {
-      (
-        (__ \ "user_id").read[String] and
-        (__ \ "github_user_id").read[Long] and
-        (__ \ "login").read[String]
-      )(GithubUserForm.apply _)
+      for {
+        userId <- (__ \ "user_id").read[String]
+        githubUserId <- (__ \ "github_user_id").read[Long]
+        login <- (__ \ "login").read[String]
+      } yield GithubUserForm(userId, githubUserId, login)
     }
 
     def jsObjectGithubUserForm(obj: io.flow.dependency.v0.models.GithubUserForm): play.api.libs.json.JsObject = {
@@ -1077,14 +1077,14 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyItem: play.api.libs.json.Reads[Item] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "summary").read[io.flow.dependency.v0.models.ItemSummary] and
-        (__ \ "label").read[String] and
-        (__ \ "description").readNullable[String]
-      )(Item.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        summary <- (__ \ "summary").read[io.flow.dependency.v0.models.ItemSummary]
+        label <- (__ \ "label").read[String]
+        description <- (__ \ "description").readNullable[String]
+      } yield Item(id, organization, visibility, summary, label, description)
     }
 
     def jsObjectItem(obj: io.flow.dependency.v0.models.Item): play.api.libs.json.JsObject = {
@@ -1109,13 +1109,13 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyLibrary: play.api.libs.json.Reads[Library] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "group_id").read[String] and
-        (__ \ "artifact_id").read[String] and
-        (__ \ "resolver").read[io.flow.dependency.v0.models.ResolverSummary]
-      )(Library.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        groupId <- (__ \ "group_id").read[String]
+        artifactId <- (__ \ "artifact_id").read[String]
+        resolver <- (__ \ "resolver").read[io.flow.dependency.v0.models.ResolverSummary]
+      } yield Library(id, organization, groupId, artifactId, resolver)
     }
 
     def jsObjectLibrary(obj: io.flow.dependency.v0.models.Library): play.api.libs.json.JsObject = {
@@ -1137,13 +1137,13 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyLibraryForm: play.api.libs.json.Reads[LibraryForm] = {
-      (
-        (__ \ "organization_id").read[String] and
-        (__ \ "group_id").read[String] and
-        (__ \ "artifact_id").read[String] and
-        (__ \ "resolver_id").read[String] and
-        (__ \ "version").readNullable[io.flow.dependency.v0.models.VersionForm]
-      )(LibraryForm.apply _)
+      for {
+        organizationId <- (__ \ "organization_id").read[String]
+        groupId <- (__ \ "group_id").read[String]
+        artifactId <- (__ \ "artifact_id").read[String]
+        resolverId <- (__ \ "resolver_id").read[String]
+        version <- (__ \ "version").readNullable[io.flow.dependency.v0.models.VersionForm]
+      } yield LibraryForm(organizationId, groupId, artifactId, resolverId, version)
     }
 
     def jsObjectLibraryForm(obj: io.flow.dependency.v0.models.LibraryForm): play.api.libs.json.JsObject = {
@@ -1167,12 +1167,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyLibrarySummary: play.api.libs.json.Reads[LibrarySummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "group_id").read[String] and
-        (__ \ "artifact_id").read[String]
-      )(LibrarySummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        groupId <- (__ \ "group_id").read[String]
+        artifactId <- (__ \ "artifact_id").read[String]
+      } yield LibrarySummary(id, organization, groupId, artifactId)
     }
 
     def jsObjectLibrarySummary(obj: io.flow.dependency.v0.models.LibrarySummary): play.api.libs.json.JsObject = {
@@ -1185,12 +1185,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyLibraryVersion: play.api.libs.json.Reads[LibraryVersion] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "library").read[io.flow.dependency.v0.models.Library] and
-        (__ \ "version").read[String] and
-        (__ \ "cross_build_version").readNullable[String]
-      )(LibraryVersion.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        library <- (__ \ "library").read[io.flow.dependency.v0.models.Library]
+        version <- (__ \ "version").read[String]
+        crossBuildVersion <- (__ \ "cross_build_version").readNullable[String]
+      } yield LibraryVersion(id, library, version, crossBuildVersion)
     }
 
     def jsObjectLibraryVersion(obj: io.flow.dependency.v0.models.LibraryVersion): play.api.libs.json.JsObject = {
@@ -1213,12 +1213,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyMembership: play.api.libs.json.Reads[Membership] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.dependency.v0.models.UserSummary] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "role").read[io.flow.dependency.v0.models.Role]
-      )(Membership.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.dependency.v0.models.UserSummary]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        role <- (__ \ "role").read[io.flow.dependency.v0.models.Role]
+      } yield Membership(id, user, organization, role)
     }
 
     def jsObjectMembership(obj: io.flow.dependency.v0.models.Membership): play.api.libs.json.JsObject = {
@@ -1239,11 +1239,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyMembershipForm: play.api.libs.json.Reads[MembershipForm] = {
-      (
-        (__ \ "user_id").read[String] and
-        (__ \ "organization").read[String] and
-        (__ \ "role").read[io.flow.dependency.v0.models.Role]
-      )(MembershipForm.apply _)
+      for {
+        userId <- (__ \ "user_id").read[String]
+        organization <- (__ \ "organization").read[String]
+        role <- (__ \ "role").read[io.flow.dependency.v0.models.Role]
+      } yield MembershipForm(userId, organization, role)
     }
 
     def jsObjectMembershipForm(obj: io.flow.dependency.v0.models.MembershipForm): play.api.libs.json.JsObject = {
@@ -1263,11 +1263,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyOrganization: play.api.libs.json.Reads[Organization] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "key").read[String]
-      )(Organization.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        key <- (__ \ "key").read[String]
+      } yield Organization(id, user, key)
     }
 
     def jsObjectOrganization(obj: io.flow.dependency.v0.models.Organization): play.api.libs.json.JsObject = {
@@ -1305,10 +1305,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyOrganizationSummary: play.api.libs.json.Reads[OrganizationSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "key").read[String]
-      )(OrganizationSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        key <- (__ \ "key").read[String]
+      } yield OrganizationSummary(id, key)
     }
 
     def jsObjectOrganizationSummary(obj: io.flow.dependency.v0.models.OrganizationSummary): play.api.libs.json.JsObject = {
@@ -1327,15 +1327,15 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProject: play.api.libs.json.Reads[Project] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "scms").read[io.flow.dependency.v0.models.Scms] and
-        (__ \ "name").read[String] and
-        (__ \ "uri").read[String]
-      )(Project.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        scms <- (__ \ "scms").read[io.flow.dependency.v0.models.Scms]
+        name <- (__ \ "name").read[String]
+        uri <- (__ \ "uri").read[String]
+      } yield Project(id, organization, user, visibility, scms, name, uri)
     }
 
     def jsObjectProject(obj: io.flow.dependency.v0.models.Project): play.api.libs.json.JsObject = {
@@ -1359,14 +1359,14 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectBinary: play.api.libs.json.Reads[ProjectBinary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail] and
-        (__ \ "name").read[String] and
-        (__ \ "version").read[String] and
-        (__ \ "path").read[String] and
-        (__ \ "binary").readNullable[io.flow.dependency.v0.models.Reference]
-      )(ProjectBinary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        project <- (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail]
+        name <- (__ \ "name").read[String]
+        version <- (__ \ "version").read[String]
+        path <- (__ \ "path").read[String]
+        binary <- (__ \ "binary").readNullable[io.flow.dependency.v0.models.Reference]
+      } yield ProjectBinary(id, project, name, version, path, binary)
     }
 
     def jsObjectProjectBinary(obj: io.flow.dependency.v0.models.ProjectBinary): play.api.libs.json.JsObject = {
@@ -1391,11 +1391,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectDetail: play.api.libs.json.Reads[ProjectDetail] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "name").read[String]
-      )(ProjectDetail.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        name <- (__ \ "name").read[String]
+      } yield ProjectDetail(id, organization, name)
     }
 
     def jsObjectProjectDetail(obj: io.flow.dependency.v0.models.ProjectDetail): play.api.libs.json.JsObject = {
@@ -1415,13 +1415,13 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectForm: play.api.libs.json.Reads[ProjectForm] = {
-      (
-        (__ \ "organization").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "scms").read[io.flow.dependency.v0.models.Scms] and
-        (__ \ "uri").read[String]
-      )(ProjectForm.apply _)
+      for {
+        organization <- (__ \ "organization").read[String]
+        name <- (__ \ "name").read[String]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        scms <- (__ \ "scms").read[io.flow.dependency.v0.models.Scms]
+        uri <- (__ \ "uri").read[String]
+      } yield ProjectForm(organization, name, visibility, scms, uri)
     }
 
     def jsObjectProjectForm(obj: io.flow.dependency.v0.models.ProjectForm): play.api.libs.json.JsObject = {
@@ -1443,16 +1443,16 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectLibrary: play.api.libs.json.Reads[ProjectLibrary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail] and
-        (__ \ "group_id").read[String] and
-        (__ \ "artifact_id").read[String] and
-        (__ \ "version").read[String] and
-        (__ \ "cross_build_version").readNullable[String] and
-        (__ \ "path").read[String] and
-        (__ \ "library").readNullable[io.flow.dependency.v0.models.Reference]
-      )(ProjectLibrary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        project <- (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail]
+        groupId <- (__ \ "group_id").read[String]
+        artifactId <- (__ \ "artifact_id").read[String]
+        version <- (__ \ "version").read[String]
+        crossBuildVersion <- (__ \ "cross_build_version").readNullable[String]
+        path <- (__ \ "path").read[String]
+        library <- (__ \ "library").readNullable[io.flow.dependency.v0.models.Reference]
+      } yield ProjectLibrary(id, project, groupId, artifactId, version, crossBuildVersion, path, library)
     }
 
     def jsObjectProjectLibrary(obj: io.flow.dependency.v0.models.ProjectLibrary): play.api.libs.json.JsObject = {
@@ -1482,12 +1482,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectPatchForm: play.api.libs.json.Reads[ProjectPatchForm] = {
-      (
-        (__ \ "name").readNullable[String] and
-        (__ \ "visibility").readNullable[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "scms").readNullable[io.flow.dependency.v0.models.Scms] and
-        (__ \ "uri").readNullable[String]
-      )(ProjectPatchForm.apply _)
+      for {
+        name <- (__ \ "name").readNullable[String]
+        visibility <- (__ \ "visibility").readNullable[io.flow.dependency.v0.models.Visibility]
+        scms <- (__ \ "scms").readNullable[io.flow.dependency.v0.models.Scms]
+        uri <- (__ \ "uri").readNullable[String]
+      } yield ProjectPatchForm(name, visibility, scms, uri)
     }
 
     def jsObjectProjectPatchForm(obj: io.flow.dependency.v0.models.ProjectPatchForm): play.api.libs.json.JsObject = {
@@ -1518,11 +1518,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyProjectSummary: play.api.libs.json.Reads[ProjectSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "name").read[String]
-      )(ProjectSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.dependency.v0.models.OrganizationSummary]
+        name <- (__ \ "name").read[String]
+      } yield ProjectSummary(id, organization, name)
     }
 
     def jsObjectProjectSummary(obj: io.flow.dependency.v0.models.ProjectSummary): play.api.libs.json.JsObject = {
@@ -1534,16 +1534,16 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyRecommendation: play.api.libs.json.Reads[Recommendation] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail] and
-        (__ \ "type").read[io.flow.dependency.v0.models.RecommendationType] and
-        (__ \ "object").read[io.flow.dependency.v0.models.Reference] and
-        (__ \ "name").read[String] and
-        (__ \ "from").read[String] and
-        (__ \ "to").read[String] and
-        (__ \ "created_at").read[_root_.org.joda.time.DateTime]
-      )(Recommendation.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        project <- (__ \ "project").read[io.flow.dependency.v0.models.ProjectDetail]
+        `type` <- (__ \ "type").read[io.flow.dependency.v0.models.RecommendationType]
+        `object` <- (__ \ "object").read[io.flow.dependency.v0.models.Reference]
+        name <- (__ \ "name").read[String]
+        from <- (__ \ "from").read[String]
+        to <- (__ \ "to").read[String]
+        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+      } yield Recommendation(id, project, `type`, `object`, name, from, to, createdAt)
     }
 
     def jsObjectRecommendation(obj: io.flow.dependency.v0.models.Recommendation): play.api.libs.json.JsObject = {
@@ -1586,11 +1586,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyRepository: play.api.libs.json.Reads[Repository] = {
-      (
-        (__ \ "name").read[String] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "uri").read[String]
-      )(Repository.apply _)
+      for {
+        name <- (__ \ "name").read[String]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        uri <- (__ \ "uri").read[String]
+      } yield Repository(name, visibility, uri)
     }
 
     def jsObjectRepository(obj: io.flow.dependency.v0.models.Repository): play.api.libs.json.JsObject = {
@@ -1610,13 +1610,13 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyResolver: play.api.libs.json.Reads[Resolver] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "organization").readNullable[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "uri").read[String] and
-        (__ \ "credentials").readNullable[io.flow.dependency.v0.models.Credentials]
-      )(Resolver.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        organization <- (__ \ "organization").readNullable[io.flow.dependency.v0.models.OrganizationSummary]
+        uri <- (__ \ "uri").read[String]
+        credentials <- (__ \ "credentials").readNullable[io.flow.dependency.v0.models.Credentials]
+      } yield Resolver(id, visibility, organization, uri, credentials)
     }
 
     def jsObjectResolver(obj: io.flow.dependency.v0.models.Resolver): play.api.libs.json.JsObject = {
@@ -1643,12 +1643,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyResolverForm: play.api.libs.json.Reads[ResolverForm] = {
-      (
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "organization").read[String] and
-        (__ \ "uri").read[String] and
-        (__ \ "credentials").readNullable[io.flow.dependency.v0.models.Credentials]
-      )(ResolverForm.apply _)
+      for {
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        organization <- (__ \ "organization").read[String]
+        uri <- (__ \ "uri").read[String]
+        credentials <- (__ \ "credentials").readNullable[io.flow.dependency.v0.models.Credentials]
+      } yield ResolverForm(visibility, organization, uri, credentials)
     }
 
     def jsObjectResolverForm(obj: io.flow.dependency.v0.models.ResolverForm): play.api.libs.json.JsObject = {
@@ -1671,12 +1671,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyResolverSummary: play.api.libs.json.Reads[ResolverSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").readNullable[io.flow.dependency.v0.models.OrganizationSummary] and
-        (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility] and
-        (__ \ "uri").read[String]
-      )(ResolverSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").readNullable[io.flow.dependency.v0.models.OrganizationSummary]
+        visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
+        uri <- (__ \ "uri").read[String]
+      } yield ResolverSummary(id, organization, visibility, uri)
     }
 
     def jsObjectResolverSummary(obj: io.flow.dependency.v0.models.ResolverSummary): play.api.libs.json.JsObject = {
@@ -1699,11 +1699,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencySubscription: play.api.libs.json.Reads[Subscription] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "publication").read[io.flow.dependency.v0.models.Publication]
-      )(Subscription.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        publication <- (__ \ "publication").read[io.flow.dependency.v0.models.Publication]
+      } yield Subscription(id, user, publication)
     }
 
     def jsObjectSubscription(obj: io.flow.dependency.v0.models.Subscription): play.api.libs.json.JsObject = {
@@ -1723,10 +1723,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencySubscriptionForm: play.api.libs.json.Reads[SubscriptionForm] = {
-      (
-        (__ \ "user_id").read[String] and
-        (__ \ "publication").read[io.flow.dependency.v0.models.Publication]
-      )(SubscriptionForm.apply _)
+      for {
+        userId <- (__ \ "user_id").read[String]
+        publication <- (__ \ "publication").read[io.flow.dependency.v0.models.Publication]
+      } yield SubscriptionForm(userId, publication)
     }
 
     def jsObjectSubscriptionForm(obj: io.flow.dependency.v0.models.SubscriptionForm): play.api.libs.json.JsObject = {
@@ -1745,12 +1745,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencySync: play.api.libs.json.Reads[Sync] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "object_id").read[String] and
-        (__ \ "event").read[io.flow.dependency.v0.models.SyncEvent] and
-        (__ \ "created_at").read[_root_.org.joda.time.DateTime]
-      )(Sync.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        objectId <- (__ \ "object_id").read[String]
+        event <- (__ \ "event").read[io.flow.dependency.v0.models.SyncEvent]
+        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+      } yield Sync(id, objectId, event, createdAt)
     }
 
     def jsObjectSync(obj: io.flow.dependency.v0.models.Sync): play.api.libs.json.JsObject = {
@@ -1771,13 +1771,13 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyToken: play.api.libs.json.Reads[Token] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "masked").read[String] and
-        (__ \ "cleartext").readNullable[String] and
-        (__ \ "description").readNullable[String]
-      )(Token.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        masked <- (__ \ "masked").read[String]
+        cleartext <- (__ \ "cleartext").readNullable[String]
+        description <- (__ \ "description").readNullable[String]
+      } yield Token(id, user, masked, cleartext, description)
     }
 
     def jsObjectToken(obj: io.flow.dependency.v0.models.Token): play.api.libs.json.JsObject = {
@@ -1804,10 +1804,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyTokenForm: play.api.libs.json.Reads[TokenForm] = {
-      (
-        (__ \ "user_id").read[String] and
-        (__ \ "description").readNullable[String]
-      )(TokenForm.apply _)
+      for {
+        userId <- (__ \ "user_id").read[String]
+        description <- (__ \ "description").readNullable[String]
+      } yield TokenForm(userId, description)
     }
 
     def jsObjectTokenForm(obj: io.flow.dependency.v0.models.TokenForm): play.api.libs.json.JsObject = {
@@ -1828,10 +1828,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyUserForm: play.api.libs.json.Reads[UserForm] = {
-      (
-        (__ \ "email").readNullable[String] and
-        (__ \ "name").readNullable[io.flow.common.v0.models.Name]
-      )(UserForm.apply _)
+      for {
+        email <- (__ \ "email").readNullable[String]
+        name <- (__ \ "name").readNullable[io.flow.common.v0.models.Name]
+      } yield UserForm(email, name)
     }
 
     def jsObjectUserForm(obj: io.flow.dependency.v0.models.UserForm): play.api.libs.json.JsObject = {
@@ -1854,11 +1854,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyUserIdentifier: play.api.libs.json.Reads[UserIdentifier] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "value").read[String]
-      )(UserIdentifier.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        value <- (__ \ "value").read[String]
+      } yield UserIdentifier(id, user, value)
     }
 
     def jsObjectUserIdentifier(obj: io.flow.dependency.v0.models.UserIdentifier): play.api.libs.json.JsObject = {
@@ -1878,11 +1878,11 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyUserSummary: play.api.libs.json.Reads[UserSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "email").readNullable[String] and
-        (__ \ "name").read[io.flow.common.v0.models.Name]
-      )(UserSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        email <- (__ \ "email").readNullable[String]
+        name <- (__ \ "name").read[io.flow.common.v0.models.Name]
+      } yield UserSummary(id, email, name)
     }
 
     def jsObjectUserSummary(obj: io.flow.dependency.v0.models.UserSummary): play.api.libs.json.JsObject = {
@@ -1904,10 +1904,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyUsernamePassword: play.api.libs.json.Reads[UsernamePassword] = {
-      (
-        (__ \ "username").read[String] and
-        (__ \ "password").readNullable[String]
-      )(UsernamePassword.apply _)
+      for {
+        username <- (__ \ "username").read[String]
+        password <- (__ \ "password").readNullable[String]
+      } yield UsernamePassword(username, password)
     }
 
     def jsObjectUsernamePassword(obj: io.flow.dependency.v0.models.UsernamePassword): play.api.libs.json.JsObject = {
@@ -1920,10 +1920,10 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonReadsDependencyVersionForm: play.api.libs.json.Reads[VersionForm] = {
-      (
-        (__ \ "version").read[String] and
-        (__ \ "cross_build_version").readNullable[String]
-      )(VersionForm.apply _)
+      for {
+        version <- (__ \ "version").read[String]
+        crossBuildVersion <- (__ \ "cross_build_version").readNullable[String]
+      } yield VersionForm(version, crossBuildVersion)
     }
 
     def jsObjectVersionForm(obj: io.flow.dependency.v0.models.VersionForm): play.api.libs.json.JsObject = {
@@ -2122,7 +2122,7 @@ package io.flow.dependency.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -2145,7 +2145,7 @@ package io.flow.dependency.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -3298,7 +3298,7 @@ package io.flow.dependency.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -4003,16 +4003,16 @@ package io.flow.dependency.v0 {
     import io.flow.github.v0.models.json._
     import io.flow.healthcheck.v0.models.json._
 
-    case class GenericErrorsResponse(
+    final case class GenericErrorsResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
       lazy val genericErrors = _root_.io.flow.dependency.v0.Client.parseJson("Seq[io.flow.error.v0.models.GenericError]", response, _.validate[Seq[io.flow.error.v0.models.GenericError]])
     }
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

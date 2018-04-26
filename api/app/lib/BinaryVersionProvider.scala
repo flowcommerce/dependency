@@ -17,7 +17,7 @@ trait BinaryVersionProvider {
 
 object DefaultBinaryVersionProvider extends BinaryVersionProvider {
 
-  private[this] val ScalaUrl = "http://www.scala-lang.org/download/all.html"
+  private[this] val ScalaUrl = "https://www.scala-lang.org/download/all.html"
   private[this] val SbtUrl = "https://dl.bintray.com/sbt/native-packages/sbt/"
 
   override def versions(
