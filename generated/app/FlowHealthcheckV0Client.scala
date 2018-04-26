@@ -5,7 +5,7 @@
  */
 package io.flow.healthcheck.v0.models {
 
-  case class Healthcheck(
+  final case class Healthcheck(
     status: String
   )
 
@@ -126,7 +126,7 @@ package io.flow.healthcheck.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -149,7 +149,7 @@ package io.flow.healthcheck.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -308,7 +308,7 @@ package io.flow.healthcheck.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -331,14 +331,14 @@ package io.flow.healthcheck.v0 {
     import io.flow.error.v0.models.json._
     import io.flow.healthcheck.v0.models.json._
 
-    case class GenericErrorResponse(
+    final case class GenericErrorResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
       lazy val genericError = _root_.io.flow.healthcheck.v0.Client.parseJson("io.flow.error.v0.models.GenericError", response, _.validate[io.flow.error.v0.models.GenericError])
     }
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

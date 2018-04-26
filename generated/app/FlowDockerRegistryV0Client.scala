@@ -5,11 +5,11 @@
  */
 package io.flow.docker.registry.v0.models {
 
-  case class Build(
+  final case class Build(
     repoWebUrl: String
   )
 
-  case class BuildForm(
+  final case class BuildForm(
     active: Boolean,
     buildTags: Seq[io.flow.docker.registry.v0.models.BuildTag],
     description: String,
@@ -21,7 +21,7 @@ package io.flow.docker.registry.v0.models {
     vcsRepoName: String
   )
 
-  case class BuildTag(
+  final case class BuildTag(
     dockerfileLocation: String,
     name: String,
     sourceName: String,
@@ -29,26 +29,26 @@ package io.flow.docker.registry.v0.models {
     id: _root_.scala.Option[Long] = None
   )
 
-  case class Deploykey(
+  final case class Deploykey(
     provider: _root_.scala.Option[String] = None,
     providerKeyId: _root_.scala.Option[String] = None,
     publicKey: _root_.scala.Option[String] = None
   )
 
-  case class DockerRepository(
+  final case class DockerRepository(
     name: String
   )
 
-  case class Tag(
+  final case class Tag(
     layer: String,
     name: String
   )
 
-  case class V2Tag(
+  final case class V2Tag(
     results: Seq[io.flow.docker.registry.v0.models.V2TagDetails]
   )
 
-  case class V2TagDetails(
+  final case class V2TagDetails(
     name: String
   )
 
@@ -114,17 +114,17 @@ package io.flow.docker.registry.v0.models {
     }
 
     implicit def jsonReadsDockerRegistryBuildForm: play.api.libs.json.Reads[BuildForm] = {
-      (
-        (__ \ "active").read[Boolean] and
-        (__ \ "build_tags").read[Seq[io.flow.docker.registry.v0.models.BuildTag]] and
-        (__ \ "description").read[String] and
-        (__ \ "dockerhub_repo_name").read[String] and
-        (__ \ "is_private").read[Boolean] and
-        (__ \ "name").read[String] and
-        (__ \ "namespace").read[String] and
-        (__ \ "provider").read[String] and
-        (__ \ "vcs_repo_name").read[String]
-      )(BuildForm.apply _)
+      for {
+        active <- (__ \ "active").read[Boolean]
+        buildTags <- (__ \ "build_tags").read[Seq[io.flow.docker.registry.v0.models.BuildTag]]
+        description <- (__ \ "description").read[String]
+        dockerhubRepoName <- (__ \ "dockerhub_repo_name").read[String]
+        isPrivate <- (__ \ "is_private").read[Boolean]
+        name <- (__ \ "name").read[String]
+        namespace <- (__ \ "namespace").read[String]
+        provider <- (__ \ "provider").read[String]
+        vcsRepoName <- (__ \ "vcs_repo_name").read[String]
+      } yield BuildForm(active, buildTags, description, dockerhubRepoName, isPrivate, name, namespace, provider, vcsRepoName)
     }
 
     def jsObjectBuildForm(obj: io.flow.docker.registry.v0.models.BuildForm): play.api.libs.json.JsObject = {
@@ -150,13 +150,13 @@ package io.flow.docker.registry.v0.models {
     }
 
     implicit def jsonReadsDockerRegistryBuildTag: play.api.libs.json.Reads[BuildTag] = {
-      (
-        (__ \ "dockerfile_location").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "source_name").read[String] and
-        (__ \ "source_type").read[String] and
-        (__ \ "id").readNullable[Long]
-      )(BuildTag.apply _)
+      for {
+        dockerfileLocation <- (__ \ "dockerfile_location").read[String]
+        name <- (__ \ "name").read[String]
+        sourceName <- (__ \ "source_name").read[String]
+        sourceType <- (__ \ "source_type").read[String]
+        id <- (__ \ "id").readNullable[Long]
+      } yield BuildTag(dockerfileLocation, name, sourceName, sourceType, id)
     }
 
     def jsObjectBuildTag(obj: io.flow.docker.registry.v0.models.BuildTag): play.api.libs.json.JsObject = {
@@ -180,11 +180,11 @@ package io.flow.docker.registry.v0.models {
     }
 
     implicit def jsonReadsDockerRegistryDeploykey: play.api.libs.json.Reads[Deploykey] = {
-      (
-        (__ \ "provider").readNullable[String] and
-        (__ \ "provider_key_id").readNullable[String] and
-        (__ \ "public_key").readNullable[String]
-      )(Deploykey.apply _)
+      for {
+        provider <- (__ \ "provider").readNullable[String]
+        providerKeyId <- (__ \ "provider_key_id").readNullable[String]
+        publicKey <- (__ \ "public_key").readNullable[String]
+      } yield Deploykey(provider, providerKeyId, publicKey)
     }
 
     def jsObjectDeploykey(obj: io.flow.docker.registry.v0.models.Deploykey): play.api.libs.json.JsObject = {
@@ -229,10 +229,10 @@ package io.flow.docker.registry.v0.models {
     }
 
     implicit def jsonReadsDockerRegistryTag: play.api.libs.json.Reads[Tag] = {
-      (
-        (__ \ "layer").read[String] and
-        (__ \ "name").read[String]
-      )(Tag.apply _)
+      for {
+        layer <- (__ \ "layer").read[String]
+        name <- (__ \ "name").read[String]
+      } yield Tag(layer, name)
     }
 
     def jsObjectTag(obj: io.flow.docker.registry.v0.models.Tag): play.api.libs.json.JsObject = {
@@ -341,7 +341,7 @@ package io.flow.docker.registry.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -364,7 +364,7 @@ package io.flow.docker.registry.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -563,7 +563,7 @@ package io.flow.docker.registry.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -606,9 +606,9 @@ package io.flow.docker.registry.v0 {
 
     import io.flow.docker.registry.v0.models.json._
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

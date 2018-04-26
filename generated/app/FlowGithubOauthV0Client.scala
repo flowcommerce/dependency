@@ -5,13 +5,13 @@
  */
 package io.flow.github.oauth.v0.models {
 
-  case class AccessToken(
+  final case class AccessToken(
     accessToken: String,
     scope: String,
     tokenType: io.flow.github.oauth.v0.models.TokenType
   )
 
-  case class AccessTokenForm(
+  final case class AccessTokenForm(
     clientId: String,
     clientSecret: String,
     code: String,
@@ -34,7 +34,7 @@ package io.flow.github.oauth.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends TokenType
+    final case class UNDEFINED(override val toString: String) extends TokenType
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -126,11 +126,11 @@ package io.flow.github.oauth.v0.models {
     }
 
     implicit def jsonReadsGithubOauthAccessToken: play.api.libs.json.Reads[AccessToken] = {
-      (
-        (__ \ "access_token").read[String] and
-        (__ \ "scope").read[String] and
-        (__ \ "token_type").read[io.flow.github.oauth.v0.models.TokenType]
-      )(AccessToken.apply _)
+      for {
+        accessToken <- (__ \ "access_token").read[String]
+        scope <- (__ \ "scope").read[String]
+        tokenType <- (__ \ "token_type").read[io.flow.github.oauth.v0.models.TokenType]
+      } yield AccessToken(accessToken, scope, tokenType)
     }
 
     def jsObjectAccessToken(obj: io.flow.github.oauth.v0.models.AccessToken): play.api.libs.json.JsObject = {
@@ -150,13 +150,13 @@ package io.flow.github.oauth.v0.models {
     }
 
     implicit def jsonReadsGithubOauthAccessTokenForm: play.api.libs.json.Reads[AccessTokenForm] = {
-      (
-        (__ \ "client_id").read[String] and
-        (__ \ "client_secret").read[String] and
-        (__ \ "code").read[String] and
-        (__ \ "redirect_uri").readNullable[String] and
-        (__ \ "state").readNullable[String]
-      )(AccessTokenForm.apply _)
+      for {
+        clientId <- (__ \ "client_id").read[String]
+        clientSecret <- (__ \ "client_secret").read[String]
+        code <- (__ \ "code").read[String]
+        redirectUri <- (__ \ "redirect_uri").readNullable[String]
+        state <- (__ \ "state").readNullable[String]
+      } yield AccessTokenForm(clientId, clientSecret, code, redirectUri, state)
     }
 
     def jsObjectAccessTokenForm(obj: io.flow.github.oauth.v0.models.AccessTokenForm): play.api.libs.json.JsObject = {
@@ -251,7 +251,7 @@ package io.flow.github.oauth.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -274,7 +274,7 @@ package io.flow.github.oauth.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -436,7 +436,7 @@ package io.flow.github.oauth.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -459,9 +459,9 @@ package io.flow.github.oauth.v0 {
 
     import io.flow.github.oauth.v0.models.json._
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

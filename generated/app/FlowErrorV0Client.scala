@@ -11,7 +11,7 @@ package io.flow.error.v0.models {
    * 
    * @param code Generic errors will always have a code set to 'generic_error'
    */
-  case class GenericError(
+  final case class GenericError(
     code: io.flow.error.v0.models.GenericErrorCode = io.flow.error.v0.models.GenericErrorCode.GenericError,
     messages: Seq[String]
   )
@@ -44,7 +44,7 @@ package io.flow.error.v0.models {
      * We use all CAPS for the variable name to avoid collisions
      * with the camel cased values above.
      */
-    case class UNDEFINED(override val toString: String) extends GenericErrorCode
+    final case class UNDEFINED(override val toString: String) extends GenericErrorCode
 
     /**
      * all returns a list of all the valid, known values. We use
@@ -136,10 +136,10 @@ package io.flow.error.v0.models {
     }
 
     implicit def jsonReadsErrorGenericError: play.api.libs.json.Reads[GenericError] = {
-      (
-        (__ \ "code").read[io.flow.error.v0.models.GenericErrorCode] and
-        (__ \ "messages").read[Seq[String]]
-      )(GenericError.apply _)
+      for {
+        code <- (__ \ "code").read[io.flow.error.v0.models.GenericErrorCode]
+        messages <- (__ \ "messages").read[Seq[String]]
+      } yield GenericError(code, messages)
     }
 
     def jsObjectGenericError(obj: io.flow.error.v0.models.GenericError): play.api.libs.json.JsObject = {
@@ -226,7 +226,7 @@ package io.flow.error.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -249,7 +249,7 @@ package io.flow.error.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -397,7 +397,7 @@ package io.flow.error.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -413,7 +413,7 @@ package io.flow.error.v0 {
 
   package errors {
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

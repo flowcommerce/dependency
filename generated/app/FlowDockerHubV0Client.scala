@@ -5,11 +5,11 @@
  */
 package io.flow.docker.hub.v0.models {
 
-  case class Jwt(
+  final case class Jwt(
     token: String
   )
 
-  case class JwtForm(
+  final case class JwtForm(
     username: String,
     password: String
   )
@@ -76,10 +76,10 @@ package io.flow.docker.hub.v0.models {
     }
 
     implicit def jsonReadsDockerHubJwtForm: play.api.libs.json.Reads[JwtForm] = {
-      (
-        (__ \ "username").read[String] and
-        (__ \ "password").read[String]
-      )(JwtForm.apply _)
+      for {
+        username <- (__ \ "username").read[String]
+        password <- (__ \ "password").read[String]
+      } yield JwtForm(username, password)
     }
 
     def jsObjectJwtForm(obj: io.flow.docker.hub.v0.models.JwtForm): play.api.libs.json.JsObject = {
@@ -152,7 +152,7 @@ package io.flow.docker.hub.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -175,7 +175,7 @@ package io.flow.docker.hub.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -339,7 +339,7 @@ package io.flow.docker.hub.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -362,9 +362,9 @@ package io.flow.docker.hub.v0 {
 
     import io.flow.docker.hub.v0.models.json._
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 
