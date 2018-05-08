@@ -42,6 +42,11 @@ class Syncs @javax.inject.Inject()(
     )
   }
 
+  def postAll() = IdentifiedWithFallback { request =>
+    mainActor ! MainActor.Messages.SyncAll
+    NoContent
+  }
+
   def postBinariesById(id: String) = IdentifiedWithFallback { request =>
     binaryHelper.withBinary(request.user, id) { binary =>
       mainActor ! MainActor.Messages.BinarySync(binary.id)

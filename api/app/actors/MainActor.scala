@@ -21,6 +21,8 @@ object MainActor {
     case class ProjectDeleted(id: String)
     case class ProjectSync(id: String)
 
+    case object SyncAll
+
     case class ProjectLibraryCreated(projectId: String, id: String)
     case class ProjectLibrarySync(projectId: String, id: String)
     case class ProjectLibraryDeleted(projectId: String, id: String, version: String)
@@ -245,6 +247,26 @@ class MainActor @javax.inject.Inject() (
     case m @ MainActor.Messages.ResolverDeleted(id) => withErrorHandler(m) {
       resolverActors.remove(id).map { ref =>
         ref ! ResolverActor.Messages.Deleted
+      }
+    }
+
+    case m @ MainActor.Messages.SyncAll => withErrorHandler(m) {
+      Pager.create { offset =>
+        binariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self @ MainActor.Messages.BinarySync(rec.id)
+      }
+
+      Pager.create { offset =>
+        libraries.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self @ MainActor.Messages.LibrarySync(rec.id)
+      }
+
+      Pager.create { offset =>
+        projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self @ MainActor.Messages.ProjectSync(rec.id)
       }
     }
 
