@@ -5,6 +5,7 @@ import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
+import io.flow.postgresql.Pager
 import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
@@ -254,19 +255,19 @@ class MainActor @javax.inject.Inject() (
       Pager.create { offset =>
         binariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
       }.foreach { rec =>
-        self @ MainActor.Messages.BinarySync(rec.id)
+        self ! MainActor.Messages.BinarySync(rec.id)
       }
 
       Pager.create { offset =>
-        libraries.findAll(Authorization.All, offset = offset, limit = 1000)
+        librariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
       }.foreach { rec =>
-        self @ MainActor.Messages.LibrarySync(rec.id)
+        self ! MainActor.Messages.LibrarySync(rec.id)
       }
 
       Pager.create { offset =>
         projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
       }.foreach { rec =>
-        self @ MainActor.Messages.ProjectSync(rec.id)
+        self ! MainActor.Messages.ProjectSync(rec.id)
       }
     }
 
