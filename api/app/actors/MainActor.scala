@@ -5,6 +5,7 @@ import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
+import io.flow.postgresql.Pager
 import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
@@ -20,6 +21,8 @@ object MainActor {
     case class ProjectUpdated(id: String)
     case class ProjectDeleted(id: String)
     case class ProjectSync(id: String)
+
+    case object SyncAll
 
     case class ProjectLibraryCreated(projectId: String, id: String)
     case class ProjectLibrarySync(projectId: String, id: String)
@@ -245,6 +248,26 @@ class MainActor @javax.inject.Inject() (
     case m @ MainActor.Messages.ResolverDeleted(id) => withErrorHandler(m) {
       resolverActors.remove(id).map { ref =>
         ref ! ResolverActor.Messages.Deleted
+      }
+    }
+
+    case m @ MainActor.Messages.SyncAll => withErrorHandler(m) {
+      Pager.create { offset =>
+        binariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self ! MainActor.Messages.BinarySync(rec.id)
+      }
+
+      Pager.create { offset =>
+        librariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self ! MainActor.Messages.LibrarySync(rec.id)
+      }
+
+      Pager.create { offset =>
+        projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      }.foreach { rec =>
+        self ! MainActor.Messages.ProjectSync(rec.id)
       }
     }
 

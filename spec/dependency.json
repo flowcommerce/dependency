@@ -1151,6 +1151,15 @@
 
         {
           "method": "POST",
+          "path": "/all",
+          "responses": {
+            "204": { "type": "unit" },
+            "404": { "type": "unit" }
+          }
+        },
+
+        {
+          "method": "POST",
           "path": "/binaries/:id",
           "responses": {
             "204": { "type": "unit" },
