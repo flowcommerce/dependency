@@ -85,6 +85,8 @@ package io.flow.common.v0.anorm.conversions {
     implicit val columnToMapCommonMeasurementSystem: Column[Map[String, _root_.io.flow.common.v0.models.MeasurementSystem]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.MeasurementSystem]] }
     implicit val columnToSeqCommonMerchantOfRecord: Column[Seq[_root_.io.flow.common.v0.models.MerchantOfRecord]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.MerchantOfRecord]] }
     implicit val columnToMapCommonMerchantOfRecord: Column[Map[String, _root_.io.flow.common.v0.models.MerchantOfRecord]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.MerchantOfRecord]] }
+    implicit val columnToSeqCommonOrderMerchantOfRecord: Column[Seq[_root_.io.flow.common.v0.models.OrderMerchantOfRecord]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.OrderMerchantOfRecord]] }
+    implicit val columnToMapCommonOrderMerchantOfRecord: Column[Map[String, _root_.io.flow.common.v0.models.OrderMerchantOfRecord]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.OrderMerchantOfRecord]] }
     implicit val columnToSeqCommonPriceBookStatus: Column[Seq[_root_.io.flow.common.v0.models.PriceBookStatus]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.PriceBookStatus]] }
     implicit val columnToMapCommonPriceBookStatus: Column[Map[String, _root_.io.flow.common.v0.models.PriceBookStatus]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.PriceBookStatus]] }
     implicit val columnToSeqCommonRole: Column[Seq[_root_.io.flow.common.v0.models.Role]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.Role]] }

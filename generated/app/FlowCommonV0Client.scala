@@ -1027,6 +1027,46 @@ package io.flow.common.v0.models {
 
   }
 
+  /**
+   * The order merchant of record defines who is merchant of record for a particular
+   * order. The value will be 'mixed' if you support split payments and the merchant
+   * of record differed across the individual payment transactions.
+   */
+  sealed trait OrderMerchantOfRecord extends _root_.scala.Product with _root_.scala.Serializable
+
+  object OrderMerchantOfRecord {
+
+    case object Flow extends OrderMerchantOfRecord { override def toString = "flow" }
+    case object Organization extends OrderMerchantOfRecord { override def toString = "organization" }
+    case object Mixed extends OrderMerchantOfRecord { override def toString = "mixed" }
+
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    final case class UNDEFINED(override val toString: String) extends OrderMerchantOfRecord
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all: scala.List[OrderMerchantOfRecord] = scala.List(Flow, Organization, Mixed)
+
+    private[this]
+    val byName: Map[String, OrderMerchantOfRecord] = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): OrderMerchantOfRecord = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[OrderMerchantOfRecord] = byName.get(value.toLowerCase)
+
+  }
+
   sealed trait PriceBookStatus extends _root_.scala.Product with _root_.scala.Serializable
 
   object PriceBookStatus {
@@ -2022,6 +2062,36 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.MerchantOfRecord] {
         def writes(obj: io.flow.common.v0.models.MerchantOfRecord) = {
           jsonWritesCommonMerchantOfRecord(obj)
+        }
+      }
+    }
+
+    implicit val jsonReadsCommonOrderMerchantOfRecord = new play.api.libs.json.Reads[io.flow.common.v0.models.OrderMerchantOfRecord] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.OrderMerchantOfRecord] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.common.v0.models.OrderMerchantOfRecord(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.flow.common.v0.models.OrderMerchantOfRecord(v))
+              case err: play.api.libs.json.JsError => err
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesCommonOrderMerchantOfRecord(obj: io.flow.common.v0.models.OrderMerchantOfRecord) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectOrderMerchantOfRecord(obj: io.flow.common.v0.models.OrderMerchantOfRecord) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesCommonOrderMerchantOfRecord: play.api.libs.json.Writes[OrderMerchantOfRecord] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.OrderMerchantOfRecord] {
+        def writes(obj: io.flow.common.v0.models.OrderMerchantOfRecord) = {
+          jsonWritesCommonOrderMerchantOfRecord(obj)
         }
       }
     }
@@ -3377,6 +3447,15 @@ package io.flow.common.v0 {
       }
       implicit def pathBindableMerchantOfRecord(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.common.v0.models.MerchantOfRecord] = ApibuilderPathBindable(merchantOfRecordConverter)
       implicit def queryStringBindableMerchantOfRecord(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.common.v0.models.MerchantOfRecord] = ApibuilderQueryStringBindable(merchantOfRecordConverter)
+
+      val orderMerchantOfRecordConverter: ApibuilderTypeConverter[io.flow.common.v0.models.OrderMerchantOfRecord] = new ApibuilderTypeConverter[io.flow.common.v0.models.OrderMerchantOfRecord] {
+        override def convert(value: String): io.flow.common.v0.models.OrderMerchantOfRecord = io.flow.common.v0.models.OrderMerchantOfRecord(value)
+        override def convert(value: io.flow.common.v0.models.OrderMerchantOfRecord): String = value.toString
+        override def example: io.flow.common.v0.models.OrderMerchantOfRecord = io.flow.common.v0.models.OrderMerchantOfRecord.Flow
+        override def validValues: Seq[io.flow.common.v0.models.OrderMerchantOfRecord] = io.flow.common.v0.models.OrderMerchantOfRecord.all
+      }
+      implicit def pathBindableOrderMerchantOfRecord(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.common.v0.models.OrderMerchantOfRecord] = ApibuilderPathBindable(orderMerchantOfRecordConverter)
+      implicit def queryStringBindableOrderMerchantOfRecord(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.common.v0.models.OrderMerchantOfRecord] = ApibuilderQueryStringBindable(orderMerchantOfRecordConverter)
 
       val priceBookStatusConverter: ApibuilderTypeConverter[io.flow.common.v0.models.PriceBookStatus] = new ApibuilderTypeConverter[io.flow.common.v0.models.PriceBookStatus] {
         override def convert(value: String): io.flow.common.v0.models.PriceBookStatus = io.flow.common.v0.models.PriceBookStatus(value)
