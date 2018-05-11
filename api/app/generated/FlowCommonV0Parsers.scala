@@ -203,6 +203,18 @@ package io.flow.common.v0.anorm.parsers {
 
   }
 
+  object OrderMerchantOfRecord {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.OrderMerchantOfRecord] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(name: String = "order_merchant_of_record", prefixOpt: Option[String] = None): RowParser[io.flow.common.v0.models.OrderMerchantOfRecord] = {
+      SqlParser.str(prefixOpt.getOrElse("") + name) map {
+        case value => io.flow.common.v0.models.OrderMerchantOfRecord(value)
+      }
+    }
+
+  }
+
   object PriceBookStatus {
 
     def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.PriceBookStatus] = parser(prefixOpt = Some(s"$prefix$sep"))
