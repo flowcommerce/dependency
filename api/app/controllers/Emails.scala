@@ -33,7 +33,7 @@ class Emails @javax.inject.Inject() (
 
             Ok(
               Seq(
-                "Subject: " + Email.subjectWithPrefix(config, generator.subject()),
+                "Subject: " + Email.subjectWithPrefix(config, generator.subject),
                 "<br/><br/><hr size=1/>",
                 generator.body(lastEmailsDao, recommendationsDao, config)
               ).mkString("\n")

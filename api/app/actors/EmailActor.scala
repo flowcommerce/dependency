@@ -100,7 +100,8 @@ class BatchEmailProcessor @Inject()(
   ) {
     subscriptions.foreach { subscription =>
       usersDao.findById(subscription.user.id).foreach { user =>
-        Recipient.fromUser(userIdentifiersDao, usersDao, user).map { new DailySummaryEmailMessage(_) }.map { generator =>
+        Recipient.fromUser(userIdentifiersDao, usersDao, user).foreach { recipient =>
+          val generator = new DailySummaryEmailMessage(recipient)
           // Record before send in case of crash - prevent loop of
           // emails.
           lastEmailsDao.record(
@@ -114,7 +115,7 @@ class BatchEmailProcessor @Inject()(
           Email.sendHtml(
             config = config,
             recipient = generator.recipient,
-            subject = generator.subject(),
+            subject = generator.subject,
             body = generator.body(lastEmailsDao, recommendationsDao, config)
           )
         }
@@ -124,8 +125,8 @@ class BatchEmailProcessor @Inject()(
 }
 
 trait EmailMessageGenerator {
-  def recipient(): Recipient
-  def subject(): String
+  def recipient: Recipient
+  def subject: String
   def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String
 }
 
@@ -141,9 +142,9 @@ class DailySummaryEmailMessage (
 
   private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
 
-  override def subject() = "Daily Summary"
+  override def subject = "Daily Summary"
 
-  override def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config) = {
+  override def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String = {
     val recommendations = recommendationsDao.findAll(
       Authorization.User(recipient.userId),
       limit = MaxRecommendations
