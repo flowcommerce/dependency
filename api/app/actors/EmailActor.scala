@@ -139,7 +139,7 @@ class DailySummaryEmailMessage (
 
   private[this] val MaxRecommendations = 250
 
-  private[this] def lastEmail(lastEmailsDao: LastEmailsDao) = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
+  private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
 
   override def subject() = "Daily Summary"
 
@@ -151,12 +151,8 @@ class DailySummaryEmailMessage (
 
     val (newRecommendations, oldRecommendations) = lastEmail(lastEmailsDao) match {
       case None => (recommendations, Nil)
-      case Some(email) => {
-        (
-          recommendations.filter { !_.createdAt.isBefore(email.createdAt) },
-          recommendations.filter { _.createdAt.isBefore(email.createdAt) }
-        )
-      }
+      case Some(email) =>
+        recommendations.partition(!_.createdAt.isBefore(email.createdAt))
     }
 
     views.html.emails.dailySummary(
