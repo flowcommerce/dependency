@@ -5,17 +5,15 @@ import javax.inject.{Inject, Singleton}
 import io.flow.dependency.v0.models.UserIdentifier
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.postgresql.{OrderBy, Query}
-import io.flow.play.util.UrlKey
 import anorm._
-import com.google.inject.Provider
+import io.flow.dependency.api.lib.Recipient
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 @Singleton
 class UserIdentifiersDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers]
+  dbHelpers: DbHelpers,
+  usersDao: UsersDao
 ){
 
   val GithubOauthUserIdentifierValue = "github_oauth"
@@ -38,13 +36,19 @@ class UserIdentifiersDao @Inject()(
     * Returns the latest identifier, creating if necessary
     */
   def latestForUser(createdBy: UserReference, user: User): UserIdentifier = {
-    findAll(Authorization.All, userId = Some(user.id)).headOption match {
-      case None => {
-        createForUser(createdBy, user)
-      }
-      case Some(existing) => {
-        existing
-      }
+    findAll(Authorization.All, userId = Some(user.id))
+      .headOption
+      .getOrElse(createForUser(createdBy, user))
+  }
+
+  def recipientForUser(user: User): Option[Recipient] = {
+    user.email.map { email =>
+      Recipient(
+        email = email,
+        name = user.name,
+        userId = user.id,
+        identifier = latestForUser(usersDao.systemUser, user).value
+      )
     }
   }
 
@@ -61,7 +65,7 @@ class UserIdentifiersDao @Inject()(
   private[this] val CharactersAndNumbers = Characters + Numbers
 
   private[this] def randomString(alphabet: String)(n: Int): String = {
-    Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    List.fill(n)(random.nextInt(alphabet.length)).map(alphabet).mkString
   }
 
   /**
@@ -89,7 +93,7 @@ class UserIdentifiersDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, identifier: UserIdentifier) {
-    dbHelpersProvider.get.delete("user_identifiers", deletedBy.id, identifier.id)
+    dbHelpers.delete("user_identifiers", deletedBy.id, identifier.id)
   }
 
   def findById(auth: Authorization, id: String): Option[UserIdentifier] = {

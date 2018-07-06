@@ -6,6 +6,7 @@ import java.net.URLEncoder
 
 object Config {
 
+  //todo use injected config
   private[this] lazy val config = play.api.Play.current.injector.instanceOf[FlowConfig]
 
   lazy val githubClientId = config.requiredString("github.dependency.client.id")

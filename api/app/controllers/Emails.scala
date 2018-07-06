@@ -15,18 +15,19 @@ class Emails @javax.inject.Inject() (
   recommendationsDao: RecommendationsDao,
   userIdentifiersDao: UserIdentifiersDao
 ) extends BaseController {
+  private val mikeEmail = "mbryzek@alum.mit.edu"
 
   private[this] val TestEmailAddressName = "io.flow.dependency.api.test.email"
   private[this] lazy val TestEmailAddress = config.optionalString(TestEmailAddressName)
 
-  def get() = Action { request =>
+  def get() = Action {
     TestEmailAddress match {
       case None => Ok(s"Set the $TestEmailAddressName property to enable testing")
       case Some(email) => {
-        usersDao.findByEmail("mbryzek@alum.mit.edu") match {
+        usersDao.findByEmail(mikeEmail) match {
           case None => Ok(s"No user with email address[$email] found")
           case Some(user) => {
-            val recipient = Recipient.fromUser(userIdentifiersDao, usersDao, user).getOrElse {
+            val recipient = userIdentifiersDao.recipientForUser(user).getOrElse {
               Recipient(email = "noemail@test.flow.io", name = user.name, userId = user.id, identifier = "TESTID")
             }
             val generator = new DailySummaryEmailMessage(recipient)

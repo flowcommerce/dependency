@@ -43,7 +43,7 @@ object Email {
     val prefixedSubject = subjectWithPrefix(config, subject)
 
     val from = new com.sendgrid.Email(fromEmail(config))
-    val to = recipient.fullName() match {
+    val to = recipient.fullName match {
       case Some(fn) => new com.sendgrid.Email(recipient.email, fn)
       case None => new com.sendgrid.Email(recipient.email)
     }

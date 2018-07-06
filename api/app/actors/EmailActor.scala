@@ -73,9 +73,7 @@ class EmailActor @Inject()(
             offset = offset
           )
         }
-      ) { recipient =>
-        new DailySummaryEmailMessage(recipient)
-      }
+      )
     }
 
   }
@@ -90,24 +88,21 @@ class BatchEmailProcessor @Inject()(
   config: Config
 ) {
 
-  lazy val SystemUser = usersDao.systemUser
-
   def process(
     publication: Publication,
     subscriptions: Iterator[Subscription]
-  ) (
-    generator: Recipient => EmailMessageGenerator
-  ) {
+  ): Unit = {
     subscriptions.foreach { subscription =>
-      usersDao.findById(subscription.user.id).foreach { user =>
-        Recipient.fromUser(userIdentifiersDao, usersDao, user).foreach { recipient =>
+      usersDao.findById(subscription.user.id)
+        .flatMap(userIdentifiersDao.recipientForUser)
+        .foreach { recipient =>
           val generator = new DailySummaryEmailMessage(recipient)
           // Record before send in case of crash - prevent loop of
           // emails.
           lastEmailsDao.record(
-            SystemUser,
+            usersDao.systemUser,
             LastEmailForm(
-              userId = user.id,
+              userId = recipient.userId,
               publication = publication
             )
           )
@@ -119,7 +114,6 @@ class BatchEmailProcessor @Inject()(
             body = generator.body(lastEmailsDao, recommendationsDao, config)
           )
         }
-      }
     }
   }
 }
