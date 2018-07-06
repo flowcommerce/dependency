@@ -150,10 +150,10 @@ class DailySummaryEmailMessage (
       limit = MaxRecommendations
     )
 
-    val (newRecommendations, oldRecommendations) = lastEmail(lastEmailsDao) match {
-      case None => (recommendations, Nil)
+    val (oldRecommendations, newRecommendations) = lastEmail(lastEmailsDao) match {
+      case None => (Nil, recommendations)
       case Some(email) =>
-        recommendations.partition(!_.createdAt.isBefore(email.createdAt))
+        recommendations.partition(_.createdAt.isBefore(email.createdAt))
     }
 
     views.html.emails.dailySummary(
