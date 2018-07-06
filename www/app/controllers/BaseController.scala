@@ -29,7 +29,6 @@ class UserActionBuilder(
     }
 }
 
-//todo remove config requirement
 abstract class BaseController(
   config: Config,
   dependencyClientProvider: DependencyClientProvider
