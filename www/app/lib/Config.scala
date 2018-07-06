@@ -1,52 +1,59 @@
 package io.flow.dependency.www.lib
 
-import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, ProjectSummary, Recommendation, RecommendationType, Scms}
+import io.flow.dependency.v0.models.Scms
 import io.flow.play.util.{Config => FlowConfig}
 import java.net.URLEncoder
+import javax.inject.{Inject, Singleton}
 
-object Config {
 
-  //todo use injected config
-  private[this] lazy val config = play.api.Play.current.injector.instanceOf[FlowConfig]
+@Singleton
+class GitHubConfig @Inject()(config: FlowConfig) {
+  private val Scopes = Seq("user:email", "repo", "read:repo_hook", "write:repo_hook")
+  private val OauthUrl = "https://github.com/login/oauth/authorize"
 
-  lazy val githubClientId = config.requiredString("github.dependency.client.id")
-  lazy val dependencyWwwHost = config.requiredString("dependency.www.host")
-  lazy val githubBaseUrl = s"$dependencyWwwHost/login/github"
-
-  val VersionsPerPage = 5
-
-  private val GithubScopes = Seq("user:email", "repo", "read:repo_hook", "write:repo_hook")
-
-  private[this] val GitHubOauthUrl = "https://github.com/login/oauth/authorize"
+  private val githubClientId = config.requiredString("github.dependency.client.id")
+  private val dependencyWwwHost = config.requiredString("dependency.www.host")
+  private val githubBaseUrl = s"$dependencyWwwHost/login/github"
 
   def githubOauthUrl(returnUrl: Option[String]): String = {
-    GitHubOauthUrl + "?" + Seq(
-      Some("scope" -> GithubScopes.mkString(",")),
-      Some("client_id" -> githubClientId),
-      returnUrl.map { url => ("redirect_uri" -> (s"$githubBaseUrl?return_url=" + URLEncoder.encode(url, "UTF-8"))) }
-    ).flatten.map { case (key, value) =>
-        s"$key=" + URLEncoder.encode(value, "UTF-8")
-    }.mkString("&")
+    val returnUrlParam = returnUrl
+      .map { encoded =>
+        s"$githubBaseUrl?return_url=$encoded"
+      }
 
+    val params: Map[String, String] = Seq(
+      Some("scope" -> Scopes.mkString(",")),
+      Some("client_id" -> githubClientId),
+      returnUrlParam.map("redirect_uri" -> _)
+    ).flatten.toMap
+
+    val queryParams = params
+      .mapValues(URLEncoder.encode(_, "UTF-8"))
+      .map {
+        case (key, value) => s"$key=$value"
+      }
+
+    OauthUrl + "?" + queryParams.mkString("&")
   }
+
+}
+
+object Config {
+  val VersionsPerPage: Int = 5
 
   /**
     * Returns full URL to the file with the specified path
     */
   def scmsUrl(scms: Scms, uri: String, path: String): String = {
-    val join = if (path.startsWith("/")) {
-      ""
-    } else {
-      "/"
-    }
+    val separator = if (path.startsWith("/")) "" else "/"
+    val pathSep = path + separator
 
     scms match {
-      case Scms.Github => {
-        uri + Seq("/blob/master", path).mkString(join)
-      }
-      case Scms.UNDEFINED(_) => {
-        Seq(uri, path).mkString(join)
-      }
+      case Scms.Github =>
+        s"$uri/blob/master$pathSep"
+
+      case Scms.UNDEFINED(_) =>
+        uri + pathSep
     }
   }
 

@@ -20,7 +20,7 @@ class UserActionBuilder(
   implicit val executionContext: ExecutionContext
 ) extends ActionBuilder[IdentifiedRequest, AnyContent] {
 
-  def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
+  def invokeBlock[A](request: Request[A], block: IdentifiedRequest[A] => Future[Result]): Future[Result] =
     request.session.get(UserKey) match {
       case None => Future.successful(onUnauthorized(request))
       case Some(userId) =>
@@ -29,6 +29,7 @@ class UserActionBuilder(
     }
 }
 
+//todo remove config requirement
 abstract class BaseController(
   config: Config,
   dependencyClientProvider: DependencyClientProvider
@@ -37,9 +38,10 @@ abstract class BaseController(
   protected def onUnauthorized(requestHeader: RequestHeader): Result =
     Redirect(routes.LoginController.index(return_url = Some(requestHeader.path))).flashing("warning" -> "Please login")
 
-  private lazy val UserActionBuilder =
+  private val UserActionBuilder =
     new UserActionBuilder(controllerComponents.parsers.default, onUnauthorized = onUnauthorized)
-  protected def User = UserActionBuilder
+
+  protected val User: UserActionBuilder = UserActionBuilder
 
   private[this] lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 

@@ -2,6 +2,7 @@ package controllers
 
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.GithubAuthenticationForm
+import io.flow.dependency.www.lib
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.IdentifiedCookie._
 import io.flow.play.util.Config
@@ -11,10 +12,10 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext
 
 class LoginController @javax.inject.Inject()(
-  config: Config,
   val provider: DependencyClientProvider,
-  val controllerComponents: ControllerComponents
-)(implicit ec: ExecutionContext) extends play.api.mvc.BaseController with I18nSupport {
+  val controllerComponents: ControllerComponents,
+  config: Config
+)(implicit ec: ExecutionContext, dependencyConfig: lib.GitHubConfig) extends play.api.mvc.BaseController with I18nSupport {
 
   def index(returnUrl: Option[String]) = Action { implicit request =>
     Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl))
@@ -24,7 +25,7 @@ class LoginController @javax.inject.Inject()(
     code: String,
     state: Option[String],
     returnUrl: Option[String]
-  ) = Action.async { implicit request =>
+  ): Action[AnyContent] = Action.async { implicit request =>
     provider.newClient(user = None, requestId = None).githubUsers.postGithub(
       GithubAuthenticationForm(
         code = code
@@ -41,9 +42,8 @@ class LoginController @javax.inject.Inject()(
       }
       Redirect(url).withIdentifiedCookieUser(user = UserReference(user.id))
     }.recover {
-      case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+      case response: io.flow.dependency.v0.errors.GenericErrorsResponse =>
         Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl, response.genericErrors.flatMap(_.messages)))
-      }
     }
   }
 
