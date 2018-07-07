@@ -83,7 +83,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "io.flow" %% "lib-play-play26" % "0.4.77",
     "com.typesafe.play" %% "play-json-joda" % "2.6.9",
     "com.typesafe.play" %% "play-json" % "2.6.9",
-    "io.flow" %% "lib-test-utils" % "0.0.13" % Test
+    "io.flow" %% "lib-test-utils" % "0.0.14" % Test
   ),
   scalacOptions += "-feature",
   credentials += credsToUse,
