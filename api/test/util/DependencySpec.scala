@@ -182,7 +182,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
 
   def createProjectForm(
     org: Organization = createOrganization()
-  ) = {
+  ): ProjectForm = {
     ProjectForm(
       organization = org.key,
       name = createTestName(),

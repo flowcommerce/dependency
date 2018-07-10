@@ -3,6 +3,8 @@ package db
 import io.flow.dependency.v0.models.{Organization, Recommendation}
 import util.DependencySpec
 
+import scala.util.Try
+
 class RecommendationsDaoSpec extends DependencySpec{
 
   def createRecommendation(
@@ -12,12 +14,21 @@ class RecommendationsDaoSpec extends DependencySpec{
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
 
-    eventuallyInNSeconds(3) {
+    def getFirst() = {
       val projectRecommendations = recommendationsDao.findAll(Authorization.All, projectId = Some(project.id))
 
       projectRecommendations.headOption.getOrElse {
         sys.error("Failed to create recommendation")
       }
+    }
+
+    Try {
+      eventuallyInNSeconds(3) {
+        getFirst()
+      }
+    }.getOrElse {
+      recommendationsDao.sync(systemUser, project)
+      getFirst()
     }
   }
 
