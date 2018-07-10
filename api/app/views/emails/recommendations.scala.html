@@ -11,12 +11,12 @@
       <tr>
         <td>
 	  @if(j == 0) {
-	    <a href="@urls.www(urls.project(project.id))">@io.flow.dependency.lib.Text.truncate(project.name, 50)</a>
+	    <a href="@urls.www(urls.project(project.id))">@io.flow.play.util.Text.truncate(project.name, 50)</a>
 	  } else {
   	    &nbsp;
 	  }
 	</td>
-        <td><a href="@urls.www(urls.recommendation(rec))">@io.flow.dependency.lib.Text.truncate(rec.name, 50)</a></td>
+        <td><a href="@urls.www(urls.recommendation(rec))">@io.flow.play.util.Text.truncate(rec.name, 50)</a></td>
         <td>@rec.from</td>
         <td>=&gt;</td>
         <td>@rec.to</td>

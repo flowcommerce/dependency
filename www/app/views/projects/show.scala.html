@@ -50,7 +50,7 @@
 	</thead>
         @recommendations.items.map { rec =>
           <tr>
-            <td><a href="@data.urls.recommendation(rec)">@io.flow.dependency.lib.Text.truncate(rec.name, 50)</a></td>
+            <td><a href="@data.urls.recommendation(rec)">@io.flow.play.util.Text.truncate(rec.name, 50)</a></td>
             <td>@rec.from</td>
             <td>@rec.to</td>
           </tr>
