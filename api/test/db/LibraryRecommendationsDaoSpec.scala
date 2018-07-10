@@ -28,7 +28,7 @@ class LibraryRecommendationsDaoSpec extends  DependencySpec {
       }
     }
   }
-  
+
   "no-op if nothing to upgrade" in {
     val project = createProject(org)
     libraryRecommendationsDao.forProject(project) must be(Nil)
@@ -59,7 +59,7 @@ class LibraryRecommendationsDaoSpec extends  DependencySpec {
   }
 
   "Prefers latest production release even when more recent beta release is available" in {
-    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
+    val (library, libraryVersions) = createLibraryWithMultipleVersions(org,
       versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1")
     )
     val project = createProject(org)

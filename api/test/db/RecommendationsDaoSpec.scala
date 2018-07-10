@@ -3,7 +3,9 @@ package db
 import io.flow.dependency.v0.models.{Organization, Recommendation}
 import util.DependencySpec
 
-class RecommendationsDaoSpec extends DependencySpec {
+import scala.util.Try
+
+class RecommendationsDaoSpec extends DependencySpec{
 
   def createRecommendation(
     org: Organization
@@ -11,9 +13,22 @@ class RecommendationsDaoSpec extends DependencySpec {
     val (_, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
-    recommendationsDao.sync(systemUser, project)
-    recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).headOption.getOrElse {
-      sys.error("Failed to create recommendation")
+
+    def getFirst() = {
+      val projectRecommendations = recommendationsDao.findAll(Authorization.All, projectId = Some(project.id))
+
+      projectRecommendations.headOption.getOrElse {
+        sys.error("Failed to create recommendation")
+      }
+    }
+
+    Try {
+      eventuallyInNSeconds(3) {
+        getFirst()
+      }
+    }.getOrElse {
+      recommendationsDao.sync(systemUser, project)
+      getFirst()
     }
   }
 
@@ -67,7 +82,7 @@ class RecommendationsDaoSpec extends DependencySpec {
   }
 
   "Prefers latest production release even when more recent beta release is available" in {
-    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
+    val (library, libraryVersions) = createLibraryWithMultipleVersions(org,
       versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1")
     )
     val project = createProject(org)()
