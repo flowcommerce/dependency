@@ -73,9 +73,7 @@ class EmailActor @Inject()(
             offset = offset
           )
         }
-      ) { recipient =>
-        new DailySummaryEmailMessage(recipient)
-      }
+      )
     }
 
   }
@@ -90,23 +88,21 @@ class BatchEmailProcessor @Inject()(
   config: Config
 ) {
 
-  lazy val SystemUser = usersDao.systemUser
-
   def process(
     publication: Publication,
     subscriptions: Iterator[Subscription]
-  ) (
-    generator: Recipient => EmailMessageGenerator
-  ) {
+  ): Unit = {
     subscriptions.foreach { subscription =>
-      usersDao.findById(subscription.user.id).foreach { user =>
-        Recipient.fromUser(userIdentifiersDao, usersDao, user).map { new DailySummaryEmailMessage(_) }.map { generator =>
+      usersDao.findById(subscription.user.id)
+        .flatMap(userIdentifiersDao.recipientForUser)
+        .foreach { recipient =>
+          val generator = new DailySummaryEmailMessage(recipient)
           // Record before send in case of crash - prevent loop of
           // emails.
           lastEmailsDao.record(
-            SystemUser,
+            usersDao.systemUser,
             LastEmailForm(
-              userId = user.id,
+              userId = recipient.userId,
               publication = publication
             )
           )
@@ -114,18 +110,17 @@ class BatchEmailProcessor @Inject()(
           Email.sendHtml(
             config = config,
             recipient = generator.recipient,
-            subject = generator.subject(),
+            subject = generator.subject,
             body = generator.body(lastEmailsDao, recommendationsDao, config)
           )
         }
-      }
     }
   }
 }
 
 trait EmailMessageGenerator {
-  def recipient(): Recipient
-  def subject(): String
+  def recipient: Recipient
+  def subject: String
   def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String
 }
 
@@ -139,24 +134,20 @@ class DailySummaryEmailMessage (
 
   private[this] val MaxRecommendations = 250
 
-  private[this] def lastEmail(lastEmailsDao: LastEmailsDao) = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
+  private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
 
-  override def subject() = "Daily Summary"
+  override def subject = "Daily Summary"
 
-  override def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config) = {
+  override def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String = {
     val recommendations = recommendationsDao.findAll(
       Authorization.User(recipient.userId),
       limit = MaxRecommendations
     )
 
-    val (newRecommendations, oldRecommendations) = lastEmail(lastEmailsDao) match {
-      case None => (recommendations, Nil)
-      case Some(email) => {
-        (
-          recommendations.filter { !_.createdAt.isBefore(email.createdAt) },
-          recommendations.filter { _.createdAt.isBefore(email.createdAt) }
-        )
-      }
+    val (oldRecommendations, newRecommendations) = lastEmail(lastEmailsDao) match {
+      case None => (Nil, recommendations)
+      case Some(email) =>
+        recommendations.partition(_.createdAt.isBefore(email.createdAt))
     }
 
     views.html.emails.dailySummary(

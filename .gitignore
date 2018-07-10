@@ -6,3 +6,5 @@ logs/
 *.swp
 *.swo
 .DS_STORE
+native/
+**/.bloop

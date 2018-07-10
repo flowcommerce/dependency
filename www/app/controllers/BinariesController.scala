@@ -18,7 +18,7 @@ class BinariesController @javax.inject.Inject()(
 
   override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 
-  def index(page: Int = 0) = User.async { implicit request =>
+  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       binaries <- dependencyClient(request).binaries.get(
         limit = Pagination.DefaultLimit + 1,
@@ -38,7 +38,7 @@ class BinariesController @javax.inject.Inject()(
     id: String,
     versionsPage: Int = 0,
     projectsPage: Int = 0
-  ) = User.async { implicit request =>
+  ): Action[AnyContent] = User.async { implicit request =>
     withBinary(request, id) { binary =>
       for {
         versions <- dependencyClient(request).binaryVersions.get(
@@ -75,7 +75,7 @@ class BinariesController @javax.inject.Inject()(
     id: String
   )(
     f: Binary => Future[Result]
-  ) = {
+  ): Future[Result] = {
     dependencyClient(request).binaries.getById(id).flatMap { binary =>
       f(binary)
     }.recover {

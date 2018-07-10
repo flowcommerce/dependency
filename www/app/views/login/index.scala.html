@@ -1,13 +1,14 @@
+@import io.flow.dependency.www.lib.GitHubConfig
 @(data: io.flow.dependency.www.lib.UiData,
   returnUrl: Option[String],
   errorMessages: Seq[String] = Nil
-)(implicit flash: Flash, messages: Messages)
+)(implicit flash: Flash, messages: Messages, config: GitHubConfig)
 
 @main(data, errorMessages = errorMessages) {
 
   <div class="pull-left">
 
-    <a class="btn btn-block btn-social btn-github" href="@io.flow.dependency.www.lib.Config.githubOauthUrl(returnUrl)">
+    <a class="btn btn-block btn-social btn-github" href="@config.githubOauthUrl(returnUrl)">
       <span class="fa fa-github"></span> Sign in with Github
     </a>
 
