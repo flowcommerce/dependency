@@ -40,7 +40,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   val random = Random()
 
   import scala.language.implicitConversions
-  implicit def toUserReference(user: User) = UserReference(id = user.id)
+  implicit def toUserReference(user: User): UserReference = UserReference(id = user.id)
 
   lazy val systemUser = createUser()
 
@@ -362,9 +362,8 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   }
 
   def createLibraryWithMultipleVersions(
-    org: Organization
-  ) (
-    implicit versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2")
+    org: Organization,
+    versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2")
   ): (Library, Seq[LibraryVersion]) = {
     val library = createLibrary(org)(createLibraryForm(org).copy(version = None))
     (
