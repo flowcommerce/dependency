@@ -51,7 +51,7 @@ object MainActor {
 
     case class BinaryVersionCreated(id: String, binaryId: String)
     case class BinaryVersionDeleted(id: String, binaryId: String)
-    
+
     case class UserCreated(id: String)
   }
 }

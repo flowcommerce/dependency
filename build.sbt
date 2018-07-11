@@ -41,6 +41,7 @@ lazy val api = project
       jdbc,
       ws,
       guice,
+      "io.flow" %% "lib-dependency" % "0.0.17",
       "io.flow" %% "lib-util" % "0.1.0",
       "io.flow" %% "lib-postgresql-play26" % "0.0.84",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
@@ -91,3 +92,4 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
 )
 version := "0.6.1"
+

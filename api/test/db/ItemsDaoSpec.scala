@@ -75,6 +75,7 @@ class ItemsDaoSpec extends DependencySpec {
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString)) must be(Nil)
   }
 
+
   "supports libraries" in {
     val library = createLibrary(org)()
 
