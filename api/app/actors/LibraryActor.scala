@@ -43,7 +43,7 @@ class LibraryActor @Inject()
       dataLibrary.foreach { lib =>
         syncsDao.withStartedAndCompleted(SystemUser, "library", lib.id) {
           resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
-            DefaultLibraryArtifactProvider().resolve(
+            DefaultLibraryArtifactProvider.resolve(
               resolversDao = resolversDao,
               resolver = resolver,
               groupId = lib.groupId,

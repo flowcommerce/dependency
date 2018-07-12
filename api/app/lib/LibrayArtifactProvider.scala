@@ -14,7 +14,7 @@ trait LibraryArtifactProvider {
 
   /**
     * Returns the artifacts for this library.
-    * 
+    *
     * @param organization Used to look up private resolvers for this organization.
 //    * @param resolver If specified, we search this resolver first
     */
@@ -50,7 +50,7 @@ trait LibraryArtifactProvider {
 }
 
 
-case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
+object DefaultLibraryArtifactProvider extends LibraryArtifactProvider {
 
   override def resolve(
     resolversDao: ResolversDao,

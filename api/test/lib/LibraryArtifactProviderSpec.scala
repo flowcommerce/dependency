@@ -21,7 +21,7 @@ class LibraryArtifactProviderSpec extends DependencySpec {
     )
   }
 
-  lazy val provider = DefaultLibraryArtifactProvider()
+  val provider: LibraryArtifactProvider = DefaultLibraryArtifactProvider
   lazy val orgSummary = OrganizationSummary(
     id = UUID.randomUUID.toString,
     key = s"z-test-${UUID.randomUUID.toString.toLowerCase}"

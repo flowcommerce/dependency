@@ -310,7 +310,7 @@ class ProjectActor @javax.inject.Inject() (
         Some(lib)
       }
       case None => {
-        DefaultLibraryArtifactProvider().resolve(
+        DefaultLibraryArtifactProvider.resolve(
           resolversDao = resolversDao,
           organization = projectLibrary.project.organization,
           groupId = projectLibrary.groupId,
