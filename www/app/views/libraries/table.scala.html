@@ -7,7 +7,7 @@
     <table class="table">
       @libraries.items.map { library =>
         <tr>
-          <td><a href="@routes.LibrariesController.show(library.id)">@library.groupId.@library.artifactId</td>
+          <td><a href="@routes.LibrariesController.show(library.id)">@library.groupId.@library.artifactId</a></td>
         </tr>
       }
     </table>
