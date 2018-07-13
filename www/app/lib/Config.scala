@@ -46,7 +46,7 @@ object Config {
     */
   def scmsUrl(scms: Scms, uri: String, path: String): String = {
     val separator = if (path.startsWith("/")) "" else "/"
-    val pathSep = path + separator
+    val pathSep = separator + path
 
     scms match {
       case Scms.Github =>
