@@ -15,6 +15,7 @@ import io.flow.github.v0.models.{Repository => GithubRepository, User => GithubU
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.Logger
 import play.api.libs.ws.WSClient
+import cats.implicits._
 
 case class GithubUserData(
   githubId: Long,
@@ -58,7 +59,7 @@ abstract class Github {
   /**
     * Fetches the contents of the file at the specified path from the
     * given repository. Returns None if the file is not found.
-    * 
+    *
     * @param path e.g. "build.sbt",  "project/plugins.sbt", etc.
     */
   def file(
@@ -73,7 +74,7 @@ abstract class Github {
     * Given an auth validation code, pings the github UI to access the
     * user data, upserts that user with the dependency database, and
     * returns the user (or a list of errors).
-    * 
+    *
     * @param code The oauth authorization code from github
     */
   def getUserFromCode(
@@ -262,28 +263,20 @@ class DefaultGithub @Inject() (
         sys.error(error)
       }
       case Right(repo) => {
-        oauthToken(user) match {
-          case None => Future {
-            None
+        oauthToken(user).traverse[Future, String] { token =>
+          GithubHelper.apiClient(wsClient, token).contents.getContentsByPath(
+            owner = repo.owner,
+            repo = repo.project,
+            path = path
+          ).map { contents =>
+            GithubUtil.toText(contents)
           }
-          case Some(token) => {
-            GithubHelper.apiClient(wsClient, token).contents.getContentsByPath(
-              owner = repo.owner,
-              repo = repo.project,
-              path = path
-            ).map { contents =>
-              Some(GithubUtil.toText(contents))
-            }.recover {
-              case UnitResponse(404) => {
-                None
-              }
-            }
-          }
+        }.recover {
+          case UnitResponse(404) => None
         }
       }
     }
   }
-
 }
 
 class MockGithub() extends Github {

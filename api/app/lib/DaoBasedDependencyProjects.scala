@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import db.{LibrariesDao, ProjectLibrariesDao, ProjectsDao, RecommendationsDao}
 import io.flow.dependency.v0.models.{Project, Recommendation}
-import io.flow.lib.dependency.DependencyProjects
+import io.flow.lib.dependency.clients.DependencyProjects
 import io.flow.postgresql.Pager
 
 @Singleton

@@ -105,18 +105,17 @@ private[lib] case class GithubDependencyProvider(
     implicit ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, BuildSbtFilename).map { result =>
-      result.flatMap { text =>
+      result.map { text =>
         val result = BuildSbtScalaParser(
           project = project,
           path = BuildSbtFilename,
           contents = text
         )
-        Some(
-          Dependencies(
-            binaries = Some(result.binaries),
-            libraries = Some(result.libraries),
-            resolverUris = Some(result.resolverUris)
-          )
+
+        Dependencies(
+          binaries = Some(result.binaries),
+          libraries = Some(result.libraries),
+          resolverUris = Some(result.resolverUris)
         )
       }
     }

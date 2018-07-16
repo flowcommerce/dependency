@@ -1,6 +1,6 @@
 package lib
 
-import io.flow.lib.dependency.DependencyProjects
+import io.flow.lib.dependency.clients.DependencyProjects
 import play.api.{Configuration, Environment}
 import play.api.inject.{Binding, Module}
 
