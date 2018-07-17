@@ -7,18 +7,15 @@ import io.flow.play.controllers.InjectedFlowController
 import lib.UpgradeService
 
 @Singleton
-class Upgrades @Inject()(upgradeService: UpgradeService,
-                         projectsDao: ProjectsDao)
+class Upgrades @Inject()(upgradeService: UpgradeService)
     extends InjectedFlowController {
 
-  def postLibraryById(id: String) = Anonymous {
-    projectsDao.findById(Authorization.All, id) match {
-      case Some(library) =>
-        upgradeService.upgradeLibrary(library)
-        Ok(s"Upgraded library ${library.name}")
-
-      case _ =>
-        NotFound
-    }
+  def postLibraryById(name: String) = Anonymous {
+    upgradeService
+      .upgradeLibrary(name)
+      .map { library =>
+        Ok(s"Upgraded library [$library]")
+      }
+      .getOrElse(NotFound(s"Library not recognized: [$name]"))
   }
 }

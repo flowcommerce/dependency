@@ -3,30 +3,15 @@ package lib
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import io.flow.dependency.v0.models.Project
-import io.flow.lib.dependency.clients.{
-  DependencyProjects,
-  GithubClient,
-  GithubClientBuilder
-}
-import io.flow.lib.dependency.upgrade.{
-  DependenciesToUpgrade,
-  Upgrader,
-  UpgraderConfig
-}
+import io.flow.dependency.v0.models.{Library, Project}
+import io.flow.lib.dependency.clients.{DependencyProjects, GithubClient, GithubClientBuilder}
+import io.flow.lib.dependency.upgrade.{DependenciesToUpgrade, Upgrader, UpgraderConfig}
 import io.flow.play.util.Config
 import play.api.libs.ws.WSClient
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  final def upgradeLibrary(library: Project): Unit = {
-    getDependentProjects(library.name)
-      .foreach(upgradeProject)
-  }
-
-  protected def upgradeProject(project: Project): Unit
-
-  protected def getDependentProjects(name: String): Seq[Project]
+  def upgradeLibrary(library: String): Option[Library]
 }
 
 @Singleton class UpgradeServiceImpl @Inject()(
@@ -34,6 +19,7 @@ trait UpgradeService {
     config: Config,
     dependencyProjects: DependencyProjects)
     extends UpgradeService {
+  private val debugMode = false
 
   private val githubToken =
     config.requiredString("github.dependency.user.token")
@@ -53,11 +39,21 @@ trait UpgradeService {
   private val upgrader =
     new Upgrader(dependencyProjects, githubClient, upgraderConfig)
 
-  override protected def getDependentProjects(name: String): Seq[Project] =
-    dependencyProjects.getDependentProjects(name)
+  override def upgradeLibrary(library: String): Option[Library] = {
+    dependencyProjects.getLibrary(library).map { library =>
+      dependencyProjects.getLibraryDependants(library.id).foreach(upgradeProject)
+      library
+    }
+  }
 
-  override def upgradeProject(project: Project): Unit = {
+  private def upgradeProject(project: Project): Unit = {
     val projects = List(project)
-    upgrader.doUpgrade(None, projects, DependenciesToUpgrade.All, debug = true)
+
+    upgrader.doUpgrade(
+      script = None,
+      projects = projects,
+      dependenciesToUpgrade = DependenciesToUpgrade.All,
+      debug = debugMode
+    )
   }
 }
