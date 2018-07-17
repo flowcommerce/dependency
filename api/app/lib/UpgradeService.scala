@@ -5,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import io.flow.dependency.v0.models.{Library, Project}
 import io.flow.lib.dependency.clients.{DependencyProjects, GithubClient, GithubClientBuilder}
-import io.flow.lib.dependency.upgrade.{DependenciesToUpgrade, Upgrader, UpgraderConfig}
+import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Upgrader, UpgraderConfig}
 import io.flow.play.util.Config
 import play.api.libs.ws.WSClient
 
@@ -33,7 +33,8 @@ trait UpgradeService {
     blacklistLibraries = Nil,
     blacklistBinaries = Nil,
     blacklistApibuilderUpdateProjects = Nil,
-    blacklistProjectLibraries = Map.empty
+    blacklistProjectLibraries = Map.empty,
+    branchStrategy = BranchStrategy.UseExisting
   )
 
   private val upgrader =
