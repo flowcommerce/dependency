@@ -179,6 +179,18 @@ package io.flow.common.v0.anorm.parsers {
 
   }
 
+  object InputSpecificationType {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputSpecificationType] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(name: String = "input_specification_type", prefixOpt: Option[String] = None): RowParser[io.flow.common.v0.models.InputSpecificationType] = {
+      SqlParser.str(prefixOpt.getOrElse("") + name) map {
+        case value => io.flow.common.v0.models.InputSpecificationType(value)
+      }
+    }
+
+  }
+
   object MarginType {
 
     def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.MarginType] = parser(prefixOpt = Some(s"$prefix$sep"))
@@ -673,6 +685,110 @@ package io.flow.common.v0.anorm.parsers {
           io.flow.common.v0.models.IncludedLevies(
             key = key,
             label = label
+          )
+        }
+      }
+    }
+
+  }
+
+  object InputForm {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputForm] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      values: String = "values",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.InputForm] = {
+      SqlParser.get[Map[String, String]](prefixOpt.getOrElse("") + values).? map {
+        case values => {
+          io.flow.common.v0.models.InputForm(
+            values = values
+          )
+        }
+      }
+    }
+
+  }
+
+  object InputFormSpecification {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputFormSpecification] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      inputs: String = "inputs",
+      limitationsPrefix: String = "limitations",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.InputFormSpecification] = {
+      SqlParser.get[Seq[io.flow.common.v0.models.InputSpecification]](prefixOpt.getOrElse("") + inputs).? ~
+      io.flow.common.v0.anorm.parsers.InputSpecificationLimitations.parserWithPrefix(prefixOpt.getOrElse("") + limitationsPrefix).? map {
+        case inputs ~ limitations => {
+          io.flow.common.v0.models.InputFormSpecification(
+            inputs = inputs,
+            limitations = limitations
+          )
+        }
+      }
+    }
+
+  }
+
+  object InputSpecification {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputSpecification] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      `type`: String = "type",
+      name: String = "name",
+      displayText: String = "display_text",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.InputSpecification] = {
+      io.flow.common.v0.anorm.parsers.InputSpecificationType.parser(prefixOpt.getOrElse("") + `type`) ~
+      SqlParser.str(prefixOpt.getOrElse("") + name) ~
+      SqlParser.str(prefixOpt.getOrElse("") + displayText).? map {
+        case typeInstance ~ name ~ displayText => {
+          io.flow.common.v0.models.InputSpecification(
+            `type` = typeInstance,
+            name = name,
+            displayText = displayText
+          )
+        }
+      }
+    }
+
+  }
+
+  object InputSpecificationLimitationMax {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputSpecificationLimitationMax] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      max: String = "max",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.InputSpecificationLimitationMax] = {
+      SqlParser.long(prefixOpt.getOrElse("") + max) map {
+        case max => {
+          io.flow.common.v0.models.InputSpecificationLimitationMax(
+            max = max
+          )
+        }
+      }
+    }
+
+  }
+
+  object InputSpecificationLimitations {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.InputSpecificationLimitations] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      limitations: String = "limitations",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.InputSpecificationLimitations] = {
+      SqlParser.get[Seq[io.flow.common.v0.models.InputSpecificationLimitation]](prefixOpt.getOrElse("") + limitations).? map {
+        case limitations => {
+          io.flow.common.v0.models.InputSpecificationLimitations(
+            limitations = limitations
           )
         }
       }
@@ -1241,6 +1357,18 @@ package io.flow.common.v0.anorm.parsers {
     def parser() = {
       io.flow.common.v0.anorm.parsers.User.parser() |
       io.flow.common.v0.anorm.parsers.UserReference.parser()
+    }
+
+  }
+
+  object InputSpecificationLimitation {
+
+    def parserWithPrefix(prefix: String, sep: String = "_") = {
+      io.flow.common.v0.anorm.parsers.InputSpecificationLimitationMax.parser(prefixOpt = Some(s"$prefix$sep"))
+    }
+
+    def parser() = {
+      io.flow.common.v0.anorm.parsers.InputSpecificationLimitationMax.parser()
     }
 
   }
