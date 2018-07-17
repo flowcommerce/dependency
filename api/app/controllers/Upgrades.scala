@@ -11,11 +11,11 @@ class Upgrades @Inject()(upgradeService: UpgradeService,
                          projectsDao: ProjectsDao)
     extends InjectedFlowController {
 
-  def postProjectById(id: String) = Anonymous {
+  def postLibraryById(id: String) = Anonymous {
     projectsDao.findById(Authorization.All, id) match {
-      case Some(project) =>
-        upgradeService.upgradeProject(project)
-        Ok(s"Upgraded project ${project.name}")
+      case Some(library) =>
+        upgradeService.upgradeLibrary(library)
+        Ok(s"Upgraded library ${library.name}")
 
       case _ =>
         NotFound

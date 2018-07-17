@@ -60,4 +60,4 @@ GET        /tokens                           controllers.Tokens.get(id: _root_.s
 GET        /tokens/:id                       controllers.Tokens.getById(id: String)
 POST       /tokens                           controllers.Tokens.post()
 DELETE     /tokens/:id                       controllers.Tokens.deleteById(id: String)
-POST       /upgrades/projects/:id            controllers.Upgrades.postProjectById(id: String)
+POST       /upgrades/libraries/:id           controllers.Upgrades.postLibraryById(id: String)
