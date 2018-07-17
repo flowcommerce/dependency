@@ -7,6 +7,8 @@ import io.flow.dependency.v0.models.SyncEvent
 import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.Config
+import lib.SyncsService
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -21,6 +23,7 @@ class Syncs @javax.inject.Inject()(
   projectHelper: ProjectHelper,
   librariesDao: LibrariesDao,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef,
+  syncsService: SyncsService,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
 ) extends BaseIdentifiedControllerWithFallback {
 
@@ -55,10 +58,7 @@ class Syncs @javax.inject.Inject()(
   }
 
   def postLibrariesById(id: String) = IdentifiedWithFallback { request =>
-    librariesHelper.withLibrary(request.user, id) { library =>
-      mainActor ! MainActor.Messages.LibrarySync(library.id)
-      NoContent
-    }
+    syncsService.syncLibrary(id, request.user).map(_ => Ok).getOrElse(NotFound)
   }
 
   def postProjectsById(id: String) = IdentifiedWithFallback { request =>

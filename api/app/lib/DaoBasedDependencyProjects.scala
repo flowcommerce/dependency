@@ -2,13 +2,31 @@ package lib
 
 import javax.inject.{Inject, Singleton}
 
+import controllers.Syncs
 import db.{LibrariesDao, ProjectLibrariesDao, ProjectsDao, RecommendationsDao}
+import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.{Project, Recommendation}
 import io.flow.lib.dependency.clients.DependencyProjects
 import io.flow.postgresql.Pager
+import io.flow.util.Constants
 
 @Singleton
-class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao, projectsDao: ProjectsDao, projectLibrariesDao: ProjectLibrariesDao, recommendationsDao: RecommendationsDao) extends DependencyProjects {
+class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao, projectsDao: ProjectsDao, projectLibrariesDao: ProjectLibrariesDao, recommendationsDao: RecommendationsDao, syncsService: SyncsService) extends DependencyProjects {
+
+  override def syncLibrary(libraryName: String): Unit = {
+    val libraryId = librariesDao
+      .findAll(
+        auth = db.Authorization.All,
+        id = None,
+        artifactId = Some(libraryName),
+        limit = 1
+      )
+      .map(_.id).headOption
+      .getOrElse(throw new Exception(s"Library with name $libraryName not found"))
+
+    syncsService.syncLibrary(libraryId, Constants.SystemUser)
+  }
+
   override def getDependentProjects(projectName: String): Seq[Project] = {
     val libraryId :: _ = librariesDao.findAll(db.Authorization.All, artifactId = Some(projectName), limit = 1).map(_.id)
     val projectIds: Seq[String] = Pager.create[String] { offset =>

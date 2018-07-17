@@ -9,15 +9,26 @@ import io.flow.lib.dependency.clients.{
   GithubClient,
   GithubClientBuilder
 }
-import io.flow.lib.dependency.upgrade.ProjectUpgrader
+import io.flow.lib.dependency.upgrade.{
+  DependenciesToUpgrade,
+  Upgrader,
+  UpgraderConfig
+}
 import io.flow.play.util.Config
 import play.api.libs.ws.WSClient
-import io.flow.lib.dependency.implicits.project._
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  def upgradeProject(project: Project): Unit
+  final def upgradeLibrary(library: Project): Unit = {
+    getDependentProjects(library.name)
+      .foreach(upgradeProject)
+  }
+
+  protected def upgradeProject(project: Project): Unit
+
+  protected def getDependentProjects(name: String): Seq[Project]
 }
+
 @Singleton class UpgradeServiceImpl @Inject()(
     ws: WSClient,
     config: Config,
@@ -30,11 +41,23 @@ trait UpgradeService {
   private val githubClient: GithubClient =
     new GithubClientBuilder(ws).build(githubToken)
 
-  override def upgradeProject(project: Project): Unit = {
-    val recommendations =
-      dependencyProjects.getRecommendationsForProject(project)
+  //todo make blacklists configurable? Hardcode in hacks?
+  private val upgraderConfig = UpgraderConfig(
+    blacklistProjects = Nil,
+    blacklistLibraries = Nil,
+    blacklistBinaries = Nil,
+    blacklistApibuilderUpdateProjects = Nil,
+    blacklistProjectLibraries = Map.empty
+  )
 
-    new ProjectUpgrader(githubClient, recommendations, Nil, false)
-      .upgrade(project.owner, project.repo)
+  private val upgrader =
+    new Upgrader(dependencyProjects, githubClient, upgraderConfig)
+
+  override protected def getDependentProjects(name: String): Seq[Project] =
+    dependencyProjects.getDependentProjects(name)
+
+  override def upgradeProject(project: Project): Unit = {
+    val projects = List(project)
+    upgrader.doUpgrade(None, projects, DependenciesToUpgrade.All, debug = true)
   }
 }
