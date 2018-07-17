@@ -81,6 +81,8 @@ package io.flow.common.v0.anorm.conversions {
     implicit val columnToMapCommonIncludedLevyKey: Column[Map[String, _root_.io.flow.common.v0.models.IncludedLevyKey]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.IncludedLevyKey]] }
     implicit val columnToSeqCommonIncoterm: Column[Seq[_root_.io.flow.common.v0.models.Incoterm]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.Incoterm]] }
     implicit val columnToMapCommonIncoterm: Column[Map[String, _root_.io.flow.common.v0.models.Incoterm]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.Incoterm]] }
+    implicit val columnToSeqCommonInputSpecificationType: Column[Seq[_root_.io.flow.common.v0.models.InputSpecificationType]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputSpecificationType]] }
+    implicit val columnToMapCommonInputSpecificationType: Column[Map[String, _root_.io.flow.common.v0.models.InputSpecificationType]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputSpecificationType]] }
     implicit val columnToSeqCommonMarginType: Column[Seq[_root_.io.flow.common.v0.models.MarginType]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.MarginType]] }
     implicit val columnToMapCommonMarginType: Column[Map[String, _root_.io.flow.common.v0.models.MarginType]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.MarginType]] }
     implicit val columnToSeqCommonMeasurementSystem: Column[Seq[_root_.io.flow.common.v0.models.MeasurementSystem]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.MeasurementSystem]] }
@@ -135,6 +137,16 @@ package io.flow.common.v0.anorm.conversions {
     implicit val columnToMapCommonExperienceSummary: Column[Map[String, _root_.io.flow.common.v0.models.ExperienceSummary]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.ExperienceSummary]] }
     implicit val columnToSeqCommonIncludedLevies: Column[Seq[_root_.io.flow.common.v0.models.IncludedLevies]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.IncludedLevies]] }
     implicit val columnToMapCommonIncludedLevies: Column[Map[String, _root_.io.flow.common.v0.models.IncludedLevies]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.IncludedLevies]] }
+    implicit val columnToSeqCommonInputForm: Column[Seq[_root_.io.flow.common.v0.models.InputForm]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputForm]] }
+    implicit val columnToMapCommonInputForm: Column[Map[String, _root_.io.flow.common.v0.models.InputForm]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputForm]] }
+    implicit val columnToSeqCommonInputFormSpecification: Column[Seq[_root_.io.flow.common.v0.models.InputFormSpecification]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputFormSpecification]] }
+    implicit val columnToMapCommonInputFormSpecification: Column[Map[String, _root_.io.flow.common.v0.models.InputFormSpecification]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputFormSpecification]] }
+    implicit val columnToSeqCommonInputSpecification: Column[Seq[_root_.io.flow.common.v0.models.InputSpecification]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputSpecification]] }
+    implicit val columnToMapCommonInputSpecification: Column[Map[String, _root_.io.flow.common.v0.models.InputSpecification]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputSpecification]] }
+    implicit val columnToSeqCommonInputSpecificationLimitationMax: Column[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitationMax]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitationMax]] }
+    implicit val columnToMapCommonInputSpecificationLimitationMax: Column[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitationMax]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitationMax]] }
+    implicit val columnToSeqCommonInputSpecificationLimitations: Column[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitations]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitations]] }
+    implicit val columnToMapCommonInputSpecificationLimitations: Column[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitations]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitations]] }
     implicit val columnToSeqCommonItemReference: Column[Seq[_root_.io.flow.common.v0.models.ItemReference]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.ItemReference]] }
     implicit val columnToMapCommonItemReference: Column[Map[String, _root_.io.flow.common.v0.models.ItemReference]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.ItemReference]] }
     implicit val columnToSeqCommonLineItem: Column[Seq[_root_.io.flow.common.v0.models.LineItem]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.LineItem]] }
@@ -181,6 +193,8 @@ package io.flow.common.v0.anorm.conversions {
     implicit val columnToMapCommonExpandableOrganization: Column[Map[String, _root_.io.flow.common.v0.models.ExpandableOrganization]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.ExpandableOrganization]] }
     implicit val columnToSeqCommonExpandableUser: Column[Seq[_root_.io.flow.common.v0.models.ExpandableUser]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.ExpandableUser]] }
     implicit val columnToMapCommonExpandableUser: Column[Map[String, _root_.io.flow.common.v0.models.ExpandableUser]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.ExpandableUser]] }
+    implicit val columnToSeqCommonInputSpecificationLimitation: Column[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitation]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.InputSpecificationLimitation]] }
+    implicit val columnToMapCommonInputSpecificationLimitation: Column[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitation]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.InputSpecificationLimitation]] }
   }
 
   object Standard {

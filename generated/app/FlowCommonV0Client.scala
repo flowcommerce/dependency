@@ -53,6 +53,29 @@ package io.flow.common.v0.models {
 
   }
 
+  sealed trait InputSpecificationLimitation extends _root_.scala.Product with _root_.scala.Serializable
+
+  /**
+   * Defines the valid discriminator values for the type InputSpecificationLimitation
+   */
+  sealed trait InputSpecificationLimitationDiscriminator extends _root_.scala.Product with _root_.scala.Serializable
+
+  object InputSpecificationLimitationDiscriminator {
+
+    case object InputSpecificationLimitationMax extends InputSpecificationLimitationDiscriminator { override def toString = "input_specification_limitation_max" }
+
+    final case class UNDEFINED(override val toString: String) extends InputSpecificationLimitationDiscriminator
+
+    val all: scala.List[InputSpecificationLimitationDiscriminator] = scala.List(InputSpecificationLimitationMax)
+
+    private[this] val byName: Map[String, InputSpecificationLimitationDiscriminator] = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): InputSpecificationLimitationDiscriminator = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[InputSpecificationLimitationDiscriminator] = byName.get(value.toLowerCase)
+
+  }
+
   /**
    * Defines structured fields for address to be used in user/form input. Either text
    * or the structured input needs to be present.
@@ -178,6 +201,35 @@ package io.flow.common.v0.models {
   final case class IncludedLevies(
     key: io.flow.common.v0.models.IncludedLevyKey,
     label: String
+  )
+
+  final case class InputForm(
+    values: _root_.scala.Option[Map[String, String]] = None
+  )
+
+  final case class InputFormSpecification(
+    inputs: _root_.scala.Option[Seq[io.flow.common.v0.models.InputSpecification]] = None,
+    limitations: _root_.scala.Option[io.flow.common.v0.models.InputSpecificationLimitations] = None
+  )
+
+  /**
+   * @param displayText Text to display for this input.
+   */
+  final case class InputSpecification(
+    `type`: io.flow.common.v0.models.InputSpecificationType,
+    name: String,
+    displayText: _root_.scala.Option[String] = None
+  )
+
+  /**
+   * Represents the maximum number of accepted inputs
+   */
+  final case class InputSpecificationLimitationMax(
+    max: Long
+  ) extends InputSpecificationLimitation
+
+  final case class InputSpecificationLimitations(
+    limitations: _root_.scala.Option[Seq[io.flow.common.v0.models.InputSpecificationLimitation]] = None
   )
 
   final case class ItemReference(
@@ -445,6 +497,19 @@ package io.flow.common.v0.models {
   final case class ExpandableUserUndefinedType(
     description: String
   ) extends ExpandableUser
+
+  /**
+   * Provides future compatibility in clients - in the future, when a type is added
+   * to the union InputSpecificationLimitation, it will need to be handled in the
+   * client code. This implementation will deserialize these future types as an
+   * instance of this class.
+   * 
+   * @param description Information about the type that we received that is undefined in this version of
+   *        the client.
+   */
+  final case class InputSpecificationLimitationUndefinedType(
+    description: String
+  ) extends InputSpecificationLimitation
 
   /**
    * Used to tag attributes with a data type so they are properly validated.
@@ -1047,6 +1112,40 @@ package io.flow.common.v0.models {
     def apply(value: String): Incoterm = fromString(value).getOrElse(UNDEFINED(value))
 
     def fromString(value: String): _root_.scala.Option[Incoterm] = byName.get(value.toLowerCase)
+
+  }
+
+  sealed trait InputSpecificationType extends _root_.scala.Product with _root_.scala.Serializable
+
+  object InputSpecificationType {
+
+    case object Text extends InputSpecificationType { override def toString = "text" }
+    case object Number extends InputSpecificationType { override def toString = "number" }
+
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    final case class UNDEFINED(override val toString: String) extends InputSpecificationType
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all: scala.List[InputSpecificationType] = scala.List(Text, Number)
+
+    private[this]
+    val byName: Map[String, InputSpecificationType] = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): InputSpecificationType = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[InputSpecificationType] = byName.get(value.toLowerCase)
 
   }
 
@@ -2146,6 +2245,36 @@ package io.flow.common.v0.models {
       }
     }
 
+    implicit val jsonReadsCommonInputSpecificationType = new play.api.libs.json.Reads[io.flow.common.v0.models.InputSpecificationType] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.InputSpecificationType] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.common.v0.models.InputSpecificationType(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.flow.common.v0.models.InputSpecificationType(v))
+              case err: play.api.libs.json.JsError => err
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesCommonInputSpecificationType(obj: io.flow.common.v0.models.InputSpecificationType) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectInputSpecificationType(obj: io.flow.common.v0.models.InputSpecificationType) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesCommonInputSpecificationType: play.api.libs.json.Writes[InputSpecificationType] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputSpecificationType] {
+        def writes(obj: io.flow.common.v0.models.InputSpecificationType) = {
+          jsonWritesCommonInputSpecificationType(obj)
+        }
+      }
+    }
+
     implicit val jsonReadsCommonMarginType = new play.api.libs.json.Reads[io.flow.common.v0.models.MarginType] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.MarginType] = {
         js match {
@@ -2964,6 +3093,106 @@ package io.flow.common.v0.models {
       }
     }
 
+    implicit def jsonReadsCommonInputForm: play.api.libs.json.Reads[InputForm] = {
+      (__ \ "values").readNullable[Map[String, String]].map { x => new InputForm(values = x) }
+    }
+
+    def jsObjectInputForm(obj: io.flow.common.v0.models.InputForm): play.api.libs.json.JsObject = {
+      (obj.values match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("values" -> play.api.libs.json.Json.toJson(x))
+      })
+    }
+
+    implicit def jsonWritesCommonInputForm: play.api.libs.json.Writes[InputForm] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputForm] {
+        def writes(obj: io.flow.common.v0.models.InputForm) = {
+          jsObjectInputForm(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonInputFormSpecification: play.api.libs.json.Reads[InputFormSpecification] = {
+      for {
+        inputs <- (__ \ "inputs").readNullable[Seq[io.flow.common.v0.models.InputSpecification]]
+        limitations <- (__ \ "limitations").readNullable[io.flow.common.v0.models.InputSpecificationLimitations]
+      } yield InputFormSpecification(inputs, limitations)
+    }
+
+    def jsObjectInputFormSpecification(obj: io.flow.common.v0.models.InputFormSpecification): play.api.libs.json.JsObject = {
+      (obj.inputs match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("inputs" -> play.api.libs.json.Json.toJson(x))
+      }) ++
+      (obj.limitations match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("limitations" -> jsObjectInputSpecificationLimitations(x))
+      })
+    }
+
+    implicit def jsonWritesCommonInputFormSpecification: play.api.libs.json.Writes[InputFormSpecification] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputFormSpecification] {
+        def writes(obj: io.flow.common.v0.models.InputFormSpecification) = {
+          jsObjectInputFormSpecification(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonInputSpecification: play.api.libs.json.Reads[InputSpecification] = {
+      for {
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.InputSpecificationType]
+        name <- (__ \ "name").read[String]
+        displayText <- (__ \ "display_text").readNullable[String]
+      } yield InputSpecification(`type`, name, displayText)
+    }
+
+    def jsObjectInputSpecification(obj: io.flow.common.v0.models.InputSpecification): play.api.libs.json.JsObject = {
+      play.api.libs.json.Json.obj(
+        "type" -> play.api.libs.json.JsString(obj.`type`.toString),
+        "name" -> play.api.libs.json.JsString(obj.name)
+      ) ++ (obj.displayText match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("display_text" -> play.api.libs.json.JsString(x))
+      })
+    }
+
+    implicit def jsonWritesCommonInputSpecification: play.api.libs.json.Writes[InputSpecification] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputSpecification] {
+        def writes(obj: io.flow.common.v0.models.InputSpecification) = {
+          jsObjectInputSpecification(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonInputSpecificationLimitationMax: play.api.libs.json.Reads[InputSpecificationLimitationMax] = {
+      (__ \ "max").read[Long].map { x => new InputSpecificationLimitationMax(max = x) }
+    }
+
+    def jsObjectInputSpecificationLimitationMax(obj: io.flow.common.v0.models.InputSpecificationLimitationMax): play.api.libs.json.JsObject = {
+      play.api.libs.json.Json.obj(
+        "max" -> play.api.libs.json.JsNumber(obj.max)
+      )
+    }
+
+    implicit def jsonReadsCommonInputSpecificationLimitations: play.api.libs.json.Reads[InputSpecificationLimitations] = {
+      (__ \ "limitations").readNullable[Seq[io.flow.common.v0.models.InputSpecificationLimitation]].map { x => new InputSpecificationLimitations(limitations = x) }
+    }
+
+    def jsObjectInputSpecificationLimitations(obj: io.flow.common.v0.models.InputSpecificationLimitations): play.api.libs.json.JsObject = {
+      (obj.limitations match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("limitations" -> play.api.libs.json.Json.toJson(x))
+      })
+    }
+
+    implicit def jsonWritesCommonInputSpecificationLimitations: play.api.libs.json.Writes[InputSpecificationLimitations] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputSpecificationLimitations] {
+        def writes(obj: io.flow.common.v0.models.InputSpecificationLimitations) = {
+          jsObjectInputSpecificationLimitations(obj)
+        }
+      }
+    }
+
     implicit def jsonReadsCommonItemReference: play.api.libs.json.Reads[ItemReference] = {
       (__ \ "number").read[String].map { x => new ItemReference(number = x) }
     }
@@ -3547,6 +3776,32 @@ package io.flow.common.v0.models {
         }
       }
     }
+
+    implicit def jsonReadsCommonInputSpecificationLimitation: play.api.libs.json.Reads[InputSpecificationLimitation] = new play.api.libs.json.Reads[InputSpecificationLimitation] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[InputSpecificationLimitation] = {
+        (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[InputSpecificationLimitation] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
+          case "input_specification_limitation_max" => js.validate[io.flow.common.v0.models.InputSpecificationLimitationMax]
+          case other => play.api.libs.json.JsSuccess(io.flow.common.v0.models.InputSpecificationLimitationUndefinedType(other))
+        }
+      }
+    }
+
+    def jsObjectInputSpecificationLimitation(obj: io.flow.common.v0.models.InputSpecificationLimitation): play.api.libs.json.JsObject = {
+      obj match {
+        case x: io.flow.common.v0.models.InputSpecificationLimitationMax => jsObjectInputSpecificationLimitationMax(x) ++ play.api.libs.json.Json.obj("discriminator" -> "input_specification_limitation_max")
+        case other => {
+          sys.error(s"The type[${other.getClass.getName}] has no JSON writer")
+        }
+      }
+    }
+
+    implicit def jsonWritesCommonInputSpecificationLimitation: play.api.libs.json.Writes[InputSpecificationLimitation] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.InputSpecificationLimitation] {
+        def writes(obj: io.flow.common.v0.models.InputSpecificationLimitation) = {
+          jsObjectInputSpecificationLimitation(obj)
+        }
+      }
+    }
   }
 }
 
@@ -3696,6 +3951,15 @@ package io.flow.common.v0 {
       }
       implicit def pathBindableIncoterm(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.common.v0.models.Incoterm] = ApibuilderPathBindable(incotermConverter)
       implicit def queryStringBindableIncoterm(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.common.v0.models.Incoterm] = ApibuilderQueryStringBindable(incotermConverter)
+
+      val inputSpecificationTypeConverter: ApibuilderTypeConverter[io.flow.common.v0.models.InputSpecificationType] = new ApibuilderTypeConverter[io.flow.common.v0.models.InputSpecificationType] {
+        override def convert(value: String): io.flow.common.v0.models.InputSpecificationType = io.flow.common.v0.models.InputSpecificationType(value)
+        override def convert(value: io.flow.common.v0.models.InputSpecificationType): String = value.toString
+        override def example: io.flow.common.v0.models.InputSpecificationType = io.flow.common.v0.models.InputSpecificationType.Text
+        override def validValues: Seq[io.flow.common.v0.models.InputSpecificationType] = io.flow.common.v0.models.InputSpecificationType.all
+      }
+      implicit def pathBindableInputSpecificationType(implicit stringBinder: QueryStringBindable[String]): PathBindable[io.flow.common.v0.models.InputSpecificationType] = ApibuilderPathBindable(inputSpecificationTypeConverter)
+      implicit def queryStringBindableInputSpecificationType(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[io.flow.common.v0.models.InputSpecificationType] = ApibuilderQueryStringBindable(inputSpecificationTypeConverter)
 
       val marginTypeConverter: ApibuilderTypeConverter[io.flow.common.v0.models.MarginType] = new ApibuilderTypeConverter[io.flow.common.v0.models.MarginType] {
         override def convert(value: String): io.flow.common.v0.models.MarginType = io.flow.common.v0.models.MarginType(value)
