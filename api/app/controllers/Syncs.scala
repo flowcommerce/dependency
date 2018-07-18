@@ -71,21 +71,12 @@ class Syncs @javax.inject.Inject()(
     }
   }
 
-  def postLibrariesAndGroup() = IdentifiedWithFallback { request =>
-    val groupIdTry = Try {
-      (request.body.asJson.get \\ "group_id").head.as[String]
+  def postLibraries(group_id: Option[String]) = IdentifiedWithFallback { request =>
+    val auth = Authorization.User(request.user.id)
+    val libsToSync = librariesDao.findAll(auth, groupId = group_id)
+    libsToSync.foreach { lib =>
+      mainActor ! MainActor.Messages.LibrarySync(lib.id)
     }
-    groupIdTry.fold(
-      _ => BadRequest("No `group_id` in json body"),
-      groupId => {
-        val auth = Authorization.User(request.user.id)
-        val libsToSync = librariesDao.findAll(auth, groupId = Some(groupId))
-        libsToSync.foreach { lib =>
-          mainActor ! MainActor.Messages.LibrarySync(lib.id)
-        }
-        NoContent
-      }
-    )
+    NoContent
   }
-
 }
