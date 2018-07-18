@@ -1161,7 +1161,7 @@
         {
           "method": "POST",
           "path": "/libraries/group",
-          "description": "Sync libraries with given groupId",
+          "description": "Synchronize libraries with given groupId",
           "parameters": [
             { "name": "group_id", "type": "string", "required": true }
           ],
