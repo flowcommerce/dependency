@@ -1160,6 +1160,19 @@
 
         {
           "method": "POST",
+          "path": "/libraries/group",
+          "description": "Sync libraries with given groupId",
+          "parameters": [
+            { "name": "group_id", "type": "string", "required": true }
+          ],
+          "responses": {
+            "204": { "type": "unit" },
+            "404": { "type": "unit" }
+          }
+        },
+
+        {
+          "method": "POST",
           "path": "/binaries/:id",
           "responses": {
             "204": { "type": "unit" },
