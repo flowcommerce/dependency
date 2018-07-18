@@ -76,7 +76,7 @@ class Syncs @javax.inject.Inject()(
       (request.body.asJson.get \\ "group_id").head.as[String]
     }
     groupIdTry.fold(
-      ex => BadRequest("No `group_id` in json body"),
+      _ => BadRequest("No `group_id` in json body"),
       groupId => {
         val auth = Authorization.User(request.user.id)
         val libsToSync = librariesDao.findAll(auth, groupId = Some(groupId))
