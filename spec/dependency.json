@@ -1160,10 +1160,10 @@
 
         {
           "method": "POST",
-          "path": "/libraries/group",
-          "description": "Synchronize libraries with given groupId",
+          "path": "/libraries",
+          "description": "Synchronize libraries with given params",
           "parameters": [
-            { "name": "group_id", "type": "string", "required": true }
+            { "name": "group_id", "type": "string", "required": false, "location": "query", "description": "Synchronize libraries with given group_id" }
           ],
           "responses": {
             "204": { "type": "unit" },
