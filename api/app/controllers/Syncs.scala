@@ -3,15 +3,12 @@ package controllers
 import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
 import db.{Authorization, LibrariesDao, SyncsDao}
 import io.flow.dependency.actors.MainActor
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.dependency.v0.models.SyncEvent
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
+import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.Config
-import play.api.mvc._
 import play.api.libs.json._
-
-import scala.util.Try
+import play.api.mvc._
 
 @javax.inject.Singleton
 class Syncs @javax.inject.Inject()(
@@ -73,7 +70,7 @@ class Syncs @javax.inject.Inject()(
 
   def postLibraries(group_id: Option[String]) = IdentifiedWithFallback { request =>
     val auth = Authorization.User(request.user.id)
-    val libsToSync = librariesDao.findAll(auth, groupId = group_id)
+    val libsToSync = librariesDao.findAll(auth, groupId = group_id, limit = 1000)
     libsToSync.foreach { lib =>
       mainActor ! MainActor.Messages.LibrarySync(lib.id)
     }
