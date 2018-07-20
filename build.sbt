@@ -89,7 +89,8 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   ),
   scalacOptions ++= Seq("-feature", "-Ypartial-unification"),
   credentials += credsToUse,
-  resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
+  resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
+  resolvers += "Artifactory Snapshots" at "https://flow.jfrog.io/flow/libs-snapshot-local"
 )
 version := "0.6.1"
 
