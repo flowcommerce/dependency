@@ -41,7 +41,7 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "io.flow" %% "lib-postgresql-play26" % "0.0.83",
+      "io.flow" %% "lib-postgresql-play26" % "0.0.84",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
       "org.postgresql" % "postgresql" % "42.2.4",
       "com.sendgrid"   %  "sendgrid-java" % "4.2.1",
@@ -80,7 +80,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play26" % "0.4.82",
+    "io.flow" %% "lib-play-play26" % "0.4.85",
     "com.typesafe.play" %% "play-json-joda" % "2.6.9",
     "com.typesafe.play" %% "play-json" % "2.6.9",
     "io.flow" %% "lib-test-utils" % "0.0.14" % Test
