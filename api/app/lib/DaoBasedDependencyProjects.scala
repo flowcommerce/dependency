@@ -2,64 +2,104 @@ package lib
 
 import javax.inject.{Inject, Singleton}
 
-import db.{LibrariesDao, ProjectLibrariesDao, ProjectsDao, RecommendationsDao}
+import cats.effect.IO
+import db._
 import io.flow.dependency.v0.models.{Library, Project, Recommendation}
-import io.flow.lib.dependency.clients.DependencyProjects
-import io.flow.postgresql.Pager
+import io.flow.lib.dependency.clients.{AsyncPager, DependencyProjects}
 import io.flow.util.Constants
+import cats.implicits._
+
+import scala.language.higherKinds
+import io.flow.lib.dependency.implicits.internal.StreamOps._
 
 @Singleton
 class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
-                                           projectsDao: ProjectsDao,
-                                           projectLibrariesDao: ProjectLibrariesDao,
-                                           recommendationsDao: RecommendationsDao,
-                                           syncsService: SyncsService) extends DependencyProjects {
+                                             projectsDao: ProjectsDao,
+                                             projectLibrariesDao: ProjectLibrariesDao,
+                                             recommendationsDao: RecommendationsDao,
+                                             syncsService: SyncsService) extends DependencyProjects[IO] {
 
-  override def getLibrary(libraryName: String): Option[Library] = {
+  override val getAllLibraries: IO[List[Library]] = AsyncPager[IO].create { offset =>
+    IO {
+      librariesDao.findAll(auth = Authorization.All, offset = offset, limit = SyncsService.LibrariesToSync)
+    }
+  }.compile.toList
+
+  override val recommendedUpgrades: IO[List[Project]] = {
+    AsyncPager[IO].create[Recommendation] { offset =>
+      IO {
+        recommendationsDao.findAll(db.Authorization.All, offset = offset, limit = 100)
+      }
+    }.map(_.project.id).segmentN(100).evalSegments { projectIds =>
+      IO {
+        projectsDao.findAll(db.Authorization.All, ids = Some(projectIds), limit = projectIds.size)
+      }
+    }
+  }.compile.to[collection.immutable.Stream].map {
+    _.distinct.sortBy(_.name).toList
+  }
+
+  override val getProjects: IO[List[Project]] = {
+    AsyncPager[IO].create { offset =>
+      IO {
+        projectsDao.findAll(
+          db.Authorization.All,
+          offset = offset, limit = 100
+        )
+      }
+    }
+  }.compile.toList
+
+  override def getLibrary(libraryName: String): IO[Option[Library]] = IO {
     librariesDao.findAll(db.Authorization.All, artifactId = Some(libraryName), limit = 1).headOption
   }
 
-  override def getLibraryDependants(libraryId: String): Seq[Project] = {
-    val projectIds: Seq[String] = Pager.create[String] { offset =>
-      projectLibrariesDao.findAll(db.Authorization.All, offset = offset, limit = Some(100), libraryId = Some(libraryId)).map(_.project.id)
-    }.toSeq
+  override def getLibraryDependants(libraryId: String): IO[List[Project]] = {
+    val projectIds = AsyncPager[IO].create { offset =>
+      IO {
+        projectLibrariesDao.findAll(
+          db.Authorization.All,
+          offset = offset,
+          limit = Some(100),
+          libraryId = Some(libraryId)
+        )
+      }
+    }.map(_.project.id)
 
-    projectIds.grouped(100).flatMap { ids =>
-      projectsDao.findAll(db.Authorization.All, ids = Some(ids), limit = projectIds.size)
-    }.toSeq
+    projectIds.segmentN(100).evalSegments { ids =>
+      IO {
+        projectsDao.findAll(db.Authorization.All, ids = Some(ids), limit = ids.size)
+      }
+    }
+  }.compile.toList
+
+  override def getRecommendationsForProject(project: Project): IO[List[Recommendation]] = IO {
+    recommendationsDao.findAll(db.Authorization.All, projectId = Some(project.id), limit = 100).toList
   }
 
-  override def recommendedUpgrades(): Seq[Project] = {
-    Pager.create[Recommendation] { offset =>
-      recommendationsDao.findAll(db.Authorization.All, offset = offset, limit = 100)
-    }.grouped(100).flatMap { recommendations =>
-      projectsDao.findAll(db.Authorization.All, ids = Some(recommendations.map(_.project.id)), limit = recommendations.size)
-    }.toSeq.distinct.sortBy(_.name)
-  }
-  override def getRecommendationsForProject(project: Project): Seq[Recommendation] = {
-    recommendationsDao.findAll(db.Authorization.All, projectId = Some(project.id), limit = 100)
+  override def syncLibrary(libraryName: String): IO[Unit] = {
+    val libraries = IO {
+      librariesDao
+        .findAll(
+          auth = db.Authorization.All,
+          id = None,
+          artifactId = Some(libraryName),
+          limit = 1
+        )
+    }
+
+    val library = libraries
+      .map(_.headOption.toRight[Throwable](new Exception(s"Library with name $libraryName not found")))
+      .flatMap(IO.fromEither)
+
+    library.flatMap {
+      lib => IO {
+        syncsService.syncLibrary(lib.id, Constants.SystemUser)
+      }
+    }
   }
 
-  override def getProjects(): Seq[Project] = {
-    Pager.byOffset { offset =>
-      projectsDao.findAll(
-        db.Authorization.All,
-        offset = offset, limit = 100
-      )
-    }.toSeq
-  }
-
-  override def syncLibrary(libraryName: String): Unit = {
-    val libraryId = librariesDao
-      .findAll(
-        auth = db.Authorization.All,
-        id = None,
-        artifactId = Some(libraryName),
-        limit = 1
-      )
-      .map(_.id).headOption
-      .getOrElse(throw new Exception(s"Library with name $libraryName not found"))
-
-    syncsService.syncLibrary(libraryId, Constants.SystemUser)
+  override def syncLibraries(groupId: String): IO[Unit] = IO {
+    syncsService.syncLibraries(Some(groupId), Constants.SystemUser)
   }
 }

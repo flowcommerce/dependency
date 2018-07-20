@@ -69,11 +69,7 @@ class Syncs @javax.inject.Inject()(
   }
 
   def postLibraries(group_id: Option[String]) = IdentifiedWithFallback { request =>
-    val auth = Authorization.User(request.user.id)
-    val libsToSync = librariesDao.findAll(auth, groupId = group_id, limit = 1000)
-    libsToSync.foreach { lib =>
-      mainActor ! MainActor.Messages.LibrarySync(lib.id)
-    }
+    syncsService.syncLibraries(group_id, request.user)
     NoContent
   }
 }

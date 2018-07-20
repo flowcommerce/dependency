@@ -9,16 +9,20 @@ import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Up
 import io.flow.play.util.Config
 import play.api.Logger
 import play.api.libs.ws.WSClient
+import cats.effect.IO
+import cats.implicits._
+
+import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  def upgradeLibrary(library: String): Option[Library]
+  def upgradeLibrary(library: String): IO[Option[Library]]
 }
 
 @Singleton class UpgradeServiceImpl @Inject()(
     ws: WSClient,
     config: Config,
-    dependencyProjects: DependencyProjects)
+    dependencyProjects: DaoBasedDependencyProjects)(implicit ec: ExecutionContext)
     extends UpgradeService {
   val logger = Logger(getClass)
 
@@ -43,25 +47,35 @@ trait UpgradeService {
   private val upgrader =
     new Upgrader(dependencyProjects, githubClient, upgraderConfig)
 
-  override def upgradeLibrary(name: String): Option[Library] = {
-    dependencyProjects.getLibrary(name).map { library =>
-      logger.info(s"Attempting upgrade of [$library]")
+  def logInfo(msg: String) = IO { logger.info(msg) }
 
-      val dependants = dependencyProjects.getLibraryDependants(library.id)
+  override def upgradeLibrary(name: String): IO[Option[Library]] = dependencyProjects.getLibrary(name).flatMap {
+    _.traverse { library =>
 
-      dependants.foreach { project =>
-        if(upgradeProject(project))
-          logger.info(s"Upgraded project [$project]")
+      val logUpgrading = logInfo(s"Attempting upgrade of [$library]")
+
+      val dependantsF = dependencyProjects.getLibraryDependants(library.id)
+
+      val upgradeDependants = dependantsF.flatMap { dependants =>
+        val doUpgrades = dependants.traverse_ { project =>
+          upgradeProject(project).flatMap {
+            case true  => logInfo(s"Upgraded project [$project]")
+            case false => IO.unit
+          }
+        }
+
+        val logNoDependants = if(dependants.isEmpty)
+          logInfo(s"No dependants of $name found")
+        else IO.unit
+
+        doUpgrades *> logNoDependants
       }
 
-      if(dependants.isEmpty)
-        logger.info(s"No dependants of $name found")
-
-      library
+      logUpgrading *> upgradeDependants.as(library)
     }
   }
 
-  private def upgradeProject(project: Project): Boolean = {
+  private def upgradeProject(project: Project): IO[Boolean] = {
     val projects = List(project)
 
     upgrader.doUpgrade(
@@ -69,6 +83,6 @@ trait UpgradeService {
       projects = projects,
       dependenciesToUpgrade = DependenciesToUpgrade.All,
       debug = debugMode
-    ).nonEmpty
+    ).map(_.nonEmpty)
   }
 }

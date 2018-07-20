@@ -41,7 +41,7 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "io.flow" %% "lib-dependency" % "1.1.1",
+      "io.flow" %% "lib-dependency" % "2.0.0-SNAPSHOT",
       "io.flow" %% "lib-util" % "0.1.0",
       "io.flow" %% "lib-postgresql-play26" % "0.0.84",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
@@ -87,7 +87,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "com.typesafe.play" %% "play-json" % "2.6.9",
     "io.flow" %% "lib-test-utils" % "0.0.18" % Test
   ),
-  scalacOptions += "-feature",
+  scalacOptions ++= Seq("-feature", "-Ypartial-unification"),
   credentials += credsToUse,
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
 )
