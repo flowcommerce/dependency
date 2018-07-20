@@ -7,7 +7,7 @@ import lib.UpgradeService
 class UpgradeActor(upgradeService: UpgradeService) extends Actor with ActorLogging {
   override def receive: Receive = SafeReceive {
     case UpgradeActor.Message.UpgradeLibrary(artifactId) =>
-      upgradeService.upgradeLibrary(artifactId).unsafeRunSync()
+      upgradeService.upgradeDependent(artifactId).unsafeRunSync()
   }
 }
 

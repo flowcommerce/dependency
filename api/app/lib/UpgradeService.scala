@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  def upgradeLibrary(library: String): IO[Option[Library]]
+  def upgradeDependent(library: String): IO[Option[Library]]
 }
 
 @Singleton class UpgradeServiceImpl @Inject()(
@@ -34,7 +34,7 @@ trait UpgradeService {
   private val githubClient: GithubClient =
     new GithubClientBuilder(ws).build(githubToken)
 
-  //todo make blacklists configurable? Hardcode in hacks?
+  //todo move to conf file
   private val upgraderConfig = UpgraderConfig(
     blacklistProjects = Nil,
     blacklistLibraries = Nil,
@@ -49,7 +49,7 @@ trait UpgradeService {
 
   def logInfo(msg: String) = IO { logger.info(msg) }
 
-  override def upgradeLibrary(name: String): IO[Option[Library]] = dependencyProjects.getLibrary(name).flatMap {
+  override def upgradeDependent(name: String): IO[Option[Library]] = dependencyProjects.getLibrary(name).flatMap {
     _.traverse { library =>
 
       val logUpgrading = logInfo(s"Attempting upgrade of [$library]")

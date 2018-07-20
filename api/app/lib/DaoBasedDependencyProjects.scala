@@ -13,11 +13,12 @@ import scala.language.higherKinds
 import io.flow.lib.dependency.implicits.internal.StreamOps._
 
 @Singleton
-class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
+final class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
                                              projectsDao: ProjectsDao,
                                              projectLibrariesDao: ProjectLibrariesDao,
                                              recommendationsDao: RecommendationsDao,
                                              syncsService: SyncsService) extends DependencyProjects[IO] {
+  private val DefaultPageSize = 100
 
   override val getAllLibraries: IO[List[Library]] = AsyncPager[IO].create { offset =>
     IO {
@@ -28,9 +29,9 @@ class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
   override val recommendedUpgrades: IO[List[Project]] = {
     AsyncPager[IO].create[Recommendation] { offset =>
       IO {
-        recommendationsDao.findAll(db.Authorization.All, offset = offset, limit = 100)
+        recommendationsDao.findAll(db.Authorization.All, offset = offset, limit = DefaultPageSize)
       }
-    }.map(_.project.id).segmentN(100).evalSegments { projectIds =>
+    }.map(_.project.id).segmentN(DefaultPageSize).evalSegments { projectIds =>
       IO {
         projectsDao.findAll(db.Authorization.All, ids = Some(projectIds), limit = projectIds.size)
       }
@@ -44,7 +45,7 @@ class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
       IO {
         projectsDao.findAll(
           db.Authorization.All,
-          offset = offset, limit = 100
+          offset = offset, limit = DefaultPageSize
         )
       }
     }
@@ -60,13 +61,13 @@ class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
         projectLibrariesDao.findAll(
           db.Authorization.All,
           offset = offset,
-          limit = Some(100),
+          limit = Some(DefaultPageSize),
           libraryId = Some(libraryId)
         )
       }
     }.map(_.project.id)
 
-    projectIds.segmentN(100).evalSegments { ids =>
+    projectIds.segmentN(DefaultPageSize).evalSegments { ids =>
       IO {
         projectsDao.findAll(db.Authorization.All, ids = Some(ids), limit = ids.size)
       }
@@ -74,7 +75,7 @@ class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
   }.compile.toList
 
   override def getRecommendationsForProject(project: Project): IO[List[Recommendation]] = IO {
-    recommendationsDao.findAll(db.Authorization.All, projectId = Some(project.id), limit = 100).toList
+    recommendationsDao.findAll(db.Authorization.All, projectId = Some(project.id), limit = DefaultPageSize).toList
   }
 
   override def syncLibrary(libraryName: String): IO[Unit] = {
