@@ -1,11 +1,13 @@
 package io.flow.dependency.actors
 
+import actors.UpgradeActor
 import db._
 import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
 import io.flow.postgresql.Pager
+import lib.UpgradeService
 import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
@@ -75,7 +77,8 @@ class MainActor @javax.inject.Inject() (
   libraryVersionsDao: LibraryVersionsDao,
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
-  projectsDao: ProjectsDao
+  projectsDao: ProjectsDao,
+  upgradeService: UpgradeService
 ) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
@@ -106,6 +109,7 @@ class MainActor @javax.inject.Inject() (
   private[this] val projectActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val userActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val resolverActors = scala.collection.mutable.Map[String, ActorRef]()
+  private[this] val upgradeActor = system.actorOf(UpgradeActor.props(upgradeService), UpgradeActor.Name)
 
   implicit val mainActorExecutionContext: ExecutionContext = system.dispatchers.lookup("main-actor-context")
 
@@ -113,8 +117,13 @@ class MainActor @javax.inject.Inject() (
     periodicActor ! PeriodicActor.Messages.SyncBinaries
   }
 
-  scheduleRecurring(system, "io.flow.dependency.api.library.seconds") {
+  scheduleRecurring(system, "io.flow.dependency.api.library.upgrade.seconds") {
     periodicActor !  PeriodicActor.Messages.SyncLibraries
+  }
+
+  println("lmao scheduling")
+  scheduleRecurring(system, "io.flow.dependency.api.library.upgrade.seconds") {
+    periodicActor !  PeriodicActor.Messages.UpgradeLibraries
   }
 
   scheduleRecurring(system, "io.flow.dependency.api.project.seconds") {

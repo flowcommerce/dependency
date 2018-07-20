@@ -2,10 +2,13 @@ package io.flow.dependency.actors
 
 import javax.inject.Inject
 
+import actors.UpgradeActor
+import actors.UpgradeActor.Message.UpgradeLibrary
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
 import play.api.Logger
 import akka.actor.{Actor, ActorSystem}
+import lib.UpgradeService
 
 import scala.concurrent.ExecutionContext
 
@@ -18,11 +21,12 @@ object PeriodicActor {
     case object SyncBinaries extends Message
     case object SyncLibraries extends Message
     case object SyncProjects extends Message
+    case object UpgradeLibraries extends Message
   }
 
 }
 
-class PeriodicActor @Inject()(
+class PeriodicActor (
   syncsDao: SyncsDao,
   projectsDao: ProjectsDao,
   binariesDao: BinariesDao,
@@ -57,6 +61,14 @@ class PeriodicActor @Inject()(
         librariesDao.findAll(Authorization.All, offset = offset)
       }.foreach { library =>
         sender ! MainActor.Messages.LibrarySync(library.id)
+      }
+    }
+
+    case m @ PeriodicActor.Messages.UpgradeLibraries => withErrorHandler(m) {
+      Pager.create { offset =>
+        librariesDao.findAll(Authorization.All, offset = offset)
+      }.foreach { library =>
+        context.actorSelection(UpgradeActor.Path) ! UpgradeActor.Message.UpgradeLibrary(library.artifactId)
       }
     }
 
