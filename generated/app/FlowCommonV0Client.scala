@@ -98,6 +98,21 @@ package io.flow.common.v0.models {
     longitude: _root_.scala.Option[String] = None
   )
 
+  /**
+   * @param name The name of the customer associated with the billing address
+   * @param streets Array for street line 1, street line 2, etc., in order
+   * @param country The ISO 3166-3 country code. Case insensitive. See
+   *        https://api.flow.io/reference/countries
+   */
+  final case class BillingAddress(
+    name: _root_.scala.Option[io.flow.common.v0.models.Name] = None,
+    streets: _root_.scala.Option[Seq[String]] = None,
+    city: _root_.scala.Option[String] = None,
+    province: _root_.scala.Option[String] = None,
+    postal: _root_.scala.Option[String] = None,
+    country: _root_.scala.Option[String] = None
+  )
+
   final case class CatalogItemReference(
     id: String,
     number: String
@@ -2782,6 +2797,52 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.Address] {
         def writes(obj: io.flow.common.v0.models.Address) = {
           jsObjectAddress(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonBillingAddress: play.api.libs.json.Reads[BillingAddress] = {
+      for {
+        name <- (__ \ "name").readNullable[io.flow.common.v0.models.Name]
+        streets <- (__ \ "streets").readNullable[Seq[String]]
+        city <- (__ \ "city").readNullable[String]
+        province <- (__ \ "province").readNullable[String]
+        postal <- (__ \ "postal").readNullable[String]
+        country <- (__ \ "country").readNullable[String]
+      } yield BillingAddress(name, streets, city, province, postal, country)
+    }
+
+    def jsObjectBillingAddress(obj: io.flow.common.v0.models.BillingAddress): play.api.libs.json.JsObject = {
+      (obj.name match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("name" -> jsObjectName(x))
+      }) ++
+      (obj.streets match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("streets" -> play.api.libs.json.Json.toJson(x))
+      }) ++
+      (obj.city match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("city" -> play.api.libs.json.JsString(x))
+      }) ++
+      (obj.province match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("province" -> play.api.libs.json.JsString(x))
+      }) ++
+      (obj.postal match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("postal" -> play.api.libs.json.JsString(x))
+      }) ++
+      (obj.country match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("country" -> play.api.libs.json.JsString(x))
+      })
+    }
+
+    implicit def jsonWritesCommonBillingAddress: play.api.libs.json.Writes[BillingAddress] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.BillingAddress] {
+        def writes(obj: io.flow.common.v0.models.BillingAddress) = {
+          jsObjectBillingAddress(obj)
         }
       }
     }

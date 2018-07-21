@@ -115,6 +115,8 @@ package io.flow.common.v0.anorm.conversions {
     implicit val columnToMapCommonVisibility: Column[Map[String, _root_.io.flow.common.v0.models.Visibility]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.Visibility]] }
     implicit val columnToSeqCommonAddress: Column[Seq[_root_.io.flow.common.v0.models.Address]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.Address]] }
     implicit val columnToMapCommonAddress: Column[Map[String, _root_.io.flow.common.v0.models.Address]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.Address]] }
+    implicit val columnToSeqCommonBillingAddress: Column[Seq[_root_.io.flow.common.v0.models.BillingAddress]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.BillingAddress]] }
+    implicit val columnToMapCommonBillingAddress: Column[Map[String, _root_.io.flow.common.v0.models.BillingAddress]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.BillingAddress]] }
     implicit val columnToSeqCommonCatalogItemReference: Column[Seq[_root_.io.flow.common.v0.models.CatalogItemReference]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.CatalogItemReference]] }
     implicit val columnToMapCommonCatalogItemReference: Column[Map[String, _root_.io.flow.common.v0.models.CatalogItemReference]] = Util.parser { _.as[Map[String, _root_.io.flow.common.v0.models.CatalogItemReference]] }
     implicit val columnToSeqCommonCatalogItemSummary: Column[Seq[_root_.io.flow.common.v0.models.CatalogItemSummary]] = Util.parser { _.as[Seq[_root_.io.flow.common.v0.models.CatalogItemSummary]] }
