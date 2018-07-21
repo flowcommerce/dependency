@@ -414,6 +414,40 @@ package io.flow.common.v0.anorm.parsers {
 
   }
 
+  object BillingAddress {
+
+    def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.BillingAddress] = parser(prefixOpt = Some(s"$prefix$sep"))
+
+    def parser(
+      namePrefix: String = "name",
+      streets: String = "streets",
+      city: String = "city",
+      province: String = "province",
+      postal: String = "postal",
+      country: String = "country",
+      prefixOpt: Option[String] = None
+    ): RowParser[io.flow.common.v0.models.BillingAddress] = {
+      io.flow.common.v0.anorm.parsers.Name.parserWithPrefix(prefixOpt.getOrElse("") + namePrefix).? ~
+      SqlParser.get[Seq[String]](prefixOpt.getOrElse("") + streets).? ~
+      SqlParser.str(prefixOpt.getOrElse("") + city).? ~
+      SqlParser.str(prefixOpt.getOrElse("") + province).? ~
+      SqlParser.str(prefixOpt.getOrElse("") + postal).? ~
+      SqlParser.str(prefixOpt.getOrElse("") + country).? map {
+        case name ~ streets ~ city ~ province ~ postal ~ country => {
+          io.flow.common.v0.models.BillingAddress(
+            name = name,
+            streets = streets,
+            city = city,
+            province = province,
+            postal = postal,
+            country = country
+          )
+        }
+      }
+    }
+
+  }
+
   object CatalogItemReference {
 
     def parserWithPrefix(prefix: String, sep: String = "_"): RowParser[io.flow.common.v0.models.CatalogItemReference] = parser(prefixOpt = Some(s"$prefix$sep"))
