@@ -121,7 +121,6 @@ class MainActor @javax.inject.Inject() (
     periodicActor !  PeriodicActor.Messages.SyncLibraries
   }
 
-  println("lmao scheduling")
   scheduleRecurring(system, "io.flow.dependency.api.library.upgrade.seconds") {
     periodicActor !  PeriodicActor.Messages.UpgradeLibraries
   }
