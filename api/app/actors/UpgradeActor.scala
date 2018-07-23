@@ -1,20 +1,28 @@
 package actors
 
 import akka.actor.{Actor, ActorLogging, Props}
+import cats.effect.IO
 import io.flow.akka.SafeReceive
 import lib.UpgradeService
 
-class UpgradeActor(upgradeService: UpgradeService) extends Actor with ActorLogging {
+class UpgradeActor(upgradeService: UpgradeService)
+    extends Actor
+    with ActorLogging {
+
+  private val pureReceive: PartialFunction[Any, IO[Unit]] = {
+    case UpgradeActor.Message.UpgradeLibraries =>
+      upgradeService.upgradeLibraries
+  }
+
   override def receive: Receive = SafeReceive {
-    case UpgradeActor.Message.UpgradeLibrary(artifactId) =>
-      upgradeService.upgradeDependent(artifactId).unsafeRunSync()
+    pureReceive.andThen(_.unsafeRunSync())
   }
 }
 
 object UpgradeActor {
   sealed trait Message extends Product with Serializable
   object Message {
-    case class UpgradeLibrary(artifactId: String) extends Message
+    case object UpgradeLibraries extends Message
   }
 
   val Name = "upgrade-actor"
@@ -23,4 +31,3 @@ object UpgradeActor {
   def props(upgradeService: UpgradeService): Props =
     Props(new UpgradeActor(upgradeService))
 }
-

@@ -22,7 +22,7 @@ final class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
 
   override val getAllLibraries: IO[List[Library]] = AsyncPager[IO].create { offset =>
     IO {
-      librariesDao.findAll(auth = Authorization.All, offset = offset, limit = SyncsService.LibrariesToSync)
+      librariesDao.findAll(auth = Authorization.All, offset = offset, limit = DefaultPageSize)
     }
   }.compile.toList
 

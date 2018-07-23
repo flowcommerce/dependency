@@ -2,37 +2,40 @@ package lib
 
 import javax.inject.{Inject, Singleton}
 
+import cats.effect.IO
+import cats.implicits._
 import com.google.inject.ImplementedBy
+import db.{Authorization, LibrariesDao}
 import io.flow.dependency.v0.models.{Library, Project}
-import io.flow.lib.dependency.clients.{DependencyProjects, GithubClient, GithubClientBuilder}
+import io.flow.lib.dependency.clients.{AsyncPager, GithubClient, GithubClientBuilder}
 import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Upgrader, UpgraderConfig}
 import io.flow.play.util.Config
 import play.api.Logger
 import play.api.libs.ws.WSClient
-import cats.effect.IO
-import cats.implicits._
 
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  def upgradeDependent(library: String): IO[Option[Library]]
+  val upgradeLibraries: IO[Unit]
 }
 
 @Singleton class UpgradeServiceImpl @Inject()(
     ws: WSClient,
     config: Config,
+    librariesDao: LibrariesDao,
     dependencyProjects: DaoBasedDependencyProjects)(implicit ec: ExecutionContext)
     extends UpgradeService {
-  val logger = Logger(getClass)
-
-  private val debugMode = false
 
   private val githubToken =
     config.requiredString("github.dependency.user.token")
 
   private val githubClient: GithubClient =
     new GithubClientBuilder(ws).build(githubToken)
+
+  private val DefaultPageSize = 100
+  private val logger = Logger(getClass)
+  private val debugMode = false
 
   //todo move to conf file
   private val upgraderConfig = UpgraderConfig(
@@ -47,32 +50,45 @@ trait UpgradeService {
   private val upgrader =
     new Upgrader(dependencyProjects, githubClient, upgraderConfig)
 
-  def logInfo(msg: String) = IO { logger.info(msg) }
+  private def logInfo(msg: String) = IO { logger.info(msg) }
 
-  override def upgradeDependent(name: String): IO[Option[Library]] = dependencyProjects.getLibrary(name).flatMap {
-    _.traverse { library =>
-
-      val logUpgrading = logInfo(s"Attempting upgrade of [$library]")
-
-      val dependantsF = dependencyProjects.getLibraryDependants(library.id)
-
-      val upgradeDependants = dependantsF.flatMap { dependants =>
-        val doUpgrades = dependants.traverse_ { project =>
-          upgradeProject(project).flatMap {
-            case true  => logInfo(s"Upgraded project [$project]")
-            case false => IO.unit
-          }
-        }
-
-        val logNoDependants = if(dependants.isEmpty)
-          logInfo(s"No dependants of $name found")
-        else IO.unit
-
-        doUpgrades *> logNoDependants
+  private val streamLibraries: fs2.Stream[IO, Library] = {
+    AsyncPager[IO]
+      .create { offset =>
+        IO(librariesDao.findAll(Authorization.All, offset = offset, limit = DefaultPageSize))
       }
+  }
 
-      logUpgrading *> upgradeDependants.as(library)
+  override val upgradeLibraries: IO[Unit] = {
+    streamLibraries
+      .evalScan(Set.empty[Project]) { (projectsToSkip, library) =>
+        upgradeDependent(library, projectsToSkip)
+          .map(_ ++ projectsToSkip)
+      }
+      .compile
+      .drain
+  }
+
+  private def upgradeDependent(library: Library, projectsToSkip: Set[Project]): IO[Set[Project]] = {
+    val logUpgrading = logInfo(s"Attempting upgrade of [$library]")
+
+    val dependentsF = dependencyProjects.getLibraryDependants(library.id)
+      .map(_.toSet -- projectsToSkip)
+      .map(_.toList)
+
+    val dependentsStream = fs2.Stream
+      .eval(dependentsF)
+      .flatMap(fs2.Stream.emits(_))
+
+    val upgradedProjectsStream = dependentsStream.evalMap { project =>
+      upgradeProject(project).tupleRight(project)
+    }.collect {
+      case (true, project) => project
+    }.evalMap {
+      project => logInfo(s"Upgraded project [$project]").as(project)
     }
+
+    logUpgrading *> upgradedProjectsStream.map(Set(_)).compile.foldMonoid
   }
 
   private def upgradeProject(project: Project): IO[Boolean] = {

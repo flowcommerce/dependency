@@ -3,7 +3,6 @@ package io.flow.dependency.actors
 import javax.inject.Inject
 
 import actors.UpgradeActor
-import actors.UpgradeActor.Message.UpgradeLibrary
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
 import play.api.Logger
@@ -65,11 +64,7 @@ class PeriodicActor (
     }
 
     case m @ PeriodicActor.Messages.UpgradeLibraries => withErrorHandler(m) {
-      Pager.create { offset =>
-        librariesDao.findAll(Authorization.All, offset = offset)
-      }.foreach { library =>
-        context.actorSelection(UpgradeActor.Path) ! UpgradeActor.Message.UpgradeLibrary(library.artifactId)
-      }
+      context.actorSelection(UpgradeActor.Path) ! UpgradeActor.Message.UpgradeLibraries
     }
 
     case m: Any => logUnhandledMessage(m)
