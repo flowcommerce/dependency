@@ -34,7 +34,6 @@ trait UpgradeService {
     new GithubClientBuilder(ws).build(githubToken)
 
   private val DefaultPageSize = 100
-  private val logger = Logger(getClass)
   private val debugMode = false
 
   //todo move to conf file
@@ -50,7 +49,7 @@ trait UpgradeService {
   private val upgrader =
     new Upgrader(dependencyProjects, githubClient, upgraderConfig)
 
-  private def logInfo(msg: String) = IO { logger.info(msg) }
+  private def logInfo(msg: String) = IO { Logger.info(msg) }
 
   private val streamLibraries: fs2.Stream[IO, Library] = {
     AsyncPager[IO]
@@ -80,12 +79,14 @@ trait UpgradeService {
       .eval(dependentsF)
       .flatMap(fs2.Stream.emits(_))
 
+    //contains all the projects in `dependentsStream`, not just the ones that were upgraded
     val upgradedProjectsStream = dependentsStream.evalMap { project =>
-      upgradeProject(project).tupleRight(project)
-    }.collect {
-      case (true, project) => project
-    }.evalMap {
-      project => logInfo(s"Upgraded project [$project]").as(project)
+      upgradeProject(project)
+        .flatMap {
+          case true  => logInfo(s"Upgraded project [$project]")
+          case false => IO.unit
+        }
+        .as(project)
     }
 
     logUpgrading *> upgradedProjectsStream.map(Set(_)).compile.foldMonoid

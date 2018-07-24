@@ -117,7 +117,7 @@ class MainActor @javax.inject.Inject() (
     periodicActor ! PeriodicActor.Messages.SyncBinaries
   }
 
-  scheduleRecurring(system, "io.flow.dependency.api.library.upgrade.seconds") {
+  scheduleRecurring(system, "io.flow.dependency.api.library.seconds") {
     periodicActor !  PeriodicActor.Messages.SyncLibraries
   }
 
