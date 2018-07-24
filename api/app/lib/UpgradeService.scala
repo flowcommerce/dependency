@@ -52,10 +52,16 @@ trait UpgradeService {
   private def logInfo(msg: String) = IO { Logger.info(msg) }
 
   private val streamLibraries: fs2.Stream[IO, Library] = {
-    AsyncPager[IO]
-      .create { offset =>
-        IO(librariesDao.findAll(Authorization.All, offset = offset, limit = DefaultPageSize))
-      }
+    def librariesByOffset(offset: Int): IO[Seq[Library]] = IO {
+      librariesDao.findAll(
+        auth = Authorization.All,
+        groupId = Some(Hacks.flowGroupId),
+        limit = DefaultPageSize,
+        offset = offset
+      )
+    }
+
+    AsyncPager[IO].create(librariesByOffset)
   }
 
   override val upgradeLibraries: IO[Unit] = {
