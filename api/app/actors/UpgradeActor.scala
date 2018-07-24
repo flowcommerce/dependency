@@ -1,20 +1,20 @@
 package actors
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, Props}
 import cats.effect.IO
 import cats.implicits._
 import io.flow.akka.SafeReceive
 import lib.UpgradeService
-import io.flow.lib.dependency.util.IOUtils._
+import play.api.Logger
 
 class UpgradeActor(upgradeService: UpgradeService)
-    extends Actor
-    with ActorLogging {
+    extends Actor {
+  private def logInfo(msg: String): IO[Unit] = IO { Logger.info(msg) }
 
   private val pureReceive: UpgradeActor.Message => IO[Unit] = {
     case UpgradeActor.Message.UpgradeLibraries =>
 
-      putStrLn[IO](s"$toString: Upgrading libraries") *>
+      logInfo(s"$toString: Upgrading libraries") *>
         upgradeService.upgradeLibraries
   }
 
