@@ -2,20 +2,24 @@ package actors
 
 import akka.actor.{Actor, ActorLogging, Props}
 import cats.effect.IO
+import cats.implicits._
 import io.flow.akka.SafeReceive
 import lib.UpgradeService
+import io.flow.lib.dependency.util.IOUtils._
 
 class UpgradeActor(upgradeService: UpgradeService)
     extends Actor
     with ActorLogging {
 
-  private val pureReceive: PartialFunction[Any, IO[Unit]] = {
+  private val pureReceive: UpgradeActor.Message => IO[Unit] = {
     case UpgradeActor.Message.UpgradeLibraries =>
-      upgradeService.upgradeLibraries
+
+      putStrLn[IO](s"$toString: Upgrading libraries") *>
+        upgradeService.upgradeLibraries
   }
 
   override def receive: Receive = SafeReceive {
-    pureReceive.andThen(_.unsafeRunSync())
+    case message: UpgradeActor.Message => pureReceive(message).unsafeRunSync()
   }
 }
 
