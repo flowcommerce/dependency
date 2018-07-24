@@ -84,6 +84,7 @@ trait UpgradeService {
     val dependentsStream = fs2.Stream
       .eval(dependentsF)
       .flatMap(fs2.Stream.emits(_))
+      .filter(_.organization.key == Hacks.flowOrgKey)
 
     //contains all the projects in `dependentsStream`, not just the ones that were upgraded
     val upgradedProjectsStream = dependentsStream.evalMap { project =>
