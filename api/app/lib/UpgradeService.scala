@@ -2,36 +2,30 @@ package lib
 
 import javax.inject.{Inject, Singleton}
 
-import cats.effect.IO
+import cats.effect.{Async, IO}
 import cats.implicits._
 import com.google.inject.ImplementedBy
 import db.{Authorization, LibrariesDao}
 import io.flow.dependency.v0.models.{Library, Project}
-import io.flow.lib.dependency.clients.{AsyncPager, GithubClient, GithubClientBuilder}
+import io.flow.lib.dependency.clients._
+import io.flow.lib.dependency.git.Git
 import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Upgrader, UpgraderConfig}
-import io.flow.play.util.Config
+import io.flow.lib.dependency.util.AsyncPager
 import play.api.Logger
-import play.api.libs.ws.WSClient
 
-import scala.concurrent.ExecutionContext
+import scala.language.higherKinds
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
   val upgradeLibraries: IO[Unit]
 }
 
-@Singleton class UpgradeServiceImpl @Inject()(
-    ws: WSClient,
-    config: Config,
-    librariesDao: LibrariesDao,
-    dependencyProjects: DaoBasedDependencyProjects)(implicit ec: ExecutionContext)
+
+@Singleton class UpgradeServiceImpl @Inject()(librariesDao: LibrariesDao)
+                                             (implicit git: Git[IO],
+                                              githubApi: GithubApi[IO],
+                                              dependencyApi: DependencyApi[IO])
     extends UpgradeService {
-
-  private val githubToken =
-    config.requiredString("github.dependency.user.token")
-
-  private val githubClient: GithubClient =
-    new GithubClientBuilder(ws).build(githubToken)
 
   private val DefaultPageSize = 100
   private val debugMode = false
@@ -46,10 +40,9 @@ trait UpgradeService {
     branchStrategy = BranchStrategy.UseExisting
   )
 
-  private val upgrader =
-    new Upgrader(dependencyProjects, githubClient, upgraderConfig)
+  private val upgrader = new Upgrader(upgraderConfig)
 
-  private def logInfo(msg: String) = IO { Logger.info(msg) }
+  private def logInfo(msg: String): IO[Unit] = IO { Logger.info(msg) }
 
   private val streamLibraries: fs2.Stream[IO, Library] = {
     def librariesByOffset(offset: Int): IO[Seq[Library]] = IO {
@@ -77,7 +70,7 @@ trait UpgradeService {
   private def upgradeDependent(library: Library, projectsToSkip: Set[Project]): IO[Set[Project]] = {
     val logUpgrading = logInfo(s"Attempting upgrade of [$library]")
 
-    val dependentsF = dependencyProjects.getLibraryDependants(library.id)
+    val dependentsF = dependencyApi.getLibraryDependants(library.id)
       .map(_.toSet -- projectsToSkip)
       .map(_.toList)
 

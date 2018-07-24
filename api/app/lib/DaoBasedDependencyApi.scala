@@ -3,21 +3,22 @@ package lib
 import javax.inject.{Inject, Singleton}
 
 import cats.effect.IO
+import cats.implicits._
 import db._
 import io.flow.dependency.v0.models.{Library, Project, Recommendation}
-import io.flow.lib.dependency.clients.{AsyncPager, DependencyProjects}
+import io.flow.lib.dependency.clients.DependencyApi
+import io.flow.lib.dependency.implicits.internal.StreamOps._
+import io.flow.lib.dependency.util.AsyncPager
 import io.flow.util.Constants
-import cats.implicits._
 
 import scala.language.higherKinds
-import io.flow.lib.dependency.implicits.internal.StreamOps._
 
 @Singleton
-final class DaoBasedDependencyProjects @Inject()(librariesDao: LibrariesDao,
-                                             projectsDao: ProjectsDao,
-                                             projectLibrariesDao: ProjectLibrariesDao,
-                                             recommendationsDao: RecommendationsDao,
-                                             syncsService: SyncsService) extends DependencyProjects[IO] {
+final class DaoBasedDependencyApi @Inject()(librariesDao: LibrariesDao,
+                                            projectsDao: ProjectsDao,
+                                            projectLibrariesDao: ProjectLibrariesDao,
+                                            recommendationsDao: RecommendationsDao,
+                                            syncsService: SyncsService) extends DependencyApi[IO] {
   private val DefaultPageSize = 100
 
   override val getAllLibraries: IO[List[Library]] = AsyncPager[IO].create { offset =>
