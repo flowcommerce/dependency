@@ -1,6 +1,7 @@
 package io.flow.dependency.api.lib
 
 import io.flow.dependency.v0.models.BinaryType
+import io.flow.util.{Tag, Version}
 import util.DependencySpec
 
 class DependencyHelperSpec extends DependencySpec {

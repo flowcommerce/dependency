@@ -3,15 +3,12 @@ package db
 import javax.inject.{Inject, Singleton}
 
 import io.flow.dependency.actors.MainActor
-import io.flow.dependency.api.lib.Version
 import io.flow.dependency.v0.models.{Library, ProjectLibrary, SyncEvent, VersionForm}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 case class ProjectLibraryForm(
   projectId: String,

@@ -41,6 +41,7 @@ lazy val api = project
       jdbc,
       ws,
       guice,
+      "io.flow" %% "lib-util" % "0.0.8",
       "io.flow" %% "lib-postgresql-play26" % "0.0.84",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
       "org.postgresql" % "postgresql" % "42.2.4",

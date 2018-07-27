@@ -1,6 +1,7 @@
 package io.flow.dependency.api.lib
 
 import io.flow.dependency.v0.models.VersionForm
+import io.flow.util.{Tag, Version}
 
 object Recommendations {
 

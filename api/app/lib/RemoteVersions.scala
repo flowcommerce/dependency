@@ -1,6 +1,7 @@
 package io.flow.dependency.api.lib
 
 import io.flow.dependency.v0.models.Credentials
+import io.flow.util.Version
 import org.apache.commons.lang3.StringUtils
 
 object RemoteVersions {
