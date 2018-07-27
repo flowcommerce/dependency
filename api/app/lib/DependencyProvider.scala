@@ -1,8 +1,8 @@
 package io.flow.dependency.api.lib
 
 import db.ProjectBinaryForm
-import io.flow.dependency.v0.models.{LibraryForm, BinaryType, Project}
-import play.api.Logger
+import io.flow.dependency.v0.models.{BinaryType, Project}
+import io.flow.util.{Tag, Version}
 import scala.concurrent.{ExecutionContext, Future}
 
 case class Dependencies(

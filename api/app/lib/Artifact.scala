@@ -1,7 +1,8 @@
 package io.flow.dependency.api.lib
 
 import db.ProjectLibraryForm
-import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary, VersionForm}
+import io.flow.dependency.v0.models.{ProjectSummary, VersionForm}
+import io.flow.util.Version
 
 case class Artifact(
   project: ProjectSummary,

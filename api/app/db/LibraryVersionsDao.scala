@@ -3,15 +3,13 @@ package db
 import javax.inject.{Inject, Singleton}
 
 import io.flow.dependency.actors.MainActor
-import io.flow.dependency.api.lib.Version
 import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
+import io.flow.util.Version
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
 
