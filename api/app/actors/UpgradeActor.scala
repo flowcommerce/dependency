@@ -1,25 +1,33 @@
 package actors
 
 import akka.actor.{Actor, Props}
-import cats.effect.IO
-import cats.implicits._
 import io.flow.akka.SafeReceive
 import lib.UpgradeService
 import play.api.Logger
 
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+
 class UpgradeActor(upgradeService: UpgradeService)
     extends Actor {
-  private def logInfo(msg: String): IO[Unit] = IO { Logger.info(msg) }
 
-  private val pureReceive: UpgradeActor.Message => IO[Unit] = {
+  private val timeout: FiniteDuration = 5.minutes
+
+  private def logInfo(msg: String): Unit = Logger.info(msg)
+
+  private val asyncReceive: UpgradeActor.Message => Future[Unit] = {
     case UpgradeActor.Message.UpgradeLibraries =>
 
-      logInfo(s"$toString: Upgrading libraries") *>
-        upgradeService.upgradeLibraries
+      logInfo(s"$toString: Upgrading libraries")
+      upgradeService.upgradeLibraries()
   }
 
   override def receive: Receive = SafeReceive {
-    case message: UpgradeActor.Message => pureReceive(message).unsafeRunSync()
+    case message: UpgradeActor.Message =>
+      Await.result(
+        asyncReceive(message),
+        timeout
+      )
   }
 }
 

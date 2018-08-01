@@ -1,47 +1,39 @@
 package lib
 
 import javax.inject.{Inject, Singleton}
-
-import cats.effect.IO
-import com.google.inject.{AbstractModule, Provider, TypeLiteral}
+import com.google.inject.Provider
 import io.flow.lib.dependency.clients.{ApiClientGithubApi, DependencyApi, GithubApi, GithubConfig}
 import io.flow.lib.dependency.git.Git
-import io.flow.play.util.Config
+import io.flow.util.Config
+import play.api.inject.{Binding, Module}
+import play.api.{Configuration, Environment}
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
 
-class UpgradeModule extends AbstractModule {
-  override def configure(): Unit = {
-    bind(new TypeLiteral[DependencyApi[IO]]() {})
-      .to(classOf[DaoBasedDependencyApi])
+class UpgradeModule extends Module {
 
-    bind(classOf[GithubConfig])
-      .to(classOf[ConfiguredGithubConfig])
-
-    bind(new TypeLiteral[GithubApi[IO]]() {})
-      .toProvider(classOf[ConfiguredGithubApiProvider])
-
-    bind(new TypeLiteral[Git[IO]](){})
-      .toProvider(classOf[GitProvider])
-  }
+  def bindings(env: Environment, conf: Configuration): Seq[Binding[_]] = List(
+    bind[DependencyApi].to[DaoBasedDependencyApi],
+    bind[GithubConfig].to[ConfiguredGithubConfig],
+    bind[GithubApi].toProvider[ConfiguredGithubApiProvider],
+    bind[Git].toProvider[GitProvider]
+  )
 }
+
 
 @Singleton
 class ConfiguredGithubConfig @Inject()(config: Config)
   extends GithubConfig(config.requiredString("github.dependency.user.token"))
 
 @Singleton
-class ConfiguredGithubApiProvider @Inject()(wsClient: WSClient)(implicit githubConfig: GithubConfig, ec: ExecutionContext)
-  extends Provider[GithubApi[IO]] {
-  private val cached: ApiClientGithubApi[IO] = ApiClientGithubApi[IO](wsClient)
-
-  override def get(): GithubApi[IO] = cached
+class ConfiguredGithubApiProvider @Inject()(wsClient: WSClient)
+                                           (implicit githubConfig: GithubConfig, ec: ExecutionContext)
+  extends Provider[GithubApi] {
+  override val get: GithubApi = ApiClientGithubApi(wsClient)
 }
 
 @Singleton
-class GitProvider @Inject()(implicit githubConfig: GithubConfig) extends Provider[Git[IO]] {
-  private val cached: Git[IO] = Git.default[IO].unsafeRunSync()
-
-  override def get(): Git[IO] = cached
+class GitProvider @Inject()(implicit githubConfig: GithubConfig, ec: ExecutionContext) extends Provider[Git] {
+  override val get: Git = Git.default
 }

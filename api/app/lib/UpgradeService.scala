@@ -1,9 +1,9 @@
 package lib
 
+import akka.NotUsed
+import akka.stream.Materializer
+import akka.stream.scaladsl.{Sink, Source}
 import javax.inject.{Inject, Singleton}
-
-import cats.effect.{Async, IO}
-import cats.implicits._
 import com.google.inject.ImplementedBy
 import db.{Authorization, LibrariesDao}
 import io.flow.dependency.v0.models.{Library, Project}
@@ -13,20 +13,24 @@ import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Up
 import io.flow.lib.dependency.util.AsyncPager
 import play.api.Logger
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
 @ImplementedBy(classOf[UpgradeServiceImpl])
 trait UpgradeService {
-  val upgradeLibraries: IO[Unit]
+  def upgradeLibraries(): Future[Unit]
 }
 
 
 @Singleton class UpgradeServiceImpl @Inject()(librariesDao: LibrariesDao)
-                                             (implicit git: Git[IO],
-                                              githubApi: GithubApi[IO],
-                                              dependencyApi: DependencyApi[IO])
+                                             (implicit git: Git,
+                                              githubApi: GithubApi,
+                                              dependencyApi: DependencyApi,
+                                              ec: ExecutionContext,
+                                              mat: Materializer)
     extends UpgradeService {
 
+  private val parallelism = 1
   private val DefaultPageSize = 100
   private val debugMode = false
 
@@ -42,10 +46,10 @@ trait UpgradeService {
 
   private val upgrader = new Upgrader(upgraderConfig)
 
-  private def logInfo(msg: String): IO[Unit] = IO { Logger.info(msg) }
+  private def logInfo(msg: String): Unit = Logger.info(msg)
 
-  private val streamLibraries: fs2.Stream[IO, Library] = {
-    def librariesByOffset(offset: Int): IO[Seq[Library]] = IO {
+  private val streamLibraries: Source[Library, NotUsed] = {
+    def librariesByOffset(offset: Int): Future[Seq[Library]] = Future {
       librariesDao.findAll(
         auth = Authorization.All,
         groupId = Some(Hacks.flowGroupId),
@@ -54,45 +58,43 @@ trait UpgradeService {
       )
     }
 
-    AsyncPager[IO].create(librariesByOffset)
+    AsyncPager.create(librariesByOffset)
   }
 
-  override val upgradeLibraries: IO[Unit] = {
+  override val upgradeLibraries: Future[Unit] = {
     streamLibraries
-      .evalScan(Set.empty[Project]) { (projectsToSkip, library) =>
+      .scanAsync(Set.empty[Project]) { (projectsToSkip, library) =>
         upgradeDependent(library, projectsToSkip)
           .map(_ ++ projectsToSkip)
-      }
-      .compile
-      .drain
+      }.runWith(Sink.ignore).map(_ => ())
   }
 
-  private def upgradeDependent(library: Library, projectsToSkip: Set[Project]): IO[Set[Project]] = {
-    val logUpgrading = logInfo(s"Attempting upgrade of [$library]")
+  private def upgradeDependent(library: Library, projectsToSkip: Set[Project]): Future[Set[Project]] = {
+    def logUpgrading(): Unit = logInfo(s"Attempting upgrade of [$library]")
 
     val dependentsF = dependencyApi.getLibraryDependants(library.id)
       .map(_.toSet -- projectsToSkip)
       .map(_.toList)
 
-    val dependentsStream = fs2.Stream
-      .eval(dependentsF)
-      .flatMap(fs2.Stream.emits(_))
-      .filter(_.organization.key == Hacks.flowOrgKey)
+    val dependentsStream =
+      Source.fromFuture(dependentsF)
+        .mapConcat(identity)
+        .filter(_.organization.key == Hacks.flowOrgKey)
 
     //contains all the projects in `dependentsStream`, not just the ones that were upgraded
-    val upgradedProjectsStream = dependentsStream.evalMap { project =>
+    val upgradedProjectsStream = dependentsStream.mapAsync(parallelism) { project =>
       upgradeProject(project)
-        .flatMap {
+        .map {
           case true  => logInfo(s"Upgraded project [$project]")
-          case false => IO.unit
-        }
-        .as(project)
+          case false => ()
+        }.map(_ => project)
     }
 
-    logUpgrading *> upgradedProjectsStream.map(Set(_)).compile.foldMonoid
+    logUpgrading()
+    upgradedProjectsStream.map(Set(_)).runFold(Set.empty[Project])(_ ++ _)
   }
 
-  private def upgradeProject(project: Project): IO[Boolean] = {
+  private def upgradeProject(project: Project): Future[Boolean] = {
     val projects = List(project)
 
     upgrader.doUpgrade(
