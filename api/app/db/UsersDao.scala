@@ -118,6 +118,10 @@ class UsersDao @Inject()(
     findAll(id = Some(id), limit = 1).headOption
   }
 
+  def findByIdentifier(identifier: String): Option[User] = {
+    findAll(identifier = Some(identifier), limit = 1).headOption
+  }
+
   def findAll(
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,

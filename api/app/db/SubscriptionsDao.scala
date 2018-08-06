@@ -131,7 +131,7 @@ class SubscriptionsDao @Inject()(
           """.trim }
         ).bind("min_hours_since_registration", minHoursSinceRegistration).
         and(
-          identifier.map { id =>
+          identifier.map { _ =>
             "subscriptions.user_id in (select user_id from user_identifiers where value = trim({identifier}))"
           }
         ).bind("identifier", identifier).
