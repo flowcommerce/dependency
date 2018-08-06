@@ -46,7 +46,7 @@ class Subscriptions @javax.inject.Inject() (
     )
   }
 
-  def getById(id: String) = subscriptionIdentified { request =>
+  def getById(id: String) = subscriptionIdentified { _ =>
     withSubscription(id) { subscription =>
       Ok(Json.toJson(subscription))
     }
@@ -61,7 +61,7 @@ class Subscriptions @javax.inject.Inject() (
         val form = s.get
         subscriptionsDao.upsertByUserIdAndPublication(request.user, form) match {
           case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
-          case Right(subscription) => {
+          case Right(_) => {
             val sub = subscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).getOrElse {
               sys.error("Failed to upsert subscription")
             }

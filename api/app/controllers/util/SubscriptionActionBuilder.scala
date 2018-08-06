@@ -20,19 +20,31 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
   usersDao: UsersDao
 )(implicit override val executionContext: ExecutionContext) extends IdentificationWithFallback(parser, config, authorization, tokensDao, usersDao) {
 
-  override def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
-    val identifiers = request.queryString.getOrElse("identifier", Seq.empty)
-    if (identifiers.isEmpty) super.invokeBlock(request, block)
-    else if (identifiers.size > 1) {
-      Logger.warn(s"Multiple identifiers[${identifiers.size}] found in request - assuming no User")
-      Future.successful(unauthorized(request))
-    } else {
-      usersDao.findById(identifiers.head) match {
-        case None => Future.successful(unauthorized(request))
-        case Some(user) =>
-          val userRef = UserReference(id = user.id)
-          val ad = AuthData.Identified(user = userRef, session = None, requestId = "lib-play-" + UUID.randomUUID.toString)
-          block(new IdentifiedRequest(ad, request))
+  override def invokeBlock[A](request: Request[A], block: IdentifiedRequest[A] => Future[Result]): Future[Result] = {
+    request.queryString.getOrElse("identifier", Seq.empty).toList match {
+      case Nil => {
+        super.invokeBlock(request, block)
+      }
+
+      case identifier :: Nil => {
+        usersDao.findByIdentifier(identifier) match {
+          case None => {
+            Future.successful(unauthorized(request))
+          }
+          case Some(user) => {
+            val ad = AuthData.Identified(
+              user = UserReference(id = user.id),
+              session = None,
+              requestId = "dependency-api-" + UUID.randomUUID.toString
+            )
+            block(new IdentifiedRequest(ad, request))
+          }
+        }
+      }
+
+      case multiple => {
+        Logger.warn(s"Multiple identifiers[${multiple.size}] found in request - assuming no User")
+        Future.successful(unauthorized(request))
       }
     }
   }

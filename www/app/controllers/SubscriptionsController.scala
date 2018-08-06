@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object Subscriptions {
 
   case class UserPublication(publication: Publication, isSubscribed: Boolean) {
-    val label = publication match {
+    val label: String = publication match {
       case Publication.DailySummary => "Email me a daily summary of dependencies to upgrade"
       case Publication.UNDEFINED(key) => key
     }
@@ -27,7 +27,7 @@ class SubscriptionsController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
+  private[this] lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 
   // needs to specify a section for BaseController
   override def section = None
@@ -51,7 +51,7 @@ class SubscriptionsController @javax.inject.Inject()(
       val userPublications = Publication.all.map { p =>
         Subscriptions.UserPublication(
           publication = p,
-          isSubscribed = !subscriptions.find(_.publication == p).isEmpty
+          isSubscribed = subscriptions.exists(_.publication == p)
         )
       }
       Ok(views.html.subscriptions.identifier(uiData(request, users.headOption), identifier, userPublications))

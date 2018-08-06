@@ -332,6 +332,7 @@ package io.flow.github.oauth.v0 {
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.oauth.v0.models.AccessToken] = {
         val payload = play.api.libs.json.Json.toJson(accessTokenForm)
+        println(s"payload: $payload")
 
         _executeRequest("POST", s"/login/oauth/access_token", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.github.oauth.v0.Client.parseJson("io.flow.github.oauth.v0.models.AccessToken", r, _.validate[io.flow.github.oauth.v0.models.AccessToken])

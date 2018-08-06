@@ -198,17 +198,19 @@ class DefaultGithub @Inject() (
     wsClient,
     baseUrl = "https://github.com",
     defaultHeaders = Seq(
-      ("Accept" -> "application/json")
+      "Accept" -> "application/json"
     )
   )
 
   override def getGithubUserFromCode(code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
+    val form = AccessTokenForm(
+      clientId = clientId,
+      clientSecret = clientSecret,
+      code = code
+    )
+    println(s"form: $form")
     oauthClient.accessTokens.postAccessToken(
-      AccessTokenForm(
-        clientId = clientId,
-        clientSecret = clientSecret,
-        code = code
-      )
+      form
     ).flatMap { response =>
       val client = GithubHelper.apiClient(wsClient, response.accessToken)
       for {
