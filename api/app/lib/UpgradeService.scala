@@ -1,9 +1,10 @@
 package lib
 
+import javax.inject.{Inject, Singleton}
+
 import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
-import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import db.{Authorization, LibrariesDao}
 import io.flow.dependency.v0.models.{Library, Project}
@@ -30,7 +31,10 @@ trait UpgradeService {
                                               mat: Materializer)
     extends UpgradeService {
 
-  private val parallelism = 1
+  //filter out projects that can have upgrade PRs issued automatically.
+  //This check is used after non-flow projects are filtered out (only Flow projects will be checked by this predicate)
+  private val filterProjects: Project => Boolean = Hacks.isMetric
+
   private val DefaultPageSize = 100
   private val debugMode = false
 
@@ -76,13 +80,14 @@ trait UpgradeService {
       .map(_.toSet -- projectsToSkip)
       .map(_.toList)
 
-    val dependentsStream =
+    val dependentsStream: Source[Project, NotUsed] =
       Source.fromFuture(dependentsF)
         .mapConcat(identity)
         .filter(_.organization.key == Hacks.flowOrgKey)
+        .filter(filterProjects)
 
     //contains all the projects in `dependentsStream`, not just the ones that were upgraded
-    val upgradedProjectsStream = dependentsStream.mapAsync(parallelism) { project =>
+    val upgradedProjectsStream = dependentsStream.mapAsync(parallelism = 1) { project =>
       upgradeProject(project)
         .map {
           case true  => logInfo(s"Upgraded project [$project]")
