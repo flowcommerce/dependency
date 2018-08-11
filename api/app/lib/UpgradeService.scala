@@ -12,6 +12,7 @@ import io.flow.lib.dependency.clients._
 import io.flow.lib.dependency.git.Git
 import io.flow.lib.dependency.upgrade.{BranchStrategy, DependenciesToUpgrade, Upgrader, UpgraderConfig}
 import io.flow.lib.dependency.util.AsyncPager
+import io.flow.util.Config
 import play.api.Logger
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,7 +29,7 @@ trait UpgradeService {
                                               githubApi: GithubApi,
                                               dependencyApi: DependencyApi,
                                               ec: ExecutionContext,
-                                              mat: Materializer)
+                                              mat: Materializer, config: Config)
     extends UpgradeService {
 
   //filter out projects that can have upgrade PRs issued automatically.
@@ -38,15 +39,25 @@ trait UpgradeService {
   private val DefaultPageSize = 100
   private val debugMode = false
 
-  //todo move to conf file
-  private val upgraderConfig = UpgraderConfig(
-    blacklistProjects = Nil,
-    blacklistLibraries = Nil,
-    blacklistBinaries = Nil,
-    blacklistApibuilderUpdateProjects = Nil,
-    blacklistProjectLibraries = Map.empty,
-    branchStrategy = BranchStrategy.UseExisting
-  )
+  private val upgraderConfig = {
+    val prefix = "io.flow.lib.dependency.upgrade.upgrader"
+
+    val branchStrategy = {
+      val configValue = config.requiredString(s"$prefix.branch-strategy")
+      BranchStrategy
+        .fromStringOption(configValue)
+        .getOrElse(sys.error(s"Invalid branch strategy: $configValue"))
+    }
+
+    UpgraderConfig(
+      blacklistProjects = config.requiredList(s"$prefix.blacklist-projects"),
+      blacklistLibraries = config.requiredList(s"$prefix.blacklist-libraries"),
+      blacklistBinaries = config.requiredList(s"$prefix.blacklist-binaries"),
+      blacklistApibuilderUpdateProjects = config.requiredList(s"$prefix.blacklist-apibuilder-update-projects"),
+      blacklistProjectLibraries = config.requiredMap(s"$prefix.blacklist-project-libraries"),
+      branchStrategy = branchStrategy
+    )
+  }
 
   private val upgrader = new Upgrader(upgraderConfig)
 
