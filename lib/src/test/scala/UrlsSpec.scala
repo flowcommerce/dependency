@@ -8,6 +8,7 @@ class UrlsSpec extends FlowPlaySpec with Factories {
 
   private[this] lazy val urls = Urls(
     new Config {
+      override def optionalMap(name: String): Option[Map[String, Seq[String]]] = None
       override def optionalString(name: String): Option[String] = {
         if (name == "dependency.www.host")  {
           Some("http://localhost")
