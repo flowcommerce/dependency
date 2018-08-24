@@ -1,7 +1,7 @@
 FROM flowdocker/play_builder:0.0.85 as builder
 ADD . /opt/play
 WORKDIR /opt/play
-RUN sbt 'project api' clean stage
+RUN SBT_OPTS="-Xms1024M -Xmx2048M -Xss2M -XX:MaxMetaspaceSize=2048M" sbt 'project api' clean stage
 
 FROM flowdocker/play:0.0.85
 COPY --from=builder /opt/play /opt/play
