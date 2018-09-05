@@ -1,31 +1,26 @@
 ---
 flow:
   common:
+    play_2_6_client:
+    - generated/app/FlowCommonV0Client.scala
     anorm_2_6_parsers:
     - api/app/generated/FlowCommonV0Conversions.scala
     - api/app/generated/FlowCommonV0Parsers.scala
-    play_2_6_client:
-    - generated/app/FlowCommonV0Client.scala
-  dependency:
-    anorm_2_6_parsers:
-    - api/app/generated/FlowDependencyV0Conversions.scala
-    - api/app/generated/FlowDependencyV0Parsers.scala
-    play_2_6_client:
-    - generated/app/FlowDependencyV0Client.scala
-    play_2_x_routes:
-    - api/conf/routes
-  docker-hub:
-    play_2_6_client:
-    - generated/app/FlowDockerHubV0Client.scala
-  docker-registry:
-    play_2_6_client:
-    - generated/app/FlowDockerRegistryV0Client.scala
   error:
+    play_2_6_client:
+    - generated/app/FlowErrorV0Client.scala
     anorm_2_6_parsers:
     - api/app/generated/FlowErrorV0Conversions.scala
     - api/app/generated/FlowErrorV0Parsers.scala
+  healthcheck:
     play_2_6_client:
-    - generated/app/FlowErrorV0Client.scala
+    - generated/app/FlowHealthcheckV0Client.scala
+  docker-registry:
+    play_2_6_client:
+    - generated/app/FlowDockerRegistryV0Client.scala
+  docker-hub:
+    play_2_6_client:
+    - generated/app/FlowDockerHubV0Client.scala
   github:
     anorm_2_6_parsers:
     - api/app/generated/FlowGithubV0Conversions.scala
@@ -35,6 +30,11 @@ flow:
   github-oauth:
     play_2_6_client:
     - generated/app/FlowGithubOauthV0Client.scala
-  healthcheck:
+  dependency:
+    play_2_x_routes:
+    - api/conf/routes
     play_2_6_client:
-    - generated/app/FlowHealthcheckV0Client.scala
+    - generated/app/FlowDependencyV0Client.scala
+    anorm_2_6_parsers:
+    - api/app/generated/FlowDependencyV0Conversions.scala
+    - api/app/generated/FlowDependencyV0Parsers.scala
