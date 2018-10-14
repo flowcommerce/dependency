@@ -45,7 +45,7 @@ lazy val api = project
       "io.flow" %% "lib-postgresql-play26" % "0.0.88",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
       "org.postgresql" % "postgresql" % "42.2.5",
-      "com.sendgrid"   %  "sendgrid-java" % "4.2.1",
+      "com.sendgrid"   %  "sendgrid-java" % "4.3.0",
       "io.flow" %% "lib-play-graphite-play26" % "0.0.53",
       "io.flow" %% "lib-log" % "0.0.35"
     )
