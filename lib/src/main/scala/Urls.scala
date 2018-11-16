@@ -15,7 +15,7 @@ case class Urls(
   config: Config
 ) {
 
-  val github = "https://github.com/mbryzek/dependency"
+  val github = "https://github.com/flowcommerce/dependency"
 
   lazy val wwwHost = config.requiredString("dependency.www.host")
 
