@@ -6,7 +6,7 @@ import db.{TokensDao, UsersDao}
 import io.flow.common.v0.models.UserReference
 import io.flow.play.controllers.{AuthorizationImpl, IdentifiedRequest}
 import io.flow.play.util.{AuthData, Config}
-import play.api.Logger
+
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}

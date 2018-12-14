@@ -1,6 +1,6 @@
 package io.flow.dependency.api.lib
 
-import play.api.Logger
+
 import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary}
 
 trait SimpleScalaParser {

@@ -1,6 +1,6 @@
 package io.flow.dependency.actors
 
-import play.api.Logger
+
 
 /**
   * TODO: Extract to lib. Maybe lib-play-actors ??

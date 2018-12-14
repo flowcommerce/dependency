@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import io.flow.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
 import db._
-import play.api.Logger
+
 import akka.actor.{Actor, ActorSystem}
 
 import scala.concurrent.ExecutionContext

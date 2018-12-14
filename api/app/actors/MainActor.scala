@@ -6,7 +6,7 @@ import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
 import io.flow.postgresql.Pager
-import play.api.Logger
+
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
 

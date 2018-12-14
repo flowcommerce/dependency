@@ -10,7 +10,7 @@ import io.flow.dependency.v0.models.{Publication, Subscription}
 import io.flow.dependency.lib.Urls
 import io.flow.dependency.api.lib.{Email, Recipient}
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.Logger
+
 import akka.actor.{Actor, ActorSystem}
 
 import scala.concurrent.ExecutionContext

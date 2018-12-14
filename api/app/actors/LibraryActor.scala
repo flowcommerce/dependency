@@ -6,7 +6,7 @@ import io.flow.dependency.v0.models.{Library, LibraryForm, VersionForm}
 import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, ItemsDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao, UsersDao}
-import play.api.Logger
+
 import akka.actor.Actor
 
 object LibraryActor {

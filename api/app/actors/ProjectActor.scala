@@ -6,7 +6,7 @@ import io.flow.postgresql.Pager
 import io.flow.play.actors.ErrorHandler
 import io.flow.play.util.Config
 import db._
-import play.api.Logger
+
 import play.libs.Akka
 import akka.actor.{Actor, ActorSystem}
 import io.flow.github.v0.models.HookForm

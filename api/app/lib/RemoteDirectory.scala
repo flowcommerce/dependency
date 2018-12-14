@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
 import java.net.URL
 import scala.util.{Failure, Success, Try}
-import play.api.Logger
+
 
 /**
   * Accepts the URI of a resolver

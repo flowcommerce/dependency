@@ -1,7 +1,6 @@
 package db
 
 import javax.inject.Inject
-
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.api.lib.Validation
 import io.flow.dependency.v0.models.{Credentials, Resolver, ResolverForm, ResolverSummary}
@@ -11,6 +10,7 @@ import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{Pager, Query}
 import anorm._
 import com.google.inject.Provider
+
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
@@ -277,7 +277,7 @@ class ResolversDao @Inject()(
         Some(credentials)
       }
       case JsError(error) => {
-        play.api.Logger.warn(s"Resolver[${resolverId}] has credentials that could not be parsed: $error")
+        Logger.warn(s"Resolver[${resolverId}] has credentials that could not be parsed: $error")
         None
       }
     }

@@ -7,6 +7,7 @@ import db.{Authorization, LibrariesDao, ProjectsDao}
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
 import io.flow.postgresql.Pager
+
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -24,7 +25,7 @@ class GithubWebhooks @javax.inject.Inject() (
         NotFound
       }
       case Some(project) => {
-        play.api.Logger.info(s"Received github webook for project[${project.id}] name[${project.name}]")
+        Logger.info(s"Received github webook for project[${project.id}] name[${project.name}]")
         mainActor ! MainActor.Messages.ProjectSync(project.id)
 
         // Find any libaries with the exact name of this project and

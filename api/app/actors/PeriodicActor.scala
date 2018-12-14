@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
-import play.api.Logger
+
 import akka.actor.{Actor, ActorSystem}
 
 import scala.concurrent.ExecutionContext
