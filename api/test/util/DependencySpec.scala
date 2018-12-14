@@ -4,6 +4,7 @@ import java.util.UUID
 
 import db._
 import io.flow.common.v0.models.{Name, User, UserReference}
+import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
 import io.flow.log.RollbarLogger
 import io.flow.play.util.{Config, Random}
@@ -14,6 +15,7 @@ import play.api.db.Database
 
 trait DependencySpec extends FlowPlaySpec with Factories {
 
+  implicit val defaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
   implicit val logger = init[RollbarLogger]
   implicit val organizationsDao = init[OrganizationsDao]
   implicit val binariesDao = init[BinariesDao]

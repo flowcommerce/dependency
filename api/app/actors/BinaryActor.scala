@@ -27,6 +27,7 @@ class BinaryActor @Inject() (
   usersDao: UsersDao,
   itemsDao: ItemsDao,
   projectBinariesDao: ProjectBinariesDao,
+  defaultBinaryVersionProvider: DefaultBinaryVersionProvider,
   override val logger: RollbarLogger
 ) extends Actor with Util {
 
@@ -42,7 +43,7 @@ class BinaryActor @Inject() (
     case m @ BinaryActor.Messages.Sync => withErrorHandler(m) {
       dataBinary.foreach { binary =>
         syncsDao.withStartedAndCompleted(SystemUser, "binary", binary.id) {
-          DefaultBinaryVersionProvider.versions(binary.name).foreach { version =>
+          defaultBinaryVersionProvider.versions(binary.name).foreach { version =>
             binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
           }
         }

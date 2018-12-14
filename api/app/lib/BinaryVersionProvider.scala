@@ -17,10 +17,10 @@ trait BinaryVersionProvider {
 
 }
 
-object DefaultBinaryVersionProvider extends BinaryVersionProvider {
-
-  // TODO: IS THERE A BETTER WAY TO DO THIS?
-  private[this] def logger: RollbarLogger= play.api.Play.current.injector.instanceOf[RollbarLogger]
+@javax.inject.Singleton
+case class DefaultBinaryVersionProvider @javax.inject.Inject()(
+  logger: RollbarLogger
+) extends BinaryVersionProvider {
 
   private[this] val ScalaUrl = "https://www.scala-lang.org/download/all.html"
   private[this] val SbtUrl = "https://dl.bintray.com/sbt/native-packages/sbt/"

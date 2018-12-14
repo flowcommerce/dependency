@@ -5,6 +5,7 @@ import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
+import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.Pager
 import play.api.Play.current
@@ -76,7 +77,8 @@ class MainActor @javax.inject.Inject() (
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
-  logger: RollbarLogger
+  logger: RollbarLogger,
+  defaultBinaryVersionProvider: DefaultBinaryVersionProvider
 ) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
@@ -329,6 +331,7 @@ class MainActor @javax.inject.Inject() (
         usersDao,
         itemsDao,
         projectBinariesDao,
+        defaultBinaryVersionProvider,
         logger
       )), name = s"$name:binaryActor:$id")
       ref ! BinaryActor.Messages.Data(id)
