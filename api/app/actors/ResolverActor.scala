@@ -1,11 +1,11 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.dependency.v0.models.{Resolver, Visibility}
 import io.flow.postgresql.Pager
 import db._
 import akka.actor.Actor
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -26,7 +26,8 @@ class ResolverActor @Inject()(
   resolversDao: ResolversDao,
   librariesDao: LibrariesDao,
   projectLibrariesDao: ProjectLibrariesDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
   var dataResolver: Option[Resolver] = None

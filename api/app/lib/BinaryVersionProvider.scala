@@ -1,6 +1,7 @@
 package io.flow.dependency.api.lib
 
 import io.flow.dependency.v0.models.BinaryType
+import io.flow.log.RollbarLogger
 import io.flow.util.Version
 import org.apache.commons.lang3.StringUtils
 
@@ -18,6 +19,9 @@ trait BinaryVersionProvider {
 
 object DefaultBinaryVersionProvider extends BinaryVersionProvider {
 
+  // TODO: IS THERE A BETTER WAY TO DO THIS?
+  private[this] def logger: RollbarLogger= play.api.Play.current.injector.instanceOf[RollbarLogger]
+
   private[this] val ScalaUrl = "https://www.scala-lang.org/download/all.html"
   private[this] val SbtUrl = "https://dl.bintray.com/sbt/native-packages/sbt/"
 
@@ -32,7 +36,7 @@ object DefaultBinaryVersionProvider extends BinaryVersionProvider {
         fetchSbtVersions()
       }
       case BinaryType.UNDEFINED(name) => {
-        Logger.warn(s"Do not know how to find versions for the programming binary[$name]")
+        logger.withKeyValue("binary_name", name).warn(s"Do not know how to find versions for the programming binary")
         Nil
       }
     }

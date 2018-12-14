@@ -1,11 +1,10 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
-
 import akka.actor.{Actor, ActorSystem}
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -26,7 +25,8 @@ class PeriodicActor @Inject()(
   syncsDao: SyncsDao,
   projectsDao: ProjectsDao,
   binariesDao: BinariesDao,
-  librariesDao: LibrariesDao
+  librariesDao: LibrariesDao,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
 

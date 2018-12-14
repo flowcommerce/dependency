@@ -10,7 +10,7 @@ import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{Pager, Query}
 import anorm._
 import com.google.inject.Provider
-
+import io.flow.log.RollbarLogger
 import play.api.db._
 import play.api.Play.current
 import play.api.libs.json._
@@ -22,6 +22,7 @@ class ResolversDao @Inject()(
   librariesDaoProvider: Provider[LibrariesDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
   usersDaoProvider: Provider[UsersDao],
+  logger: RollbarLogger,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) {
 
@@ -277,7 +278,7 @@ class ResolversDao @Inject()(
         Some(credentials)
       }
       case JsError(error) => {
-        Logger.warn(s"Resolver[${resolverId}] has credentials that could not be parsed: $error")
+        logger.withKeyValue("resolver", resolverId).withKeyValue("error", error.toString()).warn(s"Resolver has credentials that could not be parsed")
         None
       }
     }

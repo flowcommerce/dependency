@@ -2,8 +2,11 @@ package io.flow.dependency.api.lib
 
 
 import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary}
+import io.flow.log.RollbarLogger
 
 trait SimpleScalaParser {
+
+  val logger: RollbarLogger
 
   def project: ProjectSummary
 
@@ -79,15 +82,15 @@ trait SimpleScalaParser {
     substring.split(",").map(_.trim).filter(!_.isEmpty).flatMap { el =>
       el.replaceAll("%%", "%").split("%").map(_.trim).toList match {
         case Nil => {
-          warn(s"Could not parse library from[$value]")
+          logger.withKeyValue("value", value).warn(s"Could not parse library from value")
           None
         }
         case groupId :: Nil => {
-          warn(s"Could not parse library from[$value] - only found groupId[$groupId] but missing artifactId and version")
+          logger.withKeyValue("value", value).withKeyValue("group", groupId).warn(s"Could not parse library from value - only found groupId but missing artifactId and version")
           None
         }
         case groupId :: artifactId :: Nil => {
-          warn(s"Could not parse library from[$value] - only found groupId[$groupId] and artifactId[$artifactId] but missing version")
+          logger.withKeyValue("value", value).withKeyValue("artifact", artifactId).withKeyValue("group", groupId).warn(s"Could not parse library from value - only found groupId and artifactId but missing version")
           None
         }
         case groupId :: artifactId :: version :: more => {
@@ -104,10 +107,6 @@ trait SimpleScalaParser {
         }
       }
     }
-  }
-
-  private[this] def warn(message: String) {
-    Logger.warn(s"project[${project.id}] name[${project.name}] path[$path]: $message")
   }
 
 }

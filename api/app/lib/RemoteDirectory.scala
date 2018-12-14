@@ -45,14 +45,8 @@ object RemoteDirectory {
     }
 
     Try(cleaner.clean(uc.getInputStream())) match {
-      case Failure(ex) => ex match {
-        case e: java.io.FileNotFoundException => {
-          base
-        }
-        case _ => {
-          Logger.error(s"Error fetching URL[$url]: $ex")
-          base
-        }
+      case Failure(_) => {
+        base
       }
       case Success(rootNode) => {
         rootNode.getElementsByName("a", true).foldLeft(base) { case (result, elem) =>

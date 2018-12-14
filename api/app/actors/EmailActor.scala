@@ -1,7 +1,6 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.play.util.Config
 import io.flow.postgresql.Pager
 import io.flow.common.v0.models.User
@@ -10,8 +9,8 @@ import io.flow.dependency.v0.models.{Publication, Subscription}
 import io.flow.dependency.lib.Urls
 import io.flow.dependency.api.lib.{Email, Recipient}
 import org.joda.time.{DateTime, DateTimeZone}
-
 import akka.actor.{Actor, ActorSystem}
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -28,7 +27,8 @@ object EmailActor {
 class EmailActor @Inject()(
   subscriptionsDao: SubscriptionsDao,
   batchEmailProcessor: BatchEmailProcessor,
-  config: Config
+  config: Config,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
   val PreferredHourToSendEst: Int = {

@@ -1,13 +1,12 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.dependency.v0.models.{Binary, BinaryForm}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, BinaryVersionsDao, ItemsDao, ProjectBinariesDao, SyncsDao, UsersDao}
-
 import akka.actor.{Actor, ActorSystem}
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -27,7 +26,8 @@ class BinaryActor @Inject() (
   binaryVersionsDao: BinaryVersionsDao,
   usersDao: UsersDao,
   itemsDao: ItemsDao,
-  projectBinariesDao: ProjectBinariesDao
+  projectBinariesDao: ProjectBinariesDao,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
   var dataBinary: Option[Binary] = None

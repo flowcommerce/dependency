@@ -18,7 +18,7 @@ lazy val root = project
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must be(Nil)
     }
@@ -49,7 +49,7 @@ lazy val root = project
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must contain theSameElementsAs Seq(ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.11.7", "test.sbt"))
       result.libraries must be(
         Seq(
@@ -75,7 +75,7 @@ lazy val root = project
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true),
@@ -108,7 +108,7 @@ lazy val www = project
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true),
@@ -133,7 +133,7 @@ lazy val avro = project
     )
   )
 """
-    val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+    val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
     result.binaries must be(Nil)
     result.libraries must contain theSameElementsAs Seq(
       Artifact(projectSummary, "test.sbt", "com.typesafe.akka", "akka-cluster", "2.3.4", true),
@@ -150,7 +150,7 @@ lazy val avro = project
   )
 """
 
-    val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+    val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
     result.binaries must be(Nil)
     result.libraries must contain theSameElementsAs Seq(
       Artifact(projectSummary, "test.sbt", "org.scalatest", "scalatest", "2.2.0", true)
@@ -176,7 +176,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.dropwizard.metrics", "metrics-core", "3.1.0", false),
@@ -194,7 +194,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
 """
 
     "parse dependencies" in {
-      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents)
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "com.typesafe.play", "play-json", "2.2.2", true)

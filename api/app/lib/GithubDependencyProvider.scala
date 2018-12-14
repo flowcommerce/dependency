@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import java.net.URI
 
+import io.flow.log.RollbarLogger
 import play.api.libs.ws.WSClient
 
 object GithubUtil {
@@ -66,8 +67,10 @@ object GithubDependencyProviderClient {
     config: Config,
     tokensDao: TokensDao,
     project: ProjectSummary,
-    user: UserReference) = {
-    new GithubDependencyProvider(new DefaultGithub(wsClient, config, tokensDao), project, user)
+    user: UserReference,
+    logger: RollbarLogger
+  ) = {
+    new GithubDependencyProvider(new DefaultGithub(wsClient, config, tokensDao), project, user, logger)
   }
 
 }
@@ -75,7 +78,8 @@ object GithubDependencyProviderClient {
 private[lib] case class GithubDependencyProvider(
   github: Github,
   project: ProjectSummary,
-  user: UserReference
+  user: UserReference,
+  logger: RollbarLogger
 ) extends DependencyProvider {
 
   private val BuildSbtFilename = "build.sbt"
@@ -109,7 +113,8 @@ private[lib] case class GithubDependencyProvider(
         val result = BuildSbtScalaParser(
           project = project,
           path = BuildSbtFilename,
-          contents = text
+          contents = text,
+          logger = logger
         )
         Some(
           Dependencies(
@@ -132,7 +137,8 @@ private[lib] case class GithubDependencyProvider(
         val properties = PropertiesParser(
           project = project,
           path = BuildPropertiesFilename,
-          contents = text
+          contents = text,
+          logger = logger
         )
         properties.get("sbt.version").map { value =>
           Dependencies(
@@ -162,7 +168,8 @@ private[lib] case class GithubDependencyProvider(
         val result = ProjectPluginsSbtScalaParser(
           project = project,
           contents = text,
-          path = ProjectPluginsSbtFilename
+          path = ProjectPluginsSbtFilename,
+          logger = logger
         )
         Some(
           Dependencies(
