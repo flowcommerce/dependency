@@ -4,9 +4,9 @@ import java.util.UUID
 
 import db.{TokensDao, UsersDao}
 import io.flow.common.v0.models.UserReference
+import io.flow.log.RollbarLogger
 import io.flow.play.controllers.{AuthorizationImpl, IdentifiedRequest}
 import io.flow.play.util.{AuthData, Config}
-import play.api.Logger
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,7 +17,8 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
   override val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  logger: RollbarLogger
 )(implicit override val executionContext: ExecutionContext) extends IdentificationWithFallback(parser, config, authorization, tokensDao, usersDao) {
 
   override def invokeBlock[A](request: Request[A], block: IdentifiedRequest[A] => Future[Result]): Future[Result] = {
@@ -43,7 +44,7 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
       }
 
       case multiple => {
-        Logger.warn(s"Multiple identifiers[${multiple.size}] found in request - assuming no User")
+        logger.withKeyValue("size", multiple.size).warn(s"Multiple identifiers found in request - assuming no User")
         Future.successful(unauthorized(request))
       }
     }

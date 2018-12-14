@@ -1,13 +1,12 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.dependency.v0.models.{Binary, BinaryForm}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, BinaryVersionsDao, ItemsDao, ProjectBinariesDao, SyncsDao, UsersDao}
-import play.api.Logger
 import akka.actor.{Actor, ActorSystem}
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -27,7 +26,9 @@ class BinaryActor @Inject() (
   binaryVersionsDao: BinaryVersionsDao,
   usersDao: UsersDao,
   itemsDao: ItemsDao,
-  projectBinariesDao: ProjectBinariesDao
+  projectBinariesDao: ProjectBinariesDao,
+  defaultBinaryVersionProvider: DefaultBinaryVersionProvider,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
   var dataBinary: Option[Binary] = None
@@ -42,7 +43,7 @@ class BinaryActor @Inject() (
     case m @ BinaryActor.Messages.Sync => withErrorHandler(m) {
       dataBinary.foreach { binary =>
         syncsDao.withStartedAndCompleted(SystemUser, "binary", binary.id) {
-          DefaultBinaryVersionProvider.versions(binary.name).foreach { version =>
+          defaultBinaryVersionProvider.versions(binary.name).foreach { version =>
             binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
           }
         }

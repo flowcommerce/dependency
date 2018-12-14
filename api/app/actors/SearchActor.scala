@@ -1,11 +1,10 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
 import db._
-import play.api.Logger
 import akka.actor.{Actor, ActorSystem}
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -26,7 +25,8 @@ class SearchActor @Inject()(
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,
   itemsDao: ItemsDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
 

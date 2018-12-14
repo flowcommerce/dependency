@@ -4,6 +4,7 @@ import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.json._
 import db.{Authorization, LibrariesDao, ProjectsDao}
+import io.flow.log.RollbarLogger
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
 import io.flow.play.util.{Config, Validation}
 import io.flow.postgresql.Pager
@@ -15,6 +16,7 @@ class GithubWebhooks @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   projectsDao: ProjectsDao,
   librariesDao: LibrariesDao,
+  logger: RollbarLogger,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) extends BaseController {
 
@@ -24,7 +26,7 @@ class GithubWebhooks @javax.inject.Inject() (
         NotFound
       }
       case Some(project) => {
-        play.api.Logger.info(s"Received github webook for project[${project.id}] name[${project.name}]")
+        logger.withKeyValue("project", Json.toJson(project)).info(s"Received github webook for project")
         mainActor ! MainActor.Messages.ProjectSync(project.id)
 
         // Find any libaries with the exact name of this project and

@@ -1,11 +1,11 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-
 import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.common.v0.models.User
 import db.{OrganizationsDao, SubscriptionsDao, UserIdentifiersDao, UsersDao}
 import akka.actor.Actor
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 
@@ -24,7 +24,8 @@ class UserActor @Inject()(
   organizationsDao: OrganizationsDao,
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  override val logger: RollbarLogger
 ) extends Actor with Util {
 
   var dataUser: Option[User] = None

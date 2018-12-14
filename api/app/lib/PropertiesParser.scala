@@ -1,11 +1,13 @@
 package io.flow.dependency.api.lib
 
 import io.flow.dependency.v0.models.ProjectSummary
+import io.flow.log.RollbarLogger
 
 case class PropertiesParser(
   override val project: ProjectSummary,
   override val path: String,
-  contents: String
+  contents: String,
+  override val logger: RollbarLogger
 ) extends SimpleScalaParser {
 
   private[this] lazy val properties: Map[String, String] = {

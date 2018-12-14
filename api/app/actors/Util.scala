@@ -1,11 +1,13 @@
 package io.flow.dependency.actors
 
-import play.api.Logger
+import io.flow.log.RollbarLogger
 
 /**
   * TODO: Extract to lib. Maybe lib-play-actors ??
   */
 trait Util {
+
+  val logger: RollbarLogger
 
   def withErrorHandler[T](
     description: Any
@@ -16,7 +18,7 @@ trait Util {
       f
     } catch {
       case t: Throwable => {
-        Logger.error(msg(s"$description: ${t}") , t)
+        logger.error(msg(description.toString) , t)
       }
     }
   }
@@ -26,17 +28,17 @@ trait Util {
   ) (
     f: => T
   ) {
-    Logger.info(msg(description.toString))
+    logger.info(msg(description.toString))
     withErrorHandler(description)(f)
   }
 
   def logUnhandledMessage[T](
     description: Any
   ) {
-    Logger.error(msg(s"got an unhandled message: $description"))
+    logger.withKeyValue("description", description.toString).error(msg(s"got an unhandled message"))
   }
 
-private[this] def msg(value: String) = {
+  private[this] def msg(value: String) = {
     s"${getClass.getName}: $value"
   }
 

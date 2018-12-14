@@ -1,7 +1,6 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
 import io.flow.postgresql.{OrderBy, Query}
@@ -9,6 +8,7 @@ import io.flow.common.v0.models.UserReference
 import io.flow.util.Version
 import anorm._
 import com.google.inject.Provider
+import io.flow.log.RollbarLogger
 import play.api.db._
 
 import scala.util.{Failure, Success, Try}
@@ -17,6 +17,7 @@ import scala.util.{Failure, Success, Try}
 class LibraryVersionsDao @Inject()(
   db: Database,
   dbHelpersProvider: Provider[DbHelpers],
+  logger: RollbarLogger,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
 
@@ -79,7 +80,7 @@ class LibraryVersionsDao @Inject()(
             crossBuildVersion = Some(form.crossBuildVersion),
             limit = Some(1)
           ).headOption.getOrElse {
-            play.api.Logger.error(ex.getMessage, ex)
+            logger.error(ex.getMessage, ex)
             sys.error(ex.getMessage)
           }
         }

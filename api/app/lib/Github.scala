@@ -13,7 +13,7 @@ import io.flow.github.v0.errors.UnitResponse
 import io.flow.github.v0.models.{Repository => GithubRepository, User => GithubUser}
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.Logger
+
 import play.api.libs.ws.WSClient
 
 case class GithubUserData(

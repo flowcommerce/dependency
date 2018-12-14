@@ -5,8 +5,9 @@ import io.flow.play.util.Config
 import io.flow.play.actors.{ErrorHandler, Scheduler}
 import play.api.libs.concurrent.Akka
 import akka.actor._
+import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
+import io.flow.log.RollbarLogger
 import io.flow.postgresql.Pager
-import play.api.Logger
 import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
 
@@ -75,7 +76,9 @@ class MainActor @javax.inject.Inject() (
   libraryVersionsDao: LibraryVersionsDao,
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
-  projectsDao: ProjectsDao
+  projectsDao: ProjectsDao,
+  logger: RollbarLogger,
+  defaultBinaryVersionProvider: DefaultBinaryVersionProvider
 ) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
@@ -85,20 +88,23 @@ class MainActor @javax.inject.Inject() (
   private[this] val emailActor = system.actorOf(Props(new EmailActor(
     subscriptionsDao,
     batchEmailProcessor,
-    config
+    config,
+    logger
   )), name = s"$name:emailActor")
   private[this] val periodicActor = system.actorOf(Props(new PeriodicActor(
     syncsDao,
     projectsDao,
     binariesDao,
-    librariesDao
+    librariesDao,
+    logger
   )), name = s"$name:periodicActor")
   private[this] val searchActor = system.actorOf(Props(new SearchActor(
     binariesDao: BinariesDao,
     librariesDao,
     projectsDao,
     itemsDao,
-    usersDao
+    usersDao,
+    logger
   )), name = s"$name:SearchActor")
 
   private[this] val binaryActors = scala.collection.mutable.Map[String, ActorRef]()
@@ -281,7 +287,8 @@ class MainActor @javax.inject.Inject() (
         organizationsDao,
         userIdentifiersDao,
         subscriptionsDao,
-        usersDao
+        usersDao,
+        logger
       )), name = s"$name:userActor:$id")
       ref ! UserActor.Messages.Data(id)
       userActors += (id -> ref)
@@ -306,7 +313,8 @@ class MainActor @javax.inject.Inject() (
         libraryVersionsDao,
         itemsDao,
         projectLibrariesDao,
-        usersDao
+        usersDao,
+        logger
       )), name = s"$name:libraryActor:$id")
       ref ! LibraryActor.Messages.Data(id)
       libraryActors += (id -> ref)
@@ -322,7 +330,9 @@ class MainActor @javax.inject.Inject() (
         binaryVersionsDao,
         usersDao,
         itemsDao,
-        projectBinariesDao
+        projectBinariesDao,
+        defaultBinaryVersionProvider,
+        logger
       )), name = s"$name:binaryActor:$id")
       ref ! BinaryActor.Messages.Data(id)
       binaryActors += (id -> ref)
@@ -336,7 +346,8 @@ class MainActor @javax.inject.Inject() (
         resolversDao,
         librariesDao,
         projectLibrariesDao,
-        usersDao
+        usersDao,
+        logger
       )), name = s"$name:resolverActor:$id")
       ref ! ResolverActor.Messages.Data(id)
       resolverActors += (id -> ref)

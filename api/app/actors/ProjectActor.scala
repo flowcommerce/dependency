@@ -2,14 +2,16 @@ package io.flow.dependency.actors
 
 import io.flow.dependency.api.lib._
 import io.flow.dependency.v0.models._
+import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.Pager
 import io.flow.play.actors.ErrorHandler
 import io.flow.play.util.Config
 import db._
-import play.api.Logger
-import play.libs.Akka
+
 import akka.actor.{Actor, ActorSystem}
 import io.flow.github.v0.models.HookForm
+import io.flow.log.RollbarLogger
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext
@@ -56,6 +58,7 @@ class ProjectActor @javax.inject.Inject() (
   usersDao: UsersDao,
   resolversDao: ResolversDao,
   wsClient: WSClient,
+  logger: RollbarLogger,
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor with ErrorHandler {
 
@@ -103,12 +106,12 @@ class ProjectActor @javax.inject.Inject() (
       dataProject.foreach { project =>
         GithubUtil.parseUri(project.uri) match {
           case Left(error) => {
-            Logger.warn(s"Project id[${project.id}] name[${project.name}]: $error")
+            logger.fingerprint(getClass.getName).withKeyValue("project", Json.toJson(project)).withKeyValue("error", error).warn("error creating github hooks")
           }
           case Right(repo) => {
             tokensDao.getCleartextGithubOauthTokenByUserId(project.user.id) match {
               case None => {
-                Logger.warn(s"No oauth token for user[${project.user.id}]")
+                logger.fingerprint(getClass.getName).withKeyValue("project", Json.toJson(project)).warn(s"No oauth token for user")
               }
 
               case Some(token) => {
@@ -133,7 +136,7 @@ class ProjectActor @javax.inject.Inject() (
                       println("  - Project[${project.id}] hook created: " + hook)
                     }.recover {
                       case e: Throwable => {
-                        Logger.error("Project[${project.id}] Error creating hook: " + e)
+                        logger.fingerprint(getClass.getName).withKeyValue("project", Json.toJson(project)).error("Error creating hook", e)
                       }
                     }
                   }
@@ -151,14 +154,14 @@ class ProjectActor @javax.inject.Inject() (
 
         val summary = projectsDao.toSummary(project)
 
-        GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user).dependencies(project).map { dependencies =>
+        GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user, logger).dependencies(project).map { dependencies =>
           println(s" - project[${project.id}] name[${project.name}] dependencies: $dependencies")
 
           dependencies.binaries.map { binaries =>
             val projectBinaries = binaries.map { form =>
               projectBinariesDao.upsert(project.user, form) match {
                 case Left(errors) => {
-                  Logger.error(s"Project[${project.name}] id[${project.id}] Error storing binary[$form]: " + errors.mkString(", "))
+                  logger.withKeyValue("project", Json.toJson(project)).withKeyValue("form", form.toString).withKeyValue("errors", errors).error(s"Errors storing binary")
                   None
                 }
                 case Right(projectBinary) => {
@@ -178,7 +181,7 @@ class ProjectActor @javax.inject.Inject() (
                 )
               ) match {
                 case Left(errors) => {
-                  Logger.error(s"Project[${project.name}] id[${project.id}] Error storing artifact[$artifact]: " + errors.mkString(", "))
+                  logger.withKeyValue("project", Json.toJson(project)).withKeyValue("errors", errors).withKeyValue("artifact", artifact.toString).error(s"Error storing artifact")
                   None
                 }
                 case Right(library) => {
@@ -194,8 +197,7 @@ class ProjectActor @javax.inject.Inject() (
           processPendingSync(project)
         }.recover {
           case e => {
-            e.printStackTrace(System.err)
-            Logger.error(s"Error fetching dependencies for project[${project.id}] name[${project.name}]: $e")
+            logger.withKeyValue("project", Json.toJson(project)).error(s"Error fetching dependencies", e)
           }
         }
       }
@@ -330,7 +332,7 @@ class ProjectActor @javax.inject.Inject() (
               )
             ) match {
               case Left(errors) => {
-                Logger.error(s"Project[${projectLibrary.project.id}] name[${projectLibrary.project.name}] - error upserting library: " + errors.mkString(", "))
+                logger.withKeyValue("project", Json.toJson(projectLibrary)).withKeyValue("errors", errors).error(s"Error upserting library")
                 None
               }
               case Right(library) => {
@@ -354,7 +356,7 @@ class ProjectActor @javax.inject.Inject() (
           )
         ) match {
           case Left(errors) => {
-            Logger.error(s"Project[${projectBinary.project.id}] name[${projectBinary.project.name}] - error upserting binary[$projectBinary]: " + errors.mkString(", "))
+            logger.withKeyValue("project", Json.toJson(projectBinary)).withKeyValue("errors", errors).error(s"error upserting binary")
             None
           }
           case Right(binary) => {
@@ -363,7 +365,7 @@ class ProjectActor @javax.inject.Inject() (
         }
       }
       case BinaryType.UNDEFINED(_) => {
-        Logger.warn(s"Project[${projectBinary.id}] name[${projectBinary.name}] references an unknown binary[${projectBinary.name}]")
+        logger.withKeyValue("project", Json.toJson(projectBinary)).warn(s"Project references an unknown binary")
         None
       }
     }

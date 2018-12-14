@@ -6,7 +6,7 @@ import org.apache.commons.codec.binary.Base64
 import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
 import java.net.URL
 import scala.util.{Failure, Success, Try}
-import play.api.Logger
+
 
 /**
   * Accepts the URI of a resolver
@@ -45,14 +45,8 @@ object RemoteDirectory {
     }
 
     Try(cleaner.clean(uc.getInputStream())) match {
-      case Failure(ex) => ex match {
-        case e: java.io.FileNotFoundException => {
-          base
-        }
-        case _ => {
-          Logger.error(s"Error fetching URL[$url]: $ex")
-          base
-        }
+      case Failure(_) => {
+        base
       }
       case Success(rootNode) => {
         rootNode.getElementsByName("a", true).foldLeft(base) { case (result, elem) =>
