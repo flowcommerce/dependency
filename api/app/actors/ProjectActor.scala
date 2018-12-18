@@ -45,6 +45,7 @@ object ProjectActor {
 }
 
 class ProjectActor @javax.inject.Inject() (
+  override val logger: RollbarLogger,
   config: Config,
   actorSystem: ActorSystem,
   projectsDao: ProjectsDao,
@@ -58,7 +59,6 @@ class ProjectActor @javax.inject.Inject() (
   usersDao: UsersDao,
   resolversDao: ResolversDao,
   wsClient: WSClient,
-  logger: RollbarLogger,
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor with ErrorHandler {
 

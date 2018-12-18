@@ -59,9 +59,10 @@ object MainActor {
 
 @javax.inject.Singleton
 class MainActor @javax.inject.Inject() (
-  projectFactory: ProjectActor.Factory,
+  override val logger: RollbarLogger,
   override val config: io.flow.play.util.Config,
   system: ActorSystem,
+  projectFactory: ProjectActor.Factory,
   binariesDao: BinariesDao,
   syncsDao: SyncsDao,
   binaryVersionsDao: BinaryVersionsDao,
@@ -77,7 +78,6 @@ class MainActor @javax.inject.Inject() (
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
-  logger: RollbarLogger,
   defaultBinaryVersionProvider: DefaultBinaryVersionProvider
 ) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
 
