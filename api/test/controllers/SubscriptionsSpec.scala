@@ -41,6 +41,6 @@ class SubscriptionsSpec extends DependencySpec with MockDependencyClient {
     await(
       identifiedClient().subscriptions.deleteById(id = subscription.id, identifier = Some(user1Identifier.value))
     )
-    subscriptionsDao.findById(subscription.id).isEmpty must be(true)
+    subscriptionsDao.findById(subscription.id) must be(empty)
   }
 }
