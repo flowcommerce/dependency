@@ -3186,7 +3186,8 @@ package io.flow.dependency.v0 {
         _executeRequest("GET", s"/users", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.dependency.v0.Client.parseJson("Seq[io.flow.common.v0.models.User]", r, _.validate[Seq[io.flow.common.v0.models.User]])
           case r if r.status == 401 => throw io.flow.dependency.v0.errors.UnitResponse(r.status)
-          case r => throw io.flow.dependency.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401")
+          case r if r.status == 422 => throw io.flow.dependency.v0.errors.GenericErrorsResponse(r)
+          case r => throw io.flow.dependency.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 422")
         }
       }
 

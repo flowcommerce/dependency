@@ -262,8 +262,8 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   )
 
   def createUser(
-                  form: UserForm = createUserForm()
-                ): User = {
+    form: UserForm = createUserForm()
+  ): User = {
     create(usersDao.create(None, form))
   }
 
