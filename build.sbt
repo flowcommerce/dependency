@@ -20,6 +20,15 @@ lazy val lib = project
   .dependsOn(generated)
   .aggregate(generated)
   .settings(commonSettings: _*)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-test" % "2.6.20",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2",
+      "org.specs2" %% "specs2-core" % "4.3.5",
+      "com.typesafe.play" %% "play-specs2" % "2.6.20"
+    )
+  )
+
 
 lazy val api = project
   .in(file("api"))
@@ -47,7 +56,8 @@ lazy val api = project
       "org.postgresql" % "postgresql" % "42.2.5",
       "com.sendgrid"   %  "sendgrid-java" % "4.3.0",
       "io.flow" %% "lib-play-graphite-play26" % "0.0.62",
-      "io.flow" %% "lib-log" % "0.0.50"
+      "io.flow" %% "lib-log" % "0.0.50",
+      "io.flow" %% "lib-test-utils" % "0.0.22" % Test      
     )
   )
 
@@ -70,7 +80,8 @@ lazy val www = project
       "org.webjars" % "bootstrap" % "3.3.7",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "org.webjars" % "font-awesome" % "5.5.0",
-      "org.webjars" % "jquery" % "2.1.4"
+      "org.webjars" % "jquery" % "2.1.4",
+      "io.flow" %% "lib-test-utils" % "0.0.22" % Test
     )
   )
 
@@ -84,8 +95,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   libraryDependencies ++= Seq(
     "io.flow" %% "lib-play-play26" % "0.5.23",
     "com.typesafe.play" %% "play-json-joda" % "2.6.10",
-    "com.typesafe.play" %% "play-json" % "2.6.10",
-    "io.flow" %% "lib-test-utils" % "0.0.22" % Test
+    "com.typesafe.play" %% "play-json" % "2.6.10"
   ),
   scalacOptions += "-feature",
   credentials += credsToUse,
