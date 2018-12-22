@@ -26,9 +26,9 @@ class Users @javax.inject.Inject()(
     id: Option[String],
     email: Option[String],
     identifier: Option[String]
-  ) = Anonymous { request =>
-    if (Seq(id, email, identifier).isEmpty) {
-      UnprocessableEntity(Json.toJson(Validation.error("Must specify id, email or identifier")))
+  ) = Anonymous { _ =>
+    if (Seq(id, email, identifier).flatten.isEmpty) {
+      UnprocessableEntity(Json.toJson(Seq(Validation.error("Must specify id, email or identifier"))))
     } else {
       Ok(
         Json.toJson(

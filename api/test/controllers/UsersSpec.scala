@@ -2,7 +2,7 @@ package controllers
 
 import java.util.UUID
 
-import io.flow.common.v0.models.Name
+import io.flow.common.v0.models.{Name, User}
 import io.flow.dependency.v0.models.UserForm
 import _root_.util.{DependencySpec, MockDependencyClient}
 
@@ -10,13 +10,21 @@ class UsersSpec extends DependencySpec with MockDependencyClient {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  lazy val user1 = createUser()
-  lazy val user2 = createUser()
+  private[this] lazy val user1: User = createUser()
+  private[this] lazy val user2: User = createUser()
 
-  "GET /users requires auth" in {
-    expectNotAuthorized {
+  "GET /users requires a parameter" in {
+    expectErrors {
       anonClient.users.get()
-    }
+    }.genericErrors.flatMap(_.messages) must equal(
+      Seq("Must specify id, email or identifier")
+    )
+  }
+
+  "GET /users allows anonymous access" in {
+    await {
+      anonClient.users.get(id = Some(createTestId()))
+    } must be(Nil)
   }
 
   "GET /users by id" in {

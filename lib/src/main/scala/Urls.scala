@@ -17,7 +17,7 @@ case class Urls(
 
   val github = "https://github.com/flowcommerce/dependency"
 
-  lazy val wwwHost = config.requiredString("dependency.www.host")
+  lazy val wwwHost: String = config.requiredString("dependency.www.host")
 
   def binary(id: String) = s"/binaries/$id"
   def library(id: String) = s"/libraries/$id"
@@ -52,10 +52,10 @@ case class Urls(
 
   def itemSummary(summary: ItemSummary): String = {
     summary match {
-      case BinarySummary(id, org, name) => binary(id)
-      case LibrarySummary(id, org, groupId, artifactId) => library(id)
-      case ProjectSummary(id, org, name) => project(id)
-      case ItemSummaryUndefinedType(name) => "#"
+      case BinarySummary(id, _, _) => binary(id)
+      case LibrarySummary(id, _, _, _) => library(id)
+      case ProjectSummary(id, _, _) => project(id)
+      case ItemSummaryUndefinedType(_) => "#"
     }
   }
 

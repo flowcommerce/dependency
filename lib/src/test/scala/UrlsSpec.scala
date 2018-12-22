@@ -2,9 +2,9 @@ package io.flow.dependency.lib
 
 import io.flow.dependency.v0.models.{ItemSummaryUndefinedType, RecommendationType}
 import io.flow.play.util.Config
-import io.flow.test.utils.FlowPlaySpec
+import org.scalatestplus.play.PlaySpec
 
-class UrlsSpec extends FlowPlaySpec with Factories {
+class UrlsSpec extends PlaySpec with Factories {
 
   private[this] lazy val urls = Urls(
     new Config {
