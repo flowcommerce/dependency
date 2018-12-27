@@ -9,6 +9,7 @@ builds:
       remote_logging: false
   - www:
       dockerfile: www/Dockerfile
+      instance.type: t2.small
       port.container: 9000
       port.host: 6110
       version: 1.3
