@@ -43,19 +43,19 @@ class EmailActor @Inject()(
 
   def receive = SafeReceive.withLogUnhandled {
 
-    /**
-      * Selects people to whom we delivery email by:
-      *
-      *  If it is our preferred time to send (7am), filter by anybody
-      *  who has been a member for at least 2 hours and who has not
-      *  received an email in last 2 hours. We use 2 hours to catch up
-      *  from emails sent the prior day late (at say 10am) to get them
-      *  back on schedule, while making sure we don't send back to
-      *  back emails
-      *
-      *  Otherwise, filter by 26 hours to allow us to catch up on any
-      *  missed emails
-      */
+    /*
+     * Selects people to whom we delivery email by:
+     *
+     *  If it is our preferred time to send (7am), filter by anybody
+     *  who has been a member for at least 2 hours and who has not
+     *  received an email in last 2 hours. We use 2 hours to catch up
+     *  from emails sent the prior day late (at say 10am) to get them
+     *  back on schedule, while making sure we don't send back to
+     *  back emails
+     *
+     *  Otherwise, filter by 26 hours to allow us to catch up on any
+     *  missed emails
+     */
     case EmailActor.Messages.ProcessDailySummary =>
       val hoursForPreferredTime = 2
       val hours = currentHourEst match {
