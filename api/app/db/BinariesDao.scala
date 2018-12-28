@@ -1,15 +1,14 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Binary, BinaryForm, SyncEvent}
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import anorm._
 import com.google.inject.Provider
+import io.flow.util.IdGenerator
 import play.api.db._
-import play.api.Play.current
 
 @Singleton
 class BinariesDao @Inject()(
@@ -42,7 +41,7 @@ class BinariesDao @Inject()(
       Seq("Name cannot be empty")
 
     } else {
-      findByName(Authorization.All, form.name.toString) match {
+      findByName(form.name.toString) match {
         case None => Seq.empty
         case Some(_) => Seq("Binary with this name already exists")
       }
@@ -50,7 +49,7 @@ class BinariesDao @Inject()(
   }
 
   def upsert(createdBy: UserReference, form: BinaryForm): Either[Seq[String], Binary] = {
-    findByName(Authorization.All, form.name.toString) match {
+    findByName(form.name.toString) match {
       case Some(binary) => Right(binary)
       case None => create(createdBy, form)
     }
@@ -59,7 +58,7 @@ class BinariesDao @Inject()(
   def create(createdBy: UserReference, form: BinaryForm): Either[Seq[String], Binary] = {
     validate(form) match {
       case Nil => {
-        val id = io.flow.play.util.IdGenerator("bin").randomId()
+        val id = IdGenerator("bin").randomId()
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
@@ -73,7 +72,7 @@ class BinariesDao @Inject()(
         mainActor ! MainActor.Messages.BinaryCreated(id)
 
         Right(
-          findById(Authorization.All, id).getOrElse {
+          findById(id).getOrElse {
             sys.error("Failed to create binary")
           }
         )
@@ -82,21 +81,21 @@ class BinariesDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, binary: Binary) {
+  def delete(deletedBy: UserReference, binary: Binary): Unit = {
     Pager.create { offset =>
-      binaryVersionsDaoProvider.get().findAll(Authorization.All, binaryId = Some(binary.id), offset = offset)
+      binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
     }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
 
     dbHelpersProvider.get.delete("binaries", deletedBy.id, binary.id)
     mainActor ! MainActor.Messages.BinaryDeleted(binary.id)
   }
 
-  def findByName(auth: Authorization, name: String): Option[Binary] = {
-    findAll(auth, name = Some(name), limit = 1).headOption
+  def findByName(name: String): Option[Binary] = {
+    findAll(name = Some(name), limit = 1).headOption
   }
 
-  def findById(auth: Authorization, id: String): Option[Binary] = {
-    findAll(auth, id = Some(id), limit = 1).headOption
+  def findById(id: String): Option[Binary] = {
+    findAll(id = Some(id), limit = 1).headOption
   }
 
   /**
@@ -104,7 +103,6 @@ class BinariesDao @Inject()(
     *  moment all binary data are public.
     */
   def findAll(
-    auth: Authorization,
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,
     projectId: Option[String] = None,
@@ -120,7 +118,7 @@ class BinariesDao @Inject()(
         equals("binaries.id", id).
         optionalIn("binaries.id", ids).
         and (
-          projectId.map { id =>
+          projectId.map { _ =>
             s"binaries.id in (select binary_id from project_binaries where binary_id is not null and project_id = {project_id})"
           }
         ).bind("project_id", projectId).

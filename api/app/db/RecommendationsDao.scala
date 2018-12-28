@@ -1,14 +1,13 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.v0.models.{Project, Recommendation, RecommendationType}
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import anorm._
 import com.google.inject.Provider
+import io.flow.util.IdGenerator
 import play.api.db._
-import play.api.Play.current
 
 @Singleton
 class RecommendationsDao @Inject()(
@@ -54,7 +53,7 @@ class RecommendationsDao @Inject()(
     ({id}, {project_id}, {type}, {object_id}, {name}, {from_version}, {to_version}, {updated_by_user_id})
   """
 
-  def sync(user: UserReference, project: Project) {
+  def sync(user: UserReference, project: Project): Unit = {
     val libraries = libraryRecommendationsDaoProvider.get.forProject(project).map { rec =>
       RecommendationForm(
         projectId = project.id,
@@ -99,7 +98,7 @@ class RecommendationsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, rec: Recommendation) {
+  def delete(deletedBy: UserReference, rec: Recommendation): Unit = {
     dbHelpersProvider.get.delete("recommendations", deletedBy.id, rec.id)
   }
 
@@ -108,7 +107,7 @@ class RecommendationsDao @Inject()(
     form: RecommendationForm
   ) (
     implicit c: java.sql.Connection
-  ) {
+  ): Unit = {
     findByProjectIdAndTypeAndObjectIdAndNameAndFromVersion(
       Authorization.All,
       form.projectId,
@@ -132,8 +131,8 @@ class RecommendationsDao @Inject()(
     form: RecommendationForm
   ) (
     implicit c: java.sql.Connection
-  ) {
-    val id = io.flow.play.util.IdGenerator("rec").randomId()
+  ): Unit = {
+    val id = IdGenerator("rec").randomId()
     SQL(InsertQuery).on(
       'id -> id,
       'project_id -> form.projectId,
@@ -144,6 +143,7 @@ class RecommendationsDao @Inject()(
       'to_version -> form.to,
       'updated_by_user_id -> createdBy.id
     ).execute()
+    ()
   }
 
   def findByProjectIdAndTypeAndObjectIdAndNameAndFromVersion(

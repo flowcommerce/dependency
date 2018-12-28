@@ -1,15 +1,13 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.v0.models.{Publication, Subscription, SubscriptionForm}
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
+import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 @Singleton
 class SubscriptionsDao @Inject()(
@@ -34,7 +32,7 @@ class SubscriptionsDao @Inject()(
     do nothing
   """
 
-  private[this] val idGenerator = io.flow.play.util.IdGenerator("sub")
+  private[this] val idGenerator = IdGenerator("sub")
 
   private[db] def validate(
     form: SubscriptionForm
@@ -69,7 +67,7 @@ class SubscriptionsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, subscription: Subscription) {
+  def delete(deletedBy: UserReference, subscription: Subscription): Unit = {
     dbHelpersProvider.get.delete("subscriptions", deletedBy.id, subscription.id)
   }
 
@@ -114,7 +112,7 @@ class SubscriptionsDao @Inject()(
         equals("subscriptions.user_id", userId).
         optionalText("subscriptions.publication", publication).
         and(
-          minHoursSinceLastEmail.map { v => """
+          minHoursSinceLastEmail.map { _ => """
             not exists (select 1
                           from last_emails
                          where last_emails.user_id = subscriptions.user_id
@@ -123,7 +121,7 @@ class SubscriptionsDao @Inject()(
           """.trim }
         ).bind("min_hours", minHoursSinceLastEmail).
         and(
-          minHoursSinceRegistration.map { v => """
+          minHoursSinceRegistration.map { _ => """
             exists (select 1
                       from users
                      where users.id = subscriptions.user_id

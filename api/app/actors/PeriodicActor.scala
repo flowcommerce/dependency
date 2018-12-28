@@ -3,10 +3,9 @@ package io.flow.dependency.actors
 import javax.inject.Inject
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
 
 object PeriodicActor {
 
@@ -26,41 +25,36 @@ class PeriodicActor @Inject()(
   projectsDao: ProjectsDao,
   binariesDao: BinariesDao,
   librariesDao: LibrariesDao,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
 
+  private[this] implicit val configuredRollbar = logger.fingerprint("PeriodicActor")
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ PeriodicActor.Messages.Purge => withErrorHandler(m) {
+    case PeriodicActor.Messages.Purge =>
       syncsDao.purgeOld()
-    }
 
-    case m @ PeriodicActor.Messages.SyncProjects => withErrorHandler(m) {
+    case PeriodicActor.Messages.SyncProjects =>
       Pager.create { offset =>
         projectsDao.findAll(Authorization.All, offset = offset)
       }.foreach { project =>
         sender ! MainActor.Messages.ProjectSync(project.id)
       }
-    }
 
-    case m @ PeriodicActor.Messages.SyncBinaries => withErrorHandler(m) {
+    case PeriodicActor.Messages.SyncBinaries =>
       Pager.create { offset =>
-        binariesDao.findAll(Authorization.All, offset = offset)
+        binariesDao.findAll(offset = offset)
       }.foreach { bin =>
         sender ! MainActor.Messages.BinarySync(bin.id)
       }
-    }
 
-    case m @ PeriodicActor.Messages.SyncLibraries => withErrorHandler(m) {
+    case PeriodicActor.Messages.SyncLibraries =>
       Pager.create { offset =>
         librariesDao.findAll(Authorization.All, offset = offset)
       }.foreach { library =>
         sender ! MainActor.Messages.LibrarySync(library.id)
       }
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
 }

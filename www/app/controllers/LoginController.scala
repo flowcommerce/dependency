@@ -1,5 +1,6 @@
 package controllers
 
+import com.github.ghik.silencer.silent
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.GithubAuthenticationForm
 import io.flow.dependency.www.lib
@@ -21,6 +22,7 @@ class LoginController @javax.inject.Inject()(
     Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl))
   }
 
+  @silent
   def githubCallback(
     code: String,
     state: Option[String],

@@ -1,16 +1,15 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.v0.models.{Binary, BinarySummary, Item, ItemSummary, ItemSummaryUndefinedType, Library, LibrarySummary}
-import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, ResolverSummary, Visibility}
+import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, Visibility}
 import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
+import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
 import play.api.libs.json._
 
 import scala.util.{Failure, Success, Try}
@@ -28,7 +27,6 @@ class ItemsDao @Inject()(
   dbHelpersProvider: Provider[DbHelpers],
   librariesDaoProvider: Provider[LibrariesDao],
   projectsDaoProvider: Provider[ProjectsDao],
-  resolversDaoProvider: Provider[ResolversDao]
 ){
 
   private[this] val BaseQuery = Query(s"""
@@ -56,41 +54,37 @@ class ItemsDao @Inject()(
 
   private[this] def objectId(summary: ItemSummary): String = {
     summary match {
-      case BinarySummary(id, org, name) => id
-      case LibrarySummary(id, org, groupId, artifactId) => id
-      case ProjectSummary(id, org, name) => id
+      case BinarySummary(id, _, _) => id
+      case LibrarySummary(id, _, _, _) => id
+      case ProjectSummary(id, _, _) => id
       case ItemSummaryUndefinedType(name) => sys.error(s"Cannot get a id from ItemSummaryUndefinedType($name)")
     }
   }
 
   private[this] def organization(summary: ItemSummary): OrganizationSummary = {
     summary match {
-      case BinarySummary(id, org, name) => org
-      case LibrarySummary(id, org, groupId, artifactId) => org
-      case ProjectSummary(id, org, name) => org
+      case BinarySummary(_, org, _) => org
+      case LibrarySummary(_, org, _, _) => org
+      case ProjectSummary(_, org, _) => org
       case ItemSummaryUndefinedType(name) => sys.error(s"Cannot get a id from ItemSummaryUndefinedType($name)")
     }
   }
 
   private[this] def visibility(summary: ItemSummary): Visibility = {
     summary match {
-      case BinarySummary(id, org, name) => {
+      case BinarySummary(_, _, _) => {
         Visibility.Public
       }
-      case LibrarySummary(id, org, groupId, artifactId) => {
+      case LibrarySummary(id, _, _, _) => {
         librariesDaoProvider.get.findById(Authorization.All, id).map(_.resolver.visibility).getOrElse(Visibility.Private)
       }
-      case ProjectSummary(id, org, name) => {
+      case ProjectSummary(id, _, _) => {
         projectsDaoProvider.get.findById(Authorization.All, id).map(_.visibility).getOrElse(Visibility.Private)
       }
-      case ItemSummaryUndefinedType(name) => {
+      case ItemSummaryUndefinedType(_) => {
         Visibility.Private
       }
     }
-  }
-
-  private[this] def visibility(resolver: ResolverSummary): Visibility = {
-    resolversDaoProvider.get.findById(Authorization.All, resolver.id).map(_.visibility).getOrElse(Visibility.Private)
   }
 
   def replaceBinary(user: UserReference, binary: Binary): Item = {
@@ -165,7 +159,7 @@ class ItemsDao @Inject()(
   }
 
   private[this] def create(createdBy: UserReference, form: ItemForm)(implicit c: java.sql.Connection): Item = {
-    val id = io.flow.play.util.IdGenerator("itm").randomId()
+    val id = IdGenerator("itm").randomId()
 
     SQL(InsertQuery).on(
       'id -> id,
@@ -184,7 +178,7 @@ class ItemsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, item: Item) {
+  def delete(deletedBy: UserReference, item: Item): Unit = {
     db.withConnection { implicit c =>
       deleteWithConnection(deletedBy, item)(c)
     }
@@ -192,12 +186,12 @@ class ItemsDao @Inject()(
 
   private[this] def deleteWithConnection(deletedBy: UserReference, item: Item)(
     implicit c: java.sql.Connection
-  ) {
-    dbHelpersProvider.get.delete("items", deletedBy.id, item.id)
+  ): Unit = {
+    dbHelpersProvider.get.delete(c,"items", deletedBy.id, item.id)
   }
 
-  def deleteByObjectId(auth: Authorization, deletedBy: UserReference, objectId: String) {
-    findByObjectId(auth, objectId).map { item =>
+  def deleteByObjectId(auth: Authorization, deletedBy: UserReference, objectId: String): Unit = {
+    findByObjectId(auth, objectId).foreach { item =>
       delete(deletedBy, item)
     }
   }
@@ -225,7 +219,7 @@ class ItemsDao @Inject()(
         and(auth.organizations("items.organization_id", Some("items.visibility")).sql).
         equals("items.id", id).
         optionalIn("items.id", ids).
-        and(q.map { v => "items.contents like '%' || lower(trim({q})) || '%' " }).bind("q", q).
+        and(q.map { _ => "items.contents like '%' || lower(trim({q})) || '%' " }).bind("q", q).
         equals("items.object_id", objectId).
         orderBy(orderBy.sql).
         limit(limit).

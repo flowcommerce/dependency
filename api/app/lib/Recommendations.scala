@@ -28,8 +28,8 @@ object Recommendations {
   private[this] def matchesText(current: Version, other: Version): Boolean = {
     (current.tags zip other.tags).map{ case (a, b) =>
       (a, b) match {
-        case (t1: Tag.Semver, t2: Tag.Semver) => true
-        case (t1: Tag.Date, t2: Tag.Date) => true
+        case (_: Tag.Semver, _: Tag.Semver) => true
+        case (_: Tag.Date, _: Tag.Date) => true
         case (Tag.Text(value1), Tag.Text(value2)) => value1 == value2
         case (_, _) => false
       }
@@ -38,8 +38,8 @@ object Recommendations {
 
   private[this] def isSimple(version: Version): Boolean = {
     version.tags match {
-      case Seq(t: Tag.Semver) => true
-      case Seq(t: Tag.Date) => true
+      case Seq(_: Tag.Semver) => true
+      case Seq(_: Tag.Date) => true
       case _ => false
     }
   }

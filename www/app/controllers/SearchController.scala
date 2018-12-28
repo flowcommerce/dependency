@@ -2,7 +2,8 @@ package controllers
 
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
@@ -23,8 +24,8 @@ class SearchController @javax.inject.Inject() (
     for {
       items <- dependencyClient(request).items.get(
         q = q,
-        limit = Pagination.DefaultLimit+1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(

@@ -4,11 +4,10 @@ import io.flow.dependency.api.lib._
 import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.Pager
-import io.flow.play.actors.ErrorHandler
 import io.flow.play.util.Config
 import db._
-
 import akka.actor.{Actor, ActorSystem}
+import io.flow.akka.SafeReceive
 import io.flow.github.v0.models.HookForm
 import io.flow.log.RollbarLogger
 import play.api.libs.json.Json
@@ -45,7 +44,7 @@ object ProjectActor {
 }
 
 class ProjectActor @javax.inject.Inject() (
-  override val logger: RollbarLogger,
+  logger: RollbarLogger,
   config: Config,
   actorSystem: ActorSystem,
   projectsDao: ProjectsDao,
@@ -60,11 +59,12 @@ class ProjectActor @javax.inject.Inject() (
   resolversDao: ResolversDao,
   wsClient: WSClient,
   @com.google.inject.assistedinject.Assisted projectId: String
-) extends Actor with ErrorHandler {
+) extends Actor {
 
   lazy val SystemUser = usersDao.systemUser
 
   implicit val projectExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("project-actor-context")
+  private[this] implicit val configuredRollbar = logger.fingerprint("ProjectActor")
 
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"
   private[this] val HookName = "web"
@@ -72,37 +72,31 @@ class ProjectActor @javax.inject.Inject() (
 
   private[this] lazy val dataProject: Option[Project] = projectsDao.findById(Authorization.All, projectId)
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ ProjectActor.Messages.ProjectLibraryCreated(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectLibraryCreated(id) =>
       syncProjectLibrary(id)
-    }
 
-    case m @ ProjectActor.Messages.ProjectLibrarySync(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectLibrarySync(id) =>
       syncProjectLibrary(id)
-    }
 
-    case m @ ProjectActor.Messages.ProjectBinaryCreated(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectBinaryCreated(id) =>
       syncProjectBinary(id)
-    }
 
-    case m @ ProjectActor.Messages.ProjectBinarySync(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectBinarySync(id) =>
       syncProjectBinary(id)
-    }
 
-    case m @ ProjectActor.Messages.LibrarySynced(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.LibrarySynced(_) =>
       dataProject.foreach { project =>
         processPendingSync(project)
       }
-    }
 
-    case m @ ProjectActor.Messages.BinarySynced(id) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.BinarySynced(_) =>
       dataProject.foreach { project =>
         processPendingSync(project)
       }
-    }
 
-    case m @ ProjectActor.Messages.CreateHooks => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.CreateHooks =>
       dataProject.foreach { project =>
         GithubUtil.parseUri(project.uri) match {
           case Left(error) => {
@@ -133,7 +127,7 @@ class ProjectActor @javax.inject.Inject() (
                         active = true
                       )
                     ).map { hook =>
-                      println("  - Project[${project.id}] hook created: " + hook)
+                      println(s"  - Project[${project.id}] hook created: $hook")
                     }.recover {
                       case e: Throwable => {
                         logger.fingerprint(getClass.getName).withKeyValue("project", Json.toJson(project)).error("Error creating hook", e)
@@ -146,9 +140,8 @@ class ProjectActor @javax.inject.Inject() (
           }
         }
       }
-    }
 
-    case m @ ProjectActor.Messages.Sync => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.Sync =>
       dataProject.foreach { project =>
         syncsDao.recordStarted(SystemUser, "project", project.id)
 
@@ -201,9 +194,8 @@ class ProjectActor @javax.inject.Inject() (
           }
         }
       }
-    }
 
-    case m @ ProjectActor.Messages.Deleted => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.Deleted =>
       dataProject.foreach { project =>
         Pager.create { offset =>
           recommendationsDao.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
@@ -212,9 +204,8 @@ class ProjectActor @javax.inject.Inject() (
         }
       }
       context.stop(self)
-    }
 
-    case m @ ProjectActor.Messages.ProjectLibraryDeleted(id, version) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectLibraryDeleted(id, version) =>
       dataProject.foreach { project =>
         recommendationsDao.findAll(
           Authorization.All,
@@ -228,9 +219,8 @@ class ProjectActor @javax.inject.Inject() (
 
         processPendingSync(project)
       }
-    }
 
-    case m @ ProjectActor.Messages.ProjectBinaryDeleted(id, version) => withErrorHandler(m.toString) {
+    case ProjectActor.Messages.ProjectBinaryDeleted(id, version) =>
       dataProject.foreach { project =>
         recommendationsDao.findAll(
           Authorization.All,
@@ -243,16 +233,13 @@ class ProjectActor @javax.inject.Inject() (
         }
         processPendingSync(project)
       }
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
   /**
     * Attempts to resolve the library. If successful, sets the
     * project_libraries.library_id
     */
-  def syncProjectLibrary(id: String) {
+  def syncProjectLibrary(id: String): Unit = {
     syncsDao.withStartedAndCompleted(SystemUser, "project_library", id) {
       dataProject.foreach { project =>
         projectLibrariesDao.findById(Authorization.All, id).map { projectLibrary =>
@@ -265,7 +252,7 @@ class ProjectActor @javax.inject.Inject() (
     }
   }
 
-  def syncProjectBinary(id: String) {
+  def syncProjectBinary(id: String): Unit = {
     syncsDao.withStartedAndCompleted(SystemUser, "project_binary", id) {
       dataProject.foreach { project =>
         projectBinariesDao.findById(Authorization.All, id).map { projectBinary =>
@@ -278,7 +265,7 @@ class ProjectActor @javax.inject.Inject() (
     }
   }
 
-  def processPendingSync(project: Project) {
+  def processPendingSync(project: Project): Unit = {
     dependenciesPendingCompletion(project) match {
       case Nil => {
         println(s" -- project[${project.name}] id[${project.id}] dependencies satisfied")

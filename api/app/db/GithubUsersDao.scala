@@ -1,14 +1,13 @@
 package db
 
 import javax.inject.Inject
-
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.dependency.v0.models.{GithubUser, GithubUserForm}
 import io.flow.common.v0.models.UserReference
+import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
 
 class GithubUsersDao @Inject()(
   db: Database,
@@ -49,7 +48,7 @@ class GithubUsersDao @Inject()(
   }
 
   private[db] def createWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit c: java.sql.Connection): GithubUser = {
-    val id = io.flow.play.util.IdGenerator("ghu").randomId()
+    val id = IdGenerator("ghu").randomId()
     SQL(InsertQuery).on(
       'id -> id,
       'user_id -> form.userId,

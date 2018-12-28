@@ -18,7 +18,7 @@ object Util {
 
   private[db] def maskCredentials(cred: Credentials): Option[Credentials] = {
     cred match {
-      case CredentialsUndefinedType(value) => None
+      case CredentialsUndefinedType(_) => None
       case UsernamePassword(username, password) => {
         Some(
           UsernamePassword(

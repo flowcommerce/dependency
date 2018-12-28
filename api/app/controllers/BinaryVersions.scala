@@ -1,13 +1,10 @@
 package controllers
 
-import com.google.inject.Provider
-import db.{Authorization, BinaryVersionsDao, TokensDao, UsersDao}
-import io.flow.play.controllers.{AuthorizationImpl, FlowController, FlowControllerComponents}
-import io.flow.common.v0.models.UserReference
-import io.flow.play.util.{Config, Validation}
+import db.BinaryVersionsDao
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.util.Config
 import io.flow.dependency.v0.models.BinaryVersion
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -27,11 +24,10 @@ class BinaryVersions @javax.inject.Inject()(
     projectId: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = IdentifiedWithFallback { request =>
+  ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
         binaryVersionsDao.findAll(
-          Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
           binaryId = binaryId,
@@ -43,16 +39,16 @@ class BinaryVersions @javax.inject.Inject()(
     )
   }
 
-  def getById(id: String) = IdentifiedWithFallback { request =>
-    withBinaryVersion(request.user, id) { binary =>
+  def getById(id: String) = IdentifiedWithFallback {
+    withBinaryVersion(id) { binary =>
       Ok(Json.toJson(binary))
     }
   }
 
-  def withBinaryVersion(user: UserReference, id: String)(
+  def withBinaryVersion(id: String)(
     f: BinaryVersion => Result
   ): Result = {
-    binaryVersionsDao.findById(Authorization.User(user.id), id) match {
+    binaryVersionsDao.findById(id) match {
       case None => {
         NotFound
       }

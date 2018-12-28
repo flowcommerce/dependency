@@ -5,11 +5,7 @@ import javax.inject.{Inject, Singleton}
 import io.flow.dependency.api.lib.Recommendations
 import io.flow.dependency.v0.models.{Binary, BinaryVersion, Project, ProjectBinary, VersionForm}
 import io.flow.postgresql.Pager
-import anorm._
 import com.google.inject.Provider
-import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 case class BinaryRecommendation(
   binary: Binary,
@@ -20,15 +16,13 @@ case class BinaryRecommendation(
 
 @Singleton
 class BinaryRecommendationsDao @Inject()(
-  db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
   binariesDaoProvider: Provider[BinariesDao]
 ) {
 
   def forProject(project: Project): Seq[BinaryRecommendation] = {
-    var recommendations = scala.collection.mutable.ListBuffer[BinaryRecommendation]()
-    val auth = Authorization.Organization(project.organization.id)
+    val recommendations = scala.collection.mutable.ListBuffer[BinaryRecommendation]()
 
     Pager.create { offset =>
       projectBinariesDaoProvider.get.findAll(
@@ -38,8 +32,8 @@ class BinaryRecommendationsDao @Inject()(
         offset = offset
       )
     }.foreach { projectBinary =>
-      projectBinary.binary.flatMap { lib => binariesDaoProvider.get.findById(auth, lib.id) }.map { binary =>
-        val recentVersions = versionsGreaterThan(auth, binary, projectBinary.version)
+      projectBinary.binary.flatMap { lib => binariesDaoProvider.get.findById(lib.id) }.map { binary =>
+        val recentVersions = versionsGreaterThan(binary, projectBinary.version)
         recommend(projectBinary, recentVersions).map { v =>
           recommendations ++= Seq(
             BinaryRecommendation(
@@ -72,11 +66,10 @@ class BinaryRecommendationsDao @Inject()(
   /**
     * Returns all versions of a binary greater than the one specified
     */
-  private[this] def versionsGreaterThan(auth: Authorization, binary: Binary, version: String): Seq[BinaryVersion] = {
-    var recommendations = scala.collection.mutable.ListBuffer[BinaryVersion]()
+  private[this] def versionsGreaterThan(binary: Binary, version: String): Seq[BinaryVersion] = {
+    val recommendations = scala.collection.mutable.ListBuffer[BinaryVersion]()
     Pager.create { offset =>
       binaryVersionsDaoProvider.get.findAll(
-        auth,
         binaryId = Some(binary.id),
         greaterThanVersion = Some(version),
         offset = offset

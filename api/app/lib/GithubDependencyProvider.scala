@@ -1,17 +1,13 @@
 package io.flow.dependency.api.lib
 
 import db.{ProjectBinaryForm, TokensDao}
-import io.flow.common.v0.models.{User, UserReference}
-import io.flow.dependency.v0.models.{BinaryForm, BinaryType, LibraryForm, Project, ProjectSummary}
-import io.flow.github.v0.Client
-import io.flow.github.v0.errors.UnitResponse
+import io.flow.common.v0.models.UserReference
+import io.flow.dependency.v0.models.{BinaryType, Project, ProjectSummary}
 import io.flow.github.v0.models.{Contents, Encoding}
-import io.flow.play.util.{Config, DefaultConfig}
+import io.flow.util.Config
 import org.apache.commons.codec.binary.Base64
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
-import java.net.URI
 
 import io.flow.log.RollbarLogger
 import play.api.libs.ws.WSClient
@@ -34,9 +30,9 @@ object GithubUtil {
         }.trim
         path.split("/").filter(!_.isEmpty).toList match {
           case Nil => Left(s"URI path cannot be empty for uri[$uri]")
-          case owner :: Nil => Left(s"Invalid uri path[$uri] missing project name")
+          case _ :: Nil => Left(s"Invalid uri path[$uri] missing project name")
           case owner :: project :: Nil => Right(Repository(owner, project))
-          case inple => Left(s"Invalid uri path[$u] - expected exactly two path components")
+          case _ => Left(s"Invalid uri path[$u] - expected exactly two path components")
         }
       }
     }

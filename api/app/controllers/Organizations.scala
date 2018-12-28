@@ -6,7 +6,8 @@ import io.flow.dependency.v0.models.OrganizationForm
 import io.flow.dependency.v0.models.json._
 import io.flow.error.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.{Config, Validation}
+import io.flow.play.util.Validation
+import io.flow.util.Config
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -49,7 +50,7 @@ class Organizations @javax.inject.Inject()(
     }
   }
 
-  def getUsersByUserId(userId: String) = IdentifiedWithFallback { request =>
+  def getUsersByUserId(userId: String) = IdentifiedWithFallback {
     usersHelper.withUser(userId) { user =>
       Ok(Json.toJson(organizationsDao.upsertForUser(user)))
     }

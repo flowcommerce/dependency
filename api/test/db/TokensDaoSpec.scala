@@ -27,7 +27,7 @@ class TokensDaoSpec extends DependencySpec {
     val user = createUser()
     val actualToken = createTestKey()
     val form = InternalTokenForm.GithubOauth(user.id, actualToken)
-    val token = tokensDao.create(systemUser, form)
+    tokensDao.create(systemUser, form)
 
     tokensDao.getCleartextGithubOauthTokenByUserId(user.id) must be(Some(actualToken))
     tokensDao.getCleartextGithubOauthTokenByUserId(createUser().id) must be(None)

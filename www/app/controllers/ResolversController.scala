@@ -4,7 +4,8 @@ import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Resolver, ResolverForm, UsernamePassword, Visibility}
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
@@ -23,8 +24,8 @@ class ResolversController @javax.inject.Inject() (
   def index(page: Int = 0) = User.async { implicit request =>
     for {
       resolvers <- dependencyClient(request).resolvers.get(
-        limit = Pagination.DefaultLimit+1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(
@@ -41,8 +42,8 @@ class ResolversController @javax.inject.Inject() (
       for {
         libraries <- dependencyClient(request).libraries.get(
           resolverId = Some(id),
-          limit = Pagination.DefaultLimit+1,
-          offset = librariesPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = librariesPage * Pagination.DefaultLimit.toLong
         )
       } yield {
         Ok(
@@ -107,7 +108,7 @@ class ResolversController @javax.inject.Inject() (
   }
 
   def postDelete(id: String) = User.async { implicit request =>
-    dependencyClient(request).resolvers.deleteById(id).map { response =>
+    dependencyClient(request).resolvers.deleteById(id).map { _ =>
       Redirect(routes.ResolversController.index()).flashing("success" -> s"Resolver deleted")
     }.recover {
       case UnitResponse(404) => {

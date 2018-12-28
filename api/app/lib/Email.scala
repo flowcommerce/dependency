@@ -1,7 +1,7 @@
 package io.flow.dependency.api.lib
 
-import io.flow.common.v0.models.{Name, User}
-import io.flow.play.util.{Config, IdGenerator}
+import io.flow.common.v0.models.Name
+import io.flow.util.{Config, IdGenerator}
 import java.nio.file.{Path, Paths, Files}
 import java.nio.charset.StandardCharsets
 import org.joda.time.DateTime
@@ -17,10 +17,6 @@ object Email {
   }
 
   private[this] def fromEmail(config: Config) = config.requiredString("mail.default.from.email")
-  private[this] def fromName(config: Config) = Name(
-    Some(config.requiredString("mail.default.from.name.first")),
-    Some(config.requiredString("mail.default.from.name.last"))
-  )
 
   def localDeliveryDir(config: Config) = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
 
@@ -39,7 +35,7 @@ object Email {
     recipient: Recipient,
     subject: String,
     body: String
-  ) {
+  ): Unit = {
     val prefixedSubject = subjectWithPrefix(config, subject)
 
     val from = new com.sendgrid.Email(fromEmail(config))
@@ -54,6 +50,7 @@ object Email {
     localDeliveryDir(config) match {
       case Some(dir) => {
         localDelivery(dir, recipient, prefixedSubject, body)
+        ()
       }
 
       case None => {

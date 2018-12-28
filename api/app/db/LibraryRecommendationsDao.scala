@@ -4,12 +4,7 @@ import javax.inject.{Inject, Singleton}
 
 import io.flow.dependency.api.lib.Recommendations
 import io.flow.dependency.v0.models.{Library, LibraryVersion, Project, ProjectLibrary, VersionForm}
-import io.flow.postgresql.Pager
-import anorm._
 import com.google.inject.Provider
-import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 case class LibraryRecommendation(
   library: Library,
@@ -26,7 +21,7 @@ class LibraryRecommendationsDao @Inject()(
 ){
 
   def forProject(project: Project): Seq[LibraryRecommendation] = {
-    var recommendations = scala.collection.mutable.ListBuffer[LibraryRecommendation]()
+    val recommendations = scala.collection.mutable.ListBuffer[LibraryRecommendation]()
     val auth = Authorization.Organization(project.organization.id)
 
     projectLibrariesDaoProvider.get.findAll(

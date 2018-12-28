@@ -2,7 +2,8 @@ package controllers
 
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
@@ -20,8 +21,8 @@ class SyncsController @javax.inject.Inject() (
     for {
       syncs <- dependencyClient(request).syncs.get(
         objectId = objectId,
-        limit = Pagination.DefaultLimit+1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(views.html.syncs.index(uiData(request), PaginatedCollection(page, syncs), objectId))

@@ -1,17 +1,15 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.v0.models.Reference
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.dependency.v0.models.Publication
+import io.flow.util.IdGenerator
 import org.joda.time.DateTime
 import anorm._
 import com.google.inject.Provider
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 case class LastEmailForm(
   userId: String,
@@ -58,7 +56,7 @@ class LastEmailsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, rec: LastEmail) {
+  def delete(deletedBy: UserReference, rec: LastEmail): Unit = {
     dbHelpersProvider.get.delete("last_emails", deletedBy.id, rec.id)
   }
 
@@ -68,7 +66,7 @@ class LastEmailsDao @Inject()(
   ) (
     implicit c: java.sql.Connection
   ): String = {
-    val id = io.flow.play.util.IdGenerator("lse").randomId()
+    val id = IdGenerator("lse").randomId()
     SQL(InsertQuery).on(
       'id -> id,
       'user_id -> form.userId,

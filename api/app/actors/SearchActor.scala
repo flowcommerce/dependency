@@ -1,12 +1,10 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.dependency.v0.models.{BinarySummary, LibrarySummary, ProjectSummary}
 import db._
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
 
 object SearchActor {
 
@@ -26,38 +24,37 @@ class SearchActor @Inject()(
   projectsDao: ProjectsDao,
   itemsDao: ItemsDao,
   usersDao: UsersDao,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
 
+  private[this] implicit val configuredRollbar = logger.fingerprint("SearchActor")
 
   lazy val SystemUser = usersDao.systemUser
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
 
-    case m @ SearchActor.Messages.SyncBinary(id) => withErrorHandler(m) {
+    case SearchActor.Messages.SyncBinary(id) =>
       println(s"SearchActor.Messages.SyncBinary($id)")
-      binariesDao.findById(Authorization.All, id) match {
+      binariesDao.findById(id) match {
         case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
         case Some(binary) => itemsDao.replaceBinary(SystemUser, binary)
       }
-    }
+      ()
 
-    case m @ SearchActor.Messages.SyncLibrary(id) => withErrorHandler(m) {
+    case SearchActor.Messages.SyncLibrary(id) =>
       librariesDao.findById(Authorization.All, id) match {
         case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
         case Some(library) => itemsDao.replaceLibrary(SystemUser, library)
       }
-    }
+      ()
 
-    case m @ SearchActor.Messages.SyncProject(id) => withErrorHandler(m) {
+    case SearchActor.Messages.SyncProject(id) =>
       projectsDao.findById(Authorization.All, id) match {
         case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
         case Some(project) => itemsDao.replaceProject(SystemUser, project)
       }
-    }
-
-    case m: Any => logUnhandledMessage(m)
+      ()
   }
 
 }

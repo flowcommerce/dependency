@@ -1,18 +1,16 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.play.util.Config
 import io.flow.postgresql.Pager
-import io.flow.common.v0.models.User
 import db._
 import io.flow.dependency.v0.models.{Publication, Subscription}
 import io.flow.dependency.lib.Urls
 import io.flow.dependency.api.lib.{Email, Recipient}
-import org.joda.time.{DateTime, DateTimeZone}
-import akka.actor.{Actor, ActorSystem}
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
+import io.flow.util.Config
+import org.joda.time.{DateTime, DateTimeZone}
+import akka.actor.Actor
+import io.flow.akka.SafeReceive
 
 object EmailActor {
 
@@ -28,8 +26,10 @@ class EmailActor @Inject()(
   subscriptionsDao: SubscriptionsDao,
   batchEmailProcessor: BatchEmailProcessor,
   config: Config,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
+
+  private[this] implicit val configuredRollbar = logger.fingerprint("EmailActor")
 
   val PreferredHourToSendEst: Int = {
     val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
@@ -41,7 +41,7 @@ class EmailActor @Inject()(
     (new DateTime()).toDateTime(DateTimeZone.forID("America/New_York")).getHourOfDay
   }
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
     /**
       * Selects people to whom we delivery email by:
@@ -56,7 +56,7 @@ class EmailActor @Inject()(
       *  Otherwise, filter by 26 hours to allow us to catch up on any
       *  missed emails
       */
-    case m @ EmailActor.Messages.ProcessDailySummary => withErrorHandler(m) {
+    case EmailActor.Messages.ProcessDailySummary =>
       val hoursForPreferredTime = 2
       val hours = currentHourEst match {
         case PreferredHourToSendEst => hoursForPreferredTime
@@ -75,9 +75,6 @@ class EmailActor @Inject()(
         }
       )
     }
-
-  }
-
 }
 
 class BatchEmailProcessor @Inject()(
@@ -132,7 +129,7 @@ class DailySummaryEmailMessage (
   val recipient: Recipient
 ) extends EmailMessageGenerator {
 
-  private[this] val MaxRecommendations = 250
+  private[this] val MaxRecommendations = 250L
 
   private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
 

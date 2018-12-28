@@ -1,13 +1,15 @@
 package controllers
 
+import com.github.ghik.silencer.silent
 import controllers.util.SubscriptionActionBuilder
-import db.{SubscriptionsDao, UsersDao}
+import db.SubscriptionsDao
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.json._
 import io.flow.dependency.v0.models.{Publication, Subscription, SubscriptionForm}
 import io.flow.error.v0.models.json._
 import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
+import io.flow.play.util.Validation
+import io.flow.util.Config
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -18,7 +20,6 @@ class Subscriptions @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  usersDao: UsersDao,
   subscriptionsDao: SubscriptionsDao,
   subscriptionIdentified: SubscriptionActionBuilder
 )(implicit val ec: ExecutionContext) extends FlowController {
@@ -56,6 +57,7 @@ class Subscriptions @javax.inject.Inject() (
     }
   }
 
+  @silent
   def post(identifier: Option[String]) = subscriptionIdentified(parse.json) { request =>
     request.body.validate[SubscriptionForm] match {
       case e: JsError => {
@@ -78,6 +80,7 @@ class Subscriptions @javax.inject.Inject() (
     }
   }
 
+  @silent
   def deleteById(id: String, userIdentifier: Option[String]) = subscriptionIdentified { request =>
     withSubscription(request.user, id) { subscription =>
       subscriptionsDao.delete(request.user, subscription)

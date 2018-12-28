@@ -4,7 +4,7 @@ import io.flow.common.v0.models.{User, UserReference}
 import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.Config
+import io.flow.util.Config
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,7 +45,7 @@ class SubscriptionsController @javax.inject.Inject()(
       )
       subscriptions <- dependencyClientProvider.newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None).subscriptions.get(
         identifier = Some(identifier),
-        limit = Publication.all.size + 1
+        limit = Publication.all.size.toLong + 1L
       )
     } yield {
       val userPublications = Publication.all.map { p =>
@@ -58,7 +58,7 @@ class SubscriptionsController @javax.inject.Inject()(
     }
   }
 
-  def postToggle(identifier: String, publication: Publication) = Action.async { implicit request =>
+  def postToggle(identifier: String, publication: Publication) = Action.async {
     client.users.get(identifier = Some(identifier)).flatMap { users =>
       users.headOption match {
         case None => Future {

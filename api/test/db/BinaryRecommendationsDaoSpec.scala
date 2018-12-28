@@ -20,14 +20,13 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
     (
       binary,
       binaryVersionsDao.findAll(
-        Authorization.Organization(org.id),
         binaryId = Some(binary.id),
-        limit = versions.size
+        limit = versions.size.toLong
       ).reverse
     )
   }
 
-  def addBinaryVersion(project: Project, binaryVersion: BinaryVersion) {
+  def addBinaryVersion(project: Project, binaryVersion: BinaryVersion): Unit = {
     val projectBinary = create(
       projectBinariesDao.upsert(
         systemUser,
@@ -50,7 +49,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
   }
 
   "ignores earlier versions of binary" in {
-    val (binary, binaryVersions) = createBinaryWithMultipleVersions(org)
+    val (_, binaryVersions) = createBinaryWithMultipleVersions(org)
     val project = createProject(org)
     addBinaryVersion(project, binaryVersions.last)
     binaryRecommendationsDao.forProject(project) must be(Nil)
@@ -93,7 +92,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
   }
 
 
-  def verify(actual: Seq[BinaryRecommendation], expected: Seq[BinaryRecommendation]) {
+  def verify(actual: Seq[BinaryRecommendation], expected: Seq[BinaryRecommendation]): Unit = {
     (actual == expected) match {
       case true => {}
       case false => {
@@ -102,7 +101,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
             sys.error(s"Expected[${expected.size}] recommendations but got [${actual.size}]")
           }
           case true => {
-            (actual zip expected).map { case (a, b) =>
+            (actual zip expected).foreach { case (a, b) =>
               (a == b) match {
                 case true => {}
                 case false => {

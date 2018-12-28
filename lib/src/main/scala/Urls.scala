@@ -1,8 +1,8 @@
 package io.flow.dependency.lib
 
-import io.flow.play.util.Config
 import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, ProjectSummary}
 import io.flow.dependency.v0.models.{Recommendation, RecommendationType}
+import io.flow.util.Config
 
 /**
  * All our URLs to the webapp go here. We tried to use the www routers

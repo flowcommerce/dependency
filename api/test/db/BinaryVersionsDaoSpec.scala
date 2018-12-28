@@ -20,24 +20,24 @@ class BinaryVersionsDaoSpec extends DependencySpec {
 
   "findById" in {
     val version = createBinaryVersion(org)()
-    binaryVersionsDao.findById(Authorization.All, version.id).map(_.id) must be(
+    binaryVersionsDao.findById(version.id).map(_.id) must be(
       Some(version.id)
     )
 
-    binaryVersionsDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
+    binaryVersionsDao.findById(UUID.randomUUID.toString) must be(None)
   }
 
   "findAll by ids" in {
     val version1 = createBinaryVersion(org)()
     val version2 = createBinaryVersion(org)()
 
-    binaryVersionsDao.findAll(Authorization.All, ids = Some(Seq(version1.id, version2.id))).map(_.id).sorted must be(
+    binaryVersionsDao.findAll(ids = Some(Seq(version1.id, version2.id))).map(_.id).sorted must be(
       Seq(version1.id, version2.id).sorted
     )
 
-    binaryVersionsDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
-    binaryVersionsDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    binaryVersionsDao.findAll(Authorization.All, ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(version1.id))
+    binaryVersionsDao.findAll(ids = Some(Nil)) must be(Nil)
+    binaryVersionsDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
+    binaryVersionsDao.findAll(ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(version1.id))
   }
 
   "delete" in {

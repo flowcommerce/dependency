@@ -1,10 +1,12 @@
 package controllers
 
+import com.github.ghik.silencer.silent
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models._
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
@@ -23,8 +25,8 @@ class ProjectsController @javax.inject.Inject()(
   def index(page: Int = 0) = User.async { implicit request =>
     for {
       projects <- dependencyClient(request).projects.get(
-        limit = Pagination.DefaultLimit + 1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(
@@ -41,18 +43,18 @@ class ProjectsController @javax.inject.Inject()(
       for {
         recommendations <- dependencyClient(request).recommendations.get(
           projectId = Some(project.id),
-          limit = Pagination.DefaultLimit + 1,
-          offset = recommendationsPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = recommendationsPage * Pagination.DefaultLimit.toLong
         )
         projectBinaries <- dependencyClient(request).projectBinaries.get(
           projectId = Some(id),
-          limit = Pagination.DefaultLimit + 1,
-          offset = binariesPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = binariesPage * Pagination.DefaultLimit.toLong
         )
         projectLibraries <- dependencyClient(request).projectLibraries.get(
           projectId = Some(id),
-          limit = Pagination.DefaultLimit + 1,
-          offset = librariesPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = librariesPage * Pagination.DefaultLimit.toLong
         )
         syncs <- dependencyClient(request).syncs.get(
           objectId = Some(id),
@@ -102,8 +104,8 @@ class ProjectsController @javax.inject.Inject()(
         repositories <- dependencyClient(request).repositories.getGithub(
           organizationId = Some(org.id),
           existingProject = Some(false),
-          limit = Pagination.DefaultLimit + 1,
-          offset = repositoriesPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = repositoriesPage * Pagination.DefaultLimit.toLong
         )
       } yield {
         Ok(
@@ -115,6 +117,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
+  @silent
   def postGithubOrg(
     orgKey: String,
     owner: String, // github owner, ex. flowcommerce    
@@ -253,7 +256,7 @@ class ProjectsController @javax.inject.Inject()(
   }
 
   def postDelete(id: String) = User.async { implicit request =>
-    dependencyClient(request).projects.deleteById(id).map { response =>
+    dependencyClient(request).projects.deleteById(id).map { _ =>
       Redirect(routes.ProjectsController.index()).flashing("success" -> s"Project deleted")
     }.recover {
       case UnitResponse(404) => {
@@ -265,8 +268,9 @@ class ProjectsController @javax.inject.Inject()(
   /**
     * Waits for the latest sync to complete for this project.
     */
+  @silent
   def sync(id: String, n: Int, librariesPage: Int = 0) = User.async { implicit request =>
-    withProject(request, id) { project =>
+    withProject(request, id) { _ =>
       for {
         syncs <- dependencyClient(request).syncs.get(
           objectId = Some(id)
@@ -318,7 +322,7 @@ class ProjectsController @javax.inject.Inject()(
         syncs.find {
           _.event == SyncEvent.Completed
         } match {
-          case Some(rec) => {
+          case Some(_) => {
             Redirect(routes.ProjectsController.show(id))
           }
           case None => {

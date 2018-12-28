@@ -6,7 +6,8 @@ import io.flow.dependency.v0.models.Organization
 import io.flow.dependency.www.lib.{DependencyClientProvider, Section, UiData}
 import io.flow.play.controllers.IdentifiedCookie._
 import io.flow.play.controllers._
-import io.flow.play.util.{AuthHeaders, Config}
+import io.flow.play.util.AuthHeaders
+import io.flow.util.Config
 import play.api.i18n._
 import play.api.mvc._
 

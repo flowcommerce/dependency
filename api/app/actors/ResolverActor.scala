@@ -5,9 +5,8 @@ import io.flow.dependency.v0.models.{Resolver, Visibility}
 import io.flow.postgresql.Pager
 import db._
 import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
 
 object ResolverActor {
 
@@ -27,27 +26,26 @@ class ResolverActor @Inject()(
   librariesDao: LibrariesDao,
   projectLibrariesDao: ProjectLibrariesDao,
   usersDao: UsersDao,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
+
+  private[this] implicit val configuredRollbar = logger.fingerprint("ResolverActor")
 
   var dataResolver: Option[Resolver] = None
   lazy val SystemUser = usersDao.systemUser
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ ResolverActor.Messages.Data(id) => withErrorHandler(m.toString) {
+    case ResolverActor.Messages.Data(id) =>
       dataResolver = resolversDao.findById(Authorization.All, id)
-    }
 
-    case m @ ResolverActor.Messages.Created => withErrorHandler(m.toString) {
+    case ResolverActor.Messages.Created =>
       sync()
-    }
 
-    case m @ ResolverActor.Messages.Sync => withErrorHandler(m.toString) {
+    case ResolverActor.Messages.Sync =>
       sync()
-    }
 
-    case m @ ResolverActor.Messages.Deleted => withErrorHandler(m.toString) {
+    case ResolverActor.Messages.Deleted =>
       dataResolver.foreach { resolver =>
         Pager.create { offset =>
           librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
@@ -57,17 +55,14 @@ class ResolverActor @Inject()(
       }
 
       context.stop(self)
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
-  def sync() {
+  def sync(): Unit = {
     dataResolver.foreach { resolver =>
       // Trigger resolution for any project libraries that are currently not resolved.
       val auth = (resolver.organization, resolver.visibility) match {
         case (None, _) => Authorization.All
-        case (Some(org), Visibility.Public | Visibility.UNDEFINED(_)) => {
+        case (Some(_), Visibility.Public | Visibility.UNDEFINED(_)) => {
           Authorization.All
         }
         case (Some(org), Visibility.Private) => {

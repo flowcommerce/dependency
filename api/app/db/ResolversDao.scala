@@ -8,11 +8,11 @@ import io.flow.dependency.v0.models.{OrganizationSummary, Visibility}
 import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{Pager, Query}
+import io.flow.log.RollbarLogger
+import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
-import io.flow.log.RollbarLogger
 import play.api.db._
-import play.api.Play.current
 import play.api.libs.json._
 
 class ResolversDao @Inject()(
@@ -75,7 +75,7 @@ class ResolversDao @Inject()(
   def validate(user: UserReference, form: ResolverForm): Seq[String] = {
     val urlErrors = Validation.validateUri(form.uri) match {
       case Left(errors) => errors
-      case Right(url) => Nil
+      case Right(_) => Nil
     }
 
     val uniqueErrors = form.visibility match {
@@ -124,10 +124,10 @@ class ResolversDao @Inject()(
     validate(createdBy, form) match {
       case Nil => {
         val org = organizationsDaoProvider.get.findByKey(Authorization.All, form.organization).getOrElse {
-          sys.error("Could not find organization with key[${form.organization}]")
+          sys.error(s"Could not find organization with key[${form.organization}]")
         }
 
-        val id = io.flow.play.util.IdGenerator("res").randomId()
+        val id = IdGenerator("res").randomId()
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
@@ -153,7 +153,7 @@ class ResolversDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, resolver: Resolver) {
+  def delete(deletedBy: UserReference, resolver: Resolver): Unit = {
     Pager.create { offset =>
       librariesDaoProvider.get.findAll(
         Authorization.All,

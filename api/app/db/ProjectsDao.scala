@@ -1,17 +1,15 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.actors.MainActor
-import io.flow.dependency.v0.models.{Binary, BinaryForm, Library, LibraryForm, OrganizationSummary, Project, ProjectForm, ProjectSummary, Scms, Visibility}
+import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectForm, ProjectSummary, Scms, Visibility}
 import io.flow.dependency.api.lib.GithubUtil
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
 import com.google.inject.Provider
+import io.flow.util.IdGenerator
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
 
 @Singleton
 class ProjectsDao @Inject()(
@@ -123,10 +121,10 @@ class ProjectsDao @Inject()(
       case Nil => {
 
         val org = organizationsDaoProvider.get.findByKey(Authorization.All, form.organization).getOrElse {
-          sys.error("Could not find organization with key[${form.organization}]")
+          sys.error(s"Could not find organization with key[${form.organization}]")
         }
 
-        val id = io.flow.play.util.IdGenerator("prj").randomId()
+        val id = IdGenerator("prj").randomId()
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
@@ -186,7 +184,7 @@ class ProjectsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, project: Project) {
+  def delete(deletedBy: UserReference, project: Project): Unit = {
     Pager.create { offset =>
       projectLibrariesDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), limit = Some(100), offset = offset)
     }.foreach { projectLibrariesDaoProvider.get.delete(deletedBy, _) }
@@ -254,22 +252,22 @@ class ProjectsDao @Inject()(
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
         ).
         and(
-          groupId.map { v => FilterProjectLibraries.format("project_libraries.group_id = trim({group_id})") }
+          groupId.map { _ => FilterProjectLibraries.format("project_libraries.group_id = trim({group_id})") }
         ).bind("group_id", groupId).
         and(
-          artifactId.map { v => FilterProjectLibraries.format("project_libraries.artifact_id = trim({artifact_id})") }
+          artifactId.map { _ => FilterProjectLibraries.format("project_libraries.artifact_id = trim({artifact_id})") }
         ).bind("artifact_id", artifactId).
         and(
-          version.map { v => FilterProjectLibraries.format("project_libraries.version = trim({version})") }
+          version.map { _ => FilterProjectLibraries.format("project_libraries.version = trim({version})") }
         ).bind("version", version).
         and(
-          libraryId.map { v => FilterProjectLibraries.format("project_libraries.library_id = {library_id}") }
+          libraryId.map { _ => FilterProjectLibraries.format("project_libraries.library_id = {library_id}") }
         ).bind("library_id", libraryId).
         and(
-          binary.map { v => FilterProjectBinaries.format("project_binaries.name = trim({binary})") }
+          binary.map { _ => FilterProjectBinaries.format("project_binaries.name = trim({binary})") }
         ).bind("binary", binary).
         and(
-          binaryId.map { v => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") }
+          binaryId.map { _ => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") }
         ).bind("binary_id", binaryId).
         as(
           io.flow.dependency.v0.anorm.parsers.Project.parser().*

@@ -1,16 +1,12 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.v0.models.{Sync, SyncEvent}
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
+import io.flow.util.IdGenerator
 import anorm._
 import play.api.db._
-import play.api.Play.current
-import play.api.libs.json._
-
-import scala.util.{Failure, Success, Try}
 
 case class SyncForm(
   `type`: String,
@@ -54,12 +50,14 @@ class SyncsDao @Inject()(
     result
   }
 
-  def recordStarted(createdBy: UserReference, `type`: String, id: String) {
+  def recordStarted(createdBy: UserReference, `type`: String, id: String): Unit = {
     createInternal(createdBy, SyncForm(`type`, id, SyncEvent.Started))
+    ()
   }
 
-  def recordCompleted(createdBy: UserReference, `type`: String, id: String) {
+  def recordCompleted(createdBy: UserReference, `type`: String, id: String): Unit = {
     createInternal(createdBy, SyncForm(`type`, id, SyncEvent.Completed))
+    ()
   }
 
   def create(createdBy: UserReference, form: SyncForm): Sync = {
@@ -70,7 +68,7 @@ class SyncsDao @Inject()(
   }
 
   private[this] def createInternal(createdBy: UserReference, form: SyncForm): String = {
-    val id = io.flow.play.util.IdGenerator("syn").randomId()
+    val id = IdGenerator("syn").randomId()
 
     db.withConnection { implicit c =>
       SQL(InsertQuery).on(
@@ -85,10 +83,11 @@ class SyncsDao @Inject()(
     id
   }
 
-  def purgeOld() {
+  def purgeOld(): Unit = {
     db.withConnection { implicit c =>
       SQL(PurgeQuery).execute()
     }
+    ()
   }
 
   def findById(id: String): Option[Sync] = {

@@ -4,7 +4,8 @@ import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Library, SyncEvent}
 import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,8 +22,8 @@ class LibrariesController @javax.inject.Inject() (
   def index(page: Int = 0) = User.async { implicit request =>
     for {
       libraries <- dependencyClient(request).libraries.get(
-        limit = Pagination.DefaultLimit+1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(
@@ -43,13 +44,13 @@ class LibrariesController @javax.inject.Inject() (
       for {
         versions <- dependencyClient(request).libraryVersions.get(
           libraryId = Some(id),
-          limit = Config.VersionsPerPage+1,
-          offset = versionsPage * Config.VersionsPerPage
+          limit = Config.VersionsPerPage.toLong + 1L,
+          offset = versionsPage * Config.VersionsPerPage.toLong
         )
         projectLibraries <- dependencyClient(request).projectLibraries.get(
           libraryId = Some(id),
-          limit = Pagination.DefaultLimit+1,
-          offset = projectsPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = projectsPage * Pagination.DefaultLimit.toLong
         )
         syncs <- dependencyClient(request).syncs.get(
           objectId = Some(id),

@@ -3,8 +3,8 @@ package controllers.helpers
 import javax.inject.{Inject, Singleton}
 
 import db.{Authorization, LibrariesDao}
-import io.flow.common.v0.models.{User, UserReference}
-import io.flow.dependency.v0.models.{Library, Organization, Project, Resolver}
+import io.flow.common.v0.models.UserReference
+import io.flow.dependency.v0.models.Library
 import play.api.mvc.{Result, Results}
 
 @Singleton

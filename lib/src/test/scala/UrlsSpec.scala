@@ -1,8 +1,8 @@
 package io.flow.dependency.lib
 
 import io.flow.dependency.v0.models.{ItemSummaryUndefinedType, RecommendationType}
-import io.flow.play.util.Config
 import org.scalatestplus.play.PlaySpec
+import io.flow.util.Config
 
 class UrlsSpec extends PlaySpec with Factories {
 

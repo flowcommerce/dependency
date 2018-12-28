@@ -6,7 +6,8 @@ import anorm._
 import com.google.inject.Provider
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.dependency.v0.models.{Organization, OrganizationForm, Role}
-import io.flow.play.util.{IdGenerator, Random, UrlKey}
+import io.flow.play.util.UrlKey
+import io.flow.util.{IdGenerator, Random}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import play.api.db._
 
@@ -134,7 +135,7 @@ class OrganizationsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, organization: Organization) {
+  def delete(deletedBy: UserReference, organization: Organization): Unit = {
     Pager.create { offset =>
       projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
     }.foreach { project =>
@@ -227,7 +228,7 @@ class OrganizationsDao @Inject()(
         offset = offset
       ).
         and(
-          userId.map { id =>
+          userId.map { _ =>
             "organizations.id in (select organization_id from memberships where user_id = {user_id})"
           }
         ).bind("user_id", userId).
@@ -238,7 +239,7 @@ class OrganizationsDao @Inject()(
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
         ).
         and(
-          forUserId.map { id =>
+          forUserId.map { _ =>
             "organizations.id in (select organization_id from user_organizations where user_id = {for_user_id})"
           }
         ).bind("for_user_id", forUserId).
