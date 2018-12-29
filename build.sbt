@@ -51,13 +51,13 @@ lazy val api = project
       ws,
       guice,
       "io.flow" %% "lib-util" % "0.1.4",
-      "io.flow" %% "lib-postgresql-play26" % "0.0.96",
+      "io.flow" %% "lib-postgresql-play26" % "0.1.0",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.22",
       "org.postgresql" % "postgresql" % "42.2.5",
       "com.sendgrid"   %  "sendgrid-java" % "4.3.0",
-      "io.flow" %% "lib-play-graphite-play26" % "0.0.63",
-      "io.flow" %% "lib-log" % "0.0.52",
-      "io.flow" %% "lib-test-utils" % "0.0.26" % Test      
+      "io.flow" %% "lib-play-graphite-play26" % "0.0.71",
+      "io.flow" %% "lib-log" % "0.0.54",
+      "io.flow" %% "lib-test-utils" % "0.0.29" % Test      
     )
   )
 
@@ -81,7 +81,7 @@ lazy val www = project
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "org.webjars" % "font-awesome" % "5.6.1",
       "org.webjars" % "jquery" % "2.1.4",
-      "io.flow" %% "lib-test-utils" % "0.0.26" % Test
+      "io.flow" %% "lib-test-utils" % "0.0.29" % Test
     )
   )
 
@@ -93,7 +93,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play26" % "0.5.25",
+    "io.flow" %% "lib-play-play26" % "0.5.28",
     "com.typesafe.play" %% "play-json-joda" % "2.6.10",
     "com.typesafe.play" %% "play-json" % "2.6.13"
   ),
