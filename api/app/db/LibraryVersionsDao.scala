@@ -3,12 +3,13 @@ package db
 import javax.inject.{Inject, Singleton}
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
+import io.flow.log.RollbarLogger
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
 import io.flow.util.Version
+import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
-import io.flow.log.RollbarLogger
 import play.api.db._
 
 import scala.util.{Failure, Success, Try}
@@ -95,7 +96,7 @@ class LibraryVersionsDao @Inject()(
   }
 
   def createWithConnection(createdBy: UserReference, libraryId: String, form: VersionForm)(implicit c: java.sql.Connection): LibraryVersion = {
-    val id = io.flow.play.util.IdGenerator("liv").randomId()
+    val id = IdGenerator("liv").randomId()
 
     val sortKey = form.crossBuildVersion match {
       case None => Version(form.version).sortKey
@@ -118,7 +119,7 @@ class LibraryVersionsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, lv: LibraryVersion) {
+  def delete(deletedBy: UserReference, lv: LibraryVersion): Unit = {
     dbHelpersProvider.get.delete("library_versions", deletedBy.id, lv.id)
     mainActor ! MainActor.Messages.LibraryVersionDeleted(lv.id, lv.library.id)
   }
@@ -222,7 +223,7 @@ class LibraryVersionsDao @Inject()(
         }
       ).bind("cross_build_version", crossBuildVersion.flatMap(v => v)).
       and(
-        greaterThanVersion.map { v =>
+        greaterThanVersion.map { _ =>
           """
             library_versions.sort_key > (
               select lv2.sort_key

@@ -35,7 +35,6 @@ trait Factories {
   def makeResolverSummary(
     id: String = UUID.randomUUID.toString,
     org: OrganizationSummary = makeOrganizationSummary(),
-    name: String = makeName
   ) = ResolverSummary(
     id = id,
     organization = Some(org),

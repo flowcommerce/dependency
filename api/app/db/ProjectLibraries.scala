@@ -1,13 +1,13 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, ProjectLibrary, SyncEvent, VersionForm}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
 import com.google.inject.Provider
+import io.flow.util.IdGenerator
 import play.api.db._
 
 case class ProjectLibraryForm(
@@ -102,7 +102,7 @@ class ProjectLibrariesDao @Inject()(
         Authorization.All, form.projectId, form.groupId, form.artifactId, form.version
       ) match {
         case None => Nil
-        case Some(lib) => {
+        case Some(_) => {
           Seq("Project library with this group id, artifact id, and version already exists")
         }
       }
@@ -129,7 +129,7 @@ class ProjectLibrariesDao @Inject()(
   def create(createdBy: UserReference, form: ProjectLibraryForm): Either[Seq[String], ProjectLibrary] = {
     validate(createdBy, form) match {
       case Nil => {
-        val id = io.flow.play.util.IdGenerator("prl").randomId()
+        val id = IdGenerator("prl").randomId()
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
@@ -155,19 +155,20 @@ class ProjectLibrariesDao @Inject()(
     }
   }
 
-  def removeLibrary(user: UserReference, projectLibrary: ProjectLibrary) {
+  def removeLibrary(user: UserReference, projectLibrary: ProjectLibrary): Unit = {
     db.withConnection { implicit c =>
       SQL(RemoveLibraryQuery).on(
         'id -> projectLibrary.id,
         'updated_by_user_id -> user.id
       ).execute()
     }
+    ()
   }
 
   /**
     * Removes any project library ids for this project not specified in this list
     */
-  def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectLibrary]) {
+  def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectLibrary]): Unit = {
     val ids = projectBinaries.map(_.id)
     Pager.create { offset =>
       findAll(Authorization.All, projectId = Some(projectId), limit = Some(100), offset = offset)
@@ -179,7 +180,7 @@ class ProjectLibrariesDao @Inject()(
 
   }
 
-  def setLibrary(user: UserReference, projectLibrary: ProjectLibrary, library: Library) {
+  def setLibrary(user: UserReference, projectLibrary: ProjectLibrary, library: Library): Unit = {
     db.withConnection { implicit c =>
       SQL(SetLibraryQuery).on(
         'id -> projectLibrary.id,
@@ -187,9 +188,10 @@ class ProjectLibrariesDao @Inject()(
         'updated_by_user_id -> user.id
       ).execute()
     }
+    ()
   }
 
-  def delete(deletedBy: UserReference, library: ProjectLibrary) {
+  def delete(deletedBy: UserReference, library: ProjectLibrary): Unit = {
     dbHelpersProvider.get.delete("project_libraries", deletedBy.id, library.id)
     mainActor ! MainActor.Messages.ProjectLibraryDeleted(library.project.id, library.id, library.version)
   }

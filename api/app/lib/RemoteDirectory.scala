@@ -3,8 +3,11 @@ package io.flow.dependency.api.lib
 import io.flow.dependency.v0.models.{Credentials, CredentialsUndefinedType, UsernamePassword}
 import org.htmlcleaner.HtmlCleaner
 import org.apache.commons.codec.binary.Base64
-import org.apache.commons.lang3.{StringEscapeUtils, StringUtils}
+import org.apache.commons.lang3.StringUtils
+import org.apache.commons.text.StringEscapeUtils
 import java.net.URL
+
+
 import scala.util.{Failure, Success, Try}
 
 
@@ -54,7 +57,7 @@ object RemoteDirectory {
             case None => {
               result
             }
-            case Some(rawHref) => {
+            case Some(_) => {
               val text = StringEscapeUtils.unescapeHtml4(elem.getText.toString)
               filter(StringUtils.stripEnd(text, "/")) match {
                 case false => {

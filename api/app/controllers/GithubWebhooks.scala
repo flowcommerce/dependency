@@ -2,11 +2,8 @@ package controllers
 
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.json._
-import io.flow.common.v0.models.json._
 import db.{Authorization, LibrariesDao, ProjectsDao}
 import io.flow.log.RollbarLogger
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
 import io.flow.postgresql.Pager
 import play.api.mvc._
 import play.api.libs.json._
@@ -20,7 +17,7 @@ class GithubWebhooks @javax.inject.Inject() (
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) extends BaseController {
 
-  def postByProjectId(projectId: String) = Action { request =>
+  def postByProjectId(projectId: String) = Action {
     projectsDao.findById(Authorization.All, projectId) match {
       case None => {
         NotFound

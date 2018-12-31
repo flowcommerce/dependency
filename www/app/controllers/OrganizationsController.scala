@@ -4,7 +4,8 @@ import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.OrganizationForm
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import io.flow.play.util.{PaginatedCollection, Pagination}
+import io.flow.util.Config
 import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
@@ -20,15 +21,15 @@ class OrganizationsController @javax.inject.Inject() (
 
   override def section = None
 
-  def redirectToDashboard(org: String) = User { implicit request =>
+  def redirectToDashboard(org: String) = User {
     Redirect(routes.ApplicationController.index(organization = Some(org)))
   }
 
   def index(page: Int = 0) = User.async { implicit request =>
     for {
       organizations <- dependencyClient(request).organizations.get(
-        limit = Pagination.DefaultLimit+1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(
@@ -45,8 +46,8 @@ class OrganizationsController @javax.inject.Inject() (
       for {
         projects <- dependencyClient(request).projects.get(
           organization = Some(key),
-          limit = Pagination.DefaultLimit+1,
-          offset = projectsPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = projectsPage * Pagination.DefaultLimit.toLong
         )
       } yield {
         Ok(
@@ -131,7 +132,7 @@ class OrganizationsController @javax.inject.Inject() (
 
   def postDelete(key: String) = User.async { implicit request =>
     withOrganization(request, key) { org =>
-      dependencyClient(request).organizations.deleteById(org.id).map { response =>
+      dependencyClient(request).organizations.deleteById(org.id).map { _ =>
         Redirect(routes.OrganizationsController.index()).flashing("success" -> s"Organization deleted")
       }.recover {
         case UnitResponse(404) => {

@@ -1,11 +1,12 @@
 package controllers
 
 import controllers.helpers.BinaryHelper
-import db.{Authorization, BinariesDao, TokensDao, UsersDao}
+import db.BinariesDao
 import io.flow.dependency.v0.models.BinaryForm
 import io.flow.dependency.v0.models.json._
-import io.flow.play.controllers.{AuthorizationImpl, FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.Validation
+import io.flow.util.Config
 import play.api.libs.json._
 import io.flow.error.v0.models.json._
 import play.api.mvc._
@@ -27,11 +28,10 @@ class Binaries @javax.inject.Inject()(
     name: Option[String],
     limit: Long = 25,
     offset: Long = 0
-  ) = IdentifiedWithFallback { request =>
+  ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
         binariesDao.findAll(
-          Authorization.User(request.user.id),
           id = id,
           ids = optionals(ids),
           projectId = projectId,
@@ -43,8 +43,8 @@ class Binaries @javax.inject.Inject()(
     )
   }
 
-  def getById(id: String) = IdentifiedWithFallback { request =>
-    binaryHelper.withBinary(request.user, id) { binary =>
+  def getById(id: String) = IdentifiedWithFallback {
+    binaryHelper.withBinary(id) { binary =>
       Ok(Json.toJson(binary))
     }
   }
@@ -65,7 +65,7 @@ class Binaries @javax.inject.Inject()(
   }
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
-    binaryHelper.withBinary(request.user, id) { binary =>
+    binaryHelper.withBinary(id) { binary =>
       binariesDao.delete(request.user, binary)
       NoContent
     }

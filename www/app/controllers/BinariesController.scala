@@ -21,8 +21,8 @@ class BinariesController @javax.inject.Inject()(
   def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       binaries <- dependencyClient(request).binaries.get(
-        limit = Pagination.DefaultLimit + 1,
-        offset = page * Pagination.DefaultLimit
+        limit = Pagination.DefaultLimit.toLong + 1L,
+        offset = page * Pagination.DefaultLimit.toLong
       )
     } yield {
       Ok(
@@ -43,13 +43,13 @@ class BinariesController @javax.inject.Inject()(
       for {
         versions <- dependencyClient(request).binaryVersions.get(
           binaryId = Some(id),
-          limit = Config.VersionsPerPage + 1,
-          offset = versionsPage * Config.VersionsPerPage
+          limit = Config.VersionsPerPage.toLong + 1L,
+          offset = versionsPage * Config.VersionsPerPage.toLong
         )
         projectBinaries <- dependencyClient(request).projectBinaries.get(
           binaryId = Some(id),
-          limit = Pagination.DefaultLimit + 1,
-          offset = projectsPage * Pagination.DefaultLimit
+          limit = Pagination.DefaultLimit.toLong + 1L,
+          offset = projectsPage * Pagination.DefaultLimit.toLong
         )
         syncs <- dependencyClient(request).syncs.get(
           objectId = Some(id),

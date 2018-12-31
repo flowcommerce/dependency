@@ -3,8 +3,6 @@ package controllers
 import java.util.UUID
 
 import _root_.util.{DependencySpec, MockDependencyClient}
-import io.flow.common.v0.models.Name
-import io.flow.dependency.v0.models.UserForm
 
 class SubscriptionsSpec extends DependencySpec with MockDependencyClient {
 

@@ -5,8 +5,9 @@ import io.flow.dependency.v0.models.json._
 import db.{UserIdentifiersDao, UsersDao}
 import io.flow.common.v0.models.User
 import io.flow.common.v0.models.json._
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.Validation
+import io.flow.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -44,7 +45,7 @@ class Users @javax.inject.Inject()(
     }
   }
 
-  def getById(id: String) = IdentifiedWithFallback { request =>
+  def getById(id: String) = IdentifiedWithFallback {
     withUser(id) { user =>
       Ok(Json.toJson(user))
     }

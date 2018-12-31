@@ -26,7 +26,7 @@ case class BuildSbtScalaParser(
       filter(_.startsWith("scalaVersion")).
       flatMap { line =>
       line.split(":=").map(_.trim).toList match {
-        case head :: version :: Nil => {
+        case _ :: version :: Nil => {
           Some(
             ProjectBinaryForm(
               projectId = project.id,

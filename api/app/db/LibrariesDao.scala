@@ -1,13 +1,13 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import anorm._
 import com.google.inject.Provider
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, LibraryForm}
 import io.flow.postgresql.{OrderBy, Query}
+import io.flow.util.IdGenerator
 import play.api.db._
 
 @Singleton
@@ -95,7 +95,7 @@ class LibrariesDao @Inject()(
   def create(createdBy: UserReference, form: LibraryForm): Either[Seq[String], Library] = {
     validate(form) match {
       case Nil => {
-        val id = io.flow.play.util.IdGenerator("lib").randomId()
+        val id = IdGenerator("lib").randomId()
 
         db.withTransaction { implicit c =>
           SQL(InsertQuery).on(
@@ -123,7 +123,7 @@ class LibrariesDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, library: Library) {
+  def delete(deletedBy: UserReference, library: Library): Unit = {
     libraryVersionsDaoProvider.get.findAll(
       Authorization.All,
       libraryId = Some(library.id),
@@ -179,7 +179,7 @@ class LibrariesDao @Inject()(
       ).
         equals("libraries.organization_id", organizationId).
         and(
-          projectId.map { id =>
+          projectId.map { _ =>
             "libraries.id in (select library_id from project_libraries where project_id = {project_id})"
           }
         ).bind("project_id", projectId).

@@ -7,7 +7,7 @@ import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
 import io.flow.log.RollbarLogger
-import io.flow.play.util.{Config, Random}
+import io.flow.util.{Config, IdGenerator, Random}
 import io.flow.test.utils.FlowPlaySpec
 import org.scalatest.concurrent.Eventually._
 import org.scalatest.time.{Seconds, Span}
@@ -56,7 +56,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   }
 
   def eventuallyInNSeconds[T](n: Int)(f: => T): T = {
-    eventually(timeout(Span(n, Seconds))) {
+    eventually(timeout(Span(n.toLong, Seconds))) {
       f
     }
   }
@@ -78,7 +78,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
       if (ctr > maxAttempts) {
         sys.error("Did not create user organization")
       }
-      Thread.sleep(msBetweenAttempts)
+      Thread.sleep(msBetweenAttempts.toLong)
     }
     true
   }
@@ -250,7 +250,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     form: UserForm = makeUserForm()
   ): User = {
     User(
-      id = io.flow.play.util.IdGenerator("tst").randomId(),
+      id = IdGenerator("tst").randomId(),
       email = form.email,
       name = form.name.getOrElse(Name())
     )
@@ -388,7 +388,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     )
   }
 
-  def addLibraryVersion(project: Project, libraryVersion: LibraryVersion) {
+  def addLibraryVersion(project: Project, libraryVersion: LibraryVersion): Unit = {
     val projectLibrary = create(
       projectLibrariesDao.upsert(
         systemUser,
@@ -431,9 +431,9 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     implicit summary: ItemSummary = createItemSummary(org)
   ): ItemForm = {
     val label = summary match {
-      case BinarySummary(id, org, name) => name.toString
-      case LibrarySummary(id, org, groupId, artifactId) => Seq(groupId, artifactId).mkString(".")
-      case ProjectSummary(id, org, name) => name
+      case BinarySummary(_, _, name) => name.toString
+      case LibrarySummary(_, _, groupId, artifactId) => Seq(groupId, artifactId).mkString(".")
+      case ProjectSummary(_, _, name) => name
       case ItemSummaryUndefinedType(name) => name
     }
     ItemForm(

@@ -1,13 +1,13 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Binary, BinaryType, ProjectBinary, SyncEvent}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
 import com.google.inject.Provider
+import io.flow.util.IdGenerator
 import play.api.db._
 
 case class ProjectBinaryForm(
@@ -93,7 +93,7 @@ class ProjectBinariesDao @Inject()(
         Authorization.All, form.projectId, form.name.toString, form.version
       ) match {
         case None => Nil
-        case Some(lib) => {
+        case Some(_) => {
           Seq("Project binary with this name and version already exists")
         }
       }
@@ -120,7 +120,7 @@ class ProjectBinariesDao @Inject()(
   def create(createdBy: UserReference, form: ProjectBinaryForm): Either[Seq[String], ProjectBinary] = {
     validate(createdBy, form) match {
       case Nil => {
-        val id = io.flow.play.util.IdGenerator("prb").randomId()
+        val id = IdGenerator("prb").randomId()
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
@@ -144,19 +144,20 @@ class ProjectBinariesDao @Inject()(
     }
   }
 
-  def removeBinary(user: UserReference, projectBinary: ProjectBinary) {
+  def removeBinary(user: UserReference, projectBinary: ProjectBinary): Unit = {
     db.withConnection { implicit c =>
       SQL(RemoveBinaryQuery).on(
         'id -> projectBinary.id,
         'updated_by_user_id -> user.id
       ).execute()
     }
+    ()
   }
 
   /**
     * Removes any project binary ids for this project not specified in this list
     */
-  def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectBinary]) {
+  def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectBinary]): Unit = {
     val ids = projectBinaries.map(_.id)
     Pager.create { offset =>
       findAll(Authorization.All, projectId = Some(projectId), limit = 100, offset = offset)
@@ -168,7 +169,7 @@ class ProjectBinariesDao @Inject()(
 
   }
 
-  def setBinary(user: UserReference, projectBinary: ProjectBinary, binary: Binary) {
+  def setBinary(user: UserReference, projectBinary: ProjectBinary, binary: Binary): Unit = {
     db.withConnection { implicit c =>
       SQL(SetBinaryQuery).on(
         'id -> projectBinary.id,
@@ -176,9 +177,10 @@ class ProjectBinariesDao @Inject()(
         'updated_by_user_id -> user.id
       ).execute()
     }
+    ()
   }
 
-  def delete(deletedBy: UserReference, binary: ProjectBinary) {
+  def delete(deletedBy: UserReference, binary: ProjectBinary): Unit = {
     dbHelpersProvider.get.delete("project_binaries", deletedBy.id, binary.id)
     mainActor ! MainActor.Messages.ProjectBinaryDeleted(binary.project.id, binary.id, binary.version)
   }

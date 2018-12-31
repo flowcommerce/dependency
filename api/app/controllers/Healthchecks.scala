@@ -4,8 +4,6 @@ import javax.inject.{Inject, Singleton}
 
 import io.flow.healthcheck.v0.models.json._
 import io.flow.healthcheck.v0.models.Healthcheck
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.Config
 import play.api.mvc._
 import play.api.libs.json._
 

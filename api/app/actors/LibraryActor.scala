@@ -1,11 +1,12 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.dependency.v0.models.{Library, LibraryForm, VersionForm}
+import io.flow.dependency.v0.models.{Library, VersionForm}
 import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, ItemsDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao, UsersDao}
 import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 
 object LibraryActor {
@@ -27,19 +28,19 @@ class LibraryActor @Inject()
   itemsDao: ItemsDao,
   projectLibrariesDao: ProjectLibrariesDao,
   usersDao: UsersDao,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
 
   var dataLibrary: Option[Library] = None
   lazy val SystemUser = usersDao.systemUser
+  private[this] implicit val configuredRollbar = logger.fingerprint("LibraryActor")
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ LibraryActor.Messages.Data(id: String) => withErrorHandler(m) {
+    case LibraryActor.Messages.Data(id: String) => 
       dataLibrary = librariesDao.findById(Authorization.All, id)
-    }
 
-    case m @ LibraryActor.Messages.Sync => withErrorHandler(m) {
+    case LibraryActor.Messages.Sync => 
       dataLibrary.foreach { lib =>
         syncsDao.withStartedAndCompleted(SystemUser, "library", lib.id) {
           resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
@@ -63,9 +64,8 @@ class LibraryActor @Inject()
         // TODO: Should we only send if something changed?
         sender ! MainActor.Messages.LibrarySyncCompleted(lib.id)
       }
-    }
 
-    case m @ LibraryActor.Messages.Deleted => withErrorHandler(m) {
+    case LibraryActor.Messages.Deleted => 
       dataLibrary.foreach { lib =>
         itemsDao.deleteByObjectId(Authorization.All, SystemUser, lib.id)
 
@@ -77,9 +77,6 @@ class LibraryActor @Inject()
         }
       }
       context.stop(self)
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
 }

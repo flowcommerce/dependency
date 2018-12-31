@@ -12,3 +12,6 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.20")
 addSbtPlugin("com.gilt.sbt" % "sbt-newrelic" % "0.2.4")
 
 addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.4")
+
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.1.4")
+

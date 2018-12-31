@@ -6,7 +6,7 @@ import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.SyncEvent
 import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
-import io.flow.play.util.Config
+import io.flow.util.Config
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -29,7 +29,7 @@ class Syncs @javax.inject.Inject()(
     event: Option[SyncEvent],
     limit: Long = 25,
     offset: Long = 0
-  ) = IdentifiedWithFallback { request =>
+  ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
         syncsDao.findAll(
@@ -42,13 +42,13 @@ class Syncs @javax.inject.Inject()(
     )
   }
 
-  def postAll() = IdentifiedWithFallback { request =>
+  def postAll() = IdentifiedWithFallback {
     mainActor ! MainActor.Messages.SyncAll
     NoContent
   }
 
-  def postBinariesById(id: String) = IdentifiedWithFallback { request =>
-    binaryHelper.withBinary(request.user, id) { binary =>
+  def postBinariesById(id: String) = IdentifiedWithFallback {
+    binaryHelper.withBinary(id) { binary =>
       mainActor ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }
@@ -62,7 +62,7 @@ class Syncs @javax.inject.Inject()(
   }
 
   def postProjectsById(id: String) = IdentifiedWithFallback { request =>
-    projectHelper.withProject(request.user, id) { project =>
+    projectHelper.withProject(request.user, id) { _ =>
       mainActor ! MainActor.Messages.ProjectSync(id)
       NoContent
     }

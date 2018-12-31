@@ -1,7 +1,7 @@
 package io.flow.dependency.api.lib
 
 
-import io.flow.dependency.v0.models.{LibraryForm, ProjectSummary}
+import io.flow.dependency.v0.models.ProjectSummary
 import io.flow.log.RollbarLogger
 
 trait SimpleScalaParser {
@@ -93,7 +93,7 @@ trait SimpleScalaParser {
           logger.withKeyValue("value", value).withKeyValue("artifact", artifactId).withKeyValue("group", groupId).warn(s"Could not parse library from value - only found groupId and artifactId but missing version")
           None
         }
-        case groupId :: artifactId :: version :: more => {
+        case groupId :: artifactId :: version :: _ => {
           Some(
             Artifact(
               project = project,

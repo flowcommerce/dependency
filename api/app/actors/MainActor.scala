@@ -1,18 +1,16 @@
 package io.flow.dependency.actors
 
 import db._
-import io.flow.play.util.Config
-import io.flow.play.actors.{ErrorHandler, Scheduler}
-import play.api.libs.concurrent.Akka
-import akka.actor._
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.log.RollbarLogger
+import io.flow.akka.SafeReceive
+import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
+import io.flow.play.util.ApplicationConfig
 import io.flow.postgresql.Pager
-import play.api.Play.current
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 object MainActor {
 
@@ -59,8 +57,8 @@ object MainActor {
 
 @javax.inject.Singleton
 class MainActor @javax.inject.Inject() (
-  override val logger: RollbarLogger,
-  override val config: io.flow.play.util.Config,
+  logger: RollbarLogger,
+  config: ApplicationConfig,
   system: ActorSystem,
   projectFactory: ProjectActor.Factory,
   binariesDao: BinariesDao,
@@ -79,10 +77,11 @@ class MainActor @javax.inject.Inject() (
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
   defaultBinaryVersionProvider: DefaultBinaryVersionProvider
-) extends Actor with ActorLogging with ErrorHandler with Scheduler with InjectedActorSupport {
+) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
 
+  private[this] implicit val configuredRollbar = logger.fingerprint("MainActor")
   private[this] val name = "main"
 
   private[this] val emailActor = system.actorOf(Props(new EmailActor(
@@ -115,151 +114,136 @@ class MainActor @javax.inject.Inject() (
 
   implicit val mainActorExecutionContext: ExecutionContext = system.dispatchers.lookup("main-actor-context")
 
-  scheduleRecurring(system, "io.flow.dependency.api.binary.seconds") {
-    periodicActor ! PeriodicActor.Messages.SyncBinaries
-  }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.binary"),
+    PeriodicActor.Messages.SyncBinaries,
+    periodicActor,
+  )
 
-  scheduleRecurring(system, "io.flow.dependency.api.library.seconds") {
-    periodicActor !  PeriodicActor.Messages.SyncLibraries
-  }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.library"),
+    PeriodicActor.Messages.SyncLibraries,
+    periodicActor,
+  )
 
-  scheduleRecurring(system, "io.flow.dependency.api.project.seconds") {
-    periodicActor !  PeriodicActor.Messages.SyncProjects
-  }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.project"),
+    PeriodicActor.Messages.SyncProjects,
+    periodicActor,
+  )
 
-  scheduleRecurring(system, "io.flow.dependency.api.purge.seconds") {
-    periodicActor !  PeriodicActor.Messages.Purge
-  }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.purge"),
+    PeriodicActor.Messages.Purge,
+    periodicActor,
+  )
 
-  scheduleRecurring(system, "io.flow.dependency.api.email.seconds") {
-    emailActor ! EmailActor.Messages.ProcessDailySummary
-  }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
+    EmailActor.Messages.ProcessDailySummary,
+    emailActor,
+  )
 
-  def receive = akka.event.LoggingReceive {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ MainActor.Messages.UserCreated(id) => withErrorHandler(m) {
+    case MainActor.Messages.UserCreated(id) =>
       upsertUserActor(id) ! UserActor.Messages.Created
-    }
 
-    case m @ MainActor.Messages.ProjectCreated(id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectCreated(id) =>
       val actor = upsertProjectActor(id)
       actor ! ProjectActor.Messages.CreateHooks
       actor ! ProjectActor.Messages.Sync
       searchActor ! SearchActor.Messages.SyncProject(id)
-    }
 
-    case m @ MainActor.Messages.ProjectUpdated(id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectUpdated(id) =>
       upsertProjectActor(id) ! ProjectActor.Messages.Sync
       searchActor ! SearchActor.Messages.SyncProject(id)
-    }
 
-    case m @ MainActor.Messages.ProjectDeleted(id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectDeleted(id) =>
       projectActors.remove(id).map { actor =>
         actor ! ProjectActor.Messages.Deleted
       }
       searchActor ! SearchActor.Messages.SyncProject(id)
-    }
 
-    case m @ MainActor.Messages.ProjectSync(id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectSync(id) =>
       upsertProjectActor(id) ! ProjectActor.Messages.Sync
       searchActor ! SearchActor.Messages.SyncProject(id)
-    }
 
-    case m @ MainActor.Messages.ProjectLibraryCreated(projectId, id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectLibraryCreated(projectId, id) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectLibraryCreated(id)
-    }
 
-    case m @ MainActor.Messages.ProjectLibrarySync(projectId, id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectLibrarySync(projectId, id) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectLibrarySync(id)
-    }
 
-    case m @ MainActor.Messages.ProjectLibraryDeleted(projectId, id, version) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectLibraryDeleted(projectId, id, version) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectLibraryDeleted(id, version)
-    }
 
-    case m @ MainActor.Messages.ProjectBinaryCreated(projectId, id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectBinaryCreated(projectId, id) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectBinaryCreated(id)
-    }
 
-    case m @ MainActor.Messages.ProjectBinarySync(projectId, id) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectBinarySync(projectId, id) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectBinarySync(id)
-    }
 
-    case m @ MainActor.Messages.ProjectBinaryDeleted(projectId, id, version) => withErrorHandler(m) {
+    case MainActor.Messages.ProjectBinaryDeleted(projectId, id, version) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectBinaryDeleted(id, version)
-    }
 
-    case m @ MainActor.Messages.LibraryCreated(id) => withErrorHandler(m) {
+    case MainActor.Messages.LibraryCreated(id) =>
       syncLibrary(id)
-    }
 
-    case m @ MainActor.Messages.LibrarySync(id) => withErrorHandler(m) {
+    case MainActor.Messages.LibrarySync(id) =>
       syncLibrary(id)
-    }
 
-    case m @ MainActor.Messages.LibrarySyncFuture(id, seconds) => withErrorHandler(m) {
-      system.scheduler.scheduleOnce(Duration(seconds, "seconds")) {
+    case MainActor.Messages.LibrarySyncFuture(id, seconds) =>
+      system.scheduler.scheduleOnce(Duration(seconds.toLong, "seconds")) {
         syncLibrary(id)
       }
-    }
+      ()
 
-    case m @ MainActor.Messages.LibrarySyncCompleted(id) => withErrorHandler(m) {
+    case MainActor.Messages.LibrarySyncCompleted(id) =>
       projectBroadcast(ProjectActor.Messages.LibrarySynced(id))
-    }
 
-    case m @ MainActor.Messages.LibraryDeleted(id) => withErrorHandler(m) {
-      libraryActors.remove(id).map { ref =>
+    case MainActor.Messages.LibraryDeleted(id) =>
+      libraryActors.remove(id).foreach { ref =>
         ref ! LibraryActor.Messages.Deleted
       }
-    }
 
-    case m @ MainActor.Messages.LibraryVersionCreated(id, libraryId) => withErrorHandler(m) {
-      syncLibraryVersion(id, libraryId)
-    }
+    case MainActor.Messages.LibraryVersionCreated(_, libraryId) =>
+      syncLibraryVersion(libraryId)
 
-    case m @ MainActor.Messages.LibraryVersionDeleted(id, libraryId) => withErrorHandler(m) {
-      syncLibraryVersion(id, libraryId)
-    }
+    case MainActor.Messages.LibraryVersionDeleted(_, libraryId) =>
+      syncLibraryVersion(libraryId)
 
-    case m @ MainActor.Messages.BinaryCreated(id) => withErrorHandler(m) {
+    case MainActor.Messages.BinaryCreated(id) =>
       syncBinary(id)
-    }
 
-    case m @ MainActor.Messages.BinarySync(id) => withErrorHandler(m) {
+    case MainActor.Messages.BinarySync(id) =>
       syncBinary(id)
-    }
 
-    case m @ MainActor.Messages.BinarySyncCompleted(id) => withErrorHandler(m) {
+    case MainActor.Messages.BinarySyncCompleted(id) =>
       projectBroadcast(ProjectActor.Messages.BinarySynced(id))
-    }
 
-    case m @ MainActor.Messages.BinaryDeleted(id) => withErrorHandler(m) {
-      binaryActors.remove(id).map { ref =>
+    case MainActor.Messages.BinaryDeleted(id) =>
+      binaryActors.remove(id).foreach { ref =>
         ref ! BinaryActor.Messages.Deleted
       }
-    }
 
-    case m @ MainActor.Messages.BinaryVersionCreated(id, binaryId) => withErrorHandler(m) {
-      syncBinaryVersion(id, binaryId)
-    }
+    case MainActor.Messages.BinaryVersionCreated(_, binaryId) =>
+      syncBinaryVersion(binaryId)
 
-    case m @ MainActor.Messages.BinaryVersionDeleted(id, binaryId) => withErrorHandler(m) {
-      syncBinaryVersion(id, binaryId)
-    }
+    case MainActor.Messages.BinaryVersionDeleted(_, binaryId) =>
+      syncBinaryVersion(binaryId)
 
-    case m @ MainActor.Messages.ResolverCreated(id) => withErrorHandler(m) {
+    case MainActor.Messages.ResolverCreated(id) =>
       upsertResolverActor(id) ! ResolverActor.Messages.Sync
-    }
 
-    case m @ MainActor.Messages.ResolverDeleted(id) => withErrorHandler(m) {
-      resolverActors.remove(id).map { ref =>
+    case MainActor.Messages.ResolverDeleted(id) =>
+      resolverActors.remove(id).foreach { ref =>
         ref ! ResolverActor.Messages.Deleted
       }
-    }
 
-    case m @ MainActor.Messages.SyncAll => withErrorHandler(m) {
+    case MainActor.Messages.SyncAll =>
       Pager.create { offset =>
-        binariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
+        binariesDao.findAll(offset = offset, limit = 1000)
       }.foreach { rec =>
         self ! MainActor.Messages.BinarySync(rec.id)
       }
@@ -275,10 +259,6 @@ class MainActor @javax.inject.Inject() (
       }.foreach { rec =>
         self ! MainActor.Messages.ProjectSync(rec.id)
       }
-    }
-
-    case m: Any => logUnhandledMessage(m)
-
   }
 
   def upsertUserActor(id: String): ActorRef = {
@@ -355,29 +335,29 @@ class MainActor @javax.inject.Inject() (
     }
   }
 
-  def syncLibrary(id: String) {
+  def syncLibrary(id: String): Unit = {
     upsertLibraryActor(id) ! LibraryActor.Messages.Sync
     searchActor ! SearchActor.Messages.SyncLibrary(id)
     projectBroadcast(ProjectActor.Messages.LibrarySynced(id))
   }
 
 
-  def syncLibraryVersion(id: String, libraryId: String) {
+  def syncLibraryVersion(libraryId: String): Unit = {
     syncLibrary(libraryId)
   }
 
-  def syncBinary(id: String) {
+  def syncBinary(id: String): Unit = {
     upsertBinaryActor(id) ! BinaryActor.Messages.Sync
     searchActor ! SearchActor.Messages.SyncBinary(id)
     projectBroadcast(ProjectActor.Messages.BinarySynced(id))
   }
 
-  def syncBinaryVersion(id: String, binaryId: String) {
+  def syncBinaryVersion(binaryId: String): Unit = {
     syncBinary(binaryId)
   }
 
-  def projectBroadcast(message: ProjectActor.Message) {
-    projectActors.foreach { case (projectId, actor) =>
+  def projectBroadcast(message: ProjectActor.Message): Unit = {
+    projectActors.foreach { case (_, actor) =>
       actor ! message
     }
   }

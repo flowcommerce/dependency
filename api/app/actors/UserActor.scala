@@ -5,9 +5,8 @@ import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.common.v0.models.User
 import db.{OrganizationsDao, SubscriptionsDao, UserIdentifiersDao, UsersDao}
 import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
 
 object UserActor {
 
@@ -25,19 +24,20 @@ class UserActor @Inject()(
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
   usersDao: UsersDao,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
+
+  private[this] implicit val configuredRollbar = logger.fingerprint("UserActor")
 
   var dataUser: Option[User] = None
   lazy val SystemUser = usersDao.systemUser
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ UserActor.Messages.Data(id) => withErrorHandler(m.toString) {
+    case UserActor.Messages.Data(id) =>
       dataUser = usersDao.findById(id)
-    }
 
-    case m @ UserActor.Messages.Created => withErrorHandler(m.toString) {
+    case UserActor.Messages.Created =>
       dataUser.foreach { user =>
         organizationsDao.upsertForUser(user)
 
@@ -55,9 +55,6 @@ class UserActor @Inject()(
           )
         }
       }
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
 }

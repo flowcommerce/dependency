@@ -8,7 +8,6 @@ import util.DependencySpec
 class LibraryArtifactProviderSpec extends DependencySpec {
 
   def makeLibrary(
-    org: OrganizationSummary,
     groupId: String = UUID.randomUUID.toString,
     artifactId: String = UUID.randomUUID.toString
   ): Library = {
@@ -28,7 +27,7 @@ class LibraryArtifactProviderSpec extends DependencySpec {
   )
 
   "parseUri" in {
-    val library = makeLibrary(org = orgSummary, groupId = "com.github.tototoshi", artifactId = "scala-csv")
+    val library = makeLibrary(groupId = "com.github.tototoshi", artifactId = "scala-csv")
     val resolution = provider.resolve(resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
       sys.error("Could not find scala-csv library")
     }
@@ -38,7 +37,7 @@ class LibraryArtifactProviderSpec extends DependencySpec {
   }
 
   "swagger" in {
-    val library = makeLibrary(org = orgSummary, groupId = "io.swagger", artifactId = "swagger-parser")
+    val library = makeLibrary(groupId = "io.swagger", artifactId = "swagger-parser")
     val resolution = provider.resolve(resolversDao, organization = orgSummary, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
       sys.error("Could not find swagger-parser library")
     }

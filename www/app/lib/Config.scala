@@ -39,7 +39,7 @@ class GitHubConfig @Inject()(config: FlowConfig) {
 }
 
 object Config {
-  val VersionsPerPage: Int = 5
+  val VersionsPerPage = 5
 
   /**
     * Returns full URL to the file with the specified path

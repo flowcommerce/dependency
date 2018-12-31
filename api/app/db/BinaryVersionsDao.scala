@@ -3,12 +3,12 @@ package db
 import javax.inject.Inject
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Binary, BinaryVersion}
+import io.flow.log.RollbarLogger
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
-import io.flow.util.Version
+import io.flow.util.{IdGenerator, Version}
 import anorm._
 import com.google.inject.Provider
-import io.flow.log.RollbarLogger
 import play.api.db._
 
 import scala.util.{Failure, Success, Try}
@@ -49,7 +49,6 @@ class BinaryVersionsDao @Inject()(
     implicit c: java.sql.Connection
   ): BinaryVersion = {
     findAllWithConnection(
-      Authorization.All,
       binaryId = Some(binaryId),
       version = Some(version),
       limit = 1
@@ -60,7 +59,6 @@ class BinaryVersionsDao @Inject()(
         case Success(version) => version
         case Failure(ex) => {
           findAllWithConnection(
-            Authorization.All,
             binaryId = Some(binaryId),
             version = Some(version),
             limit = 1
@@ -81,7 +79,7 @@ class BinaryVersionsDao @Inject()(
 
   def createWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit c: java.sql.Connection): BinaryVersion = {
     assert(!version.trim.isEmpty, "Version must be non empty")
-    val id = io.flow.play.util.IdGenerator("biv").randomId()
+    val id = IdGenerator("biv").randomId()
 
     SQL(InsertQuery).on(
       'id -> id,
@@ -93,22 +91,20 @@ class BinaryVersionsDao @Inject()(
 
     mainActor ! MainActor.Messages.BinaryVersionCreated(id, binaryId)
 
-    findByIdWithConnection(Authorization.All, id).getOrElse {
+    findByIdWithConnection(id).getOrElse {
       sys.error("Failed to create version")
     }
   }
 
-  def delete(deletedBy: UserReference, bv: BinaryVersion) {
+  def delete(deletedBy: UserReference, bv: BinaryVersion): Unit = {
     dbHelpersProvider.get.delete("binary_versions", deletedBy.id, bv.id)
     mainActor ! MainActor.Messages.BinaryVersionDeleted(bv.id, bv.binary.id)
   }
 
   def findByBinaryAndVersion(
-    auth: Authorization,
     binary: Binary, version: String
   ): Option[BinaryVersion] = {
     findAll(
-      auth,
       binaryId = Some(binary.id),
       version = Some(version),
       limit = 1
@@ -116,25 +112,22 @@ class BinaryVersionsDao @Inject()(
   }
 
   def findById(
-    auth: Authorization,
     id: String
   ): Option[BinaryVersion] = {
     db.withConnection { implicit c =>
-      findByIdWithConnection(auth, id)
+      findByIdWithConnection(id)
     }
   }
 
   def findByIdWithConnection(
-    auth: Authorization,
     id: String
   ) (
     implicit c: java.sql.Connection
   ): Option[BinaryVersion] = {
-    findAllWithConnection(auth, id = Some(id), limit = 1).headOption
+    findAllWithConnection(id = Some(id), limit = 1).headOption
   }
 
   def findAll(
-    auth: Authorization,
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,
     binaryId: Option[String] = None,
@@ -146,7 +139,6 @@ class BinaryVersionsDao @Inject()(
   ) = {
     db.withConnection { implicit c =>
       findAllWithConnection(
-        auth,
         id = id,
         ids = ids,
         binaryId = binaryId,
@@ -160,7 +152,6 @@ class BinaryVersionsDao @Inject()(
   }
 
   def findAllWithConnection(
-    auth: Authorization,
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,
     binaryId: Option[String] = None,
@@ -182,7 +173,7 @@ class BinaryVersionsDao @Inject()(
       optionalIn("binary_versions.id", ids).
       equals("binary_versions.binary_id", binaryId).
       and(
-        projectId.map { id =>
+        projectId.map { _ =>
           "binary_versions.binary_id in (select binary_id from project_bainaries where binary_id is not null and project_id = {project_id})"
         }
       ).bind("project_id", projectId).
@@ -193,7 +184,7 @@ class BinaryVersionsDao @Inject()(
         valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
       ).
       and(
-        greaterThanVersion.map { v =>
+        greaterThanVersion.map { _ =>
           s"binary_versions.sort_key > {greater_than_version_sort_key}"
         }
       ).bind("greater_than_version_sort_key", greaterThanVersion).

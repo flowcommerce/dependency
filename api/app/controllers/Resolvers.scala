@@ -2,8 +2,9 @@ package controllers
 
 import db.{Authorization, ResolversDao}
 import io.flow.common.v0.models.UserReference
-import io.flow.play.controllers.{FlowController, FlowControllerComponents}
-import io.flow.play.util.{Config, Validation}
+import io.flow.play.controllers.FlowControllerComponents
+import io.flow.play.util.Validation
+import io.flow.util.Config
 import io.flow.dependency.v0.models.{Resolver, ResolverForm, Visibility}
 import io.flow.dependency.v0.models.json._
 import io.flow.error.v0.models.json._

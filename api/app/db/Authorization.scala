@@ -42,7 +42,7 @@ sealed trait Authorization {
 
   private[this] val IdRegex = """^[\w\d\-\_]+$""".r
 
-  private[db] def assertValidId(id: String) {
+  private[db] def assertValidId(id: String): Unit = {
     id match {
       case IdRegex() => {}
       case _ => sys.error(s"Invalid id[$id]")

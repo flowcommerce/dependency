@@ -1,7 +1,7 @@
 package io.flow.dependency.www.lib
 
 import io.flow.common.v0.models.User
-import io.flow.play.util.{Config => FlowConfig}
+import io.flow.util.{Config => FlowConfig}
 import io.flow.dependency.lib.Urls
 
 sealed trait Section

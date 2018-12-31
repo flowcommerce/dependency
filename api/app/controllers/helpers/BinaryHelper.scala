@@ -2,9 +2,8 @@ package controllers.helpers
 
 import javax.inject.{Inject, Singleton}
 
-import db.{Authorization, BinariesDao, LibrariesDao}
-import io.flow.common.v0.models.UserReference
-import io.flow.dependency.v0.models.{Binary, Library}
+import db.BinariesDao
+import io.flow.dependency.v0.models.Binary
 import play.api.mvc.{Result, Results}
 
 @Singleton
@@ -12,10 +11,10 @@ class BinaryHelper @Inject()(
   binariesDao: BinariesDao
 ) {
 
-  def withBinary(user: UserReference, id: String)(
+  def withBinary(id: String)(
     f: Binary => Result
   ): Result = {
-    binariesDao.findById(Authorization.User(user.id), id) match {
+    binariesDao.findById(id) match {
       case None => {
         Results.NotFound
       }

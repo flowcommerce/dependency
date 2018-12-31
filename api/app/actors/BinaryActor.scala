@@ -1,14 +1,13 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.dependency.v0.models.{Binary, BinaryForm}
+import io.flow.dependency.v0.models.Binary
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.postgresql.Pager
 import db.{Authorization, BinariesDao, BinaryVersionsDao, ItemsDao, ProjectBinariesDao, SyncsDao, UsersDao}
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.Actor
+import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
-
-import scala.concurrent.ExecutionContext
 
 object BinaryActor {
 
@@ -28,19 +27,19 @@ class BinaryActor @Inject() (
   itemsDao: ItemsDao,
   projectBinariesDao: ProjectBinariesDao,
   defaultBinaryVersionProvider: DefaultBinaryVersionProvider,
-  override val logger: RollbarLogger
-) extends Actor with Util {
+  logger: RollbarLogger
+) extends Actor {
 
   var dataBinary: Option[Binary] = None
   lazy val SystemUser = usersDao.systemUser
+  private[this] implicit val configuredRollbar = logger.fingerprint("BinaryActor")
 
-  def receive = {
+  def receive = SafeReceive.withLogUnhandled {
 
-    case m @ BinaryActor.Messages.Data(id: String) => withErrorHandler(m) {
-      dataBinary = binariesDao.findById(Authorization.All, id)
-    }
+    case BinaryActor.Messages.Data(id: String) =>
+      dataBinary = binariesDao.findById(id)
 
-    case m @ BinaryActor.Messages.Sync => withErrorHandler(m) {
+    case BinaryActor.Messages.Sync =>
       dataBinary.foreach { binary =>
         syncsDao.withStartedAndCompleted(SystemUser, "binary", binary.id) {
           defaultBinaryVersionProvider.versions(binary.name).foreach { version =>
@@ -50,9 +49,8 @@ class BinaryActor @Inject() (
 
         sender ! MainActor.Messages.BinarySyncCompleted(binary.id)
       }
-    }
 
-    case m @ BinaryActor.Messages.Deleted => withErrorHandler(m) {
+    case BinaryActor.Messages.Deleted =>
       dataBinary.foreach { binary =>
         itemsDao.deleteByObjectId(Authorization.All, SystemUser, binary.id)
 
@@ -64,9 +62,6 @@ class BinaryActor @Inject() (
         }
       }
       context.stop(self)
-    }
-
-    case m: Any => logUnhandledMessage(m)
   }
 
 }

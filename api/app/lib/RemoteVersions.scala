@@ -51,7 +51,7 @@ object RemoteVersions {
   def crossBuildVersion(text: String): Option[Version] = {
     StringUtils.stripEnd(text, "/").split("_").toList match {
       case Nil => None
-      case one :: Nil => None
+      case _ :: Nil => None
       case inple => {
         // Check if we can successfully parse the version tag for a
         // major version. If so, we assume we have found a cross build

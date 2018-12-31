@@ -3,9 +3,9 @@ package io.flow.dependency.api.lib
 import javax.inject.Inject
 
 import db.{GithubUsersDao, InternalTokenForm, TokensDao, UsersDao}
-import io.flow.dependency.v0.models.{GithubUserForm, Repository, UserForm, Visibility}
+import io.flow.dependency.v0.models.{GithubUserForm, UserForm}
 import io.flow.common.v0.models.{Name, User, UserReference}
-import io.flow.play.util.{Config, IdGenerator}
+import io.flow.util.{Config, IdGenerator}
 import io.flow.github.oauth.v0.{Client => GithubOauthClient}
 import io.flow.github.oauth.v0.models.AccessTokenForm
 import io.flow.github.v0.{Client => GithubClient}
@@ -328,7 +328,7 @@ object MockGithubData {
   private[this] var repositories = scala.collection.mutable.Map[String, GithubRepository]()
   private[this] var files = scala.collection.mutable.Map[String, String]()
 
-  def addUser(githubUser: GithubUser, code: String, token: Option[String] = None) {
+  def addUser(githubUser: GithubUser, code: String, token: Option[String] = None): Unit = {
     githubUserByCodes +== (
       code -> GithubUserData(
         githubId = githubUser.id,
@@ -345,7 +345,7 @@ object MockGithubData {
     githubUserByCodes.lift(code)
   }
 
-  def addUserOauthToken(token: String, user: UserReference) {
+  def addUserOauthToken(token: String, user: UserReference): Unit = {
     userTokens +== (user.id -> token)
   }
 
@@ -368,7 +368,7 @@ object MockGithubData {
     projectUri: String,
     path: String,
     contents: String
-  ) {
+  ): Unit = {
     files +== (s"${projectUri}.$path" -> contents)
   }
 

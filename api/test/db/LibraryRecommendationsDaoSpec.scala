@@ -6,7 +6,7 @@ class LibraryRecommendationsDaoSpec extends  DependencySpec {
 
   lazy val org = createOrganization()
 
-  def verify(actual: Seq[LibraryRecommendation], expected: Seq[LibraryRecommendation]) {
+  def verify(actual: Seq[LibraryRecommendation], expected: Seq[LibraryRecommendation]): Unit = {
     actual == expected match {
       case true => {}
       case false => {
@@ -35,7 +35,7 @@ class LibraryRecommendationsDaoSpec extends  DependencySpec {
   }
 
   "ignores earlier versions of library" in {
-    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)
+    val (_, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.last)
     libraryRecommendationsDao.forProject(project) must be(Nil)
