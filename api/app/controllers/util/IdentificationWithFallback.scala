@@ -1,10 +1,11 @@
 package controllers.util
 
 import java.util.UUID
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import db.{TokensDao, UsersDao}
 import io.flow.common.v0.models.UserReference
+import io.flow.log.RollbarLogger
 import io.flow.play.controllers._
 import io.flow.play.util.{AuthData, Config}
 import play.api.mvc._
@@ -19,7 +20,7 @@ class IdentificationWithFallback @Inject()(
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
   usersDao: UsersDao
-)(implicit val executionContext: ExecutionContext)
+)(implicit val executionContext: ExecutionContext, logger: RollbarLogger)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {

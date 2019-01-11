@@ -18,8 +18,7 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
   usersDao: UsersDao,
-  logger: RollbarLogger
-)(implicit override val executionContext: ExecutionContext) extends IdentificationWithFallback(parser, config, authorization, tokensDao, usersDao) {
+)(implicit override val executionContext: ExecutionContext, logger: RollbarLogger) extends IdentificationWithFallback(parser, config, authorization, tokensDao, usersDao) {
 
   override def invokeBlock[A](request: Request[A], block: IdentifiedRequest[A] => Future[Result]): Future[Result] = {
     request.queryString.getOrElse("identifier", Seq.empty).toList match {
