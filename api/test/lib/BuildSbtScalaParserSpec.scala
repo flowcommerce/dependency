@@ -203,4 +203,50 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
     }
   }
 
+ "with multiple lines" should {
+    val contents = """
+lazy val rules = project.settings(
+  libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion,
+)
+
+lazy val input = project.settings(
+  libraryDependencies += "io.flow" %% "lib-play-play26" % "0.5.28",
+)
+
+lazy val output = project.settings(
+  libraryDependencies += "io.flow" %% "lib-play-play26" % "0.5.28",
+)
+
+lazy val tests = project.settings(
+  libraryDependencies += "ch.epfl.scala" % "scalafix-testkit" % V.scalafixVersion % Test cross CrossVersion.full,
+)
+"""
+
+    "parse dependencies" in {
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
+      result.binaries must be(Nil)
+      result.libraries must contain theSameElementsAs Seq(
+        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-core", "V.scalafixVersion", true),
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-play26", "0.5.28", true),
+        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-testkit", "V.scalafixVersion", false),
+      )
+      result.resolverUris must be(Nil)
+    }
+  }
+
+  "non-library dependencies" should {
+    val contents = """
+    scalafixDependencies += "io.flow" %% "scalafix-rules" % "0.0.1"
+"""
+
+    "parse dependencies" in {
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
+      result.binaries must be(Nil)
+      result.libraries must contain theSameElementsAs Seq(
+        Artifact(projectSummary, "test.sbt", "io.flow", "scalafix-rules", "0.0.1", true),
+      )
+      result.resolverUris must be(Nil)
+    }
+  }
+
 }
