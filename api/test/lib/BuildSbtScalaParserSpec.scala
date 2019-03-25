@@ -249,4 +249,36 @@ lazy val tests = project.settings(
     }
   }
 
+  "with variable substitution" should {
+
+    val contents = """
+val libSuffix1 = "-play26"
+val libSuffix2 = ""
+
+lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
+  organization := "com.cavellc",
+  name <<= name("cave-" + _),
+  version := "git describe --tags --dirty --always".!!.stripPrefix("v").trim,
+  resolvers += Resolver.sonatypeRepo("snapshots"),
+  resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
+  libraryDependencies ++= Seq(
+      "io.flow" %% s"lib-event$libSuffix1" % "0.4.55",
+      "io.flow" %% s"lib-postgresql-play${libSuffix1}" % "0.3.6",
+      "io.flow" %% "lib-reference-scala" % "0.2.28",
+      "io.flow" %% s"lib-log$libSuffix2${libSuffix2}$libSuffix2" % "0.0.64",
+  )
+)
+"""
+
+    "parse dependencies" in {
+      val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
+      result.libraries must contain theSameElementsAs Seq(
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-event-play26", "0.4.55", true),
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-postgresql-play-play26", "0.3.6", true),
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-reference-scala", "0.2.28", true),
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-log", "0.0.64", true)
+      )
+    }
+
+  }
 }
