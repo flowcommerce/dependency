@@ -58,7 +58,7 @@ trait SimpleScalaParser {
   }
 
   def parseLibraries(): Seq[Artifact] = {
-    val moduleIdRegex = """"([\w.-]+)"\s*(%{1,3})\s*s?"([\$\{\}\w.-]+)"\s*%\s*("?[\w.-]+"?)""".r
+    val moduleIdRegex = """"([^"]+)"\s*(%{1,3})\s*s?"([^"]+)"\s*%\s*("?[_\w.-]+"?)""".r
 
     lines.flatMap { line =>
       moduleIdRegex.findAllMatchIn(line).map { regexMatch =>
@@ -77,8 +77,7 @@ trait SimpleScalaParser {
   }
 
   private def replaceVariables(str: String, lines: Seq[String]): String = {
-    val StrInterpol1Rx = """([\w.-]*)\$([\w]+)([\$\{\}\w.-]*)""".r
-    val StrInterpol2Rx = """([\w.-]*)\$\{([\w]+)\}([\$\{\}\w.-]*)""".r
+    val StrInterpolRx = """([^\$]*)\$\{?([\w]+)\}?(.*)""".r
     val ValRx = """\s*[\w]+\s*([\w]+)\s*=\s*"([^"]*)"\s*""".r
 
     def findVal(toFind: String): Option[String] = lines.collect {
@@ -86,9 +85,7 @@ trait SimpleScalaParser {
     }.headOption
 
     str match {
-      case StrInterpol1Rx(prefix, interpol, suffix) =>
-        findVal(interpol).fold(str)(value => replaceVariables(s"$prefix$value$suffix", lines))
-      case StrInterpol2Rx(prefix, interpol, suffix) =>
+      case StrInterpolRx(prefix, interpol, suffix) =>
         findVal(interpol).fold(str)(value => replaceVariables(s"$prefix$value$suffix", lines))
       case _ =>
         str
