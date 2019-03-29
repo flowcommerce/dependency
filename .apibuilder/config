@@ -34,6 +34,6 @@ code:
     dependency:
       version: latest
       generators:
-        play_2_x_routes: api/conf/routes
+        play_2_x_routes: api/conf/dependency.routes
         play_2_6_client: generated/app
         anorm_2_6_parsers: api/app/generated
