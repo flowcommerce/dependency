@@ -30,7 +30,7 @@
       @if(lastCompletedSync.isEmpty) {
         <em>pending</em>
       } else {
-        @io.flow.play.util.DateHelper.longDateTime(lastCompletedSync.get.createdAt)
+        @io.flow.util.DateHelper.longDateTime(TimeUtil.toZonedDateTime(lastCompletedSync.get.createdAt))
       }
     </li>
   </ul>
