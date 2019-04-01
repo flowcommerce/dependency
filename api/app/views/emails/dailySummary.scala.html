@@ -27,7 +27,9 @@
       case n => s"$n new recommendations"
     }}
     since your last summary sent on
-    @io.flow.play.util.DateHelper.longDateTime(lastEmail.get.createdAt).
+    @io.flow.util.DateHelper.longDateTime(
+      java.time.Instant.ofEpochMilli(lastEmail.get.createdAt.getMillis).atOffset(java.time.ZoneOffset.UTC)
+    ).
   </p>
 }
 
