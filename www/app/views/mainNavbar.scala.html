@@ -22,7 +22,7 @@
           <li><a href="@routes.LoginController.index(return_url = Some(data.requestPath))">Login/Register</a></li>
         </ul>
       } else {
-        <div class="dropdown nav navbar-nav navbar-right">
+        <div class="dropdown nav navbar-form navbar-right">
           <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
             @data.user.get.email <span class="caret"></span>
           </button>
