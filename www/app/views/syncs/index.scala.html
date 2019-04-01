@@ -19,7 +19,7 @@
     <tbody>
       @syncs.items.map { sync =>
        <tr>
-         <td>@io.flow.play.util.DateHelper.longDateTime(sync.createdAt)</td>
+         <td>@io.flow.util.DateHelper.longDateTime(TimeUtil.toZonedDateTime(sync.createdAt))</td>
          <td>@sync.id</td>
          <td>@sync.objectId</td>
          <td>@sync.event</td>
