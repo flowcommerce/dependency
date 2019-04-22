@@ -44,7 +44,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.3")
 
 resolvers += Resolver.url("scoverage-bintray", url("https://dl.bintray.com/sksamuel/sbt-plugins/"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "1.0.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.1")
 """
 
     "parse dependencies" in {
@@ -54,8 +54,8 @@ addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "1.0.1")
         "https://dl.bintray.com/sksamuel/sbt-plugins/"
       )
       result.plugins must contain theSameElementsAs Seq(
-        Artifact(projectSummary, "test.sbt", "com.typesafe.play", "sbt-plugin", "2.4.3", false),
-        Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true)
+        Artifact(projectSummary, "test.sbt", "com.typesafe.play", "sbt-plugin", "2.4.3", true, true),
+        Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true, true)
       )
     }
 
