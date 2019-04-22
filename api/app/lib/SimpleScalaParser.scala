@@ -58,11 +58,11 @@ trait SimpleScalaParser {
   }
 
   def parseLibraries(): Seq[Artifact] = {
-    val moduleIdRegex = """"([^"]+)"\s*(%{1,3})\s*s?"([^"]+)"\s*%\s*("?[_\w.-]+"?)""".r
+    val moduleIdRegex = """(addSbtPlugin\s*\()?"([^"]+)"\s*(%{1,3})\s*s?"([^"]+)"\s*%\s*("?[_\w.-]+"?)\)?""".r
 
     lines.flatMap { line =>
       moduleIdRegex.findAllMatchIn(line).map { regexMatch =>
-        val groupId :: crossBuilt :: artifactId :: version :: Nil = regexMatch.subgroups
+        val addSbtPlugin :: groupId :: crossBuilt :: artifactId :: version :: Nil = regexMatch.subgroups
 
         Artifact(
           project = project,
@@ -70,7 +70,8 @@ trait SimpleScalaParser {
           groupId = groupId,
           artifactId = replaceVariables(artifactId, lines),
           version = if (version.startsWith("\"")) SimpleScalaParserUtil.stripQuotes(version) else interpolate(version),
-          isCrossBuilt = crossBuilt.length > 1
+          isCrossBuilt = addSbtPlugin != null || crossBuilt.length > 1,
+          isPlugin = (addSbtPlugin != null)
         )
       }
     }.distinct.sortBy { l => (l.groupId, l.artifactId, l.version) }.toList

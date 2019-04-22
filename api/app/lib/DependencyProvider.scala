@@ -21,13 +21,13 @@ case class Dependencies(
     }
   }
 
-  def crossBuildVersion(): Option[Version] = {
+  def crossBuildVersion(): Map[BinaryType, Version] = {
     binaries match {
-      case None => None
-      case Some(langs) => {
-        langs.sortBy { l => Version(l.version) }.reverse.find(_.name == BinaryType.Scala).headOption.map { lang =>
-          DependencyHelper.crossBuildVersion(lang.name, lang.version)
-        }
+      case None => Map()
+      case Some(bins) => {
+        bins.sortBy { b => Version(b.version) }.map { bin =>
+          bin.name -> DependencyHelper.crossBuildVersion(bin.name, bin.version)
+        }.toMap
       }
     }
   }
@@ -39,7 +39,7 @@ private[lib] object DependencyHelper {
   def crossBuildVersion(name: BinaryType, version: String): Version = {
     val versionObject = Version(version)
     name match {
-      case BinaryType.Scala |  BinaryType.Sbt=> {
+      case BinaryType.Scala => {
         versionObject.tags.head match {
           case Tag.Semver(major, minor, _, _) => {
             // This is most common. We just want major and minor
@@ -48,6 +48,13 @@ private[lib] object DependencyHelper {
           }
           case _ => versionObject
         }
+      }
+      case BinaryType.Sbt => {
+        // Get the binary-compatible version of sbt. Can be found by running `sbt sbtBinaryVersion`
+        versionObject.tags.collectFirst {
+          case Tag.Semver(1, _, _, _) => Version("1.0")
+          case Tag.Semver(0, 13, _, _) => Version("0.13")
+        }.getOrElse(versionObject)
       }
       case BinaryType.UNDEFINED(_) => {
         versionObject
