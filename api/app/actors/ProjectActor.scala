@@ -167,10 +167,17 @@ class ProjectActor @javax.inject.Inject() (
 
           dependencies.librariesAndPlugins.map { libraries =>
             val projectLibraries = libraries.map { artifact =>
+              val bins = dependencies.crossBuildVersion()
+              val crossBuildVersion = {
+                if (artifact.isPlugin)
+                  bins.get(BinaryType.Sbt).orElse(bins.get(BinaryType.Scala))
+                else
+                  bins.get(BinaryType.Scala)
+              }
               projectLibrariesDao.upsert(
                 project.user,
                 artifact.toProjectLibraryForm(
-                  crossBuildVersion = dependencies.crossBuildVersion()
+                  crossBuildVersion = crossBuildVersion
                 )
               ) match {
                 case Left(errors) => {
