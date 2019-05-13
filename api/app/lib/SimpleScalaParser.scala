@@ -57,58 +57,41 @@ trait SimpleScalaParser {
     value.replaceAll( "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "$1 " ).trim
   }
 
-
   def parseLibraries(): Seq[Artifact] = {
-    lines.
-      filter(_.replaceAll("%%", "%").split("%").size >= 2).
-      filter(!_.startsWith(".dependsOn")).
-      map(_.stripSuffix(",")).
-      map(_.trim).
-      map {
-        toArtifacts(_)
-      }.flatten.distinct.sortBy { l => (l.groupId, l.artifactId, l.version) }
-  }
+    val moduleIdRegex = """(addSbtPlugin\s*\()?"([^"]+)"\s*(%{1,3})\s*s?"([^"]+)"\s*%\s*("?[_\w.-]+"?)\)?""".r
 
-  def toArtifacts(value: String): Seq[Artifact] = {
-    val firstParen = value.indexOf("(")
-    val lastParen = value.lastIndexOf(")")
+    lines.flatMap { line =>
+      moduleIdRegex.findAllMatchIn(line).map { regexMatch =>
+        val addSbtPlugin :: groupId :: crossBuilt :: artifactId :: version :: Nil = regexMatch.subgroups
 
-    val substring = if (firstParen >= 0) {
-      value.substring(firstParen+1, lastParen)
-    } else {
-      value
-    }
-
-    substring.split(",").map(_.trim).filter(!_.isEmpty).flatMap { el =>
-      el.replaceAll("%%", "%").split("%").map(_.trim).toList match {
-        case Nil => {
-          logger.withKeyValue("value", value).warn(s"Could not parse library from value")
-          None
-        }
-        case groupId :: Nil => {
-          logger.withKeyValue("value", value).withKeyValue("group", groupId).warn(s"Could not parse library from value - only found groupId but missing artifactId and version")
-          None
-        }
-        case groupId :: artifactId :: Nil => {
-          logger.withKeyValue("value", value).withKeyValue("artifact", artifactId).withKeyValue("group", groupId).warn(s"Could not parse library from value - only found groupId and artifactId but missing version")
-          None
-        }
-        case groupId :: artifactId :: version :: _ => {
-          Some(
-            Artifact(
-              project = project,
-              path = path,
-              groupId = interpolate(groupId),
-              artifactId = interpolate(artifactId),
-              version = interpolate(version),
-              isCrossBuilt = (el.indexOf("%%") >= 0)
-            )
-          )
-        }
+        Artifact(
+          project = project,
+          path = path,
+          groupId = groupId,
+          artifactId = replaceVariables(artifactId, lines),
+          version = if (version.startsWith("\"")) SimpleScalaParserUtil.stripQuotes(version) else interpolate(version),
+          isCrossBuilt = addSbtPlugin != null || crossBuilt.length > 1,
+          isPlugin = (addSbtPlugin != null)
+        )
       }
-    }
+    }.distinct.sortBy { l => (l.groupId, l.artifactId, l.version) }.toList
   }
 
+  private def replaceVariables(str: String, lines: Seq[String]): String = {
+    val StrInterpolRx = """([^\$]*)\$\{?([\w]+)\}?(.*)""".r
+    val ValRx = """\s*[\w]+\s*([\w]+)\s*=\s*"([^"]*)"\s*""".r
+
+    def findVal(toFind: String): Option[String] = lines.collect {
+      case ValRx(name, value) if name == toFind => value
+    }.headOption
+
+    str match {
+      case StrInterpolRx(prefix, interpol, suffix) =>
+        findVal(interpol).fold(str)(value => replaceVariables(s"$prefix$value$suffix", lines))
+      case _ =>
+        str
+    }
+  }
 }
 
 object SimpleScalaParserUtil {

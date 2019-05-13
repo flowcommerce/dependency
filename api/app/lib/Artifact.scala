@@ -10,7 +10,8 @@ case class Artifact(
   groupId: String,
   artifactId: String,
   version: String,
-  isCrossBuilt: Boolean
+  isCrossBuilt: Boolean,
+  isPlugin: Boolean,
 ) {
 
   def toProjectLibraryForm(
