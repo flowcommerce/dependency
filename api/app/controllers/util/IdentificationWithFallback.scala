@@ -29,7 +29,7 @@ class IdentificationWithFallback @Inject()(
         legacyUser(request.headers) match {
           case None => Future.successful(unauthorized(request))
           case Some(user) =>
-            val ad = AuthData.Identified(user = user, session = None, requestId = "lib-play-" + UUID.randomUUID.toString)
+            val ad = AuthData.Identified(user = user, session = None, requestId = "lib-play-" + UUID.randomUUID.toString, customer = None)
             block(new IdentifiedRequest(ad, request))
         }
       case Some(ad) => block(new IdentifiedRequest(ad, request))

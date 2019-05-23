@@ -35,7 +35,8 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
             val ad = AuthData.Identified(
               user = UserReference(id = user.id),
               session = None,
-              requestId = "dependency-api-" + UUID.randomUUID.toString
+              requestId = "dependency-api-" + UUID.randomUUID.toString,
+              customer = None
             )
             block(new IdentifiedRequest(ad, request))
           }
