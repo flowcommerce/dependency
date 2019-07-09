@@ -129,5 +129,5 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   credentials += credsToUse,
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
 )
-version := "0.7.20"
-version := "0.7.20"
+version := "0.7.25"
+version := "0.7.25"
