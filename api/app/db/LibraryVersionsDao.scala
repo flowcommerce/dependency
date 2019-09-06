@@ -17,10 +17,11 @@ import scala.util.{Failure, Success, Try}
 @Singleton
 class LibraryVersionsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   logger: RollbarLogger,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "library_versions")
 
   private[this] val BaseQuery = Query(s"""
     select library_versions.id,
@@ -120,7 +121,7 @@ class LibraryVersionsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, lv: LibraryVersion): Unit = {
-    dbHelpersProvider.get.delete("library_versions", deletedBy.id, lv.id)
+    dbHelpers.delete(deletedBy.id, lv.id)
     mainActor ! MainActor.Messages.LibraryVersionDeleted(lv.id, lv.library.id)
   }
 

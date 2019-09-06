@@ -14,9 +14,10 @@ import play.api.db._
 class BinariesDao @Inject()(
   db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
-  dbHelpersProvider: Provider[DbHelpers],
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ) {
+
+  private[this] val dbHelpers = DbHelpers(db, "binaries")
 
   private[this] val BaseQuery = Query(s"""
     select binaries.id,
@@ -85,8 +86,7 @@ class BinariesDao @Inject()(
     Pager.create { offset =>
       binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
     }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
-
-    dbHelpersProvider.get.delete("binaries", deletedBy.id, binary.id)
+    dbHelpers.delete(deletedBy.id, binary.id)
     mainActor ! MainActor.Messages.BinaryDeleted(binary.id)
   }
 
@@ -98,10 +98,6 @@ class BinariesDao @Inject()(
     findAll(id = Some(id), limit = 1).headOption
   }
 
-  /**
-    * @param auth: Included here for symmetry with other APIs but at the
-    *  moment all binary data are public.
-    */
   def findAll(
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,

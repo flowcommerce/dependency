@@ -21,11 +21,12 @@ case class ProjectLibraryForm(
 @Singleton
 class ProjectLibrariesDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "zzz")
 
   private[this] val BaseQuery = Query(s"""
     select project_libraries.id,

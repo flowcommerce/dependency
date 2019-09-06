@@ -12,11 +12,12 @@ import play.api.db._
 @Singleton
 class MembershipsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   organizationsDaoProvider: Provider[OrganizationsDao]
 ){
 
   val DefaultUserNameLength = 8
+
+  private[this] val dbHelpers = DbHelpers(db, "memberships")
 
   private[this] val BaseQuery = Query(s"""
     select memberships.id,
@@ -89,7 +90,7 @@ class MembershipsDao @Inject()(
           case Some(existing) => {
             // the role is changing. Replace record
             db.withTransaction { implicit c =>
-              dbHelpersProvider.get.delete(c, "memberships", createdBy.id, existing.id)
+              dbHelpers.delete(createdBy.id, existing.id)
               create(c, createdBy, form)
             }
           }
@@ -126,7 +127,7 @@ class MembershipsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, membership: Membership): Unit = {
-    dbHelpersProvider.get.delete("memberships", deletedBy.id, membership.id)
+    dbHelpers.delete(deletedBy.id, membership.id)
   }
 
   def findByOrganizationAndUserId(

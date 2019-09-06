@@ -17,7 +17,6 @@ import play.api.libs.json._
 
 class ResolversDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   membershipsDaoProvider: Provider[MembershipsDao],
   librariesDaoProvider: Provider[LibrariesDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
@@ -27,6 +26,8 @@ class ResolversDao @Inject()(
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
+
+  private[this] val dbHelpers = DbHelpers(db, "resolvers")
 
   private[this] val BaseQuery = Query(s"""
     select resolvers.id,
@@ -165,7 +166,7 @@ class ResolversDao @Inject()(
     }
 
     mainActor ! MainActor.Messages.ResolverDeleted(resolver.id)
-    dbHelpersProvider.get.delete("resolvers", deletedBy.id, resolver.id)
+    dbHelpers.delete(deletedBy.id, resolver.id)
   }
 
   def findByOrganizationAndUri(

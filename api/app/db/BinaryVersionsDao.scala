@@ -15,10 +15,11 @@ import scala.util.{Failure, Success, Try}
 
 class BinaryVersionsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   logger: RollbarLogger,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "binary_versions")
 
   private[this] val BaseQuery = Query(s"""
     select binary_versions.id,
@@ -97,7 +98,7 @@ class BinaryVersionsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, bv: BinaryVersion): Unit = {
-    dbHelpersProvider.get.delete("binary_versions", deletedBy.id, bv.id)
+    dbHelpers.delete(deletedBy.id, bv.id)
     mainActor ! MainActor.Messages.BinaryVersionDeleted(bv.id, bv.binary.id)
   }
 

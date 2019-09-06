@@ -12,11 +12,12 @@ import play.api.db._
 @Singleton
 class UserIdentifiersDao @Inject()(
   db: Database,
-  dbHelpers: DbHelpers,
   usersDao: UsersDao
 ){
 
   val GithubOauthUserIdentifierValue = "github_oauth"
+
+  private[this] val dbHelpers = DbHelpers(db, "user_identifiers")
 
   private[this] val BaseQuery = Query(s"""
     select user_identifiers.id,
@@ -93,7 +94,7 @@ class UserIdentifiersDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, identifier: UserIdentifier): Unit = {
-    dbHelpers.delete("user_identifiers", deletedBy.id, identifier.id)
+    dbHelpers.delete(deletedBy.id, identifier.id)
   }
 
   def findById(id: String): Option[UserIdentifier] = {

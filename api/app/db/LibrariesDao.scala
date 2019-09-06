@@ -13,10 +13,10 @@ import play.api.db._
 @Singleton
 class LibrariesDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+  private[this] val dbHelpers = DbHelpers(db, "libraries")
 
   private[this] val BaseQuery = Query(s"""
     select libraries.id,
@@ -132,7 +132,7 @@ class LibrariesDao @Inject()(
       libraryVersionsDaoProvider.get.delete(deletedBy, lv)
     }
 
-    dbHelpersProvider.get.delete("libraries", deletedBy.id, library.id)
+    dbHelpers.delete(deletedBy.id, library.id)
     mainActor ! MainActor.Messages.LibraryDeleted(library.id)
   }
 

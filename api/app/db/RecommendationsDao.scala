@@ -12,11 +12,12 @@ import play.api.db._
 @Singleton
 class RecommendationsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   libraryRecommendationsDaoProvider: Provider[LibraryRecommendationsDao],
   binaryRecommendationsDaorovider: Provider[BinaryRecommendationsDao],
   recommendationsDaoProvider: Provider[RecommendationsDao]
 ) {
+
+  private[this] val dbHelpers = DbHelpers(db, "recommendations")
 
   private[this] case class RecommendationForm(
     projectId: String,
@@ -88,7 +89,7 @@ class RecommendationsDao @Inject()(
     db.withTransaction { implicit c =>
       toAdd.foreach { upsert(user, _) }
       toRemove.foreach { rec =>
-        dbHelpersProvider.get.delete(c, "recommendations", user.id, rec.id)
+        dbHelpers.delete(c, user.id, rec.id)
       }
     }
 
@@ -99,7 +100,7 @@ class RecommendationsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, rec: Recommendation): Unit = {
-    dbHelpersProvider.get.delete("recommendations", deletedBy.id, rec.id)
+    dbHelpers.delete(deletedBy.id, rec.id)
   }
 
   private[this] def upsert(
@@ -120,7 +121,7 @@ class RecommendationsDao @Inject()(
         create(createdBy, form)
       }
       case Some(rec) if rec.to != form.to => {
-        dbHelpersProvider.get.delete(c, "recommendations", createdBy.id, rec.id)
+        dbHelpers.delete(c, createdBy.id, rec.id)
         create(createdBy, form)
       }
     }
