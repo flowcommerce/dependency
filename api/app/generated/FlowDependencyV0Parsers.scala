@@ -1271,7 +1271,7 @@ package io.flow.dependency.v0.anorm.parsers {
 
   }
 
-  object Task {
+  object TaskData {
 
     def parserWithPrefix(prefix: String, sep: String = "_") = {
       io.flow.dependency.v0.anorm.parsers.TaskDataSync.parser(prefixOpt = Some(s"$prefix$sep")) |

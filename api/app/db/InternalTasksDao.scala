@@ -1,12 +1,12 @@
 package db
 
-import io.flow.dependency.v0.models.Task
+import io.flow.dependency.v0.models.TaskData
 import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.{OrderBy, Query}
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 case class InternalTask(db: generated.Task) {
-  val task: Task = task.as[Task]
+  val data: TaskData = db.data.as[TaskData]
 }
 
 class InternalTasksDao @Inject()(
@@ -16,6 +16,7 @@ class InternalTasksDao @Inject()(
   def findAll(
     ids: Option[Seq[String]] = None,
     limit: Option[Long],
+    hasProcessedAt: Option[Boolean] = None,
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
   ) (
@@ -23,6 +24,7 @@ class InternalTasksDao @Inject()(
   ): Seq[InternalTask] = {
     dao.findAll(
       ids = ids,
+      hasProcessedAt = hasProcessedAt,
       limit = limit,
       offset = offset,
       orderBy = orderBy

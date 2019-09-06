@@ -8,7 +8,6 @@ import io.flow.dependency.v0.models.Publication
 import io.flow.util.IdGenerator
 import org.joda.time.DateTime
 import anorm._
-import com.google.inject.Provider
 import play.api.db._
 
 case class LastEmailForm(

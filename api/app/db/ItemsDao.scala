@@ -188,7 +188,7 @@ class ItemsDao @Inject()(
   private[this] def deleteWithConnection(deletedBy: UserReference, item: Item)(
     implicit c: java.sql.Connection
   ): Unit = {
-    dbHelpers.delete(deletedBy.id, item.id)
+    dbHelpers.delete(c, deletedBy.id, item.id)
   }
 
   def deleteByObjectId(auth: Authorization, deletedBy: UserReference, objectId: String): Unit = {

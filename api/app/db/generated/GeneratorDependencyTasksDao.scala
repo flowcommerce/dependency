@@ -13,7 +13,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 case class Task(
   id: String,
   discriminator: String,
-  task: JsObject,
+  data: JsObject,
   numAttempts: Int,
   processedAt: Option[DateTime],
   createdAt: DateTime
@@ -21,7 +21,7 @@ case class Task(
 
   lazy val form: TaskForm = TaskForm(
     discriminator = discriminator,
-    task = task,
+    data = data,
     numAttempts = numAttempts,
     processedAt = processedAt
   )
@@ -30,13 +30,13 @@ case class Task(
 
 case class TaskForm(
   discriminator: String,
-  task: JsValue,
+  data: JsValue,
   numAttempts: Int,
   processedAt: Option[DateTime]
 ) {
   assert(
-    task.isInstanceOf[JsObject],
-    s"Field[task] must be a JsObject and not a ${task.getClass.getName}"
+    data.isInstanceOf[JsObject],
+    s"Field[data] must be a JsObject and not a ${data.getClass.getName}"
   )
 }
 
@@ -47,14 +47,14 @@ object TasksTable {
   object Columns {
     val Id: String = "id"
     val Discriminator: String = "discriminator"
-    val Task: String = "task"
+    val Data: String = "data"
     val NumAttempts: String = "num_attempts"
     val ProcessedAt: String = "processed_at"
     val CreatedAt: String = "created_at"
     val UpdatedAt: String = "updated_at"
     val UpdatedByUserId: String = "updated_by_user_id"
     val HashCode: String = "hash_code"
-    val all: List[String] = List(Id, Discriminator, Task, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
+    val all: List[String] = List(Id, Discriminator, Data, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
   }
 }
 
@@ -72,7 +72,7 @@ class TasksDao @Inject() (
   private[this] val BaseQuery = Query("""
       | select tasks.id,
       |        tasks.discriminator,
-      |        tasks.task::text as task_text,
+      |        tasks.data::text as data_text,
       |        tasks.num_attempts,
       |        tasks.processed_at,
       |        tasks.created_at,
@@ -84,15 +84,15 @@ class TasksDao @Inject() (
 
   private[this] val InsertQuery = Query("""
     | insert into tasks
-    | (id, discriminator, task, num_attempts, processed_at, updated_by_user_id, hash_code)
+    | (id, discriminator, data, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {discriminator}, {task}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {discriminator}, {data}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
     |    set discriminator = {discriminator},
-    |        task = {task}::json,
+    |        data = {data}::json,
     |        num_attempts = {num_attempts}::integer,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
@@ -104,7 +104,7 @@ class TasksDao @Inject() (
   private[this] def bindQuery(query: Query, form: TaskForm): Query = {
     query.
       bind("discriminator", form.discriminator).
-      bind("task", form.task).
+      bind("data", form.data).
       bind("num_attempts", form.numAttempts).
       bind("processed_at", form.processedAt).
       bind("hash_code", form.hashCode())
@@ -312,14 +312,14 @@ object TasksDao {
   val parser: RowParser[Task] = {
     SqlParser.str("id") ~
     SqlParser.str("discriminator") ~
-    SqlParser.str("task_text") ~
+    SqlParser.str("data_text") ~
     SqlParser.int("num_attempts") ~
     SqlParser.get[DateTime]("processed_at").? ~
     SqlParser.get[DateTime]("created_at") map {
-      case id ~ discriminator ~ task ~ numAttempts ~ processedAt ~ createdAt => Task(
+      case id ~ discriminator ~ data ~ numAttempts ~ processedAt ~ createdAt => Task(
         id = id,
         discriminator = discriminator,
-        task = Json.parse(task).as[JsObject],
+        data = Json.parse(data).as[JsObject],
         numAttempts = numAttempts,
         processedAt = processedAt,
         createdAt = createdAt

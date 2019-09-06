@@ -9,7 +9,6 @@ import io.flow.common.v0.models.UserReference
 import io.flow.util.Version
 import io.flow.util.IdGenerator
 import anorm._
-import com.google.inject.Provider
 import play.api.db._
 
 import scala.util.{Failure, Success, Try}

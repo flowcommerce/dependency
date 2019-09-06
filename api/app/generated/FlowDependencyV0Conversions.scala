@@ -159,8 +159,8 @@ package io.flow.dependency.v0.anorm.conversions {
     implicit val columnToMapDependencyCredentials: Column[Map[String, _root_.io.flow.dependency.v0.models.Credentials]] = Util.parser { _.as[Map[String, _root_.io.flow.dependency.v0.models.Credentials]] }
     implicit val columnToSeqDependencyItemSummary: Column[Seq[_root_.io.flow.dependency.v0.models.ItemSummary]] = Util.parser { _.as[Seq[_root_.io.flow.dependency.v0.models.ItemSummary]] }
     implicit val columnToMapDependencyItemSummary: Column[Map[String, _root_.io.flow.dependency.v0.models.ItemSummary]] = Util.parser { _.as[Map[String, _root_.io.flow.dependency.v0.models.ItemSummary]] }
-    implicit val columnToSeqDependencyTask: Column[Seq[_root_.io.flow.dependency.v0.models.Task]] = Util.parser { _.as[Seq[_root_.io.flow.dependency.v0.models.Task]] }
-    implicit val columnToMapDependencyTask: Column[Map[String, _root_.io.flow.dependency.v0.models.Task]] = Util.parser { _.as[Map[String, _root_.io.flow.dependency.v0.models.Task]] }
+    implicit val columnToSeqDependencyTaskData: Column[Seq[_root_.io.flow.dependency.v0.models.TaskData]] = Util.parser { _.as[Seq[_root_.io.flow.dependency.v0.models.TaskData]] }
+    implicit val columnToMapDependencyTaskData: Column[Map[String, _root_.io.flow.dependency.v0.models.TaskData]] = Util.parser { _.as[Map[String, _root_.io.flow.dependency.v0.models.TaskData]] }
   }
 
   object Standard {

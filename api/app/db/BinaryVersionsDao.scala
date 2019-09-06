@@ -8,7 +8,6 @@ import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
 import io.flow.util.{IdGenerator, Version}
 import anorm._
-import com.google.inject.Provider
 import play.api.db._
 
 import scala.util.{Failure, Success, Try}
