@@ -21,7 +21,7 @@ class TaskActor @Inject()(
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("tasks-actor-context")
 
-  private[this] val MaxTasksPerIteration = 10
+  private[this] val MaxTasksPerIteration = 10L
   private[this] case object Process
 
   scheduleRecurring(
