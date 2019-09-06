@@ -5,7 +5,6 @@ import db.DbHelpers
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import java.sql.Connection
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.db.Database
@@ -13,6 +12,7 @@ import play.api.libs.json.{JsObject, JsValue, Json}
 
 case class Task(
   id: String,
+  discriminator: String,
   task: JsObject,
   numAttempts: Int,
   processedAt: Option[DateTime],
@@ -20,6 +20,7 @@ case class Task(
 ) {
 
   lazy val form: TaskForm = TaskForm(
+    discriminator = discriminator,
     task = task,
     numAttempts = numAttempts,
     processedAt = processedAt
@@ -28,6 +29,7 @@ case class Task(
 }
 
 case class TaskForm(
+  discriminator: String,
   task: JsValue,
   numAttempts: Int,
   processedAt: Option[DateTime]
@@ -44,6 +46,7 @@ object TasksTable {
 
   object Columns {
     val Id: String = "id"
+    val Discriminator: String = "discriminator"
     val Task: String = "task"
     val NumAttempts: String = "num_attempts"
     val ProcessedAt: String = "processed_at"
@@ -51,7 +54,7 @@ object TasksTable {
     val UpdatedAt: String = "updated_at"
     val UpdatedByUserId: String = "updated_by_user_id"
     val HashCode: String = "hash_code"
-    val all: List[String] = List(Id, Task, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
+    val all: List[String] = List(Id, Discriminator, Task, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
   }
 }
 
@@ -68,6 +71,7 @@ class TasksDao @Inject() (
 
   private[this] val BaseQuery = Query("""
       | select tasks.id,
+      |        tasks.discriminator,
       |        tasks.task::text as task_text,
       |        tasks.num_attempts,
       |        tasks.processed_at,
@@ -80,14 +84,15 @@ class TasksDao @Inject() (
 
   private[this] val InsertQuery = Query("""
     | insert into tasks
-    | (id, task, num_attempts, processed_at, updated_by_user_id, hash_code)
+    | (id, discriminator, task, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {task}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {discriminator}, {task}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
-    |    set task = {task}::json,
+    |    set discriminator = {discriminator},
+    |        task = {task}::json,
     |        num_attempts = {num_attempts}::integer,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
@@ -98,68 +103,69 @@ class TasksDao @Inject() (
 
   private[this] def bindQuery(query: Query, form: TaskForm): Query = {
     query.
+      bind("discriminator", form.discriminator).
       bind("task", form.task).
       bind("num_attempts", form.numAttempts).
       bind("processed_at", form.processedAt).
       bind("hash_code", form.hashCode())
   }
 
-  def insert(updatedBy: UUID, form: TaskForm): String = {
+  def insert(updatedBy: String, form: TaskForm): String = {
     db.withConnection { implicit c =>
       insert(c, updatedBy, form)
     }
   }
 
-  def insert(implicit c: Connection, updatedBy: UUID, form: TaskForm): String = {
+  def insert(implicit c: Connection, updatedBy: String, form: TaskForm): String = {
     val id = randomId()
     bindQuery(InsertQuery, form).
       bind("id", id).
-      bind("updated_by_guid", updatedBy).
+      bind("updated_by_id", updatedBy).
       anormSql.execute()
     id
   }
 
-  def updateIfChangedById(updatedBy: UUID, id: String, form: TaskForm): Unit = {
+  def updateIfChangedById(updatedBy: String, id: String, form: TaskForm): Unit = {
     if (!findById(id).map(_.form).contains(form)) {
       updateById(updatedBy, id, form)
     }
   }
 
-  def updateById(updatedBy: UUID, id: String, form: TaskForm): Unit = {
+  def updateById(updatedBy: String, id: String, form: TaskForm): Unit = {
     db.withConnection { implicit c =>
       updateById(c, updatedBy, id, form)
     }
   }
 
-  def updateById(implicit c: Connection, updatedBy: UUID, id: String, form: TaskForm): Unit = {
+  def updateById(implicit c: Connection, updatedBy: String, id: String, form: TaskForm): Unit = {
     bindQuery(UpdateQuery, form).
       bind("id", id).
-      bind("updated_by_guid", updatedBy).
+      bind("updated_by_id", updatedBy).
       anormSql.execute()
     ()
   }
 
-  def update(updatedBy: UUID, existing: Task, form: TaskForm): Unit = {
+  def update(updatedBy: String, existing: Task, form: TaskForm): Unit = {
     db.withConnection { implicit c =>
       update(c, updatedBy, existing, form)
     }
   }
 
-  def update(implicit c: Connection, updatedBy: UUID, existing: Task, form: TaskForm): Unit = {
+  def update(implicit c: Connection, updatedBy: String, existing: Task, form: TaskForm): Unit = {
     updateById(c, updatedBy, existing.id, form)
   }
 
-  def delete(deletedBy: UUID, task: Task): Unit = {
+  def delete(deletedBy: String, task: Task): Unit = {
     dbHelpers.delete(deletedBy, task.id)
   }
 
-  def deleteById(deletedBy: UUID, id: String): Unit = {
+  def deleteById(deletedBy: String, id: String): Unit = {
     db.withConnection { implicit c =>
       deleteById(c, deletedBy, id)
     }
   }
 
-  def deleteById(c: java.sql.Connection, deletedBy: UUID, id: String): Unit = {
+  def deleteById(c: java.sql.Connection, deletedBy: String, id: String): Unit = {
     dbHelpers.delete(c, deletedBy, id)
   }
 
@@ -175,6 +181,17 @@ class TasksDao @Inject() (
 
   def iterateAll(
     ids: Option[Seq[String]] = None,
+    numAttempts: Option[Int] = None,
+    numAttemptsGreaterThanOrEquals: Option[Int] = None,
+    numAttemptsGreaterThan: Option[Int] = None,
+    numAttemptsLessThanOrEquals: Option[Int] = None,
+    numAttemptsLessThan: Option[Int] = None,
+    processedAt: Option[DateTime] = None,
+    hasProcessedAt: Option[Boolean] = None,
+    processedAtGreaterThanOrEquals: Option[DateTime] = None,
+    processedAtGreaterThan: Option[DateTime] = None,
+    processedAtLessThanOrEquals: Option[DateTime] = None,
+    processedAtLessThan: Option[DateTime] = None,
     pageSize: Long = 25L,
     orderBy: OrderBy = OrderBy("tasks.id")
   ) (
@@ -183,6 +200,17 @@ class TasksDao @Inject() (
     def iterate(offset: Long): Iterator[Task] = {
       val page = findAll(
         ids = ids,
+        numAttempts = numAttempts,
+        numAttemptsGreaterThanOrEquals = numAttemptsGreaterThanOrEquals,
+        numAttemptsGreaterThan = numAttemptsGreaterThan,
+        numAttemptsLessThanOrEquals = numAttemptsLessThanOrEquals,
+        numAttemptsLessThan = numAttemptsLessThan,
+        processedAt = processedAt,
+        hasProcessedAt = hasProcessedAt,
+        processedAtGreaterThanOrEquals = processedAtGreaterThanOrEquals,
+        processedAtGreaterThan = processedAtGreaterThan,
+        processedAtLessThanOrEquals = processedAtLessThanOrEquals,
+        processedAtLessThan = processedAtLessThan,
         limit = Some(pageSize),
         offset = offset,
         orderBy = orderBy
@@ -199,6 +227,17 @@ class TasksDao @Inject() (
 
   def findAll(
     ids: Option[Seq[String]] = None,
+    numAttempts: Option[Int] = None,
+    numAttemptsGreaterThanOrEquals: Option[Int] = None,
+    numAttemptsGreaterThan: Option[Int] = None,
+    numAttemptsLessThanOrEquals: Option[Int] = None,
+    numAttemptsLessThan: Option[Int] = None,
+    processedAt: Option[DateTime] = None,
+    hasProcessedAt: Option[Boolean] = None,
+    processedAtGreaterThanOrEquals: Option[DateTime] = None,
+    processedAtGreaterThan: Option[DateTime] = None,
+    processedAtLessThanOrEquals: Option[DateTime] = None,
+    processedAtLessThan: Option[DateTime] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -209,6 +248,17 @@ class TasksDao @Inject() (
       findAllWithConnection(
         c,
         ids = ids,
+        numAttempts = numAttempts,
+        numAttemptsGreaterThanOrEquals = numAttemptsGreaterThanOrEquals,
+        numAttemptsGreaterThan = numAttemptsGreaterThan,
+        numAttemptsLessThanOrEquals = numAttemptsLessThanOrEquals,
+        numAttemptsLessThan = numAttemptsLessThan,
+        processedAt = processedAt,
+        hasProcessedAt = hasProcessedAt,
+        processedAtGreaterThanOrEquals = processedAtGreaterThanOrEquals,
+        processedAtGreaterThan = processedAtGreaterThan,
+        processedAtLessThanOrEquals = processedAtLessThanOrEquals,
+        processedAtLessThan = processedAtLessThan,
         limit = limit,
         offset = offset,
         orderBy = orderBy
@@ -219,6 +269,17 @@ class TasksDao @Inject() (
   def findAllWithConnection(
     c: java.sql.Connection,
     ids: Option[Seq[String]] = None,
+    numAttempts: Option[Int] = None,
+    numAttemptsGreaterThanOrEquals: Option[Int] = None,
+    numAttemptsGreaterThan: Option[Int] = None,
+    numAttemptsLessThanOrEquals: Option[Int] = None,
+    numAttemptsLessThan: Option[Int] = None,
+    processedAt: Option[DateTime] = None,
+    hasProcessedAt: Option[Boolean] = None,
+    processedAtGreaterThanOrEquals: Option[DateTime] = None,
+    processedAtGreaterThan: Option[DateTime] = None,
+    processedAtLessThanOrEquals: Option[DateTime] = None,
+    processedAtLessThan: Option[DateTime] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -227,42 +288,21 @@ class TasksDao @Inject() (
   ): Seq[Task] = {
     customQueryModifier(BaseQuery).
       optionalIn("tasks.id", ids).
+      equals("tasks.num_attempts", numAttempts).
+      greaterThanOrEquals("tasks.num_attempts", numAttemptsGreaterThanOrEquals).
+      greaterThan("tasks.num_attempts", numAttemptsGreaterThan).
+      lessThanOrEquals("tasks.num_attempts", numAttemptsLessThanOrEquals).
+      lessThan("tasks.num_attempts", numAttemptsLessThan).
+      equals("tasks.processed_at", processedAt).
+      nullBoolean("tasks.processed_at", hasProcessedAt).
+      greaterThanOrEquals("tasks.processed_at", processedAtGreaterThanOrEquals).
+      greaterThan("tasks.processed_at", processedAtGreaterThan).
+      lessThanOrEquals("tasks.processed_at", processedAtLessThanOrEquals).
+      lessThan("tasks.processed_at", processedAtLessThan).
       optionalLimit(limit).
       offset(offset).
       orderBy(orderBy.sql).
       as(TasksDao.parser.*)(c)
-  }
-
-  def deleteAll(
-    deletedBy: UUID,
-    ids: Option[Seq[String]]
-  ) (
-    implicit customQueryModifier: Query => Query = { q => q }
-  ): Int = {
-    db.withConnection { implicit c =>
-      deleteAllWithConnection(
-        c,
-        deletedBy = deletedBy,
-        ids = ids
-      )(customQueryModifier)
-    }
-  }
-
-  def deleteAllWithConnection(
-    c: java.sql.Connection,
-    deletedBy: UUID,
-    ids: Option[Seq[String]]
-  ) (
-    implicit customQueryModifier: Query => Query = { q => q }
-  ): Int = {
-    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'")
-      .executeUpdate()(c)
-
-    val query = Query("delete from tasks")
-    customQueryModifier(query)
-      .optionalIn("tasks.id", ids)
-      .anormSql()
-      .executeUpdate()(c)
   }
 
 }
@@ -271,12 +311,14 @@ object TasksDao {
 
   val parser: RowParser[Task] = {
     SqlParser.str("id") ~
+    SqlParser.str("discriminator") ~
     SqlParser.str("task_text") ~
     SqlParser.int("num_attempts") ~
     SqlParser.get[DateTime]("processed_at").? ~
     SqlParser.get[DateTime]("created_at") map {
-      case id ~ task ~ numAttempts ~ processedAt ~ createdAt => Task(
+      case id ~ discriminator ~ task ~ numAttempts ~ processedAt ~ createdAt => Task(
         id = id,
+        discriminator = discriminator,
         task = Json.parse(task).as[JsObject],
         numAttempts = numAttempts,
         processedAt = processedAt,

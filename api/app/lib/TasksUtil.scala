@@ -7,6 +7,8 @@ class TasksUtil @Inject() (
   internalTasksDao: InternalTasksDao
 ) {
   def process(): Unit = {
+    internalTasksDao.findAll(
 
+    )
   }
 }
