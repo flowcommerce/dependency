@@ -2,7 +2,7 @@ builds:
   - api:
       dockerfile: api/Dockerfile
       initial.number.instances: 1
-      instance.type: t3.large
+      instance.type: t3.xlarge
       port.container: 9000
       port.host: 6111
       version: 1.3
