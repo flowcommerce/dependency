@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
-import db.{Authorization, LibrariesDao, SyncsDao}
+import db.{Authorization, InternalTasksDao, LibrariesDao, SyncsDao}
 import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.SyncEvent
 import io.flow.dependency.v0.models.json._
@@ -15,32 +15,9 @@ class Syncs @javax.inject.Inject()(
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  syncsDao: SyncsDao,
-  librariesHelper: LibrariesHelper,
-  binaryHelper: BinaryHelper,
-  projectHelper: ProjectHelper,
-  librariesDao: LibrariesDao,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
+  internalTasksDao: InternalTasksDao
 ) extends BaseIdentifiedControllerWithFallback {
-
-  def get(
-    objectId: Option[String],
-    event: Option[SyncEvent],
-    limit: Long = 25,
-    offset: Long = 0
-  ) = IdentifiedWithFallback {
-    Ok(
-      Json.toJson(
-        syncsDao.findAll(
-          objectId = objectId,
-          event = event,
-          limit = limit,
-          offset = offset
-        )
-      )
-    )
-  }
 
   def postAll() = IdentifiedWithFallback {
     mainActor ! MainActor.Messages.SyncAll
