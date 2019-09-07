@@ -3197,6 +3197,27 @@ package io.flow.dependency.v0 {
     }
 
     object Syncs extends Syncs {
+      override def get(
+        objectId: _root_.scala.Option[String] = None,
+        event: _root_.scala.Option[io.flow.dependency.v0.models.SyncEvent] = None,
+        limit: Long = 25L,
+        offset: Long = 0L,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Sync]] = {
+        val queryParameters = Seq(
+          objectId.map("object_id" -> _),
+          event.map("event" -> _.toString),
+          Some("limit" -> limit.toString),
+          Some("offset" -> offset.toString)
+        ).flatten
+
+        _executeRequest("GET", s"/syncs", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
+          case r if r.status == 200 => _root_.io.flow.dependency.v0.Client.parseJson("Seq[io.flow.dependency.v0.models.Sync]", r, _.validate[Seq[io.flow.dependency.v0.models.Sync]])
+          case r if r.status == 401 => throw io.flow.dependency.v0.errors.UnitResponse(r.status)
+          case r => throw io.flow.dependency.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401")
+        }
+      }
+
       override def postAll(
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
@@ -4059,6 +4080,18 @@ package io.flow.dependency.v0 {
   }
 
   trait Syncs {
+    /**
+     * @param limit The number of records to return
+     * @param offset Used to paginate. First page of results is 0.
+     */
+    def get(
+      objectId: _root_.scala.Option[String] = None,
+      event: _root_.scala.Option[io.flow.dependency.v0.models.SyncEvent] = None,
+      limit: Long = 25L,
+      offset: Long = 0L,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.dependency.v0.models.Sync]]
+
     def postAll(
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]

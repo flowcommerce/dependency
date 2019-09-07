@@ -2,8 +2,11 @@ package controllers
 
 import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
 import db.{Authorization, InternalTasksDao, LibrariesDao, SyncsDao}
+import io.flow.dependency.v0.models.SyncEvent
+import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.util.Config
+import play.api.libs.json.Json
 import play.api.mvc._
 
 @javax.inject.Singleton
@@ -19,6 +22,24 @@ class Syncs @javax.inject.Inject()(
   projectHelper: ProjectHelper,
   librariesDao: LibrariesDao,
 ) extends BaseIdentifiedControllerWithFallback {
+
+  def get(
+    objectId: Option[String],
+    event: Option[SyncEvent],
+    limit: Long = 25,
+    offset: Long = 0
+  ) = IdentifiedWithFallback {
+    Ok(
+      Json.toJson(
+        syncsDao.findAll(
+          objectId = objectId,
+          event = event,
+          limit = limit,
+          offset = offset
+        )
+      )
+    )
+  }
 
   def postAll() = IdentifiedWithFallback {
     internalTasksDao.createSyncAllIfNotQueued()

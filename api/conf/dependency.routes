@@ -50,6 +50,7 @@ GET        /subscriptions                    controllers.Subscriptions.get(id: _
 GET        /subscriptions/:id                controllers.Subscriptions.getById(id: String)
 POST       /subscriptions                    controllers.Subscriptions.post(identifier: _root_.scala.Option[String])
 DELETE     /subscriptions/:id                controllers.Subscriptions.deleteById(id: String, identifier: _root_.scala.Option[String])
+GET        /syncs                            controllers.Syncs.get(object_id: _root_.scala.Option[String], event: _root_.scala.Option[io.flow.dependency.v0.models.SyncEvent], limit: Long ?= 25L, offset: Long ?= 0L)
 POST       /syncs/all                        controllers.Syncs.postAll()
 POST       /syncs/libraries                  controllers.Syncs.postLibraries(group_id: _root_.scala.Option[String])
 POST       /syncs/binaries/:id               controllers.Syncs.postBinariesById(id: String)

@@ -1165,6 +1165,20 @@
     "sync": {
       "operations": [
         {
+          "method": "GET",
+          "parameters": [
+            { "name": "object_id", "type": "string", "required": false },
+            { "name": "event", "type": "sync_event", "required": false },
+            { "name": "limit", "type": "long", "default": 25, "description": "The number of records to return", "minimum": 0, "maximum": 100 },
+            { "name": "offset", "type": "long", "default": 0, "description": "Used to paginate. First page of results is 0.", "minimum": 0 }
+          ],
+          "responses": {
+            "200": { "type": "[sync]" },
+            "401": { "type": "unit" }
+          }
+        },
+
+        {
           "method": "POST",
           "path": "/all",
           "responses": {
