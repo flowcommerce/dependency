@@ -38,9 +38,7 @@ class InternalTasksDaoSpec extends FlowPlaySpec
       )
     }
 
-    val all = findTaskDataSync()
-    all.size must be(1)
-    all.foreach { t =>
+    findTaskDataSync().foreach { t =>
       internalTasksDao.setProcessed(t.id)
     }
 

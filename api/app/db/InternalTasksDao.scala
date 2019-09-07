@@ -47,6 +47,7 @@ class InternalTasksDao @Inject()(
    * returning the task id
    */
   def create(data: TaskData): String = {
+    println(s" Creating task: $data")
     val dataJson = Json.toJson(data)
     dao.insert(
       Constants.SystemUser.id,
@@ -89,8 +90,11 @@ class InternalTasksDao @Inject()(
       hasProcessedAt = Some(false),
       limit = Some(1)
     )
+    println(s"discriminator[$discriminator] tasks: ${existing.map(_.id)}")
     if (existing.isEmpty) {
+      println(s" --> creating")
       create(taskData)
+      ()
     }
   }
 
