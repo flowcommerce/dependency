@@ -86,14 +86,14 @@ class TasksDao @Inject() (
     | insert into tasks
     | (id, discriminator, data, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {discriminator}, {data}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {discriminator}, {data}::json, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
     |    set discriminator = {discriminator},
     |        data = {data}::json,
-    |        num_attempts = {num_attempts}::integer,
+    |        num_attempts = {num_attempts}::int,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
     |        hash_code = {hash_code}::bigint
@@ -120,7 +120,7 @@ class TasksDao @Inject() (
     val id = randomId()
     bindQuery(InsertQuery, form).
       bind("id", id).
-      bind("updated_by_id", updatedBy).
+      bind("updated_by_user_id", updatedBy).
       anormSql.execute()
     id
   }
@@ -140,7 +140,7 @@ class TasksDao @Inject() (
   def updateById(implicit c: Connection, updatedBy: String, id: String, form: TaskForm): Unit = {
     bindQuery(UpdateQuery, form).
       bind("id", id).
-      bind("updated_by_id", updatedBy).
+      bind("updated_by_user_id", updatedBy).
       anormSql.execute()
     ()
   }
