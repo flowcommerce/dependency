@@ -25,7 +25,7 @@ trait Factories {
   def makeProjectSummary(
     id: String = UUID.randomUUID.toString,
     org: OrganizationSummary = makeOrganizationSummary(),
-    name: String = makeName
+    name: String = makeName()
   ) = ProjectSummary(
     id = id,
     organization = org,
