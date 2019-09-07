@@ -1,5 +1,6 @@
 package db
 
+import io.flow.dependency.v0.models.TaskDataDiscriminator
 import io.flow.test.utils.FlowPlaySpec
 
 class InternalTasksDaoSpec extends FlowPlaySpec
@@ -23,5 +24,29 @@ class InternalTasksDaoSpec extends FlowPlaySpec
 
     internalTasksDao.setProcessed(task2.id)
     findIds() must equal(Seq(task1.id))
+  }
+
+  "createSyncAllIfNotQueued" in {
+    0.to(3).foreach { _ =>
+      internalTasksDao.createSyncAllIfNotQueued()
+    }
+    def findTaskDataSync() = {
+      internalTasksDao.findAll(
+        discriminator = Some(TaskDataDiscriminator.TaskDataSync),
+        hasProcessedAt = Some(false),
+        limit = None
+      )
+    }
+
+    val all = findTaskDataSync()
+    all.size must be(1)
+    all.foreach { t =>
+      internalTasksDao.setProcessed(t.id)
+    }
+
+    findTaskDataSync().size must be(0)
+    internalTasksDao.createSyncAllIfNotQueued()
+    internalTasksDao.createSyncAllIfNotQueued()
+    findTaskDataSync().size must be(1)
   }
 }

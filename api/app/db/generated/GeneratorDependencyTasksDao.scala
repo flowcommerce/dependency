@@ -192,6 +192,8 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
+    discriminator: Option[String] = None,
+    discriminators: Option[Seq[String]] = None,
     pageSize: Long = 25L,
     orderBy: OrderBy = OrderBy("tasks.id")
   ) (
@@ -211,6 +213,8 @@ class TasksDao @Inject() (
         processedAtGreaterThan = processedAtGreaterThan,
         processedAtLessThanOrEquals = processedAtLessThanOrEquals,
         processedAtLessThan = processedAtLessThan,
+        discriminator = discriminator,
+        discriminators = discriminators,
         limit = Some(pageSize),
         offset = offset,
         orderBy = orderBy
@@ -238,6 +242,8 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
+    discriminator: Option[String] = None,
+    discriminators: Option[Seq[String]] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -259,6 +265,8 @@ class TasksDao @Inject() (
         processedAtGreaterThan = processedAtGreaterThan,
         processedAtLessThanOrEquals = processedAtLessThanOrEquals,
         processedAtLessThan = processedAtLessThan,
+        discriminator = discriminator,
+        discriminators = discriminators,
         limit = limit,
         offset = offset,
         orderBy = orderBy
@@ -280,6 +288,8 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
+    discriminator: Option[String] = None,
+    discriminators: Option[Seq[String]] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -299,6 +309,8 @@ class TasksDao @Inject() (
       greaterThan("tasks.processed_at", processedAtGreaterThan).
       lessThanOrEquals("tasks.processed_at", processedAtLessThanOrEquals).
       lessThan("tasks.processed_at", processedAtLessThan).
+      equals("tasks.discriminator", discriminator).
+      optionalIn("tasks.discriminator", discriminators).
       optionalLimit(limit).
       offset(offset).
       orderBy(orderBy.sql).

@@ -1,13 +1,12 @@
 package controllers
 
-import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
-import db.{Authorization, InternalTasksDao, LibrariesDao, SyncsDao}
-import io.flow.dependency.actors.MainActor
-import io.flow.dependency.v0.models.SyncEvent
+import db.InternalTasksDao
+import io.flow.dependency.v0.anorm.parsers.TaskData
+import io.flow.dependency.v0.models.TaskDataDiscriminator.TaskDataSync
+import io.flow.dependency.v0.models.{SyncEvent, TaskData}
 import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.util.Config
-import play.api.libs.json._
 import play.api.mvc._
 
 @javax.inject.Singleton
@@ -20,12 +19,13 @@ class Syncs @javax.inject.Inject()(
 ) extends BaseIdentifiedControllerWithFallback {
 
   def postAll() = IdentifiedWithFallback {
-    mainActor ! MainActor.Messages.SyncAll
+    internalTasksDao.createSyncAllIfNotQueued()
     NoContent
   }
 
   def postBinariesById(id: String) = IdentifiedWithFallback {
     binaryHelper.withBinary(id) { binary =>
+      internalTasksDao.createSyncAllIfNotQueued()
       mainActor ! MainActor.Messages.BinarySync(binary.id)
       NoContent
     }

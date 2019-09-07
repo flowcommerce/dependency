@@ -1,6 +1,7 @@
 package db
 
-import io.flow.dependency.v0.models.TaskData
+import io.flow.dependency.v0.models.TaskDataSync
+import io.flow.dependency.v0.models.{TaskData, TaskDataDiscriminator}
 import io.flow.dependency.v0.models.json._
 import io.flow.event.JsonUtil
 import io.flow.postgresql.{OrderBy, Query}
@@ -24,6 +25,7 @@ class InternalTasksDao @Inject()(
 
   def findAll(
     ids: Option[Seq[String]] = None,
+    discriminator: Option[TaskDataDiscriminator] = None,
     limit: Option[Long],
     hasProcessedAt: Option[Boolean] = None,
     offset: Long = 0,
@@ -33,6 +35,7 @@ class InternalTasksDao @Inject()(
   ): Seq[InternalTask] = {
     dao.findAll(
       ids = ids,
+      discriminator = discriminator.map(_.toString),
       hasProcessedAt = hasProcessedAt,
       limit = limit,
       offset = offset,
@@ -55,6 +58,22 @@ class InternalTasksDao @Inject()(
         processedAt = None
       )
     )
+  }
+
+  /**
+   * Create a new sync all task IFF there isn't one
+   * that is pending processing as this is an expensive
+   * task.
+   */
+  def createSyncAllIfNotQueued(): Unit = {
+    val existing = findAll(
+      discriminator = Some(TaskDataDiscriminator.TaskDataSync),
+      hasProcessedAt = Some(false),
+      limit = Some(1)
+    )
+    if (existing.isEmpty) {
+      create(TaskDataSync())
+    }
   }
 
   def setProcessed(taskId: String): Unit = {
