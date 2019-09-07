@@ -1,10 +1,7 @@
 package controllers
 
-import db.InternalTasksDao
-import io.flow.dependency.v0.anorm.parsers.TaskData
-import io.flow.dependency.v0.models.TaskDataDiscriminator.TaskDataSync
-import io.flow.dependency.v0.models.{SyncEvent, TaskData}
-import io.flow.dependency.v0.models.json._
+import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
+import db.{Authorization, InternalTasksDao, LibrariesDao, SyncsDao}
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.util.Config
 import play.api.mvc._
@@ -15,7 +12,12 @@ class Syncs @javax.inject.Inject()(
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
-  internalTasksDao: InternalTasksDao
+  internalTasksDao: InternalTasksDao,
+  syncsDao: SyncsDao,
+  librariesHelper: LibrariesHelper,
+  binaryHelper: BinaryHelper,
+  projectHelper: ProjectHelper,
+  librariesDao: LibrariesDao,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def postAll() = IdentifiedWithFallback {
@@ -25,22 +27,21 @@ class Syncs @javax.inject.Inject()(
 
   def postBinariesById(id: String) = IdentifiedWithFallback {
     binaryHelper.withBinary(id) { binary =>
-      internalTasksDao.createSyncAllIfNotQueued()
-      mainActor ! MainActor.Messages.BinarySync(binary.id)
+      internalTasksDao.createSyncIfNotQueued(binary)
       NoContent
     }
   }
 
   def postLibrariesById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
-      mainActor ! MainActor.Messages.LibrarySync(library.id)
+      internalTasksDao.createSyncIfNotQueued(library)
       NoContent
     }
   }
 
   def postProjectsById(id: String) = IdentifiedWithFallback { request =>
-    projectHelper.withProject(request.user, id) { _ =>
-      mainActor ! MainActor.Messages.ProjectSync(id)
+    projectHelper.withProject(request.user, id) { project =>
+      internalTasksDao.createSyncIfNotQueued(project)
       NoContent
     }
   }
@@ -48,8 +49,8 @@ class Syncs @javax.inject.Inject()(
   def postLibraries(group_id: Option[String]) = IdentifiedWithFallback { request =>
     val auth = Authorization.User(request.user.id)
     val libsToSync = librariesDao.findAll(auth, groupId = group_id, limit = 1000)
-    libsToSync.foreach { lib =>
-      mainActor ! MainActor.Messages.LibrarySync(lib.id)
+    libsToSync.foreach { library =>
+      internalTasksDao.createSyncIfNotQueued(library)
     }
     NoContent
   }

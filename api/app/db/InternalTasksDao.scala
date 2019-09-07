@@ -1,7 +1,6 @@
 package db
 
-import io.flow.dependency.v0.models.TaskDataSync
-import io.flow.dependency.v0.models.{TaskData, TaskDataDiscriminator}
+import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
 import io.flow.event.JsonUtil
 import io.flow.postgresql.{OrderBy, Query}
@@ -66,13 +65,32 @@ class InternalTasksDao @Inject()(
    * task.
    */
   def createSyncAllIfNotQueued(): Unit = {
+    createSyncIfNotQueued(TaskDataSync())
+  }
+
+  def createSyncIfNotQueued(binary: Binary): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(binary.id, SyncType.Binary))
+  }
+
+  def createSyncIfNotQueued(library: Library): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(library.id, SyncType.Library))
+  }
+
+  def createSyncIfNotQueued(project: Project): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(project.id, SyncType.Project))
+  }
+
+  private[this] def createSyncIfNotQueued(taskData: TaskData): Unit = {
+    val discriminator = TaskDataDiscriminator(
+      JsonUtil.requiredString(Json.toJson(taskData), "discriminator")
+    )
     val existing = findAll(
-      discriminator = Some(TaskDataDiscriminator.TaskDataSync),
+      discriminator = Some(discriminator),
       hasProcessedAt = Some(false),
       limit = Some(1)
     )
     if (existing.isEmpty) {
-      create(TaskDataSync())
+      create(taskData)
     }
   }
 
