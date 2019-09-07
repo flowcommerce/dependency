@@ -14,7 +14,6 @@ import play.api.db._
 @Singleton
 class ProjectsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   membershipsDaoProvider: Provider[MembershipsDao],
   projectLibrariesDaoProvider: Provider[ProjectLibrariesDao],
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
@@ -22,6 +21,8 @@ class ProjectsDao @Inject()(
   organizationsDaoProvider: Provider[OrganizationsDao],
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "projects")
 
   private[this] val BaseQuery = Query(s"""
     select projects.id,
@@ -197,7 +198,7 @@ class ProjectsDao @Inject()(
       recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
     }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
 
-    dbHelpersProvider.get.delete("projects", deletedBy.id, project.id)
+    dbHelpers.delete(deletedBy.id, project.id)
     mainActor ! MainActor.Messages.ProjectDeleted(project.id)
   }
 

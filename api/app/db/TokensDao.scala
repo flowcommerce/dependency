@@ -43,9 +43,10 @@ object InternalTokenForm {
 @Singleton
 class TokensDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   usersDaoProvider: Provider[UsersDao]
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "tokens")
 
   private[this] val BaseQuery = Query(s"""
     select tokens.id,
@@ -82,7 +83,7 @@ class TokensDao @Inject()(
       }
       case Some(existing) => {
         db.withTransaction { implicit c =>
-          dbHelpersProvider.get.delete(c, "tokens", createdBy.id, existing.id)
+          dbHelpers.delete(c, createdBy.id, existing.id)
           createWithConnection(createdBy, form) match {
             case Left(errors) => sys.error("Failed to create token: " + errors.mkString(", "))
             case Right(token) => token
@@ -168,7 +169,7 @@ class TokensDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, token: Token): Unit = {
-    dbHelpersProvider.get.delete("tokens", deletedBy.id, token.id)
+    dbHelpers.delete(deletedBy.id, token.id)
   }
 
   def getCleartextGithubOauthTokenByUserId(

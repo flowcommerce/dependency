@@ -23,10 +23,26 @@
       "types": [
         { "type": "username_password" }
       ]
+    },
+
+    "task_data": {
+      "discriminator": "discriminator",
+      "types": [
+        { "type": "task_data_sync" },
+        { "type": "task_data_sync_one" }
+      ]
     }
   },
 
   "enums": {
+    "sync_type": {
+      "values": [
+        { "name": "project" },
+        { "name": "library" },
+        { "name": "binary" }
+      ]
+    },
+
     "role": {
       "values": [
         { "name": "member" },
@@ -78,6 +94,18 @@
   },
 
   "models": {
+    "task_data_sync": {
+      "fields": [
+        { "name": "type", "type": "sync_type", "required": false, "description": "If not specified, we sync all types" }
+      ]
+    },
+
+    "task_data_sync_one": {
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "type", "type": "sync_type" }
+      ]
+    },
 
     "reference": {
       "fields": [

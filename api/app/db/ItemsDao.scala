@@ -24,10 +24,11 @@ case class ItemForm(
 @Singleton
 class ItemsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   librariesDaoProvider: Provider[LibrariesDao],
   projectsDaoProvider: Provider[ProjectsDao],
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "items")
 
   private[this] val BaseQuery = Query(s"""
     select items.id,
@@ -187,7 +188,7 @@ class ItemsDao @Inject()(
   private[this] def deleteWithConnection(deletedBy: UserReference, item: Item)(
     implicit c: java.sql.Connection
   ): Unit = {
-    dbHelpersProvider.get.delete(c,"items", deletedBy.id, item.id)
+    dbHelpers.delete(c, deletedBy.id, item.id)
   }
 
   def deleteByObjectId(auth: Authorization, deletedBy: UserReference, objectId: String): Unit = {

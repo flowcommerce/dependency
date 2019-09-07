@@ -8,7 +8,6 @@ import io.flow.dependency.v0.models.Publication
 import io.flow.util.IdGenerator
 import org.joda.time.DateTime
 import anorm._
-import com.google.inject.Provider
 import play.api.db._
 
 case class LastEmailForm(
@@ -25,9 +24,9 @@ case class LastEmail(
 
 @Singleton
 class LastEmailsDao @Inject()(
-  db: Database,
-  dbHelpersProvider: Provider[DbHelpers]
+  db: Database
 ){
+  private[this] val dbHelpers = DbHelpers(db, "last_emails")
 
   private[this] val BaseQuery = Query(s"""
     select last_emails.*
@@ -47,7 +46,7 @@ class LastEmailsDao @Inject()(
   ): LastEmail = {
     val id = db.withTransaction { implicit c =>
       findByUserIdAndPublication(form.userId, form.publication).foreach { rec =>
-        dbHelpersProvider.get.delete(c, "last_emails", createdBy.id, rec.id)
+        dbHelpers.delete(c, createdBy.id, rec.id)
       }
       create(createdBy, form)
     }
@@ -57,7 +56,7 @@ class LastEmailsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, rec: LastEmail): Unit = {
-    dbHelpersProvider.get.delete("last_emails", deletedBy.id, rec.id)
+    dbHelpers.delete(deletedBy.id, rec.id)
   }
 
   private[this] def create(

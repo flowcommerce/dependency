@@ -21,11 +21,12 @@ case class ProjectLibraryForm(
 @Singleton
 class ProjectLibrariesDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "project_libraries")
 
   private[this] val BaseQuery = Query(s"""
     select project_libraries.id,
@@ -192,7 +193,7 @@ class ProjectLibrariesDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, library: ProjectLibrary): Unit = {
-    dbHelpersProvider.get.delete("project_libraries", deletedBy.id, library.id)
+    dbHelpers.delete(deletedBy.id, library.id)
     mainActor ! MainActor.Messages.ProjectLibraryDeleted(library.project.id, library.id, library.version)
   }
 

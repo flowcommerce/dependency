@@ -12,9 +12,10 @@ import play.api.db._
 @Singleton
 class SubscriptionsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   usersDaoProvider: Provider[UsersDao]
 ){
+
+  private[this] val dbHelpers = DbHelpers(db, "subscriptions")
 
   private[this] val BaseQuery = Query(s"""
     select subscriptions.id,
@@ -68,7 +69,7 @@ class SubscriptionsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, subscription: Subscription): Unit = {
-    dbHelpersProvider.get.delete("subscriptions", deletedBy.id, subscription.id)
+    dbHelpers.delete(deletedBy.id, subscription.id)
   }
 
   def findByUserIdAndPublication(

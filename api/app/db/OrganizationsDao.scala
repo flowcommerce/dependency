@@ -14,12 +14,13 @@ import play.api.db._
 @Singleton
 class OrganizationsDao @Inject()(
   db: Database,
-  dbHelpersProvider: Provider[DbHelpers],
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao]
 ){
 
   val DefaultUserNameLength = 8
+
+  private[this] val dbHelpers = DbHelpers(db, "organizations")
 
   private[this] val BaseQuery = Query(s"""
     select organizations.id,
@@ -148,7 +149,7 @@ class OrganizationsDao @Inject()(
       membershipsDaoProvider.get.delete(deletedBy, membership)
     }
 
-    dbHelpersProvider.get.delete("organizations", deletedBy.id, organization.id)
+    dbHelpers.delete(deletedBy.id, organization.id)
   }
 
   def upsertForUser(user: User): Organization = {
