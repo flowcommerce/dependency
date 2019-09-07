@@ -8,19 +8,16 @@ import java.sql.Connection
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.db.Database
-import play.api.libs.json.{JsObject, JsValue, Json}
 
 case class Task(
   id: String,
-  discriminator: String,
-  data: JsObject,
+  data: String,
   numAttempts: Int,
   processedAt: Option[DateTime],
   createdAt: DateTime
 ) {
 
   lazy val form: TaskForm = TaskForm(
-    discriminator = discriminator,
     data = data,
     numAttempts = numAttempts,
     processedAt = processedAt
@@ -29,16 +26,10 @@ case class Task(
 }
 
 case class TaskForm(
-  discriminator: String,
-  data: JsValue,
+  data: String,
   numAttempts: Int,
   processedAt: Option[DateTime]
-) {
-  assert(
-    data.isInstanceOf[JsObject],
-    s"Field[data] must be a JsObject and not a ${data.getClass.getName}"
-  )
-}
+)
 
 object TasksTable {
   val Schema: String = "public"
@@ -46,7 +37,6 @@ object TasksTable {
 
   object Columns {
     val Id: String = "id"
-    val Discriminator: String = "discriminator"
     val Data: String = "data"
     val NumAttempts: String = "num_attempts"
     val ProcessedAt: String = "processed_at"
@@ -54,7 +44,7 @@ object TasksTable {
     val UpdatedAt: String = "updated_at"
     val UpdatedByUserId: String = "updated_by_user_id"
     val HashCode: String = "hash_code"
-    val all: List[String] = List(Id, Discriminator, Data, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
+    val all: List[String] = List(Id, Data, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
   }
 }
 
@@ -71,8 +61,7 @@ class TasksDao @Inject() (
 
   private[this] val BaseQuery = Query("""
       | select tasks.id,
-      |        tasks.discriminator,
-      |        tasks.data::text as data_text,
+      |        tasks.data,
       |        tasks.num_attempts,
       |        tasks.processed_at,
       |        tasks.created_at,
@@ -84,15 +73,14 @@ class TasksDao @Inject() (
 
   private[this] val InsertQuery = Query("""
     | insert into tasks
-    | (id, discriminator, data, num_attempts, processed_at, updated_by_user_id, hash_code)
+    | (id, data, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {discriminator}, {data}::json, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {data}, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
-    |    set discriminator = {discriminator},
-    |        data = {data}::json,
+    |    set data = {data},
     |        num_attempts = {num_attempts}::int,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
@@ -103,7 +91,6 @@ class TasksDao @Inject() (
 
   private[this] def bindQuery(query: Query, form: TaskForm): Query = {
     query.
-      bind("discriminator", form.discriminator).
       bind("data", form.data).
       bind("num_attempts", form.numAttempts).
       bind("processed_at", form.processedAt).
@@ -192,8 +179,6 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
-    discriminator: Option[String] = None,
-    discriminators: Option[Seq[String]] = None,
     pageSize: Long = 25L,
     orderBy: OrderBy = OrderBy("tasks.id")
   ) (
@@ -213,8 +198,6 @@ class TasksDao @Inject() (
         processedAtGreaterThan = processedAtGreaterThan,
         processedAtLessThanOrEquals = processedAtLessThanOrEquals,
         processedAtLessThan = processedAtLessThan,
-        discriminator = discriminator,
-        discriminators = discriminators,
         limit = Some(pageSize),
         offset = offset,
         orderBy = orderBy
@@ -242,8 +225,6 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
-    discriminator: Option[String] = None,
-    discriminators: Option[Seq[String]] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -265,8 +246,6 @@ class TasksDao @Inject() (
         processedAtGreaterThan = processedAtGreaterThan,
         processedAtLessThanOrEquals = processedAtLessThanOrEquals,
         processedAtLessThan = processedAtLessThan,
-        discriminator = discriminator,
-        discriminators = discriminators,
         limit = limit,
         offset = offset,
         orderBy = orderBy
@@ -288,8 +267,6 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
-    discriminator: Option[String] = None,
-    discriminators: Option[Seq[String]] = None,
     limit: Option[Long],
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
@@ -309,8 +286,6 @@ class TasksDao @Inject() (
       greaterThan("tasks.processed_at", processedAtGreaterThan).
       lessThanOrEquals("tasks.processed_at", processedAtLessThanOrEquals).
       lessThan("tasks.processed_at", processedAtLessThan).
-      equals("tasks.discriminator", discriminator).
-      optionalIn("tasks.discriminator", discriminators).
       optionalLimit(limit).
       offset(offset).
       orderBy(orderBy.sql).
@@ -323,15 +298,13 @@ object TasksDao {
 
   val parser: RowParser[Task] = {
     SqlParser.str("id") ~
-    SqlParser.str("discriminator") ~
-    SqlParser.str("data_text") ~
+    SqlParser.str("data") ~
     SqlParser.int("num_attempts") ~
     SqlParser.get[DateTime]("processed_at").? ~
     SqlParser.get[DateTime]("created_at") map {
-      case id ~ discriminator ~ data ~ numAttempts ~ processedAt ~ createdAt => Task(
+      case id ~ data ~ numAttempts ~ processedAt ~ createdAt => Task(
         id = id,
-        discriminator = discriminator,
-        data = Json.parse(data).as[JsObject],
+        data = data,
         numAttempts = numAttempts,
         processedAt = processedAt,
         createdAt = createdAt

@@ -1,7 +1,7 @@
 package helpers
 
 import db.{InternalTask, InternalTasksDao}
-import io.flow.dependency.v0.models.{Project, SyncType, TaskData, TaskDataSync, TaskDataSyncOne}
+import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne}
 import io.flow.test.utils.FlowPlaySpec
 
 trait TaskHelpers {
@@ -20,10 +20,10 @@ trait TaskHelpers {
     )
   }
 
-  def makeTaskDataSyncOne(project: Project): TaskDataSyncOne = {
+  def makeTaskDataSyncOneProject(projectId: String = createTestId()): TaskDataSyncOne = {
     TaskDataSyncOne(
       `type` = SyncType.Project,
-      id = project.id
+      id = projectId
     )
   }
 

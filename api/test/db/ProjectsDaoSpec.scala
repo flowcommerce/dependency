@@ -2,14 +2,14 @@ package db
 
 import java.util.UUID
 
-import io.flow.dependency.v0.models.{Scms, Visibility}
+import io.flow.dependency.v0.models.{Organization, Project, Scms, Visibility}
 import util.DependencySpec
 
 class ProjectsDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
-  lazy val project1 = createProject(org)
-  lazy val project2 = createProject(org)
+  private[this] lazy val org: Organization = createOrganization()
+  private[this] lazy val project1: Project = createProject(org)
+  private[this] lazy val project2: Project = createProject(org)
 
   "findByOrganizationIdAndName" in {
     projectsDao.findByOrganizationKeyAndName(Authorization.All, org.key, project1.name).map(_.id) must be(
