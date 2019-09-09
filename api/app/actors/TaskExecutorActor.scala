@@ -1,15 +1,12 @@
 package actors
 
 import akka.actor.Actor
-import db.{Authorization, BinariesDao, BinaryVersionsDao, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectsDao, ResolversDao, SyncsDao, UsersDao}
+import db.{InternalTasksDao, LibrariesDao, ProjectsDao, UsersDao}
 import io.flow.akka.SafeReceive
-import io.flow.dependency.actors.SearchActor
-import io.flow.dependency.api.lib.{DefaultBinaryVersionProvider, DefaultLibraryArtifactProvider}
-import io.flow.dependency.v0.models.VersionForm
 import io.flow.log.RollbarLogger
-import io.flow.postgresql.Pager
 import javax.inject.Inject
 import lib.TaskUtil
+import sync.{BinarySync, LibrarySync, ProjectSync}
 
 object TaskExecutorActor {
   object Messages {
@@ -21,88 +18,44 @@ object TaskExecutorActor {
 }
 
 class TaskExecutorActor @Inject() (
-  logger: RollbarLogger,
-  binaryVersionsDao: BinaryVersionsDao,
-  defaultBinaryVersionProvider: DefaultBinaryVersionProvider,
-  binariesDao: BinariesDao,
+  rollbar: RollbarLogger,
+  binarySync: BinarySync,
+  librarySync: LibrarySync,
+  projectSync: ProjectSync,
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,
-  resolversDao: ResolversDao,
-  libraryVersionsDao: LibraryVersionsDao,
   internalTasksDao: InternalTasksDao,
-  syncsDao: SyncsDao,
   taskUtil: TaskUtil,
   usersDao: UsersDao,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) extends Actor {
 
-  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
+  private[this] implicit val logger: RollbarLogger = logger.fingerprint(getClass.getName)
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 
     case TaskExecutorActor.Messages.SyncBinary(taskId: String, binaryId: String) => {
       taskUtil.process(taskId) {
-        binariesDao.findById(binaryId).foreach { binary =>
-          syncsDao.withStartedAndCompleted("binary", binary.id) {
-            defaultBinaryVersionProvider.versions(binary.name).foreach { version =>
-              binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
-            }
-          }
-          searchActor ! SearchActor.Messages.SyncBinary(binary.id)
-        }
+        binarySync.sync(usersDao.systemUser, binaryId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncLibrary(taskId: String, libraryId: String) => {
       taskUtil.process(taskId) {
-        librariesDao.findById(Authorization.All, libraryId).foreach { lib =>
-          resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
-            DefaultLibraryArtifactProvider().resolve(
-              resolversDao = resolversDao,
-              resolver = resolver,
-              groupId = lib.groupId,
-              artifactId = lib.artifactId
-            ).map { resolution =>
-              resolution.versions.foreach { version =>
-                libraryVersionsDao.upsert(
-                  createdBy = usersDao.systemUser,
-                  libraryId = lib.id,
-                  form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
-                )
-              }
-            }
-          }
-          searchActor ! SearchActor.Messages.SyncLibrary(lib.id)
-        }
+        librarySync.sync(usersDao.systemUser, libraryId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
-      println(s"TODO: SyncProject $taskId => $projectId")
-      projectsDao.findById(Authorization.All, projectId).foreach { project =>
-        searchActor ! SearchActor.Messages.SyncProject(project.id)
+      taskUtil.process(taskId) {
+        projectSync.sync(usersDao.systemUser, projectId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncAll(taskId) => {
       taskUtil.process(taskId) {
-        Pager.create { offset =>
-          binariesDao.findAll(offset = offset, limit = 1000)
-        }.foreach { rec =>
-          internalTasksDao.createSyncIfNotQueued(rec)
-        }
-
-        Pager.create { offset =>
-          librariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
-        }.foreach { rec =>
-          internalTasksDao.createSyncIfNotQueued(rec)
-        }
-
-        Pager.create { offset =>
-          projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
-        }.foreach { rec =>
-          internalTasksDao.createSyncIfNotQueued(rec)
-        }
+        binarySync.forall(internalTasksDao.createSyncIfNotQueued)
+        librarySync.forall(internalTasksDao.createSyncIfNotQueued)
+        projectSync.forall(internalTasksDao.createSyncIfNotQueued)
       }
     }
 
