@@ -52,9 +52,7 @@ class MainActor @javax.inject.Inject() (
   config: ApplicationConfig,
   system: ActorSystem,
   projectFactory: ProjectActor.Factory,
-  binariesDao: BinariesDao,
   usersDao: UsersDao,
-  itemsDao: ItemsDao,
   organizationsDao: OrganizationsDao,
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
@@ -62,7 +60,6 @@ class MainActor @javax.inject.Inject() (
   resolversDao: ResolversDao,
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
-  projectsDao: ProjectsDao,
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
 
