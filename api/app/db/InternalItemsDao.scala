@@ -138,7 +138,7 @@ class InternalItemsDao @Inject()(
       user,
       form.dbForm
     )
-    findByOrganizationIdAndObjectId(Authorization.All, form.organization.id, form.objectId).getOrElse {
+    findByObjectId(Authorization.All, form.organization.id, form.objectId).getOrElse {
       sys.error("Failed to replace item")
     }
   }
@@ -155,10 +155,9 @@ class InternalItemsDao @Inject()(
     findAll(auth, id = Some(id), limit = Some(1)).headOption
   }
 
-  def findByOrganizationIdAndObjectId(auth: Authorization, organizationId: String, objectId: String): Option[Item] = {
+  def findByObjectId(auth: Authorization, objectId: String): Option[Item] = {
     findAll(
       auth,
-      organizationId = Some(organizationId),
       objectId = Some(objectId),
       limit = Some(1)
     ).headOption
