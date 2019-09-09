@@ -63,6 +63,7 @@ class MainActor @javax.inject.Inject() (
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -74,15 +75,6 @@ class MainActor @javax.inject.Inject() (
     config,
     logger
   )), name = s"$name:emailActor")
-
-  private[this] val searchActor = system.actorOf(Props(new SearchActor(
-    binariesDao: BinariesDao,
-    librariesDao,
-    projectsDao,
-    itemsDao,
-    usersDao,
-    logger
-  )), name = s"$name:SearchActor")
 
   private[this] val projectActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val userActors = scala.collection.mutable.Map[String, ActorRef]()

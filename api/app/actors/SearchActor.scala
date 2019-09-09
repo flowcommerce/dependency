@@ -4,6 +4,7 @@ import javax.inject.Inject
 import db._
 import akka.actor.Actor
 import io.flow.akka.SafeReceive
+import io.flow.common.v0.models.UserReference
 import io.flow.log.RollbarLogger
 
 object SearchActor {
@@ -27,12 +28,11 @@ class SearchActor @Inject()(
   logger: RollbarLogger
 ) extends Actor {
 
-  private[this] implicit val configuredRollbar = logger.fingerprint("SearchActor")
+  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 
-  lazy val SystemUser = usersDao.systemUser
+  private[this] lazy val SystemUser: UserReference = usersDao.systemUser
 
-  def receive = SafeReceive.withLogUnhandled {
-
+  def receive: Receive = SafeReceive.withLogUnhandled {
 
     case SearchActor.Messages.SyncBinary(id) =>
       println(s"SearchActor.Messages.SyncBinary($id)")

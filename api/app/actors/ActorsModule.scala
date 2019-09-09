@@ -9,7 +9,8 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActorFactory[ProjectActor, ProjectActor.Factory]
     bindActor[BinaryActor]("binary-actor")
     bindActor[TaskExecutorActor]("task-executor-actor")
-    bindActor[TaskActor]("task-actor")
     bindActor[MainActor]("main-actor")
+    bindActor[SearchActor]("search-actor")
+    bindActor[TaskActor]("task-actor")
   }
 }

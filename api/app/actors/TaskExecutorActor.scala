@@ -3,6 +3,7 @@ package actors
 import akka.actor.Actor
 import db.{Authorization, BinariesDao, BinaryVersionsDao, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectsDao, ResolversDao, SyncsDao, UsersDao}
 import io.flow.akka.SafeReceive
+import io.flow.dependency.actors.SearchActor
 import io.flow.dependency.api.lib.{DefaultBinaryVersionProvider, DefaultLibraryArtifactProvider}
 import io.flow.dependency.v0.models.VersionForm
 import io.flow.log.RollbarLogger
@@ -31,7 +32,8 @@ class TaskExecutorActor @Inject() (
   internalTasksDao: InternalTasksDao,
   syncsDao: SyncsDao,
   taskUtil: TaskUtil,
-  usersDao: UsersDao
+  usersDao: UsersDao,
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) extends Actor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -46,12 +48,12 @@ class TaskExecutorActor @Inject() (
               binaryVersionsDao.upsert(usersDao.systemUser, binary.id, version.value)
             }
           }
+          searchActor ! SearchActor.Messages.SyncBinary(binary.id)
         }
       }
     }
 
     case TaskExecutorActor.Messages.SyncLibrary(taskId: String, libraryId: String) => {
-      println(s"TODO: SyncLibrary $taskId => $libraryId")
       taskUtil.process(taskId) {
         librariesDao.findById(Authorization.All, libraryId).foreach { lib =>
           resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
@@ -70,12 +72,16 @@ class TaskExecutorActor @Inject() (
               }
             }
           }
+          searchActor ! SearchActor.Messages.SyncLibrary(lib.id)
         }
       }
     }
 
     case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
       println(s"TODO: SyncProject $taskId => $projectId")
+      projectsDao.findById(Authorization.All, projectId).foreach { project =>
+        searchActor ! SearchActor.Messages.SyncProject(project.id)
+      }
     }
 
     case TaskExecutorActor.Messages.SyncAll(taskId) => {
