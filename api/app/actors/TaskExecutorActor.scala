@@ -13,6 +13,8 @@ object TaskExecutorActor {
   object Messages {
     case class SyncAll(taskId: String)
     case class SyncBinary(taskId: String, binaryId: String)
+    case class SyncLibrary(taskId: String, libraryId: String)
+    case class SyncProject(taskId: String, projectId: String)
   }
 }
 
@@ -43,6 +45,14 @@ class TaskExecutorActor @Inject() (
           }
         }
       }
+    }
+
+    case TaskExecutorActor.Messages.SyncLibrary(taskId: String, libraryId: String) => {
+      println(s"TODO: SyncLibrary $taskId => $libraryId")
+    }
+
+    case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
+      println(s"TODO: SyncProject $taskId => $projectId")
     }
 
     case TaskExecutorActor.Messages.SyncAll(taskId) => {

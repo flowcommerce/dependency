@@ -22,19 +22,14 @@ class TaskActor @Inject()(
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("tasks-actor-context")
 
   private[this] val MaxTasksPerIteration = 10L
-  private[this] case object Process
 
   scheduleRecurring(
     ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.task"),
-    Process
+    ReactiveActor.Messages.Changed
   )
 
   def receive: Receive = SafeReceive.withLogUnhandled {
     case ReactiveActor.Messages.Changed => {
-      println(s"Receive ReactiveActor.Changed")
-    }
-
-    case Process => {
       Try {
         tasksUtil.process(MaxTasksPerIteration)
       } match {
