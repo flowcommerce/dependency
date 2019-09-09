@@ -1,11 +1,13 @@
 package db.generated
 
 import anorm._
+import akka.actor.ActorRef
 import db.DbHelpers
+import io.flow.dependency.actors.ReactiveActor
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import java.sql.Connection
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import org.joda.time.DateTime
 import play.api.db.Database
 
@@ -50,7 +52,8 @@ object TasksTable {
 
 @Singleton
 class TasksDao @Inject() (
-  val db: Database
+  val db: Database,
+  @Named("task-actor") taskActor: ActorRef
 ) {
 
   private[this] val idGenerator = IdGenerator("tsk")
@@ -98,9 +101,11 @@ class TasksDao @Inject() (
   }
 
   def insert(updatedBy: String, form: TaskForm): String = {
-    db.withConnection { implicit c =>
+    val result = db.withConnection { implicit c =>
       insert(c, updatedBy, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
+    result
   }
 
   def insert(implicit c: Connection, updatedBy: String, form: TaskForm): String = {
@@ -122,6 +127,7 @@ class TasksDao @Inject() (
     db.withConnection { implicit c =>
       updateById(c, updatedBy, id, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def updateById(implicit c: Connection, updatedBy: String, id: String, form: TaskForm): Unit = {
@@ -136,6 +142,7 @@ class TasksDao @Inject() (
     db.withConnection { implicit c =>
       update(c, updatedBy, existing, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def update(implicit c: Connection, updatedBy: String, existing: Task, form: TaskForm): Unit = {
@@ -144,16 +151,19 @@ class TasksDao @Inject() (
 
   def delete(deletedBy: String, task: Task): Unit = {
     dbHelpers.delete(deletedBy, task.id)
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def deleteById(deletedBy: String, id: String): Unit = {
     db.withConnection { implicit c =>
       deleteById(c, deletedBy, id)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def deleteById(c: java.sql.Connection, deletedBy: String, id: String): Unit = {
     dbHelpers.delete(c, deletedBy, id)
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def findById(id: String): Option[Task] = {

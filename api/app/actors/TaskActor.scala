@@ -1,8 +1,9 @@
-package actors
+package io.flow.dependency.actors
 
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
+import io.flow.dependency.actors.ReactiveActor
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
 import javax.inject.Inject
@@ -30,6 +31,10 @@ class TaskActor @Inject()(
   )
 
   def receive = SafeReceive.withLogUnhandled {
+    case ReactiveActor.Messages.Changed => {
+      println(s"Receive ReactiveActor.Changed")
+    }
+
     case Process => {
       Try {
         tasksUtil.process(MaxTasksPerIteration)
