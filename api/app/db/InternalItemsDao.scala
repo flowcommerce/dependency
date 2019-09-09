@@ -138,7 +138,7 @@ class InternalItemsDao @Inject()(
       user,
       form.dbForm
     )
-    findByObjectId(Authorization.All, form.organization.id, form.objectId).getOrElse {
+    findByObjectId(Authorization.All, form.objectId).getOrElse {
       sys.error("Failed to replace item")
     }
   }
