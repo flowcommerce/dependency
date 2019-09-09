@@ -17,9 +17,10 @@ class ProjectSync @Inject()(
     println(s"project sync starting for user:$user")
     projectsDao.findById(Authorization.All, projectId).foreach { project =>
       syncsDao.withStartedAndCompleted("project", project.id) {
-        searchActor ! SearchActor.Messages.SyncProject(project.id)
+        println(" - TODO")
       }
     }
+    searchActor ! SearchActor.Messages.SyncProject(projectId)
   }
 
   def forall(f: Project => Any): Unit = {

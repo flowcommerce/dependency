@@ -23,8 +23,8 @@ class BinarySync @Inject() (
           binaryVersionsDao.upsert(user, binary.id, version.value)
         }
       }
-      searchActor ! SearchActor.Messages.SyncBinary(binaryId)
     }
+    searchActor ! SearchActor.Messages.SyncBinary(binaryId)
   }
   def forall(f: Binary => Any): Unit = {
     Pager.create { offset =>

@@ -35,7 +35,6 @@ class SearchActor @Inject()(
   def receive: Receive = SafeReceive.withLogUnhandled {
 
     case SearchActor.Messages.SyncBinary(id) =>
-      println(s"SearchActor.Messages.SyncBinary($id)")
       binariesDao.findById(id) match {
         case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
         case Some(binary) => itemsDao.replaceBinary(SystemUser, binary)

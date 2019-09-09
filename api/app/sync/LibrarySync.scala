@@ -35,9 +35,9 @@ class LibrarySync @Inject()(
             }
           }
         }
-        searchActor ! SearchActor.Messages.SyncLibrary(lib.id)
       }
     }
+    searchActor ! SearchActor.Messages.SyncLibrary(libraryId)
   }
 
   def forall(f: Library => Any): Unit = {
