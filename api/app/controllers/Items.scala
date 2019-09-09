@@ -26,7 +26,7 @@ class Items @javax.inject.Inject() (
         itemsDao.findAll(
           authorization(request),
           q = q,
-          limit = limit,
+          limit = Some(limit),
           offset = offset
         )
       )
