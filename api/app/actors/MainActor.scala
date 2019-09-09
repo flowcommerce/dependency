@@ -69,7 +69,7 @@ class MainActor @javax.inject.Inject() (
 
   import scala.concurrent.duration._
 
-  private[this] implicit val configuredRollbar = logger.fingerprint("MainActor")
+  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
   private[this] val name = "main"
 
   private[this] val emailActor = system.actorOf(Props(new EmailActor(
@@ -93,7 +93,7 @@ class MainActor @javax.inject.Inject() (
   private[this] val userActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val resolverActors = scala.collection.mutable.Map[String, ActorRef]()
 
-  private[this] implicit val mainActorExecutionContext: ExecutionContext = system.dispatchers.lookup("main-actor-context")
+  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("main-actor-context")
 
   scheduleRecurring(
     ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
@@ -101,7 +101,7 @@ class MainActor @javax.inject.Inject() (
     emailActor,
   )
 
-  def receive = SafeReceive.withLogUnhandled {
+  def receive: Receive = SafeReceive.withLogUnhandled {
 
     case MainActor.Messages.UserCreated(id) =>
       upsertUserActor(id) ! UserActor.Messages.Created
