@@ -23,7 +23,7 @@ class SearchActor @Inject()(
   binariesDao: BinariesDao,
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,
-  itemsDao: ItemsDao,
+  internalItemsDao: InternalItemsDao,
   usersDao: UsersDao,
   logger: RollbarLogger
 ) extends Actor {
@@ -36,22 +36,22 @@ class SearchActor @Inject()(
 
     case SearchActor.Messages.SyncBinary(id) =>
       binariesDao.findById(id) match {
-        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
-        case Some(binary) => itemsDao.replaceBinary(SystemUser, binary)
+        case None => internalItemsDao.deleteByObjectId(SystemUser, id)
+        case Some(binary) => internalItemsDao.replaceBinary(SystemUser, binary)
       }
       ()
 
     case SearchActor.Messages.SyncLibrary(id) =>
       librariesDao.findById(Authorization.All, id) match {
-        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
-        case Some(library) => itemsDao.replaceLibrary(SystemUser, library)
+        case None => internalItemsDao.deleteByObjectId(SystemUser, id)
+        case Some(library) => internalItemsDao.replaceLibrary(SystemUser, library)
       }
       ()
 
     case SearchActor.Messages.SyncProject(id) =>
       projectsDao.findById(Authorization.All, id) match {
-        case None => itemsDao.deleteByObjectId(Authorization.All, SystemUser, id)
-        case Some(project) => itemsDao.replaceProject(SystemUser, project)
+        case None => internalItemsDao.deleteByObjectId(SystemUser, id)
+        case Some(project) => internalItemsDao.replaceProject(SystemUser, project)
       }
       ()
   }

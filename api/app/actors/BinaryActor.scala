@@ -2,7 +2,7 @@ package io.flow.dependency.actors
 
 import javax.inject.Inject
 import io.flow.postgresql.Pager
-import db.{Authorization, ItemsDao, ProjectBinariesDao, UsersDao}
+import db.{Authorization, InternalItemsDao, ProjectBinariesDao, UsersDao}
 import akka.actor.Actor
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
@@ -17,7 +17,7 @@ object BinaryActor {
 
 class BinaryActor @Inject() (
   usersDao: UsersDao,
-  itemsDao: ItemsDao,
+  itemsDao: InternalItemsDao,
   projectBinariesDao: ProjectBinariesDao,
   logger: RollbarLogger
 ) extends Actor {
@@ -27,7 +27,7 @@ class BinaryActor @Inject() (
   def receive: Receive = SafeReceive.withLogUnhandled {
 
     case BinaryActor.Messages.Delete(binaryId: String) =>
-      itemsDao.deleteByObjectId(Authorization.All, usersDao.systemUser, binaryId)
+      itemsDao.deleteByObjectId(usersDao.systemUser, binaryId)
 
       Pager.create { offset =>
         projectBinariesDao.findAll(Authorization.All, binaryId = Some(binaryId), offset = offset)

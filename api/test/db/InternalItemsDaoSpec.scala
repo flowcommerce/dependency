@@ -5,7 +5,7 @@ import java.util.UUID
 import io.flow.dependency.v0.models._
 import util.DependencySpec
 
-class ItemsDaoSpec extends DependencySpec {
+class InternalItemsDaoSpec extends DependencySpec {
 
   private[this] lazy val org = createOrganization()
 
@@ -45,6 +45,7 @@ class ItemsDaoSpec extends DependencySpec {
     val item2 = eventuallyInNSeconds(3) {
       itemsDao.findByObjectId(Authorization.All, binary2.id).get
     }
+    println(s"item1[${item1.id}] item2[${item2.id}]")
 
     itemsDao.findAll(Authorization.All, ids = Some(Seq(item1.id, item2.id))).map(_.id).sorted must be(
       Seq(item1.id, item2.id).sorted

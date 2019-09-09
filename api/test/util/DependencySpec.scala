@@ -31,7 +31,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit val syncsDao = init[SyncsDao]
   implicit val resolversDao = init[ResolversDao]
   implicit val membershipsDao = init[MembershipsDao]
-  implicit val itemsDao = init[ItemsDao]
+  implicit val itemsDao = init[InternalItemsDao]
   implicit val subscriptionsDao = init[SubscriptionsDao]
   implicit val lastEmailsDao = init[LastEmailsDao]
   implicit val binaryRecommendationsDao = init[BinaryRecommendationsDao]
@@ -408,7 +408,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def replaceItem(
     org: Organization
   ) (
-    implicit form: ItemForm = createItemForm(org)
+    implicit form: InternalItemForm = createItemForm(org)
   ): Item = {
     itemsDao.replace(systemUser, form)
   }
@@ -429,14 +429,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     org: Organization
   ) (
     implicit summary: ItemSummary = createItemSummary(org)
-  ): ItemForm = {
+  ): InternalItemForm = {
     val label = summary match {
       case BinarySummary(_, _, name) => name.toString
       case LibrarySummary(_, _, groupId, artifactId) => Seq(groupId, artifactId).mkString(".")
       case ProjectSummary(_, _, name) => name
       case ItemSummaryUndefinedType(name) => name
     }
-    ItemForm(
+    InternalItemForm(
       summary = summary,
       label = label,
       description = None,
