@@ -15,7 +15,9 @@ class ProjectSync @Inject()(
 
   def sync(user: UserReference, projectId: String): Unit = {
     projectsDao.findById(Authorization.All, projectId).foreach { project =>
-      searchActor ! SearchActor.Messages.SyncProject(project.id)
+      syncsDao.withStartedAndCompleted("project", project.id) {
+        searchActor ! SearchActor.Messages.SyncProject(project.id)
+      }
     }
   }
 

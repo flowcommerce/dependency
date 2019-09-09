@@ -18,23 +18,25 @@ class LibrarySync @Inject()(
 
   def sync(user: UserReference, libraryId: String): Unit = {
     librariesDao.findById(Authorization.All, libraryId).foreach { lib =>
-      resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
-        DefaultLibraryArtifactProvider().resolve(
-          resolversDao = resolversDao,
-          resolver = resolver,
-          groupId = lib.groupId,
-          artifactId = lib.artifactId
-        ).map { resolution =>
-          resolution.versions.foreach { version =>
-            libraryVersionsDao.upsert(
-              createdBy = user,
-              libraryId = lib.id,
-              form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
-            )
+      syncsDao.withStartedAndCompleted("library", lib.id) {
+        resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
+          DefaultLibraryArtifactProvider().resolve(
+            resolversDao = resolversDao,
+            resolver = resolver,
+            groupId = lib.groupId,
+            artifactId = lib.artifactId
+          ).map { resolution =>
+            resolution.versions.foreach { version =>
+              libraryVersionsDao.upsert(
+                createdBy = user,
+                libraryId = lib.id,
+                form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
+              )
+            }
           }
         }
+        searchActor ! SearchActor.Messages.SyncLibrary(lib.id)
       }
-      searchActor ! SearchActor.Messages.SyncLibrary(lib.id)
     }
   }
 

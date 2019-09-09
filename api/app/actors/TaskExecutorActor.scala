@@ -22,14 +22,12 @@ class TaskExecutorActor @Inject() (
   binarySync: BinarySync,
   librarySync: LibrarySync,
   projectSync: ProjectSync,
-  librariesDao: LibrariesDao,
-  projectsDao: ProjectsDao,
   internalTasksDao: InternalTasksDao,
   taskUtil: TaskUtil,
   usersDao: UsersDao,
 ) extends Actor {
 
-  private[this] implicit val logger: RollbarLogger = logger.fingerprint(getClass.getName)
+  private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 
