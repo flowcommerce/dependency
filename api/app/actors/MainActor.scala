@@ -53,7 +53,6 @@ class MainActor @javax.inject.Inject() (
   system: ActorSystem,
   projectFactory: ProjectActor.Factory,
   binariesDao: BinariesDao,
-  syncsDao: SyncsDao,
   usersDao: UsersDao,
   itemsDao: ItemsDao,
   organizationsDao: OrganizationsDao,
@@ -61,13 +60,10 @@ class MainActor @javax.inject.Inject() (
   subscriptionsDao: SubscriptionsDao,
   librariesDao: LibrariesDao,
   resolversDao: ResolversDao,
-  libraryVersionsDao: LibraryVersionsDao,
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
 ) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
-
-  import scala.concurrent.duration._
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
   private[this] val name = "main"
@@ -88,7 +84,6 @@ class MainActor @javax.inject.Inject() (
     logger
   )), name = s"$name:SearchActor")
 
-  private[this] val libraryActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val projectActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val userActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val resolverActors = scala.collection.mutable.Map[String, ActorRef]()
@@ -117,7 +112,7 @@ class MainActor @javax.inject.Inject() (
       searchActor ! SearchActor.Messages.SyncProject(id)
 
     case MainActor.Messages.ProjectDeleted(id) =>
-      projectActors.remove(id).map { actor =>
+      projectActors.remove(id).foreach { actor =>
         actor ! ProjectActor.Messages.Deleted
       }
       searchActor ! SearchActor.Messages.SyncProject(id)
@@ -143,32 +138,6 @@ class MainActor @javax.inject.Inject() (
 
     case MainActor.Messages.ProjectBinaryDeleted(projectId, id, version) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectBinaryDeleted(id, version)
-
-    case MainActor.Messages.LibraryCreated(id) =>
-      syncLibrary(id)
-
-    case MainActor.Messages.LibrarySync(id) =>
-      syncLibrary(id)
-
-    case MainActor.Messages.LibrarySyncFuture(id, seconds) =>
-      system.scheduler.scheduleOnce(Duration(seconds.toLong, "seconds")) {
-        syncLibrary(id)
-      }
-      ()
-
-    case MainActor.Messages.LibrarySyncCompleted(id) =>
-      projectBroadcast(ProjectActor.Messages.LibrarySynced(id))
-
-    case MainActor.Messages.LibraryDeleted(id) =>
-      libraryActors.remove(id).foreach { ref =>
-        ref ! LibraryActor.Messages.Deleted
-      }
-
-    case MainActor.Messages.LibraryVersionCreated(_, libraryId) =>
-      syncLibraryVersion(libraryId)
-
-    case MainActor.Messages.LibraryVersionDeleted(_, libraryId) =>
-      syncLibraryVersion(libraryId)
 
     case MainActor.Messages.ResolverCreated(id) =>
       upsertResolverActor(id) ! ResolverActor.Messages.Sync
@@ -202,24 +171,6 @@ class MainActor @javax.inject.Inject() (
     }
   }
 
-  def upsertLibraryActor(id: String): ActorRef = {
-    libraryActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props(new LibraryActor(
-        librariesDao,
-        syncsDao,
-        resolversDao,
-        libraryVersionsDao,
-        itemsDao,
-        projectLibrariesDao,
-        usersDao,
-        logger
-      )), name = s"$name:libraryActor:$id")
-      ref ! LibraryActor.Messages.Data(id)
-      libraryActors += (id -> ref)
-      ref
-    }
-  }
-
   def upsertResolverActor(id: String): ActorRef = {
     resolverActors.lift(id).getOrElse {
       val ref = system.actorOf(Props(new ResolverActor(
@@ -234,22 +185,4 @@ class MainActor @javax.inject.Inject() (
       ref
     }
   }
-
-  def syncLibrary(id: String): Unit = {
-    upsertLibraryActor(id) ! LibraryActor.Messages.Sync
-    searchActor ! SearchActor.Messages.SyncLibrary(id)
-    projectBroadcast(ProjectActor.Messages.LibrarySynced(id))
-  }
-
-
-  def syncLibraryVersion(libraryId: String): Unit = {
-    syncLibrary(libraryId)
-  }
-
-  def projectBroadcast(message: ProjectActor.Message): Unit = {
-    projectActors.foreach { case (_, actor) =>
-      actor ! message
-    }
-  }
-
 }

@@ -1,9 +1,10 @@
 package actors
 
 import akka.actor.Actor
-import db.{Authorization, BinariesDao, BinaryVersionsDao, InternalTasksDao, LibrariesDao, ProjectsDao, SyncsDao, UsersDao}
+import db.{Authorization, BinariesDao, BinaryVersionsDao, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectsDao, ResolversDao, SyncsDao, UsersDao}
 import io.flow.akka.SafeReceive
-import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
+import io.flow.dependency.api.lib.{DefaultBinaryVersionProvider, DefaultLibraryArtifactProvider}
+import io.flow.dependency.v0.models.VersionForm
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.Pager
 import javax.inject.Inject
@@ -25,6 +26,8 @@ class TaskExecutorActor @Inject() (
   binariesDao: BinariesDao,
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,
+  resolversDao: ResolversDao,
+  libraryVersionsDao: LibraryVersionsDao,
   internalTasksDao: InternalTasksDao,
   syncsDao: SyncsDao,
   taskUtil: TaskUtil,
@@ -49,6 +52,26 @@ class TaskExecutorActor @Inject() (
 
     case TaskExecutorActor.Messages.SyncLibrary(taskId: String, libraryId: String) => {
       println(s"TODO: SyncLibrary $taskId => $libraryId")
+      taskUtil.process(taskId) {
+        librariesDao.findById(Authorization.All, libraryId).foreach { lib =>
+          resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
+            DefaultLibraryArtifactProvider().resolve(
+              resolversDao = resolversDao,
+              resolver = resolver,
+              groupId = lib.groupId,
+              artifactId = lib.artifactId
+            ).map { resolution =>
+              resolution.versions.foreach { version =>
+                libraryVersionsDao.upsert(
+                  createdBy = usersDao.systemUser,
+                  libraryId = lib.id,
+                  form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
+                )
+              }
+            }
+          }
+        }
+      }
     }
 
     case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
