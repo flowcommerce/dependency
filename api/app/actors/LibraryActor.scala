@@ -42,7 +42,7 @@ class LibraryActor @Inject()
 
     case LibraryActor.Messages.Sync => 
       dataLibrary.foreach { lib =>
-        syncsDao.withStartedAndCompleted(SystemUser, "library", lib.id) {
+        syncsDao.withStartedAndCompleted("library", lib.id) {
           resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
             DefaultLibraryArtifactProvider().resolve(
               resolversDao = resolversDao,

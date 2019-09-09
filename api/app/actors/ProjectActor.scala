@@ -61,10 +61,10 @@ class ProjectActor @javax.inject.Inject() (
   @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor {
 
-  lazy val SystemUser = usersDao.systemUser
+  private[this] lazy val SystemUser = usersDao.systemUser
 
-  implicit val projectExecutionContext: ExecutionContext = actorSystem.dispatchers.lookup("project-actor-context")
-  private[this] implicit val configuredRollbar = logger.fingerprint("ProjectActor")
+  private[this] implicit val ec : ExecutionContext = actorSystem.dispatchers.lookup("project-actor-context")
+  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"
   private[this] val HookName = "web"
@@ -72,7 +72,7 @@ class ProjectActor @javax.inject.Inject() (
 
   private[this] lazy val dataProject: Option[Project] = projectsDao.findById(Authorization.All, projectId)
 
-  def receive = SafeReceive.withLogUnhandled {
+  def receive: Receive = SafeReceive.withLogUnhandled {
 
     case ProjectActor.Messages.ProjectLibraryCreated(id) =>
       syncProjectLibrary(id)
@@ -143,7 +143,7 @@ class ProjectActor @javax.inject.Inject() (
 
     case ProjectActor.Messages.Sync =>
       dataProject.foreach { project =>
-        syncsDao.recordStarted(SystemUser, "project", project.id)
+        syncsDao.recordStarted("project", project.id)
 
         val summary = projectsDao.toSummary(project)
 
@@ -247,7 +247,7 @@ class ProjectActor @javax.inject.Inject() (
     * project_libraries.library_id
     */
   def syncProjectLibrary(id: String): Unit = {
-    syncsDao.withStartedAndCompleted(SystemUser, "project_library", id) {
+    syncsDao.withStartedAndCompleted("project_library", id) {
       dataProject.foreach { project =>
         projectLibrariesDao.findById(Authorization.All, id).map { projectLibrary =>
           resolveLibrary(projectLibrary).map { lib =>
@@ -260,7 +260,7 @@ class ProjectActor @javax.inject.Inject() (
   }
 
   def syncProjectBinary(id: String): Unit = {
-    syncsDao.withStartedAndCompleted(SystemUser, "project_binary", id) {
+    syncsDao.withStartedAndCompleted("project_binary", id) {
       dataProject.foreach { project =>
         projectBinariesDao.findById(Authorization.All, id).map { projectBinary =>
           resolveBinary(projectBinary).map { binary =>
@@ -277,7 +277,7 @@ class ProjectActor @javax.inject.Inject() (
       case Nil => {
         println(s" -- project[${project.name}] id[${project.id}] dependencies satisfied")
         recommendationsDao.sync(SystemUser, project)
-        syncsDao.recordCompleted(SystemUser, "project", project.id)
+        syncsDao.recordCompleted("project", project.id)
       }
       case deps => {
         println(s" -- project[${project.name}] id[${project.id}] waiting on dependencies to sync: " + deps.mkString(", "))

@@ -2,7 +2,6 @@ package db
 
 import javax.inject.{Inject, Singleton}
 import io.flow.dependency.v0.models.{Sync, SyncEvent}
-import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import anorm._
@@ -16,7 +15,8 @@ case class SyncForm(
 
 @Singleton
 class SyncsDao @Inject()(
-  db: Database
+  db: Database,
+  usersDao: UsersDao
 ) {
 
   private[this] val BaseQuery = Query(s"""
@@ -40,34 +40,35 @@ class SyncsDao @Inject()(
   """
 
   def withStartedAndCompleted[T](
-    createdBy: UserReference, `type`: String, id: String
+    `type`: String, id: String
   ) (
     f: => T
   ): T = {
-    recordStarted(createdBy, `type`, id)
+    recordStarted(`type`, id)
     val result = f
-    recordCompleted(createdBy, `type`, id)
+    recordCompleted(`type`, id)
     result
   }
 
-  def recordStarted(createdBy: UserReference, `type`: String, id: String): Unit = {
-    createInternal(createdBy, SyncForm(`type`, id, SyncEvent.Started))
+  def recordStarted(`type`: String, id: String): Unit = {
+    createInternal(SyncForm(`type`, id, SyncEvent.Started))
     ()
   }
 
-  def recordCompleted(createdBy: UserReference, `type`: String, id: String): Unit = {
-    createInternal(createdBy, SyncForm(`type`, id, SyncEvent.Completed))
+  def recordCompleted(`type`: String, id: String): Unit = {
+    createInternal(SyncForm(`type`, id, SyncEvent.Completed))
     ()
   }
 
-  def create(createdBy: UserReference, form: SyncForm): Sync = {
-    val id = createInternal(createdBy, form)
+  def create(form: SyncForm): Sync = {
+    val id = createInternal(form)
     findById(id).getOrElse {
       sys.error("Failed to create sync")
     }
   }
 
-  private[this] def createInternal(createdBy: UserReference, form: SyncForm): String = {
+  private[this] def createInternal(form: SyncForm): String = {
+    val systemUser = usersDao.systemUser
     val id = IdGenerator("syn").randomId()
 
     db.withConnection { implicit c =>
@@ -76,7 +77,7 @@ class SyncsDao @Inject()(
         'type -> form.`type`,
         'object_id -> form.objectId,
         'event -> form.event.toString,
-        'updated_by_user_id -> createdBy.id
+        'updated_by_user_id -> systemUser.id
       ).execute()
     }
 

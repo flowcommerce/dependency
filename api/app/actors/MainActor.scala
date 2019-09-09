@@ -2,12 +2,10 @@ package io.flow.dependency.actors
 
 import db._
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
-import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.log.RollbarLogger
 import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.play.util.ApplicationConfig
-import io.flow.postgresql.Pager
 import play.api.libs.concurrent.InjectedActorSupport
 
 import scala.concurrent.ExecutionContext
@@ -20,8 +18,6 @@ object MainActor {
     case class ProjectUpdated(id: String)
     case class ProjectDeleted(id: String)
     case class ProjectSync(id: String)
-
-    case object SyncAll
 
     case class ProjectLibraryCreated(projectId: String, id: String)
     case class ProjectLibrarySync(projectId: String, id: String)
@@ -43,11 +39,6 @@ object MainActor {
     case class LibraryVersionCreated(id: String, libraryId: String)
     case class LibraryVersionDeleted(id: String, libraryId: String)
 
-    case class BinaryCreated(id: String)
-    case class BinaryDeleted(id: String)
-    case class BinarySync(id: String)
-    case class BinarySyncCompleted(id: String)
-
     case class BinaryVersionCreated(id: String, binaryId: String)
     case class BinaryVersionDeleted(id: String, binaryId: String)
     
@@ -63,10 +54,8 @@ class MainActor @javax.inject.Inject() (
   projectFactory: ProjectActor.Factory,
   binariesDao: BinariesDao,
   syncsDao: SyncsDao,
-  binaryVersionsDao: BinaryVersionsDao,
   usersDao: UsersDao,
   itemsDao: ItemsDao,
-  projectBinariesDao: ProjectBinariesDao,
   organizationsDao: OrganizationsDao,
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
@@ -76,7 +65,6 @@ class MainActor @javax.inject.Inject() (
   projectLibrariesDao: ProjectLibrariesDao,
   batchEmailProcessor: BatchEmailProcessor,
   projectsDao: ProjectsDao,
-  defaultBinaryVersionProvider: DefaultBinaryVersionProvider
 ) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
 
   import scala.concurrent.duration._
@@ -90,13 +78,7 @@ class MainActor @javax.inject.Inject() (
     config,
     logger
   )), name = s"$name:emailActor")
-  private[this] val periodicActor = system.actorOf(Props(new PeriodicActor(
-    syncsDao,
-    projectsDao,
-    binariesDao,
-    librariesDao,
-    logger
-  )), name = s"$name:periodicActor")
+
   private[this] val searchActor = system.actorOf(Props(new SearchActor(
     binariesDao: BinariesDao,
     librariesDao,
@@ -106,37 +88,12 @@ class MainActor @javax.inject.Inject() (
     logger
   )), name = s"$name:SearchActor")
 
-  private[this] val binaryActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val libraryActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val projectActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val userActors = scala.collection.mutable.Map[String, ActorRef]()
   private[this] val resolverActors = scala.collection.mutable.Map[String, ActorRef]()
 
-  implicit val mainActorExecutionContext: ExecutionContext = system.dispatchers.lookup("main-actor-context")
-
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.binary"),
-    PeriodicActor.Messages.SyncBinaries,
-    periodicActor,
-  )
-
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.library"),
-    PeriodicActor.Messages.SyncLibraries,
-    periodicActor,
-  )
-
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.project"),
-    PeriodicActor.Messages.SyncProjects,
-    periodicActor,
-  )
-
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.purge"),
-    PeriodicActor.Messages.Purge,
-    periodicActor,
-  )
+  private[this] implicit val mainActorExecutionContext: ExecutionContext = system.dispatchers.lookup("main-actor-context")
 
   scheduleRecurring(
     ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
@@ -213,51 +170,12 @@ class MainActor @javax.inject.Inject() (
     case MainActor.Messages.LibraryVersionDeleted(_, libraryId) =>
       syncLibraryVersion(libraryId)
 
-    case MainActor.Messages.BinaryCreated(id) =>
-      syncBinary(id)
-
-    case MainActor.Messages.BinarySync(id) =>
-      syncBinary(id)
-
-    case MainActor.Messages.BinarySyncCompleted(id) =>
-      projectBroadcast(ProjectActor.Messages.BinarySynced(id))
-
-    case MainActor.Messages.BinaryDeleted(id) =>
-      binaryActors.remove(id).foreach { ref =>
-        ref ! BinaryActor.Messages.Deleted
-      }
-
-    case MainActor.Messages.BinaryVersionCreated(_, binaryId) =>
-      syncBinaryVersion(binaryId)
-
-    case MainActor.Messages.BinaryVersionDeleted(_, binaryId) =>
-      syncBinaryVersion(binaryId)
-
     case MainActor.Messages.ResolverCreated(id) =>
       upsertResolverActor(id) ! ResolverActor.Messages.Sync
 
     case MainActor.Messages.ResolverDeleted(id) =>
       resolverActors.remove(id).foreach { ref =>
         ref ! ResolverActor.Messages.Deleted
-      }
-
-    case MainActor.Messages.SyncAll =>
-      Pager.create { offset =>
-        binariesDao.findAll(offset = offset, limit = 1000)
-      }.foreach { rec =>
-        self ! MainActor.Messages.BinarySync(rec.id)
-      }
-
-      Pager.create { offset =>
-        librariesDao.findAll(Authorization.All, offset = offset, limit = 1000)
-      }.foreach { rec =>
-        self ! MainActor.Messages.LibrarySync(rec.id)
-      }
-
-      Pager.create { offset =>
-        projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
-      }.foreach { rec =>
-        self ! MainActor.Messages.ProjectSync(rec.id)
       }
   }
 
@@ -302,24 +220,6 @@ class MainActor @javax.inject.Inject() (
     }
   }
 
-  def upsertBinaryActor(id: String): ActorRef = {
-    binaryActors.lift(id).getOrElse {
-      val ref = system.actorOf(Props(new BinaryActor(
-        binariesDao,
-        syncsDao,
-        binaryVersionsDao,
-        usersDao,
-        itemsDao,
-        projectBinariesDao,
-        defaultBinaryVersionProvider,
-        logger
-      )), name = s"$name:binaryActor:$id")
-      ref ! BinaryActor.Messages.Data(id)
-      binaryActors += (id -> ref)
-      ref
-    }
-  }
-
   def upsertResolverActor(id: String): ActorRef = {
     resolverActors.lift(id).getOrElse {
       val ref = system.actorOf(Props(new ResolverActor(
@@ -344,16 +244,6 @@ class MainActor @javax.inject.Inject() (
 
   def syncLibraryVersion(libraryId: String): Unit = {
     syncLibrary(libraryId)
-  }
-
-  def syncBinary(id: String): Unit = {
-    upsertBinaryActor(id) ! BinaryActor.Messages.Sync
-    searchActor ! SearchActor.Messages.SyncBinary(id)
-    projectBroadcast(ProjectActor.Messages.BinarySynced(id))
-  }
-
-  def syncBinaryVersion(binaryId: String): Unit = {
-    syncBinary(binaryId)
   }
 
   def projectBroadcast(message: ProjectActor.Message): Unit = {

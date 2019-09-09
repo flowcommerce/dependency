@@ -7,18 +7,18 @@ import util.DependencySpec
 
 class SyncsDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
+  private[this] lazy val org = createOrganization()
 
   "create" in {
     val form = createSyncForm()
-    val sync = syncsDao.create(systemUser, form)
+    val sync = syncsDao.create(form)
 
     sync.event must be(form.event)
   }
 
   "withStartedAndCompleted" in {
     val project = createProject(org)
-    syncsDao.withStartedAndCompleted(systemUser, "project", project.id) {
+    syncsDao.withStartedAndCompleted("project", project.id) {
       // NO-OP
     }
     val events = syncsDao.findAll(objectId = Some(project.id)).map(_.event)
@@ -28,13 +28,13 @@ class SyncsDaoSpec extends DependencySpec {
 
   "recordStarted" in {
     val project = createProject(org)
-    syncsDao.recordStarted(systemUser, "project", project.id)
+    syncsDao.recordStarted("project", project.id)
     syncsDao.findAll(objectId = Some(project.id)).map(_.event).contains(SyncEvent.Started) must be(true)
   }
 
   "recordCompleted" in {
     val project = createProject(org)
-    syncsDao.recordCompleted(systemUser, "project", project.id)
+    syncsDao.recordCompleted("project", project.id)
     syncsDao.findAll(objectId = Some(project.id)).map(_.event).contains(SyncEvent.Completed) must be(true)
   }
 

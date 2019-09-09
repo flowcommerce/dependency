@@ -315,14 +315,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createSync(
     form: SyncForm = createSyncForm()
   ): Sync = {
-    syncsDao.create(systemUser, form)
+    syncsDao.create(form)
   }
 
   def createSyncForm(
     `type`: String = "test",
     objectId: String = UUID.randomUUID.toString,
     event: SyncEvent = SyncEvent.Started
-  ) = {
+  ): SyncForm = {
     SyncForm(
       `type` = `type`,
       objectId = objectId,
