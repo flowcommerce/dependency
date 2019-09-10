@@ -2,7 +2,7 @@ package db
 
 import javax.inject.{Inject, Singleton}
 import io.flow.dependency.v0.models.UserForm
-import io.flow.dependency.actors.MainActor
+import io.flow.dependency.actors.UserActor
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.util.IdGenerator
@@ -17,7 +17,7 @@ trait StaticUserProvider {
 @Singleton
 class UsersDao @Inject()(
   db: Database,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  @javax.inject.Named("user-actor") userActor: akka.actor.ActorRef
 ) extends StaticUserProvider {
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
@@ -94,7 +94,7 @@ class UsersDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.UserCreated(id.toString)
+        userActor ! UserActor.Messages.Created(id.toString)
 
         Right(
           findById(id).getOrElse {

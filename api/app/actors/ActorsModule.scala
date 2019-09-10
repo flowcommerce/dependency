@@ -8,10 +8,13 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
     bindActor[BinaryActor]("binary-actor")
     bindActor[EmailActor]("email-actor")
+    bindActor[LibraryActor]("library-actor")
+    bindActor[PeriodicActor]("periodic-actor")
     bindActor[ProjectActor]("project-actor")
     bindActor[ResolverActor]("resolver-actor")
     bindActor[SearchActor]("search-actor")
     bindActor[TaskActor]("task-actor")
     bindActor[TaskExecutorActor]("task-executor-actor")
+    bindActor[UserActor]("user-actor")
   }
 }

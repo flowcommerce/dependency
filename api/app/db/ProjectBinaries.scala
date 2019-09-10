@@ -1,7 +1,7 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.actors.MainActor
+import io.flow.dependency.actors.ProjectActor
 import io.flow.dependency.v0.models.{Binary, BinaryType, ProjectBinary, SyncEvent}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
@@ -22,7 +22,7 @@ class ProjectBinariesDao @Inject()(
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
   projectsDaoProvider: Provider[ProjectsDao],
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "project_binaries")
@@ -132,7 +132,7 @@ class ProjectBinariesDao @Inject()(
             'path -> form.path.trim,
             'updated_by_user_id -> createdBy.id
           ).execute()
-          mainActor ! MainActor.Messages.ProjectBinaryCreated(form.projectId, id)
+          projectActor ! ProjectActor.Messages.ProjectBinaryCreated(form.projectId, id)
         }
 
         Right(
@@ -183,7 +183,7 @@ class ProjectBinariesDao @Inject()(
 
   def delete(deletedBy: UserReference, binary: ProjectBinary): Unit = {
     dbHelpers.delete(deletedBy.id, binary.id)
-    mainActor ! MainActor.Messages.ProjectBinaryDeleted(binary.project.id, binary.id, binary.version)
+    projectActor ! ProjectActor.Messages.ProjectBinaryDeleted(binary.project.id, binary.id, binary.version)
   }
 
   def findByProjectIdAndNameAndVersion(

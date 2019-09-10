@@ -33,7 +33,7 @@ class TaskExecutorActor @Inject() (
 ) extends Actor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
-  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("main-actor-context")
+  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("task-executor-actor-context")
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 

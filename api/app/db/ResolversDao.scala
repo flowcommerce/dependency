@@ -1,7 +1,6 @@
 package db
 
 import javax.inject.Inject
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.api.lib.Validation
 import io.flow.dependency.v0.models.{Credentials, Resolver, ResolverForm, ResolverSummary}
 import io.flow.dependency.v0.models.{OrganizationSummary, Visibility}
@@ -12,6 +11,7 @@ import io.flow.log.RollbarLogger
 import io.flow.util.IdGenerator
 import anorm._
 import com.google.inject.Provider
+import io.flow.dependency.actors.ResolverActor
 import play.api.db._
 import play.api.libs.json._
 
@@ -22,7 +22,7 @@ class ResolversDao @Inject()(
   organizationsDaoProvider: Provider[OrganizationsDao],
   usersDaoProvider: Provider[UsersDao],
   logger: RollbarLogger,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  @javax.inject.Named("resolver-actor") resolverActor: akka.actor.ActorRef
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
@@ -142,7 +142,7 @@ class ResolversDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.ResolverCreated(id)
+        resolverActor ! ResolverActor.Messages.Created(id)
 
         Right(
           findById(Authorization.All, id).getOrElse {
@@ -165,7 +165,7 @@ class ResolversDao @Inject()(
       librariesDaoProvider.get.delete(usersDaoProvider.get.systemUser, library)
     }
 
-    mainActor ! MainActor.Messages.ResolverDeleted(resolver.id)
+    resolverActor ! ResolverActor.Messages.Deleted(resolver.id)
     dbHelpers.delete(deletedBy.id, resolver.id)
   }
 
@@ -217,9 +217,7 @@ class ResolversDao @Inject()(
         optionalText("organizations.key", organization.map(_.toLowerCase)).
         equals("organizations.id", organizationId).
         optionalText("resolvers.uri", uri).
-        as(
-          parser().*
-        )
+        as(parser.*)
     }
   }
 
@@ -255,7 +253,7 @@ class ResolversDao @Inject()(
     }
   }
 
-  private[this] def parser(): RowParser[io.flow.dependency.v0.models.Resolver] = {
+  private[this] val parser: RowParser[io.flow.dependency.v0.models.Resolver] = {
     SqlParser.str("id") ~
     io.flow.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
     io.flow.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization").? ~
