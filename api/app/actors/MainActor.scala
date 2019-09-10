@@ -30,12 +30,6 @@ object MainActor {
     case class ResolverCreated(id: String)
     case class ResolverDeleted(id: String)
 
-    case class LibraryCreated(id: String)
-    case class LibraryDeleted(id: String)
-    case class LibrarySync(id: String)
-    case class LibrarySyncFuture(id: String, seconds: Int)
-    case class LibrarySyncCompleted(id: String)
-
     case class UserCreated(id: String)
   }
 }

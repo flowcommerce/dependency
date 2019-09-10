@@ -12,6 +12,7 @@ class TasksUtil @Inject() (
   logger: RollbarLogger,
   @javax.inject.Named("task-executor-actor") taskExecutorActor: akka.actor.ActorRef
 ) {
+
   def process(limit: Long): Unit = {
     internalTasksDao.findAll(
       hasProcessedAt = Some(false),
