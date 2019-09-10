@@ -63,7 +63,7 @@ abstract class BaseTaskActor @Inject()(
   private[this] implicit val configuredRollbar: RollbarLogger = params.logger.fingerprint(getClass.getName)
   private[this] implicit val ec: ExecutionContext = params.system.dispatchers.lookup(dispatcherName)
 
-  private[this] val MaxTasksPerIteration = 10L
+  private[this] val MaxTasksPerIteration = 100L
 
   scheduleRecurring(
     ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task"),
