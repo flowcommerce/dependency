@@ -2,7 +2,7 @@ package lib
 
 import actors.TaskExecutorActor
 import db.InternalTasksDao
-import io.flow.dependency.v0.models.{SyncType, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType}
+import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
 import javax.inject.Inject
@@ -13,30 +13,40 @@ class TasksUtil @Inject() (
   @javax.inject.Named("task-executor-actor") taskExecutorActor: akka.actor.ActorRef
 ) {
 
-  def process(limit: Long): Unit = {
-    internalTasksDao.findAll(
+  /**
+   * @return Number of tasks processed
+   */
+  def process(limit: Long): Long = {
+    val all = internalTasksDao.findAll(
       hasProcessedAt = Some(false),
       limit = Some(limit),
       orderBy = OrderBy("num_attempts, created_at")
-    ).foreach { t =>
-      t.data match {
+    )
+    all.foreach { t =>
+      processData(t.id, t.data)
+      internalTasksDao.setProcessed(t.id)
+    }
+    all.size.toLong
+  }
+
+  private[this] def processData(taskId: String, data: TaskData): Unit = {
+    data match {
         case _: TaskDataSync => {
-          taskExecutorActor ! TaskExecutorActor.Messages.SyncAll(taskId = t.id)
+          taskExecutorActor ! TaskExecutorActor.Messages.SyncAll(taskId = taskId)
         }
         case data: TaskDataSyncOne => {
           data.`type` match {
             case SyncType.Binary => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncBinary(taskId = t.id, binaryId = data.id)
+              taskExecutorActor ! TaskExecutorActor.Messages.SyncBinary(taskId = taskId, binaryId = data.id)
             }
             case SyncType.Library => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncLibrary(taskId = t.id, libraryId = data.id)
+              taskExecutorActor ! TaskExecutorActor.Messages.SyncLibrary(taskId = taskId, libraryId = data.id)
             }
             case SyncType.Project => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncProject(taskId = t.id, projectId = data.id)
+              taskExecutorActor ! TaskExecutorActor.Messages.SyncProject(taskId = taskId, projectId = data.id)
             }
             case SyncType.UNDEFINED(other) => {
               logger.withKeyValue("type", other).warn("SyncType.UNDEFINED - marking task processed")
-              internalTasksDao.setProcessed(t.id)
             }
           }
         }
@@ -44,7 +54,6 @@ class TasksUtil @Inject() (
           logger.withKeyValue("type", other).warn("TaskDataUndefinedType")
         }
       }
-    }
   }
 
 }

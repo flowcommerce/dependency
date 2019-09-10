@@ -33,7 +33,12 @@ class TaskActor @Inject()(
       Try {
         tasksUtil.process(MaxTasksPerIteration)
       } match {
-        case Success(_) => // no-op
+        case Success(numberProcessed) => {
+          if (numberProcessed >= MaxTasksPerIteration) {
+            // process all pending tasks immediately
+            self ! ReactiveActor.Messages.Changed
+          }
+        }
         case Failure(ex) => logger.warn("Error processing tasks", ex)
       }
     }

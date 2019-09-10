@@ -91,6 +91,7 @@ class InternalTasksDao @Inject()(
   def setProcessed(taskId: String): Unit = {
     dao.findById(taskId).foreach { t =>
       dao.update(Constants.SystemUser, t, t.form.copy(
+        numAttempts = t.numAttempts + 1,
         processedAt = Some(DateTime.now)
       ))
     }
