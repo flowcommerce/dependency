@@ -148,7 +148,7 @@ class ProjectActor @javax.inject.Inject() (
         val summary = projectsDao.toSummary(project)
 
         GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user, logger).dependencies(project).map { dependencies =>
-          dependencies.binaries.map { binaries =>
+          dependencies.binaries.foreach { binaries =>
             val projectBinaries = binaries.map { form =>
               projectBinariesDao.upsert(project.user, form) match {
                 case Left(errors) => {
@@ -163,7 +163,7 @@ class ProjectActor @javax.inject.Inject() (
             projectBinariesDao.setIds(project.user, project.id, projectBinaries.flatten)
           }
 
-          dependencies.librariesAndPlugins.map { libraries =>
+          dependencies.librariesAndPlugins.foreach { libraries =>
             val projectLibraries = libraries.map { artifact =>
               val bins = dependencies.crossBuildVersion()
               val crossBuildVersion = {
@@ -179,7 +179,11 @@ class ProjectActor @javax.inject.Inject() (
                 )
               ) match {
                 case Left(errors) => {
-                  logger.withKeyValue("project", Json.toJson(project)).withKeyValue("errors", errors).withKeyValue("artifact", artifact.toString).error(s"Error storing artifact")
+                  logger
+                    .withKeyValue("project", Json.toJson(project))
+                    .withKeyValue("errors", errors)
+                    .withKeyValue("artifact", artifact.toString)
+                    .warn("Validation errors storing artifact")
                   None
                 }
                 case Right(library) => {
@@ -195,7 +199,9 @@ class ProjectActor @javax.inject.Inject() (
           processPendingSync(project)
         }.recover {
           case e => {
-            logger.withKeyValue("project", Json.toJson(project)).error(s"Error fetching dependencies", e)
+            logger
+              .withKeyValue("project", Json.toJson(project))
+              .error("Error fetching dependencies", e)
           }
         }
       }

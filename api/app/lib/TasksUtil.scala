@@ -7,6 +7,8 @@ import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
 import javax.inject.Inject
 
+import scala.util.{Failure, Success, Try}
+
 class TasksUtil @Inject() (
   internalTasksDao: InternalTasksDao,
   logger: RollbarLogger,
@@ -14,6 +16,21 @@ class TasksUtil @Inject() (
 ) {
 
   /**
+   * Invokes f, ensuring the task is marked processed once the function
+   * returns. Logs any exceptions.
+   */
+  def process(taskId: String)(f: => Any)(implicit logger: RollbarLogger): Unit = {
+    Try {
+      f
+    } match {
+      case Success(_) => // no-op
+      case Failure(ex) => logger.withKeyValue("task_id", taskId).warn("Error processing task", ex)
+    }
+    internalTasksDao.setProcessed(taskId)
+  }
+
+  /**
+   * @limit Max # of tasks to process on this iteration
    * @return Number of tasks processed
    */
   def process(limit: Long): Long = {
