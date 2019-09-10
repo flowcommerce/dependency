@@ -14,7 +14,8 @@ object InternalTask {
   def assertPriorityValid(priority: Int): Unit = {
     assert(
       priority >= HighestPriority && priority <= LowestPriority,
-      s"Invalid priority[$priority] - must be in range $LowestPriority - $HighestPriority")
+      s"Invalid priority[$priority] - must be in range $LowestPriority - $HighestPriority"
+    )
   }
 }
 

@@ -15,15 +15,14 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     def findIds() = {
       internalTasksDao.findAll(
         ids = Some(ids),
-        hasProcessedAt = Some(false),
+        hasProcessedAt = Some(true),
         limit = None
       ).map(_.id)
     }
 
-    findIds() must equal(ids)
-
+    internalTasksDao.setProcessed(task1.id)
     internalTasksDao.setProcessed(task2.id)
-    findIds() must equal(Seq(task1.id))
+    findIds() must equal(Nil)
   }
 
   "createSyncAllIfNotQueued" in {
