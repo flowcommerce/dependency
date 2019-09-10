@@ -20,7 +20,7 @@ class ResolversDao @Inject()(
   membershipsDaoProvider: Provider[MembershipsDao],
   librariesDaoProvider: Provider[LibrariesDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
-  usersDaoProvider: Provider[UsersDao],
+  staticUserProviderProvider: Provider[StaticUserProvider],
   logger: RollbarLogger,
   @javax.inject.Named("resolver-actor") resolverActor: akka.actor.ActorRef
 ) {
@@ -162,7 +162,7 @@ class ResolversDao @Inject()(
         offset = offset
       )
     }.foreach { library =>
-      librariesDaoProvider.get.delete(usersDaoProvider.get.systemUser, library)
+      librariesDaoProvider.get.delete(staticUserProviderProvider.get.systemUser, library)
     }
 
     resolverActor ! ResolverActor.Messages.Deleted(resolver.id)

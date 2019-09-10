@@ -45,8 +45,6 @@ class ResolverActor @Inject()(
       }.foreach { library =>
         librariesDao.delete(SystemUser, library)
       }
-
-      context.stop(self)
   }
 
   def sync(resolverId: String): Unit = {

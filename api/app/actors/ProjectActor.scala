@@ -42,11 +42,11 @@ class ProjectActor @javax.inject.Inject() (
   recommendationsDao: RecommendationsDao,
   librariesDao: LibrariesDao,
   binariesDao: BinariesDao,
-  usersDao: UsersDao,
+  staticUserProvider: StaticUserProvider,
   resolversDao: ResolversDao,
 ) extends Actor {
 
-  private[this] lazy val SystemUser = usersDao.systemUser
+  private[this] lazy val SystemUser = staticUserProvider.systemUser
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
@@ -80,7 +80,6 @@ class ProjectActor @javax.inject.Inject() (
       }.foreach { rec =>
         recommendationsDao.delete(SystemUser, rec)
       }
-      context.stop(self)
 
     case ProjectActor.Messages.ProjectLibraryDeleted(projectId, id, version) =>
       findProject(projectId).foreach { project =>
