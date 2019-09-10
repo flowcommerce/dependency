@@ -11,18 +11,19 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     val task1 = createTask()
     val task2 = createTask()
     val ids = Seq(task1.id, task2.id).sorted
-
-    def findIds() = {
-      internalTasksDao.findAll(
-        ids = Some(ids),
-        hasProcessedAt = Some(true),
-        limit = None
-      ).map(_.id)
-    }
-
     internalTasksDao.setProcessed(task1.id)
     internalTasksDao.setProcessed(task2.id)
-    findIds() must equal(Nil)
+
+    def findIds(hasProcessed: Boolean) = {
+      internalTasksDao.findAll(
+        ids = Some(ids),
+        hasProcessedAt = Some(hasProcessed),
+        limit = None
+      ).map(_.id).sorted
+    }
+
+    findIds(false) must equal(Nil)
+    findIds(true) must equal(ids)
   }
 
   "createSyncAllIfNotQueued" in {
