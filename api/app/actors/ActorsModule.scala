@@ -12,7 +12,13 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActor[ProjectActor]("project-actor")
     bindActor[ResolverActor]("resolver-actor")
     bindActor[SearchActor]("search-actor")
-    bindActor[TaskActor]("task-actor")
     bindActor[UserActor]("user-actor")
+
+    bindActor[TaskActor]("task-actor")
+    bindActor[TaskActorUpserted]("task-actor-upserted")
+    bindActor[TaskActorSyncAll]("task-actor-sync-all")
+    bindActor[TaskActorSyncOneBinary]("task-actor-sync-one-binary")
+    bindActor[TaskActorSyncOneLibrary]("task-actor-sync-one-library")
+    bindActor[TaskActorSyncOneProject]("task-actor-sync-one-project")
   }
 }
