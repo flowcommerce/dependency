@@ -1,19 +1,25 @@
 package lib
 
-import actors.TaskExecutorActor
-import db.InternalTasksDao
+import db.{InternalTasksDao, StaticUserProvider}
 import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType, TaskDataUpserted}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
 import javax.inject.Inject
+import sync.{BinarySync, LibrarySync, ProjectSync}
 
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 class TasksUtil @Inject() (
+  rollbar: RollbarLogger,
   internalTasksDao: InternalTasksDao,
-  logger: RollbarLogger,
-  @javax.inject.Named("task-executor-actor") taskExecutorActor: akka.actor.ActorRef
+  binarySync: BinarySync,
+  librarySync: LibrarySync,
+  projectSync: ProjectSync,
+  staticUserProvider: StaticUserProvider,
 ) {
+
+  private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
   /**
    * Invokes f, ensuring the task is marked processed once the function
@@ -33,7 +39,7 @@ class TasksUtil @Inject() (
    * @param limit Max # of tasks to process on this iteration
    * @return Number of tasks processed
    */
-  def process(limit: Long): Long = {
+  def process(limit: Long)(implicit ec: ExecutionContext): Long = {
     val all = internalTasksDao.findAll(
       hasProcessedAt = Some(false),
       limit = Some(limit),
@@ -46,21 +52,31 @@ class TasksUtil @Inject() (
     all.size.toLong
   }
 
-  private[this] def processData(taskId: String, data: TaskData): Unit = {
+  private[this] def processData(taskId: String, data: TaskData)(implicit ec: ExecutionContext): Unit = {
     data match {
         case _: TaskDataSync => {
-          taskExecutorActor ! TaskExecutorActor.Messages.SyncAll(taskId = taskId)
+          process(taskId) {
+            binarySync.forall { r => internalTasksDao.queueBinary(r) }
+            librarySync.forall { r => internalTasksDao.queueLibrary(r) }
+            projectSync.forall { r => internalTasksDao.queueProject(r) }
+          }
         }
         case data: TaskDataSyncOne => {
           data.`type` match {
             case SyncType.Binary => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncBinary(taskId = taskId, binaryId = data.id)
+              process(taskId) {
+                binarySync.sync(staticUserProvider.systemUser, data.id)
+              }
             }
             case SyncType.Library => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncLibrary(taskId = taskId, libraryId = data.id)
+              process(taskId) {
+                librarySync.sync(staticUserProvider.systemUser, data.id)
+              }
             }
             case SyncType.Project => {
-              taskExecutorActor ! TaskExecutorActor.Messages.SyncProject(taskId = taskId, projectId = data.id)
+              process(taskId) {
+                projectSync.sync(data.id)
+              }
             }
             case SyncType.UNDEFINED(other) => {
               logger.withKeyValue("type", other).warn("SyncType.UNDEFINED - marking task processed")
@@ -72,7 +88,9 @@ class TasksUtil @Inject() (
             case SyncType.Binary => // no-op
             case SyncType.Library => // no-op
             case SyncType.Project => {
-              taskExecutorActor ! TaskExecutorActor.Messages.UpsertedProject(taskId = taskId, projectId = data.id)
+              process(taskId) {
+                projectSync.upserted(data.id)
+              }
             }
             case SyncType.UNDEFINED(other) => {
               logger.withKeyValue("type", other).warn("SyncType.UNDEFINED - marking task processed")
