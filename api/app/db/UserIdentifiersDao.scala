@@ -12,7 +12,7 @@ import play.api.db._
 @Singleton
 class UserIdentifiersDao @Inject()(
   db: Database,
-  usersDao: UsersDao
+  staticUserProvider: StaticUserProvider
 ){
 
   val GithubOauthUserIdentifierValue = "github_oauth"
@@ -48,7 +48,7 @@ class UserIdentifiersDao @Inject()(
         email = email,
         name = user.name,
         userId = user.id,
-        identifier = latestForUser(usersDao.systemUser, user).value
+        identifier = latestForUser(staticUserProvider.systemUser, user).value
       )
     }
   }

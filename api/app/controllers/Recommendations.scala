@@ -1,6 +1,6 @@
 package controllers
 
-import db.{Authorization, RecommendationsDao, TokensDao, UsersDao}
+import db.{Authorization, RecommendationsDao, TokensDao, StaticUserProvider}
 import io.flow.dependency.v0.models.RecommendationType
 import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.{AuthorizationImpl, FlowControllerComponents}
@@ -15,7 +15,7 @@ class Recommendations @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val authorization: AuthorizationImpl,
   val tokensDao: TokensDao,
-  val usersDao: UsersDao,
+  val staticUserProvider: StaticUserProvider,
   recommendationsDao: RecommendationsDao,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
 ) extends BaseIdentifiedControllerWithFallback {

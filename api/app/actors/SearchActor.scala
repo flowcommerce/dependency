@@ -24,13 +24,13 @@ class SearchActor @Inject()(
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,
   internalItemsDao: InternalItemsDao,
-  usersDao: UsersDao,
+  staticUserProvider: StaticUserProvider,
   logger: RollbarLogger
 ) extends Actor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 
-  private[this] lazy val SystemUser: UserReference = usersDao.systemUser
+  private[this] lazy val SystemUser: UserReference = staticUserProvider.systemUser
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 

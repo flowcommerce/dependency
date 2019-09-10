@@ -16,7 +16,7 @@ case class SyncForm(
 @Singleton
 class SyncsDao @Inject()(
   db: Database,
-  usersDao: UsersDao
+  staticUserProvider: StaticUserProvider
 ) {
 
   private[this] val BaseQuery = Query(s"""
@@ -68,7 +68,7 @@ class SyncsDao @Inject()(
   }
 
   private[this] def createInternal(form: SyncForm): String = {
-    val systemUser = usersDao.systemUser
+    val systemUser = staticUserProvider.systemUser
     val id = IdGenerator("syn").randomId()
 
     db.withConnection { implicit c =>
