@@ -15,6 +15,7 @@ import play.api.db.Database
 case class Task(
   id: String,
   data: String,
+  priority: Int,
   numAttempts: Int,
   processedAt: Option[DateTime],
   createdAt: DateTime
@@ -22,6 +23,7 @@ case class Task(
 
   lazy val form: TaskForm = TaskForm(
     data = data,
+    priority = priority,
     numAttempts = numAttempts,
     processedAt = processedAt
   )
@@ -30,6 +32,7 @@ case class Task(
 
 case class TaskForm(
   data: String,
+  priority: Int,
   numAttempts: Int,
   processedAt: Option[DateTime]
 )
@@ -41,13 +44,14 @@ object TasksTable {
   object Columns {
     val Id: String = "id"
     val Data: String = "data"
+    val Priority: String = "priority"
     val NumAttempts: String = "num_attempts"
     val ProcessedAt: String = "processed_at"
     val CreatedAt: String = "created_at"
     val UpdatedAt: String = "updated_at"
     val UpdatedByUserId: String = "updated_by_user_id"
     val HashCode: String = "hash_code"
-    val all: List[String] = List(Id, Data, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
+    val all: List[String] = List(Id, Data, Priority, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
   }
 }
 
@@ -66,6 +70,7 @@ class TasksDao @Inject() (
   private[this] val BaseQuery = Query("""
       | select tasks.id,
       |        tasks.data,
+      |        tasks.priority,
       |        tasks.num_attempts,
       |        tasks.processed_at,
       |        tasks.created_at,
@@ -77,14 +82,15 @@ class TasksDao @Inject() (
 
   private[this] val InsertQuery = Query("""
     | insert into tasks
-    | (id, data, num_attempts, processed_at, updated_by_user_id, hash_code)
+    | (id, data, priority, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {data}, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {data}, {priority}::int, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
     |    set data = {data},
+    |        priority = {priority}::int,
     |        num_attempts = {num_attempts}::int,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
@@ -96,6 +102,7 @@ class TasksDao @Inject() (
   private[this] def bindQuery(query: Query, form: TaskForm): Query = {
     query.
       bind("data", form.data).
+      bind("priority", form.priority).
       bind("num_attempts", form.numAttempts).
       bind("processed_at", form.processedAt).
       bind("hash_code", form.hashCode())
@@ -354,12 +361,14 @@ object TasksDao {
   val parser: RowParser[Task] = {
     SqlParser.str("id") ~
     SqlParser.str("data") ~
+    SqlParser.int("priority") ~
     SqlParser.int("num_attempts") ~
     SqlParser.get[DateTime]("processed_at").? ~
     SqlParser.get[DateTime]("created_at") map {
-      case id ~ data ~ numAttempts ~ processedAt ~ createdAt => Task(
+      case id ~ data ~ priority ~ numAttempts ~ processedAt ~ createdAt => Task(
         id = id,
         data = data,
+        priority = priority,
         numAttempts = numAttempts,
         processedAt = processedAt,
         createdAt = createdAt

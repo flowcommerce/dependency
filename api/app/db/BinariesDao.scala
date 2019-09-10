@@ -74,7 +74,7 @@ class BinariesDao @Inject()(
         val binary = findById(id).getOrElse {
           sys.error("Failed to create binary")
         }
-        internalTasksDao.createSyncIfNotQueued(binary)
+        internalTasksDao.queueBinary(binary)
 
         Right(binary)
       }

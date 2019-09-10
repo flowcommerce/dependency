@@ -49,7 +49,7 @@ class PeriodicActor @Inject()(
 
   def receive: Receive = SafeReceive.withLogUnhandled {
     case Purge => syncsDao.purgeOld()
-    case SyncAll => internalTasksDao.createSyncAllIfNotQueued()
+    case SyncAll => internalTasksDao.queueAll()
   }
 
 }

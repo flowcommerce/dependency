@@ -63,9 +63,9 @@ class TaskExecutorActor @Inject() (
 
     case TaskExecutorActor.Messages.SyncAll(taskId) => {
       tasksUtil.process(taskId) {
-        binarySync.forall(internalTasksDao.createSyncIfNotQueued)
-        librarySync.forall(internalTasksDao.createSyncIfNotQueued)
-        projectSync.forall(internalTasksDao.createSyncIfNotQueued)
+        binarySync.forall { r => internalTasksDao.queueBinary(r) }
+        librarySync.forall { r => internalTasksDao.queueLibrary(r) }
+        projectSync.forall { r => internalTasksDao.queueProject(r) }
       }
     }
 

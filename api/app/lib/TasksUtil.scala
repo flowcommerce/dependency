@@ -37,7 +37,7 @@ class TasksUtil @Inject() (
     val all = internalTasksDao.findAll(
       hasProcessedAt = Some(false),
       limit = Some(limit),
-      orderBy = OrderBy("num_attempts, created_at")
+      orderBy = OrderBy("priority, num_attempts, created_at")
     )
     all.foreach { t =>
       processData(t.id, t.data)

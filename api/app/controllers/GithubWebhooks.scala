@@ -25,7 +25,7 @@ class GithubWebhooks @javax.inject.Inject() (
         logger
           .withKeyValue("project", Json.toJson(project))
           .info("Received github webook for project - triggering sync")
-        internalTasksDao.createSyncIfNotQueued(project)
+        internalTasksDao.queueProject(project)
 
         // Find any libaries with the exact name of this project and
         // opportunistically trigger a sync of that library
@@ -38,7 +38,7 @@ class GithubWebhooks @javax.inject.Inject() (
         }.foreach { library =>
           // TODO: Queue into the future to leave time for
           // the artifact to be published
-          internalTasksDao.createSyncIfNotQueued(library)
+          internalTasksDao.queueLibrary(library)
         }
 
         Ok(Json.toJson(Map("result" -> "success")))

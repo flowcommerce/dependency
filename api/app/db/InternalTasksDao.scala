@@ -3,10 +3,18 @@ package db
 import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.OrderBy
-import io.flow.util.Constants
 import javax.inject.Inject
 import org.joda.time.DateTime
 import play.api.libs.json.Json
+
+object InternalTask {
+  val HighestPriority = 0
+  val LowestPriority = 10
+
+  def assertPriorityValid(priority: Int): Unit = {
+    assert(priority >= HighestPriority && priority < LowestPriority, s"Invalid priority[$priority]")
+  }
+}
 
 case class InternalTask(db: generated.Task) {
   val id: String = db.id
@@ -14,7 +22,8 @@ case class InternalTask(db: generated.Task) {
 }
 
 class InternalTasksDao @Inject()(
-  dao: generated.TasksDao
+  dao: generated.TasksDao,
+  staticUserProvider: StaticUserProvider
 ) {
 
   def findById(id: String): Option[InternalTask] = {
@@ -44,11 +53,13 @@ class InternalTasksDao @Inject()(
    * Create a new task for the specified data,
    * returning the task id
    */
-  def create(data: TaskData): String = {
+  def create(data: TaskData, priority: Int): String = {
+    InternalTask.assertPriorityValid(priority)
     dao.insert(
-      Constants.SystemUser,
+      staticUserProvider.systemUser,
       db.generated.TaskForm(
         data = Json.toJson(data).toString,
+        priority = priority,
         numAttempts = 0,
         processedAt = None
       )
@@ -60,44 +71,59 @@ class InternalTasksDao @Inject()(
    * that is pending processing as this is an expensive
    * task.
    */
-  def createSyncAllIfNotQueued(): Unit = {
-    createSyncIfNotQueued(TaskDataSync())
+  def queueAll(): Unit = {
+    createSyncIfNotQueued(TaskDataSync(), priority = InternalTask.LowestPriority)
   }
 
-  def createSyncIfNotQueued(binary: Binary): Unit = {
-    createSyncIfNotQueued(TaskDataSyncOne(binary.id, SyncType.Binary))
+  def queueBinary(binary: Binary, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(binary.id, SyncType.Binary), priority = priority)
   }
 
-  def createSyncIfNotQueued(library: Library): Unit = {
-    createSyncIfNotQueued(TaskDataSyncOne(library.id, SyncType.Library))
+  def queueLibrary(library: Library, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(library.id, SyncType.Library), priority = priority)
   }
 
-  def createSyncIfNotQueued(project: Project): Unit = {
-    createSyncIfNotQueued(TaskDataSyncOne(project.id, SyncType.Project))
+  def queueProject(project: Project, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOne(project.id, SyncType.Project), priority = priority)
   }
 
-  def createUpserted(project: Project): Unit = {
-    createSyncIfNotQueued(TaskDataUpserted(project.id, SyncType.Project))
+  def createUpserted(project: Project, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataUpserted(project.id, SyncType.Project), priority = priority)
   }
 
-  def createSyncIfNotQueued(taskData: TaskData): Unit = {
-    val existing = findAll(
+  def createSyncIfNotQueued(taskData: TaskData, priority: Int = InternalTask.LowestPriority): Unit = {
+    findAll(
       data = Some(taskData),
       hasProcessedAt = Some(false),
       limit = Some(1)
-    )
-    if (existing.isEmpty) {
-      create(taskData)
-      ()
+    ).headOption match {
+      case None => {
+        create(taskData, priority = priority)
+      }
+      case Some(existing) => {
+        if (existing.db.priority > priority) {
+          // lower priority value is processed first
+          setPriority(existing, priority)
+        }
+      }
     }
+    ()
+  }
+
+  private[this] def setPriority(task: InternalTask, priority: Int): Unit = {
+    InternalTask.assertPriorityValid(priority)
+    dao.update(staticUserProvider.systemUser, task.db, task.db.form.copy(
+      priority = priority
+    ))
   }
 
   def setProcessed(taskId: String): Unit = {
     dao.findById(taskId).foreach { t =>
-      dao.update(Constants.SystemUser, t, t.form.copy(
+      dao.update(staticUserProvider.systemUser, t, t.form.copy(
         numAttempts = t.numAttempts + 1,
         processedAt = Some(DateTime.now)
       ))
     }
   }
+
 }

@@ -144,7 +144,7 @@ class ProjectsDao @Inject()(
         val project = findById(Authorization.All, id).getOrElse {
           sys.error("Failed to create project")
         }
-        internalTasksDao.createSyncIfNotQueued(project)
+        internalTasksDao.queueProject(project)
         internalTasksDao.createUpserted(project)
         Right(project)
       }
@@ -176,7 +176,7 @@ class ProjectsDao @Inject()(
         val updated = findById(Authorization.All, project.id).getOrElse {
           sys.error("Failed to create project")
         }
-        internalTasksDao.createSyncIfNotQueued(updated)
+        internalTasksDao.queueProject(updated)
         internalTasksDao.createUpserted(project)
         Right(updated)
       }

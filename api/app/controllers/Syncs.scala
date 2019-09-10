@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.helpers.{BinaryHelper, LibrariesHelper, ProjectHelper}
-import db.{Authorization, InternalTasksDao, LibrariesDao, SyncsDao}
+import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, SyncsDao}
 import io.flow.dependency.v0.models.SyncEvent
 import io.flow.dependency.v0.models.json._
 import io.flow.play.controllers.FlowControllerComponents
@@ -42,27 +42,27 @@ class Syncs @javax.inject.Inject()(
   }
 
   def postAll() = IdentifiedWithFallback {
-    internalTasksDao.createSyncAllIfNotQueued()
+    internalTasksDao.queueAll()
     NoContent
   }
 
   def postBinariesById(id: String) = IdentifiedWithFallback {
     binaryHelper.withBinary(id) { binary =>
-      internalTasksDao.createSyncIfNotQueued(binary)
+      internalTasksDao.queueBinary(binary)
       NoContent
     }
   }
 
   def postLibrariesById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
-      internalTasksDao.createSyncIfNotQueued(library)
+      internalTasksDao.queueLibrary(library, priority = InternalTask.HighestPriority)
       NoContent
     }
   }
 
   def postProjectsById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
-      internalTasksDao.createSyncIfNotQueued(project)
+      internalTasksDao.queueProject(project, priority = InternalTask.HighestPriority)
       NoContent
     }
   }
@@ -71,7 +71,7 @@ class Syncs @javax.inject.Inject()(
     val auth = Authorization.User(request.user.id)
     val libsToSync = librariesDao.findAll(auth, groupId = group_id, limit = 1000)
     libsToSync.foreach { library =>
-      internalTasksDao.createSyncIfNotQueued(library)
+      internalTasksDao.queueLibrary(library, priority = InternalTask.HighestPriority)
     }
     NoContent
   }

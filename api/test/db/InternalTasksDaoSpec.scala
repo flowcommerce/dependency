@@ -40,8 +40,8 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     }
 
     findTaskDataSync().size must be(0)
-    internalTasksDao.createSyncAllIfNotQueued()
-    internalTasksDao.createSyncAllIfNotQueued()
+    internalTasksDao.queueAll()
+    internalTasksDao.queueAll()
     findTaskDataSync().size must be(1)
   }
 
