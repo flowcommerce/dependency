@@ -113,7 +113,7 @@ class ProjectActor @javax.inject.Inject() (
 
                 client.hooks.get(repo.owner, repo.project).map { hooks =>
                   val targetUrl = HookBaseUrl + project.id
-                  hooks.find(_.config.url == Some(targetUrl)).getOrElse {
+                  hooks.find(_.config.url.contains(targetUrl)).getOrElse {
                     client.hooks.post(
                       owner = repo.owner,
                       repo = repo.project,
@@ -126,8 +126,8 @@ class ProjectActor @javax.inject.Inject() (
                         events = HookEvents,
                         active = true
                       )
-                    ).map { hook =>
-                      println(s"  - Project[${project.id}] hook created: $hook")
+                    ).map { _ =>
+                      ()
                     }.recover {
                       case e: Throwable => {
                         logger.fingerprint(getClass.getName).withKeyValue("project", Json.toJson(project)).error("Error creating hook", e)
@@ -148,8 +148,6 @@ class ProjectActor @javax.inject.Inject() (
         val summary = projectsDao.toSummary(project)
 
         GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user, logger).dependencies(project).map { dependencies =>
-          println(s" - project[${project.id}] name[${project.name}] dependencies: $dependencies")
-
           dependencies.binaries.map { binaries =>
             val projectBinaries = binaries.map { form =>
               projectBinariesDao.upsert(project.user, form) match {
@@ -275,12 +273,11 @@ class ProjectActor @javax.inject.Inject() (
   def processPendingSync(project: Project): Unit = {
     dependenciesPendingCompletion(project) match {
       case Nil => {
-        println(s" -- project[${project.name}] id[${project.id}] dependencies satisfied")
         recommendationsDao.sync(SystemUser, project)
         syncsDao.recordCompleted("project", project.id)
       }
-      case deps => {
-        println(s" -- project[${project.name}] id[${project.id}] waiting on dependencies to sync: " + deps.mkString(", "))
+      case _ => {
+        // println(s" -- project[${project.name}] id[${project.id}] waiting on dependencies to sync: " + deps.mkString(", "))
       }
     }
   }

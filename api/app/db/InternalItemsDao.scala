@@ -36,7 +36,7 @@ case class InternalItemForm(
     }
   }
 
-  def dbForm: generated.ItemForm = {
+  val dbForm: generated.ItemForm = {
     generated.ItemForm(
       organizationId = organization.id,
       objectId = objectId,

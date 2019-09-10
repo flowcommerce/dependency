@@ -36,7 +36,9 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
         fetchSbtVersions()
       }
       case BinaryType.UNDEFINED(name) => {
-        logger.withKeyValue("binary_name", name).warn(s"Do not know how to find versions for the programming binary")
+        if (!name.startsWith("tst-")) {
+          logger.withKeyValue("binary_name", name).warn(s"Do not know how to find versions for the programming binary")
+        }
         Nil
       }
     }

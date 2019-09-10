@@ -116,7 +116,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     org: Organization = createOrganization()
   ) = BinaryForm(
     organizationId = org.id,
-    name = BinaryType.UNDEFINED(s"z-test-binary-${UUID.randomUUID.toString}".toLowerCase)
+    name = BinaryType.UNDEFINED(createTestId())
   )
 
   def createBinaryVersion(
@@ -413,9 +413,9 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     itemsDao.replace(systemUser, form)
   }
 
-  def createItemSummary(
+  def createBinarySummary(
     org: Organization
-  ) (
+  )(
     implicit binary: Binary = createBinary(org)
   ): ItemSummary = {
     BinarySummary(
@@ -425,10 +425,35 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     )
   }
 
+  def createLibrarySummary(
+    org: Organization
+  )(
+    implicit library: Library = createLibrary(org)
+  ): ItemSummary = {
+    LibrarySummary(
+      id = library.id,
+      organization = OrganizationSummary(org.id, org.key),
+      groupId = library.groupId,
+      artifactId = library.artifactId
+    )
+  }
+
+  def createProjectSummary(
+    org: Organization
+  )(
+    implicit project: Project = createProject(org)
+  ): ProjectSummary = {
+    ProjectSummary(
+      id = project.id,
+      organization = OrganizationSummary(org.id, org.key),
+      name = project.name
+    )
+  }
+
   def createItemForm(
     org: Organization
   ) (
-    implicit summary: ItemSummary = createItemSummary(org)
+    implicit summary: ItemSummary = createBinarySummary(org)
   ): InternalItemForm = {
     val label = summary match {
       case BinarySummary(_, _, name) => name.toString

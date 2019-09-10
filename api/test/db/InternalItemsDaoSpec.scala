@@ -10,16 +10,27 @@ class InternalItemsDaoSpec extends DependencySpec {
   private[this] lazy val org = createOrganization()
 
   "replace" in {
-    val form = createItemForm(org)()
+    val project = createProjectSummary(org)
+    eventuallyInNSeconds(3) {
+      itemsDao.findByObjectId(Authorization.All, project.id).get
+    }
+    val form = createItemForm(org)(project)
     val item1 = itemsDao.replace(systemUser, form)
 
     val item2 = itemsDao.replace(systemUser, form)
-    item1.id must not be(item2.id)
+    item1.id must be(item2.id)
     item1.label must be(item2.label)
+
+    val newLabel = createTestId()
+    val item3 = itemsDao.replace(systemUser, form.copy(
+      label = newLabel
+    ))
+    item3.id must be(item2.id)
+    item3.label must be(newLabel)
   }
 
-  "findById" in {
-    val binary = createBinary(org)()
+  "findById - binary" in {
+    val binary = createBinary(org)
 
     val item = eventuallyInNSeconds(3) {
       itemsDao.findByObjectId(Authorization.All, binary.id).get
@@ -28,16 +39,36 @@ class InternalItemsDaoSpec extends DependencySpec {
     itemsDao.findById(Authorization.All, item.id).get.id must be(item.id)
   }
 
+  "findById - library" in {
+    val library = createLibrary(org)
+
+    val item = eventuallyInNSeconds(3) {
+      itemsDao.findByObjectId(Authorization.All, library.id).get
+    }
+
+    itemsDao.findById(Authorization.All, item.id).get.id must be(item.id)
+  }
+
+  "findById - project" in {
+    val project = createProject(org)
+
+    val item = eventuallyInNSeconds(3) {
+      itemsDao.findByObjectId(Authorization.All, project.id).get
+    }
+
+    itemsDao.findById(Authorization.All, item.id).get.id must be(item.id)
+  }
+
   "findByObjectId" in {
-    val binary = createBinary(org)()
+    val binary = createBinary(org)
     eventuallyInNSeconds(3) {
       itemsDao.findByObjectId(Authorization.All, binary.id).get
     }
   }
 
   "findAll by ids" in {
-    val binary1 = createBinary(org)()
-    val binary2 = createBinary(org)()
+    val binary1 = createBinary(org)
+    val binary2 = createBinary(org)
 
     val item1 = eventuallyInNSeconds(3) {
       itemsDao.findByObjectId(Authorization.All, binary1.id).get
@@ -45,7 +76,6 @@ class InternalItemsDaoSpec extends DependencySpec {
     val item2 = eventuallyInNSeconds(3) {
       itemsDao.findByObjectId(Authorization.All, binary2.id).get
     }
-    println(s"item1[${item1.id}] item2[${item2.id}]")
 
     itemsDao.findAll(Authorization.All, ids = Some(Seq(item1.id, item2.id)), limit = None).map(_.id).sorted must be(
       Seq(item1.id, item2.id).sorted
@@ -57,7 +87,7 @@ class InternalItemsDaoSpec extends DependencySpec {
   }
 
   "supports binaries" in {
-    val binary = createBinary(org)()
+    val binary = createBinary(org)
     itemsDao.replaceBinary(systemUser, binary)
 
     val actual = itemsDao.findByObjectId(Authorization.All, binary.id).getOrElse {
