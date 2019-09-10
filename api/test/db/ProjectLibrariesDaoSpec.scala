@@ -7,9 +7,9 @@ import util.DependencySpec
 
 class ProjectLibrariesDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
-  lazy val project = createProject(org)
-  lazy val projectLibrary = createProjectLibrary(project)
+  private[this] lazy val org = createOrganization()
+  private[this] lazy val project = createProject(org)
+  private[this] lazy val projectLibrary = createProjectLibrary(project)
 
   "validate" must {
 
@@ -37,7 +37,7 @@ class ProjectLibrariesDaoSpec extends DependencySpec {
     "catch invalid project" in {
       projectLibrariesDao.validate(
         systemUser,
-        createProjectLibraryForm(project).copy(projectId = UUID.randomUUID.toString())
+        createProjectLibraryForm(project).copy(projectId = UUID.randomUUID.toString)
       ) must be(Seq("Project not found"))
     }
 
@@ -69,25 +69,25 @@ class ProjectLibrariesDaoSpec extends DependencySpec {
   "upsert" in {
     val form = createProjectLibraryForm(project)
 
-    val one = create(projectLibrariesDao.upsert(systemUser, form))
+    val one = rightOrErrors(projectLibrariesDao.upsert(systemUser, form))
     one.crossBuildVersion must be(None)
-    create(projectLibrariesDao.upsert(systemUser, form)).id must be(one.id)
+    rightOrErrors(projectLibrariesDao.upsert(systemUser, form)).id must be(one.id)
 
     val form210 = form.copy(
       version = form.version.copy(crossBuildVersion = Some("2.10"))
     )
-    val two = create(projectLibrariesDao.upsert(systemUser, form210))
+    val two = rightOrErrors(projectLibrariesDao.upsert(systemUser, form210))
     two.crossBuildVersion must be(Some("2.10"))
-    create(projectLibrariesDao.upsert(systemUser, form210)).id must be(two.id)
+    rightOrErrors(projectLibrariesDao.upsert(systemUser, form210)).id must be(two.id)
 
     val form211 = form.copy(
       version = form.version.copy(crossBuildVersion = Some("2.11"))
     )
-    val three = create(projectLibrariesDao.upsert(systemUser, form211))
+    val three = rightOrErrors(projectLibrariesDao.upsert(systemUser, form211))
     three.crossBuildVersion must be(Some("2.11"))
-    create(projectLibrariesDao.upsert(systemUser, form211)).id must be(three.id)
+    rightOrErrors(projectLibrariesDao.upsert(systemUser, form211)).id must be(three.id)
 
-    val other = create(projectLibrariesDao.upsert(systemUser, form.copy(groupId = form.groupId + ".other")))
+    val other = rightOrErrors(projectLibrariesDao.upsert(systemUser, form.copy(groupId = form.groupId + ".other")))
     other.groupId must be(form.groupId + ".other")
   }
 

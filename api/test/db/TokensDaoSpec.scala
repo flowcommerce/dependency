@@ -8,7 +8,7 @@ class TokensDaoSpec extends DependencySpec {
 
   "setLatestByTag" in {
     val form = InternalTokenForm.UserCreated(createTokenForm())
-    val token1 = create(tokensDao.create(systemUser, form))
+    val token1 = rightOrErrors(tokensDao.create(systemUser, form))
 
     val token2 = tokensDao.setLatestByTag(systemUser, form)
     token1.id must not be (token2.id)

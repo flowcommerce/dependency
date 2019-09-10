@@ -46,14 +46,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   import scala.language.implicitConversions
   implicit def toUserReference(user: User) = UserReference(id = user.id)
 
-  lazy val systemUser = createUser()
-
-  def create[T](result: Either[Seq[String], T]): T = {
-    result match {
-      case Left(errors) => sys.error(errors.mkString(", "))
-      case Right(obj) => obj
-    }
-  }
+  lazy val systemUser: User = createUser()
 
   def eventuallyInNSeconds[T](n: Int)(f: => T): T = {
     eventually(timeout(Span(n.toLong, Seconds))) {
@@ -181,12 +174,12 @@ trait DependencySpec extends FlowPlaySpec with Factories {
       sys.error("Could not find user that created org")
     }
 
-    create(projectsDao.create(user, form))
+    rightOrErrors(projectsDao.create(user, form))
   }
 
   def createProjectForm(
     org: Organization = createOrganization()
-  ) = {
+  ): ProjectForm = {
     ProjectForm(
       organization = org.key,
       name = createTestName(),
@@ -232,7 +225,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     val binaryVersion = createBinaryVersion(org)(binary = binary)
     val project = createProject(org)
 
-    val projectBinary = create(projectBinariesDao.create(
+    val projectBinary = rightOrErrors(projectBinariesDao.create(
       systemUser,
       createProjectBinaryForm(
         project = project,
@@ -264,7 +257,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createUser(
     form: UserForm = createUserForm()
   ): User = {
-    create(usersDao.create(None, form))
+    rightOrErrors(usersDao.create(None, form))
   }
 
   def createUserForm(
@@ -300,7 +293,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createToken(
     form: TokenForm = createTokenForm()
   ): Token = {
-    create(tokensDao.create(systemUser, InternalTokenForm.UserCreated(form)))
+    rightOrErrors(tokensDao.create(systemUser, InternalTokenForm.UserCreated(form)))
   }
 
   def createTokenForm(
@@ -336,14 +329,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: ResolverForm = createResolverForm(org)
   ): Resolver = {
-    create(resolversDao.create(user, form))
+    rightOrErrors(resolversDao.create(user, form))
   }
 
   def createResolverForm(
     org: Organization = createOrganization(),
     visibility: Visibility = Visibility.Private,
     uri: String = s"http://${UUID.randomUUID.toString}.z-test.flow.io"
-  ) = {
+  ): ResolverForm = {
     ResolverForm(
       visibility = visibility,
       organization = org.key,
@@ -354,14 +347,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createMembership(
     form: MembershipForm = createMembershipForm()
   ): Membership = {
-    create(membershipsDao.create(systemUser, form))
+    rightOrErrors(membershipsDao.create(systemUser, form))
   }
 
   def createMembershipForm(
     org: Organization = createOrganization(),
     user: User = createUser(),
     role: Role = Role.Member
-  ) = {
+  ): MembershipForm = {
     MembershipForm(
       organization = org.key,
       userId = user.id,
@@ -389,7 +382,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   }
 
   def addLibraryVersion(project: Project, libraryVersion: LibraryVersion): Unit = {
-    val projectLibrary = create(
+    val projectLibrary = rightOrErrors(
       projectLibrariesDao.upsert(
         systemUser,
         ProjectLibraryForm(
@@ -481,7 +474,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createSubscriptionForm(
     user: User = createUser(),
     publication: Publication = Publication.DailySummary
-  ) = {
+  ): SubscriptionForm = {
     SubscriptionForm(
       userId = user.id,
       publication = publication
@@ -507,7 +500,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: ProjectLibraryForm = createProjectLibraryForm(project)
   ): ProjectLibrary = {
-    create(projectLibrariesDao.create(systemUser, form))
+    rightOrErrors(projectLibrariesDao.create(systemUser, form))
   }
 
   def createProjectLibraryForm(
@@ -517,7 +510,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     path: String = "build.sbt",
     version: String = "0.0.1",
     crossBuildVersion: Option[String] = None
-  ) = {
+  ): ProjectLibraryForm = {
     ProjectLibraryForm(
       projectId = project.id,
       groupId = groupId,
@@ -532,7 +525,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: ProjectBinaryForm = createProjectBinaryForm(project)
   ): ProjectBinary = {
-    create(projectBinariesDao.create(systemUser, form))
+    rightOrErrors(projectBinariesDao.create(systemUser, form))
   }
 
   def createProjectBinaryForm(
@@ -540,7 +533,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     name: BinaryType = BinaryType.UNDEFINED(createTestKey()),
     path: String = "build.sbt",
     version: String = "0.0.1"
-  ) = {
+  ): ProjectBinaryForm = {
     ProjectBinaryForm(
       projectId = project.id,
       name = name,

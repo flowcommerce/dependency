@@ -27,7 +27,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
   }
 
   def addBinaryVersion(project: Project, binaryVersion: BinaryVersion): Unit = {
-    val projectBinary = create(
+    val projectBinary = rightOrErrors(
       projectBinariesDao.upsert(
         systemUser,
         ProjectBinaryForm(
