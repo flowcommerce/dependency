@@ -47,7 +47,7 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
   def fetchScalaVersions(): Seq[Version] = {
     RemoteDirectory.fetch(ScalaUrl) { name =>
       name.toLowerCase.startsWith("scala ")
-    }.files.flatMap { toVersion(_) }
+    }.files.flatMap { toVersion }
   }
 
   def fetchSbtVersions(): Seq[Version] = {
