@@ -10,7 +10,7 @@ trait TaskHelpers {
   def internalTasksDao: InternalTasksDao = init[InternalTasksDao]
 
   def createTask(data: TaskData = makeTaskDataSync()): InternalTask = {
-    val id = internalTasksDao.create(data)
+    val id = internalTasksDao.create(data, priority = InternalTask.LowestPriority)
     internalTasksDao.findById(id).get
   }
 
