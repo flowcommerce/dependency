@@ -1,7 +1,7 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
+import io.flow.dependency.v0.models.{Library, LibraryVersion, SyncType, TaskDataSyncOne, VersionForm}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
@@ -9,7 +9,6 @@ import io.flow.util.Version
 import io.flow.util.IdGenerator
 import anorm._
 import play.api.db._
-import sync.LibrarySync
 
 import scala.util.{Failure, Success, Try}
 
@@ -17,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 class LibraryVersionsDao @Inject()(
   db: Database,
   logger: RollbarLogger,
-  librarySync: LibrarySync
+  internalTasksDao: InternalTasksDao
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "library_versions")
@@ -112,7 +111,7 @@ class LibraryVersionsDao @Inject()(
       'updated_by_user_id -> createdBy.id
     ).execute()
 
-    librarySync.sync(createdBy, libraryId)
+    sync(libraryId)
 
     findByIdWithConnection(Authorization.All, id).getOrElse {
       sys.error("Failed to create version")
@@ -121,7 +120,13 @@ class LibraryVersionsDao @Inject()(
 
   def delete(deletedBy: UserReference, lv: LibraryVersion): Unit = {
     dbHelpers.delete(deletedBy.id, lv.id)
-    librarySync.sync(deletedBy, lv.library.id)
+    sync(lv.library.id)
+  }
+
+  private[this] def sync(libraryId: String): Unit = {
+    internalTasksDao.createSyncIfNotQueued(
+      TaskDataSyncOne(libraryId, SyncType.Library)
+    )
   }
 
   def findByLibraryAndVersionAndCrossBuildVersion(
