@@ -7,7 +7,6 @@ import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.util.IdGenerator
 import anorm._
-import com.google.inject.ImplementedBy
 import play.api.db._
 
 trait StaticUserProvider {

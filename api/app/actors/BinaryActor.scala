@@ -19,7 +19,8 @@ class BinaryActor @Inject() (
   usersDao: UsersDao,
   itemsDao: InternalItemsDao,
   projectBinariesDao: ProjectBinariesDao,
-  logger: RollbarLogger
+  logger: RollbarLogger,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) extends Actor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -33,7 +34,7 @@ class BinaryActor @Inject() (
         projectBinariesDao.findAll(Authorization.All, binaryId = Some(binaryId), offset = offset)
       }.foreach { projectBinary =>
         projectBinariesDao.removeBinary(usersDao.systemUser, projectBinary)
-        sender ! MainActor.Messages.ProjectBinarySync(projectBinary.project.id, projectBinary.id)
+        projectActor ! ProjectActor.Messages.ProjectBinarySync(projectBinary.project.id, projectBinary.id)
       }
       context.stop(self)
   }

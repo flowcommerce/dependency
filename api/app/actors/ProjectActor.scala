@@ -6,6 +6,7 @@ import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.Pager
 import db._
 import akka.actor.Actor
+import cache.ProjectsCache
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 import play.api.libs.json.Json
@@ -17,28 +18,24 @@ object ProjectActor {
   object Messages {
 
     case class Delete(projectId: String) extends Message
-    case object SyncCompleted extends Message
+    case class SyncCompleted(projectId: String) extends Message
 
-    case class ProjectLibraryCreated(id: String) extends Message
-    case class ProjectLibrarySync(id: String) extends Message
-    case class ProjectLibraryDeleted(id: String, version: String) extends Message
+    case class ProjectLibraryCreated(projectId: String, id: String) extends Message
+    case class ProjectLibrarySync(projectId: String, id: String) extends Message
+    case class ProjectLibraryDeleted(projectId: String, id: String, version: String) extends Message
 
-    case class ProjectBinaryCreated(id: String) extends Message
-    case class ProjectBinarySync(id: String) extends Message
-    case class ProjectBinaryDeleted(id: String, version: String) extends Message
+    case class ProjectBinaryCreated(projectId: String, id: String) extends Message
+    case class ProjectBinarySync(projectId: String, id: String) extends Message
+    case class ProjectBinaryDeleted(projectId: String, id: String, version: String) extends Message
 
-    case class LibrarySynced(id: String) extends Message
-    case class BinarySynced(id: String) extends Message
-  }
-
-  trait Factory {
-    def apply(projectId: String): Actor
+    case class LibrarySynced(projectId: String) extends Message
+    case class BinarySynced(projectId: String) extends Message
   }
 }
 
 class ProjectActor @javax.inject.Inject() (
-  logger: RollbarLogger,
-  projectsDao: ProjectsDao,
+  rollbar: RollbarLogger,
+  projectsCache: ProjectsCache,
   syncsDao: SyncsDao,
   projectBinariesDao:ProjectBinariesDao,
   projectLibrariesDao: ProjectLibrariesDao,
@@ -47,36 +44,33 @@ class ProjectActor @javax.inject.Inject() (
   binariesDao: BinariesDao,
   usersDao: UsersDao,
   resolversDao: ResolversDao,
-  @com.google.inject.assistedinject.Assisted projectId: String
 ) extends Actor {
 
   private[this] lazy val SystemUser = usersDao.systemUser
 
-  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
-
-  private[this] lazy val dataProject: Option[Project] = projectsDao.findById(Authorization.All, projectId)
+  private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 
-    case ProjectActor.Messages.ProjectLibraryCreated(id) =>
-      syncProjectLibrary(id)
+    case ProjectActor.Messages.ProjectLibraryCreated(projectId, id) =>
+      syncProjectLibrary(projectId, id)
 
-    case ProjectActor.Messages.ProjectLibrarySync(id) =>
-      syncProjectLibrary(id)
+    case ProjectActor.Messages.ProjectLibrarySync(projectId, id) =>
+      syncProjectLibrary(projectId, id)
 
-    case ProjectActor.Messages.ProjectBinaryCreated(id) =>
-      syncProjectBinary(id)
+    case ProjectActor.Messages.ProjectBinaryCreated(projectId, id) =>
+      syncProjectBinary(projectId, id)
 
-    case ProjectActor.Messages.ProjectBinarySync(id) =>
-      syncProjectBinary(id)
+    case ProjectActor.Messages.ProjectBinarySync(projectId, id) =>
+      syncProjectBinary(projectId, id)
 
-    case ProjectActor.Messages.LibrarySynced(_) =>
-      dataProject.foreach { project =>
+    case ProjectActor.Messages.LibrarySynced(projectId) =>
+      findProject(projectId).foreach { project =>
         processPendingSync(project)
       }
 
-    case ProjectActor.Messages.BinarySynced(_) =>
-      dataProject.foreach { project =>
+    case ProjectActor.Messages.BinarySynced(projectId) =>
+      findProject(projectId).foreach { project =>
         processPendingSync(project)
       }
 
@@ -88,8 +82,8 @@ class ProjectActor @javax.inject.Inject() (
       }
       context.stop(self)
 
-    case ProjectActor.Messages.ProjectLibraryDeleted(id, version) =>
-      dataProject.foreach { project =>
+    case ProjectActor.Messages.ProjectLibraryDeleted(projectId, id, version) =>
+      findProject(projectId).foreach { project =>
         recommendationsDao.findAll(
           Authorization.All,
           projectId = Some(project.id),
@@ -103,8 +97,8 @@ class ProjectActor @javax.inject.Inject() (
         processPendingSync(project)
       }
 
-    case ProjectActor.Messages.ProjectBinaryDeleted(id, version) =>
-      dataProject.foreach { project =>
+    case ProjectActor.Messages.ProjectBinaryDeleted(projectId, id, version) =>
+      findProject(projectId).foreach { project =>
         recommendationsDao.findAll(
           Authorization.All,
           projectId = Some(project.id),
@@ -122,9 +116,9 @@ class ProjectActor @javax.inject.Inject() (
     * Attempts to resolve the library. If successful, sets the
     * project_libraries.library_id
     */
-  def syncProjectLibrary(id: String): Unit = {
+  def syncProjectLibrary(projectId: String, id: String): Unit = {
     syncsDao.withStartedAndCompleted("project_library", id) {
-      dataProject.foreach { project =>
+      findProject(projectId).foreach { project =>
         projectLibrariesDao.findById(Authorization.All, id).map { projectLibrary =>
           resolveLibrary(projectLibrary).map { lib =>
             projectLibrariesDao.setLibrary(SystemUser, projectLibrary, lib)
@@ -135,9 +129,9 @@ class ProjectActor @javax.inject.Inject() (
     }
   }
 
-  def syncProjectBinary(id: String): Unit = {
+  def syncProjectBinary(projectId: String, id: String): Unit = {
     syncsDao.withStartedAndCompleted("project_binary", id) {
-      dataProject.foreach { project =>
+      findProject(projectId).foreach { project =>
         projectBinariesDao.findById(Authorization.All, id).map { projectBinary =>
           resolveBinary(projectBinary).map { binary =>
             projectBinariesDao.setBinary(SystemUser, projectBinary, binary)
@@ -240,4 +234,7 @@ class ProjectActor @javax.inject.Inject() (
     }
   }
 
+  private[this] def findProject(id: String): Option[Project] = {
+    projectsCache.findByProjectId(id)
+  }
 }

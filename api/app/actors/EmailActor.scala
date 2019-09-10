@@ -9,27 +9,30 @@ import io.flow.dependency.api.lib.{Email, Recipient}
 import io.flow.log.RollbarLogger
 import io.flow.util.Config
 import org.joda.time.{DateTime, DateTimeZone}
-import akka.actor.Actor
+import akka.actor.{Actor, ActorLogging, ActorSystem}
 import io.flow.akka.SafeReceive
+import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
+import io.flow.play.util.ApplicationConfig
 
-object EmailActor {
-
-  object Messages {
-    case object ProcessDailySummary
-  }
-
-
-
-}
+import scala.concurrent.ExecutionContext
 
 class EmailActor @Inject()(
+  system: ActorSystem,
+  rollbar: RollbarLogger,
+  config: ApplicationConfig,
   subscriptionsDao: SubscriptionsDao,
   batchEmailProcessor: BatchEmailProcessor,
-  config: Config,
-  logger: RollbarLogger
-) extends Actor {
+) extends Actor with ActorLogging with Scheduler {
 
-  private[this] implicit val configuredRollbar = logger.fingerprint("EmailActor")
+  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("email-actor-context")
+
+  private[this] case object ProcessDailySummary
+
+  private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
+    ProcessDailySummary
+  )
 
   val PreferredHourToSendEst: Int = {
     val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
@@ -41,7 +44,7 @@ class EmailActor @Inject()(
     (new DateTime()).toDateTime(DateTimeZone.forID("America/New_York")).getHourOfDay
   }
 
-  def receive = SafeReceive.withLogUnhandled {
+  def receive: Receive = SafeReceive.withLogUnhandled {
 
     /*
      * Selects people to whom we delivery email by:
@@ -56,9 +59,9 @@ class EmailActor @Inject()(
      *  Otherwise, filter by 26 hours to allow us to catch up on any
      *  missed emails
      */
-    case EmailActor.Messages.ProcessDailySummary =>
+    case ProcessDailySummary =>
       val hoursForPreferredTime = 2
-      val hours = currentHourEst match {
+      val hours = currentHourEst() match {
         case PreferredHourToSendEst => hoursForPreferredTime
         case _ => 24 + hoursForPreferredTime
       }

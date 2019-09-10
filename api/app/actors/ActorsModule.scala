@@ -6,11 +6,12 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 
 class ActorsModule extends AbstractModule with AkkaGuiceSupport {
   override def configure(): Unit = {
-    bindActorFactory[ProjectActor, ProjectActor.Factory]
     bindActor[BinaryActor]("binary-actor")
-    bindActor[TaskExecutorActor]("task-executor-actor")
-    bindActor[MainActor]("main-actor")
+    bindActor[EmailActor]("email-actor")
+    bindActor[ProjectActor]("project-actor")
+    bindActor[ResolverActor]("resolver-actor")
     bindActor[SearchActor]("search-actor")
     bindActor[TaskActor]("task-actor")
+    bindActor[TaskExecutorActor]("task-executor-actor")
   }
 }

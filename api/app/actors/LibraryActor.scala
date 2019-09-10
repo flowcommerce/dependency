@@ -16,10 +16,11 @@ object LibraryActor {
 }
 
 class LibraryActor @Inject()(
-                              itemsDao: InternalItemsDao,
-                              projectLibrariesDao: ProjectLibrariesDao,
-                              usersDao: UsersDao,
-                              logger: RollbarLogger
+  itemsDao: InternalItemsDao,
+  projectLibrariesDao: ProjectLibrariesDao,
+  usersDao: UsersDao,
+  logger: RollbarLogger,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) extends Actor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -33,7 +34,7 @@ class LibraryActor @Inject()(
         projectLibrariesDao.findAll(Authorization.All, libraryId = Some(libraryId), limit = Some(100), offset = offset)
       }.foreach { projectLibrary =>
         projectLibrariesDao.removeLibrary(usersDao.systemUser, projectLibrary)
-        sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
+        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
       }
 
       context.stop(self)
