@@ -62,12 +62,13 @@ package io.flow.dependency.v0.models {
 
   object TaskDataDiscriminator {
 
+    case object TaskDataUpserted extends TaskDataDiscriminator { override def toString = "task_data_upserted" }
     case object TaskDataSync extends TaskDataDiscriminator { override def toString = "task_data_sync" }
     case object TaskDataSyncOne extends TaskDataDiscriminator { override def toString = "task_data_sync_one" }
 
     final case class UNDEFINED(override val toString: String) extends TaskDataDiscriminator
 
-    val all: scala.List[TaskDataDiscriminator] = scala.List(TaskDataSync, TaskDataSyncOne)
+    val all: scala.List[TaskDataDiscriminator] = scala.List(TaskDataUpserted, TaskDataSync, TaskDataSyncOne)
 
     private[this] val byName: Map[String, TaskDataDiscriminator] = all.map(x => x.toString.toLowerCase -> x).toMap
 
@@ -364,6 +365,14 @@ package io.flow.dependency.v0.models {
   ) extends TaskData
 
   final case class TaskDataSyncOne(
+    id: String,
+    `type`: io.flow.dependency.v0.models.SyncType
+  ) extends TaskData
+
+  /**
+   * Represents that a new, for example, project was created or updated
+   */
+  final case class TaskDataUpserted(
     id: String,
     `type`: io.flow.dependency.v0.models.SyncType
   ) extends TaskData
@@ -1904,6 +1913,20 @@ package io.flow.dependency.v0.models {
       )
     }
 
+    implicit def jsonReadsDependencyTaskDataUpserted: play.api.libs.json.Reads[TaskDataUpserted] = {
+      for {
+        id <- (__ \ "id").read[String]
+        `type` <- (__ \ "type").read[io.flow.dependency.v0.models.SyncType]
+      } yield TaskDataUpserted(id, `type`)
+    }
+
+    def jsObjectTaskDataUpserted(obj: io.flow.dependency.v0.models.TaskDataUpserted): play.api.libs.json.JsObject = {
+      play.api.libs.json.Json.obj(
+        "id" -> play.api.libs.json.JsString(obj.id),
+        "type" -> play.api.libs.json.JsString(obj.`type`.toString)
+      )
+    }
+
     implicit def jsonReadsDependencyToken: play.api.libs.json.Reads[Token] = {
       for {
         id <- (__ \ "id").read[String]
@@ -2136,6 +2159,7 @@ package io.flow.dependency.v0.models {
     implicit def jsonReadsDependencyTaskData: play.api.libs.json.Reads[TaskData] = new play.api.libs.json.Reads[TaskData] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[TaskData] = {
         (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[TaskData] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
+          case "task_data_upserted" => js.validate[io.flow.dependency.v0.models.TaskDataUpserted]
           case "task_data_sync" => js.validate[io.flow.dependency.v0.models.TaskDataSync]
           case "task_data_sync_one" => js.validate[io.flow.dependency.v0.models.TaskDataSyncOne]
           case other => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.TaskDataUndefinedType(other))
@@ -2145,6 +2169,7 @@ package io.flow.dependency.v0.models {
 
     def jsObjectTaskData(obj: io.flow.dependency.v0.models.TaskData): play.api.libs.json.JsObject = {
       obj match {
+        case x: io.flow.dependency.v0.models.TaskDataUpserted => jsObjectTaskDataUpserted(x) ++ play.api.libs.json.Json.obj("discriminator" -> "task_data_upserted")
         case x: io.flow.dependency.v0.models.TaskDataSync => jsObjectTaskDataSync(x) ++ play.api.libs.json.Json.obj("discriminator" -> "task_data_sync")
         case x: io.flow.dependency.v0.models.TaskDataSyncOne => jsObjectTaskDataSyncOne(x) ++ play.api.libs.json.Json.obj("discriminator" -> "task_data_sync_one")
         case other => {

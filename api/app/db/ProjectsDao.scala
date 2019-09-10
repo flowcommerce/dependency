@@ -1,7 +1,7 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.actors.MainActor
+import io.flow.dependency.actors.ProjectActor
 import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectForm, ProjectSummary, Scms, Visibility}
 import io.flow.dependency.api.lib.GithubUtil
 import io.flow.postgresql.{OrderBy, Pager, Query}
@@ -19,7 +19,8 @@ class ProjectsDao @Inject()(
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
   recommendationsDaoProvider: Provider[RecommendationsDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  internalTasksDao: InternalTasksDao,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "projects")
@@ -140,13 +141,11 @@ class ProjectsDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.ProjectCreated(id)
-
-        Right(
-          findById(Authorization.All, id).getOrElse {
-            sys.error("Failed to create project")
-          }
-        )
+        val project = findById(Authorization.All, id).getOrElse {
+          sys.error("Failed to create project")
+        }
+        internalTasksDao.createSyncIfNotQueued(project)
+        Right(project)
       }
       case errors => Left(errors)
     }
@@ -173,13 +172,11 @@ class ProjectsDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.ProjectUpdated(project.id)
-
-        Right(
-          findById(Authorization.All, project.id).getOrElse {
-            sys.error("Failed to create project")
-          }
-        )
+        val updated = findById(Authorization.All, project.id).getOrElse {
+          sys.error("Failed to create project")
+        }
+        internalTasksDao.createSyncIfNotQueued(updated)
+        Right(updated)
       }
       case errors => Left(errors)
     }
@@ -199,7 +196,7 @@ class ProjectsDao @Inject()(
     }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
 
     dbHelpers.delete(deletedBy.id, project.id)
-    mainActor ! MainActor.Messages.ProjectDeleted(project.id)
+    projectActor ! ProjectActor.Messages.Delete(project.id) // TODO: create task
   }
 
   def findByOrganizationKeyAndName(auth: Authorization, organizationKey: String, name: String): Option[Project] = {

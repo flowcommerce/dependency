@@ -1,12 +1,14 @@
 package actors
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorSystem}
 import db.{InternalTasksDao, UsersDao}
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 import javax.inject.Inject
 import lib.TasksUtil
 import sync.{BinarySync, LibrarySync, ProjectSync}
+
+import scala.concurrent.ExecutionContext
 
 object TaskExecutorActor {
   object Messages {
@@ -18,6 +20,7 @@ object TaskExecutorActor {
 }
 
 class TaskExecutorActor @Inject() (
+  system: ActorSystem,
   rollbar: RollbarLogger,
   binarySync: BinarySync,
   librarySync: LibrarySync,
@@ -28,6 +31,7 @@ class TaskExecutorActor @Inject() (
 ) extends Actor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
+  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("main-actor-context")
 
   def receive: Receive = SafeReceive.withLogUnhandled {
 
