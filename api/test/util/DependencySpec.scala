@@ -439,6 +439,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     InternalItemForm(
       summary = summary,
       label = label,
+      visibility = Visibility.Private,
       description = None,
       contents = label
     )

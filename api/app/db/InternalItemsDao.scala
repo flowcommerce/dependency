@@ -44,7 +44,7 @@ case class InternalItemForm(
       label = label,
       description = description,
       summary = Some(Json.toJson(summary)),
-      contents = contents
+      contents = contents.trim.toLowerCase()
     )
   }
 }
