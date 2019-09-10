@@ -2,12 +2,12 @@ package db
 
 import java.util.UUID
 
-import io.flow.dependency.v0.models.{BinaryType, SyncEvent}
+import io.flow.dependency.v0.models.{BinaryType, Organization, SyncEvent}
 import util.DependencySpec
 
 class BinariesDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
+  private[this] lazy val org: Organization = createOrganization()
 
   "findByName" in {
     val lang = createBinary(org)

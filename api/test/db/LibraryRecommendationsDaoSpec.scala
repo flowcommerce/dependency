@@ -4,27 +4,22 @@ import util.DependencySpec
 
 class LibraryRecommendationsDaoSpec extends  DependencySpec {
 
-  lazy val org = createOrganization()
+  private[this] lazy val org = createOrganization()
 
   def verify(actual: Seq[LibraryRecommendation], expected: Seq[LibraryRecommendation]): Unit = {
-    actual == expected match {
-      case true => {}
-      case false => {
-        actual.size == expected.size match {
-          case false => {
-            sys.error(s"Expected[${expected.size}] recommendations but got [${actual.size}]")
-          }
-          case true => {
-            (actual zip expected).foreach { case (a, b) =>
-              a == b match {
-                case true => {}
-                case false => {
-                  sys.error(s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]")
-                }
-              }
-            }
+    if (actual == expected) {
+      {}
+    } else {
+      if (actual.size == expected.size) {
+        (actual zip expected).foreach { case (a, b) =>
+          if (a == b) {
+            {}
+          } else {
+            sys.error(s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]")
           }
         }
+      } else {
+        sys.error(s"Expected[${expected.size}] recommendations but got [${actual.size}]")
       }
     }
   }

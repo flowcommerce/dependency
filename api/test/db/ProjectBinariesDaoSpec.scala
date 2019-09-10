@@ -7,9 +7,9 @@ import util.DependencySpec
 
 class ProjectBinariesDaoSpec extends DependencySpec {
 
-  lazy val org = createOrganization()
-  lazy val project = createProject(org)
-  lazy val projectBinary = createProjectBinary(project)
+  private[this] lazy val org = createOrganization()
+  private[this] lazy val project = createProject(org)
+  private[this] lazy val projectBinary = createProjectBinary(project)
 
   "validate" must {
 
@@ -30,7 +30,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
     "catch invalid project" in {
       projectBinariesDao.validate(
         systemUser,
-        createProjectBinaryForm(project).copy(projectId = UUID.randomUUID.toString())
+        createProjectBinaryForm(project).copy(projectId = UUID.randomUUID.toString)
       ) must be(Seq("Project not found"))
     }
 
@@ -60,9 +60,9 @@ class ProjectBinariesDaoSpec extends DependencySpec {
   "upsert" in {
     val form = createProjectBinaryForm(project)
 
-    val one = create(projectBinariesDao.upsert(systemUser, form))
-    create(projectBinariesDao.upsert(systemUser, form)).id must be(one.id)
-    create(projectBinariesDao.upsert(systemUser, form)).id must be(one.id)
+    val one = rightOrErrors(projectBinariesDao.upsert(systemUser, form))
+    rightOrErrors(projectBinariesDao.upsert(systemUser, form)).id must be(one.id)
+    rightOrErrors(projectBinariesDao.upsert(systemUser, form)).id must be(one.id)
   }
 
   "setBinary" in {
