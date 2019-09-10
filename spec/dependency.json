@@ -28,6 +28,7 @@
     "task_data": {
       "discriminator": "discriminator",
       "types": [
+        { "type": "task_data_upserted" },
         { "type": "task_data_sync" },
         { "type": "task_data_sync_one" }
       ]
@@ -101,6 +102,14 @@
     },
 
     "task_data_sync_one": {
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "type", "type": "sync_type" }
+      ]
+    },
+
+    "task_data_upserted": {
+      "description": "Represents that a new, for example, project was created or updated",
       "fields": [
         { "name": "id", "type": "string" },
         { "name": "type", "type": "sync_type" }

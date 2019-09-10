@@ -31,7 +31,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit val syncsDao = init[SyncsDao]
   implicit val resolversDao = init[ResolversDao]
   implicit val membershipsDao = init[MembershipsDao]
-  implicit val itemsDao = init[ItemsDao]
+  implicit val itemsDao = init[InternalItemsDao]
   implicit val subscriptionsDao = init[SubscriptionsDao]
   implicit val lastEmailsDao = init[LastEmailsDao]
   implicit val binaryRecommendationsDao = init[BinaryRecommendationsDao]
@@ -116,7 +116,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     org: Organization = createOrganization()
   ) = BinaryForm(
     organizationId = org.id,
-    name = BinaryType.UNDEFINED(s"z-test-binary-${UUID.randomUUID.toString}".toLowerCase)
+    name = BinaryType.UNDEFINED(createTestId())
   )
 
   def createBinaryVersion(
@@ -315,14 +315,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createSync(
     form: SyncForm = createSyncForm()
   ): Sync = {
-    syncsDao.create(systemUser, form)
+    syncsDao.create(form)
   }
 
   def createSyncForm(
     `type`: String = "test",
     objectId: String = UUID.randomUUID.toString,
     event: SyncEvent = SyncEvent.Started
-  ) = {
+  ): SyncForm = {
     SyncForm(
       `type` = `type`,
       objectId = objectId,
@@ -408,14 +408,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def replaceItem(
     org: Organization
   ) (
-    implicit form: ItemForm = createItemForm(org)
+    implicit form: InternalItemForm = createItemForm(org)
   ): Item = {
     itemsDao.replace(systemUser, form)
   }
 
-  def createItemSummary(
+  def createBinarySummary(
     org: Organization
-  ) (
+  )(
     implicit binary: Binary = createBinary(org)
   ): ItemSummary = {
     BinarySummary(
@@ -425,20 +425,46 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     )
   }
 
+  def createLibrarySummary(
+    org: Organization
+  )(
+    implicit library: Library = createLibrary(org)
+  ): ItemSummary = {
+    LibrarySummary(
+      id = library.id,
+      organization = OrganizationSummary(org.id, org.key),
+      groupId = library.groupId,
+      artifactId = library.artifactId
+    )
+  }
+
+  def createProjectSummary(
+    org: Organization
+  )(
+    implicit project: Project = createProject(org)
+  ): ProjectSummary = {
+    ProjectSummary(
+      id = project.id,
+      organization = OrganizationSummary(org.id, org.key),
+      name = project.name
+    )
+  }
+
   def createItemForm(
     org: Organization
   ) (
-    implicit summary: ItemSummary = createItemSummary(org)
-  ): ItemForm = {
+    implicit summary: ItemSummary = createBinarySummary(org)
+  ): InternalItemForm = {
     val label = summary match {
       case BinarySummary(_, _, name) => name.toString
       case LibrarySummary(_, _, groupId, artifactId) => Seq(groupId, artifactId).mkString(".")
       case ProjectSummary(_, _, name) => name
       case ItemSummaryUndefinedType(name) => name
     }
-    ItemForm(
+    InternalItemForm(
       summary = summary,
       label = label,
+      visibility = Visibility.Private,
       description = None,
       contents = label
     )

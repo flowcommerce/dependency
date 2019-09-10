@@ -1,8 +1,7 @@
 package controllers
 
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.json._
-import db.{Authorization, LibrariesDao, ProjectsDao}
+import db.{Authorization, InternalTasksDao, LibrariesDao, ProjectsDao}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.Pager
 import play.api.mvc._
@@ -13,8 +12,8 @@ class GithubWebhooks @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   projectsDao: ProjectsDao,
   librariesDao: LibrariesDao,
-  logger: RollbarLogger,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  internalTasksDao: InternalTasksDao,
+  logger: RollbarLogger
 ) extends BaseController {
 
   def postByProjectId(projectId: String) = Action {
@@ -23,15 +22,13 @@ class GithubWebhooks @javax.inject.Inject() (
         NotFound
       }
       case Some(project) => {
-        logger.withKeyValue("project", Json.toJson(project)).info(s"Received github webook for project")
-        mainActor ! MainActor.Messages.ProjectSync(project.id)
+        logger
+          .withKeyValue("project", Json.toJson(project))
+          .info("Received github webook for project - triggering sync")
+        internalTasksDao.queueProject(project)
 
         // Find any libaries with the exact name of this project and
-        // opportunistically trigger a sync of that library a few
-        // times into the future. This supports the normal workflow of
-        // tagging a repository and then publishing a new version of
-        // that artifact. We want to pick up that new version
-        // reasonably quickly.
+        // opportunistically trigger a sync of that library
         Pager.create { offset =>
           librariesDao.findAll(
             Authorization.All,
@@ -39,9 +36,9 @@ class GithubWebhooks @javax.inject.Inject() (
             offset = offset
           )
         }.foreach { library =>
-          Seq(30, 60, 120, 180).foreach { seconds =>
-            mainActor ! MainActor.Messages.LibrarySyncFuture(library.id, seconds)
-          }
+          // TODO: Queue into the future to leave time for
+          // the artifact to be published
+          internalTasksDao.queueLibrary(library)
         }
 
         Ok(Json.toJson(Map("result" -> "success")))

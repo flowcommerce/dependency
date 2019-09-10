@@ -1,7 +1,7 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.actors.MainActor
+import io.flow.dependency.actors.BinaryActor
 import io.flow.dependency.v0.models.{Binary, BinaryForm, SyncEvent}
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Pager, Query}
@@ -14,7 +14,8 @@ import play.api.db._
 class BinariesDao @Inject()(
   db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  internalTasksDao: InternalTasksDao,
+  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "binaries")
@@ -70,13 +71,12 @@ class BinariesDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.BinaryCreated(id)
+        val binary = findById(id).getOrElse {
+          sys.error("Failed to create binary")
+        }
+        internalTasksDao.queueBinary(binary)
 
-        Right(
-          findById(id).getOrElse {
-            sys.error("Failed to create binary")
-          }
-        )
+        Right(binary)
       }
       case errors => Left(errors)
     }
@@ -87,7 +87,7 @@ class BinariesDao @Inject()(
       binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
     }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
     dbHelpers.delete(deletedBy.id, binary.id)
-    mainActor ! MainActor.Messages.BinaryDeleted(binary.id)
+    binaryActor ! BinaryActor.Messages.Delete(binary.id)
   }
 
   def findByName(name: String): Option[Binary] = {

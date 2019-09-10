@@ -2,29 +2,36 @@ package db
 
 import javax.inject.{Inject, Singleton}
 import io.flow.dependency.v0.models.UserForm
-import io.flow.dependency.actors.MainActor
+import io.flow.dependency.actors.UserActor
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.util.IdGenerator
 import anorm._
+import com.google.inject.ImplementedBy
 import play.api.db._
+
+@ImplementedBy(classOf[UsersDao])
+trait StaticUserProvider {
+  def systemUser: UserReference
+  def anonymousUser: UserReference
+}
 
 @Singleton
 class UsersDao @Inject()(
   db: Database,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
-){
+  @javax.inject.Named("user-actor") userActor: akka.actor.ActorRef
+) extends StaticUserProvider {
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
   private[db] val AnonymousEmailAddress = "anonymous@bryzek.com"
 
-  lazy val systemUser = UserReference(
+  override lazy val systemUser = UserReference(
     id = findAll(email = Some(SystemEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find system user[$SystemEmailAddress]")
     }
   )
 
-  lazy val anonymousUser = UserReference(
+  override lazy val anonymousUser = UserReference(
     id = findAll(email = Some(AnonymousEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find anonymous user[$AnonymousEmailAddress]")
     }
@@ -89,7 +96,7 @@ class UsersDao @Inject()(
           ).execute()
         }
 
-        mainActor ! MainActor.Messages.UserCreated(id.toString)
+        userActor ! UserActor.Messages.Created(id.toString)
 
         Right(
           findById(id).getOrElse {

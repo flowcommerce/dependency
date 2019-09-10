@@ -1,10 +1,11 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.dependency.v0.models.{Resolver, Visibility}
+import io.flow.dependency.v0.models.Visibility
 import io.flow.postgresql.Pager
 import db._
 import akka.actor.Actor
+import cache.ResolversCache
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 
@@ -13,52 +14,43 @@ object ResolverActor {
   trait Message
 
   object Messages {
-    case class Data(id: String) extends Message
-    case object Created extends Message
-    case object Sync extends Message
-    case object Deleted extends Message
+    case class Created(resolverId: String) extends Message
+    case class Sync(resolverId: String) extends Message
+    case class Deleted(resolverId: String) extends Message
   }
 
 }
 
 class ResolverActor @Inject()(
-  resolversDao: ResolversDao,
+  resolversCache: ResolversCache,
   librariesDao: LibrariesDao,
   projectLibrariesDao: ProjectLibrariesDao,
-  usersDao: UsersDao,
-  logger: RollbarLogger
+  staticUserProvider: StaticUserProvider,
+  rollbar: RollbarLogger,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) extends Actor {
 
-  private[this] implicit val configuredRollbar = logger.fingerprint("ResolverActor")
+  private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
+  private[this] lazy val SystemUser = staticUserProvider.systemUser
 
-  var dataResolver: Option[Resolver] = None
-  lazy val SystemUser = usersDao.systemUser
+  def receive: Receive = SafeReceive.withLogUnhandled {
 
-  def receive = SafeReceive.withLogUnhandled {
+    case ResolverActor.Messages.Created(resolverId) => sync(resolverId)
 
-    case ResolverActor.Messages.Data(id) =>
-      dataResolver = resolversDao.findById(Authorization.All, id)
+    case ResolverActor.Messages.Sync(resolverId) => sync(resolverId)
 
-    case ResolverActor.Messages.Created =>
-      sync()
-
-    case ResolverActor.Messages.Sync =>
-      sync()
-
-    case ResolverActor.Messages.Deleted =>
-      dataResolver.foreach { resolver =>
-        Pager.create { offset =>
-          librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id), offset = offset)
-        }.foreach { library =>
-          librariesDao.delete(SystemUser, library)
-        }
+    case ResolverActor.Messages.Deleted(resolverId) =>
+      Pager.create { offset =>
+        librariesDao.findAll(Authorization.All, resolverId = Some(resolverId), offset = offset)
+      }.foreach { library =>
+        librariesDao.delete(SystemUser, library)
       }
 
       context.stop(self)
   }
 
-  def sync(): Unit = {
-    dataResolver.foreach { resolver =>
+  def sync(resolverId: String): Unit = {
+    resolversCache.findByResolverId(resolverId).foreach { resolver =>
       // Trigger resolution for any project libraries that are currently not resolved.
       val auth = (resolver.organization, resolver.visibility) match {
         case (None, _) => Authorization.All
@@ -73,7 +65,7 @@ class ResolverActor @Inject()(
       Pager.create { offset =>
         projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
       }.foreach { projectLibrary =>
-        sender ! MainActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
+        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
       }
     }
   }

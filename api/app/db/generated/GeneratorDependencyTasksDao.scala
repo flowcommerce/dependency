@@ -1,27 +1,29 @@
 package db.generated
 
 import anorm._
+import akka.actor.ActorRef
 import db.DbHelpers
+import io.flow.common.v0.models.UserReference
+import io.flow.dependency.actors.ReactiveActor
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import java.sql.Connection
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
 import org.joda.time.DateTime
 import play.api.db.Database
-import play.api.libs.json.{JsObject, JsValue, Json}
 
 case class Task(
   id: String,
-  discriminator: String,
-  data: JsObject,
+  data: String,
+  priority: Int,
   numAttempts: Int,
   processedAt: Option[DateTime],
   createdAt: DateTime
 ) {
 
   lazy val form: TaskForm = TaskForm(
-    discriminator = discriminator,
     data = data,
+    priority = priority,
     numAttempts = numAttempts,
     processedAt = processedAt
   )
@@ -29,16 +31,11 @@ case class Task(
 }
 
 case class TaskForm(
-  discriminator: String,
-  data: JsValue,
+  data: String,
+  priority: Int,
   numAttempts: Int,
   processedAt: Option[DateTime]
-) {
-  assert(
-    data.isInstanceOf[JsObject],
-    s"Field[data] must be a JsObject and not a ${data.getClass.getName}"
-  )
-}
+)
 
 object TasksTable {
   val Schema: String = "public"
@@ -46,21 +43,22 @@ object TasksTable {
 
   object Columns {
     val Id: String = "id"
-    val Discriminator: String = "discriminator"
     val Data: String = "data"
+    val Priority: String = "priority"
     val NumAttempts: String = "num_attempts"
     val ProcessedAt: String = "processed_at"
     val CreatedAt: String = "created_at"
     val UpdatedAt: String = "updated_at"
     val UpdatedByUserId: String = "updated_by_user_id"
     val HashCode: String = "hash_code"
-    val all: List[String] = List(Id, Discriminator, Data, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
+    val all: List[String] = List(Id, Data, Priority, NumAttempts, ProcessedAt, CreatedAt, UpdatedAt, UpdatedByUserId, HashCode)
   }
 }
 
 @Singleton
 class TasksDao @Inject() (
-  val db: Database
+  val db: Database,
+  @Named("task-actor") taskActor: ActorRef
 ) {
 
   private[this] val idGenerator = IdGenerator("tsk")
@@ -71,8 +69,8 @@ class TasksDao @Inject() (
 
   private[this] val BaseQuery = Query("""
       | select tasks.id,
-      |        tasks.discriminator,
-      |        tasks.data::text as data_text,
+      |        tasks.data,
+      |        tasks.priority,
       |        tasks.num_attempts,
       |        tasks.processed_at,
       |        tasks.created_at,
@@ -84,16 +82,16 @@ class TasksDao @Inject() (
 
   private[this] val InsertQuery = Query("""
     | insert into tasks
-    | (id, discriminator, data, num_attempts, processed_at, updated_by_user_id, hash_code)
+    | (id, data, priority, num_attempts, processed_at, updated_by_user_id, hash_code)
     | values
-    | ({id}, {discriminator}, {data}::json, {num_attempts}::integer, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
+    | ({id}, {data}, {priority}::int, {num_attempts}::int, {processed_at}::timestamptz, {updated_by_user_id}, {hash_code}::bigint)
   """.stripMargin)
 
   private[this] val UpdateQuery = Query("""
     | update tasks
-    |    set discriminator = {discriminator},
-    |        data = {data}::json,
-    |        num_attempts = {num_attempts}::integer,
+    |    set data = {data},
+    |        priority = {priority}::int,
+    |        num_attempts = {num_attempts}::int,
     |        processed_at = {processed_at}::timestamptz,
     |        updated_by_user_id = {updated_by_user_id},
     |        hash_code = {hash_code}::bigint
@@ -103,70 +101,77 @@ class TasksDao @Inject() (
 
   private[this] def bindQuery(query: Query, form: TaskForm): Query = {
     query.
-      bind("discriminator", form.discriminator).
       bind("data", form.data).
+      bind("priority", form.priority).
       bind("num_attempts", form.numAttempts).
       bind("processed_at", form.processedAt).
       bind("hash_code", form.hashCode())
   }
 
-  def insert(updatedBy: String, form: TaskForm): String = {
-    db.withConnection { implicit c =>
+  def insert(updatedBy: UserReference, form: TaskForm): String = {
+    val result = db.withConnection { implicit c =>
       insert(c, updatedBy, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
+    result
   }
 
-  def insert(implicit c: Connection, updatedBy: String, form: TaskForm): String = {
+  def insert(implicit c: Connection, updatedBy: UserReference, form: TaskForm): String = {
     val id = randomId()
     bindQuery(InsertQuery, form).
       bind("id", id).
-      bind("updated_by_id", updatedBy).
+      bind("updated_by_user_id", updatedBy.id).
       anormSql.execute()
     id
   }
 
-  def updateIfChangedById(updatedBy: String, id: String, form: TaskForm): Unit = {
+  def updateIfChangedById(updatedBy: UserReference, id: String, form: TaskForm): Unit = {
     if (!findById(id).map(_.form).contains(form)) {
       updateById(updatedBy, id, form)
     }
   }
 
-  def updateById(updatedBy: String, id: String, form: TaskForm): Unit = {
+  def updateById(updatedBy: UserReference, id: String, form: TaskForm): Unit = {
     db.withConnection { implicit c =>
       updateById(c, updatedBy, id, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def updateById(implicit c: Connection, updatedBy: String, id: String, form: TaskForm): Unit = {
+  def updateById(implicit c: Connection, updatedBy: UserReference, id: String, form: TaskForm): Unit = {
     bindQuery(UpdateQuery, form).
       bind("id", id).
-      bind("updated_by_id", updatedBy).
+      bind("updated_by_user_id", updatedBy.id).
       anormSql.execute()
     ()
   }
 
-  def update(updatedBy: String, existing: Task, form: TaskForm): Unit = {
+  def update(updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
     db.withConnection { implicit c =>
       update(c, updatedBy, existing, form)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def update(implicit c: Connection, updatedBy: String, existing: Task, form: TaskForm): Unit = {
+  def update(implicit c: Connection, updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
     updateById(c, updatedBy, existing.id, form)
   }
 
-  def delete(deletedBy: String, task: Task): Unit = {
+  def delete(deletedBy: UserReference, task: Task): Unit = {
     dbHelpers.delete(deletedBy, task.id)
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def deleteById(deletedBy: String, id: String): Unit = {
+  def deleteById(deletedBy: UserReference, id: String): Unit = {
     db.withConnection { implicit c =>
       deleteById(c, deletedBy, id)
     }
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def deleteById(c: java.sql.Connection, deletedBy: String, id: String): Unit = {
+  def deleteById(c: java.sql.Connection, deletedBy: UserReference, id: String): Unit = {
     dbHelpers.delete(c, deletedBy, id)
+    taskActor ! ReactiveActor.Messages.Changed
   }
 
   def findById(id: String): Option[Task] = {
@@ -305,21 +310,65 @@ class TasksDao @Inject() (
       as(TasksDao.parser.*)(c)
   }
 
+  def deleteAll(
+    deletedBy: UserReference,
+    ids: Option[Seq[String]],
+    numAttempts: Option[Int],
+    processedAt: Option[DateTime],
+    hasProcessedAt: Option[Boolean]
+  ) (
+    implicit customQueryModifier: Query => Query = { q => q }
+  ): Int = {
+    db.withConnection { implicit c =>
+      deleteAllWithConnection(
+        c,
+        deletedBy = deletedBy,
+        ids = ids,
+        numAttempts = numAttempts,
+        processedAt = processedAt,
+        hasProcessedAt = hasProcessedAt
+      )(customQueryModifier)
+    }
+  }
+
+  def deleteAllWithConnection(
+    c: java.sql.Connection,
+    deletedBy: UserReference,
+    ids: Option[Seq[String]],
+    numAttempts: Option[Int],
+    processedAt: Option[DateTime],
+    hasProcessedAt: Option[Boolean]
+  ) (
+    implicit customQueryModifier: Query => Query = { q => q }
+  ): Int = {
+    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'")
+      .executeUpdate()(c)
+
+    val query = Query("delete from tasks")
+    customQueryModifier(query)
+      .optionalIn("tasks.id", ids)
+      .equals("tasks.num_attempts", numAttempts)
+      .equals("tasks.processed_at", processedAt)
+      .nullBoolean("tasks.processed_at", hasProcessedAt)
+      .anormSql()
+      .executeUpdate()(c)
+  }
+
 }
 
 object TasksDao {
 
   val parser: RowParser[Task] = {
     SqlParser.str("id") ~
-    SqlParser.str("discriminator") ~
-    SqlParser.str("data_text") ~
+    SqlParser.str("data") ~
+    SqlParser.int("priority") ~
     SqlParser.int("num_attempts") ~
     SqlParser.get[DateTime]("processed_at").? ~
     SqlParser.get[DateTime]("created_at") map {
-      case id ~ discriminator ~ data ~ numAttempts ~ processedAt ~ createdAt => Task(
+      case id ~ data ~ priority ~ numAttempts ~ processedAt ~ createdAt => Task(
         id = id,
-        discriminator = discriminator,
-        data = Json.parse(data).as[JsObject],
+        data = data,
+        priority = priority,
         numAttempts = numAttempts,
         processedAt = processedAt,
         createdAt = createdAt

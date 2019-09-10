@@ -36,7 +36,9 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
         fetchSbtVersions()
       }
       case BinaryType.UNDEFINED(name) => {
-        logger.withKeyValue("binary_name", name).warn(s"Do not know how to find versions for the programming binary")
+        if (!name.startsWith("tst-")) {
+          logger.withKeyValue("binary_name", name).warn(s"Do not know how to find versions for the programming binary")
+        }
         Nil
       }
     }
@@ -45,7 +47,7 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
   def fetchScalaVersions(): Seq[Version] = {
     RemoteDirectory.fetch(ScalaUrl) { name =>
       name.toLowerCase.startsWith("scala ")
-    }.files.flatMap { toVersion(_) }
+    }.files.flatMap { toVersion }
   }
 
   def fetchSbtVersions(): Seq[Version] = {

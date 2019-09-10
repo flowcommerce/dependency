@@ -1,12 +1,12 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, ProjectLibrary, SyncEvent, VersionForm}
 import io.flow.postgresql.{OrderBy, Pager, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
 import com.google.inject.Provider
+import io.flow.dependency.actors.ProjectActor
 import io.flow.util.IdGenerator
 import play.api.db._
 
@@ -23,7 +23,7 @@ class ProjectLibrariesDao @Inject()(
   db: Database,
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "project_libraries")
@@ -143,7 +143,7 @@ class ProjectLibrariesDao @Inject()(
             'path -> form.path.trim,
             'updated_by_user_id -> createdBy.id
           ).execute()
-          mainActor ! MainActor.Messages.ProjectLibraryCreated(form.projectId, id)
+          projectActor ! ProjectActor.Messages.ProjectLibraryCreated(form.projectId, id)
         }
 
         Right(
@@ -194,7 +194,7 @@ class ProjectLibrariesDao @Inject()(
 
   def delete(deletedBy: UserReference, library: ProjectLibrary): Unit = {
     dbHelpers.delete(deletedBy.id, library.id)
-    mainActor ! MainActor.Messages.ProjectLibraryDeleted(library.project.id, library.id, library.version)
+    projectActor ! ProjectActor.Messages.ProjectLibraryDeleted(library.project.id, library.id, library.version)
   }
 
   def findByProjectIdAndGroupIdAndArtifactIdAndVersion(
@@ -277,9 +277,10 @@ class ProjectLibrariesDao @Inject()(
         and(
           isSynced.map { value =>
             val clause = "select 1 from syncs where object_id = project_libraries.id and event = {sync_event_completed}"
-            value match {
-              case true => s"exists ($clause)"
-              case false => s"not exists ($clause)"
+            if (value) {
+              s"exists ($clause)"
+            } else {
+              s"not exists ($clause)"
             }
           }
         ).

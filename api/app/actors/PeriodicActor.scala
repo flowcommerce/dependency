@@ -1,11 +1,14 @@
 package io.flow.dependency.actors
 
 import javax.inject.Inject
-import io.flow.postgresql.Pager
-import db.{Authorization, BinariesDao, LibrariesDao, ProjectsDao, SyncsDao}
-import akka.actor.Actor
+import db.{InternalTasksDao, SyncsDao}
+import akka.actor.{Actor, ActorLogging, ActorSystem}
 import io.flow.akka.SafeReceive
+import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.log.RollbarLogger
+import io.flow.play.util.ApplicationConfig
+
+import scala.concurrent.ExecutionContext
 
 object PeriodicActor {
 
@@ -21,40 +24,32 @@ object PeriodicActor {
 }
 
 class PeriodicActor @Inject()(
+  config: ApplicationConfig,
+  system: ActorSystem,
   syncsDao: SyncsDao,
-  projectsDao: ProjectsDao,
-  binariesDao: BinariesDao,
-  librariesDao: LibrariesDao,
+  internalTasksDao: InternalTasksDao,
   logger: RollbarLogger
-) extends Actor {
+) extends Actor with ActorLogging with Scheduler  {
 
-  private[this] implicit val configuredRollbar = logger.fingerprint("PeriodicActor")
+  private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("periodic-actor-context")
+  private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 
-  def receive = SafeReceive.withLogUnhandled {
+  private[this] case object SyncAll
+  private[this] case object Purge
 
-    case PeriodicActor.Messages.Purge =>
-      syncsDao.purgeOld()
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.sync_all"),
+    SyncAll
+  )
 
-    case PeriodicActor.Messages.SyncProjects =>
-      Pager.create { offset =>
-        projectsDao.findAll(Authorization.All, offset = offset)
-      }.foreach { project =>
-        sender ! MainActor.Messages.ProjectSync(project.id)
-      }
+  scheduleRecurring(
+    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.purge"),
+    Purge
+  )
 
-    case PeriodicActor.Messages.SyncBinaries =>
-      Pager.create { offset =>
-        binariesDao.findAll(offset = offset)
-      }.foreach { bin =>
-        sender ! MainActor.Messages.BinarySync(bin.id)
-      }
-
-    case PeriodicActor.Messages.SyncLibraries =>
-      Pager.create { offset =>
-        librariesDao.findAll(Authorization.All, offset = offset)
-      }.foreach { library =>
-        sender ! MainActor.Messages.LibrarySync(library.id)
-      }
+  def receive: Receive = SafeReceive.withLogUnhandled {
+    case Purge => syncsDao.purgeOld()
+    case SyncAll => internalTasksDao.queueAll()
   }
 
 }

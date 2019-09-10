@@ -4,8 +4,7 @@ import javax.inject.{Inject, Singleton}
 import anorm._
 import com.google.inject.Provider
 import io.flow.common.v0.models.UserReference
-import io.flow.dependency.actors.MainActor
-import io.flow.dependency.v0.models.{Library, LibraryForm}
+import io.flow.dependency.v0.models.{Library, LibraryForm, SyncType, TaskDataSyncOne}
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import play.api.db._
@@ -14,7 +13,7 @@ import play.api.db._
 class LibrariesDao @Inject()(
   db: Database,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  internalTasksDao: InternalTasksDao
 ){
   private[this] val dbHelpers = DbHelpers(db, "libraries")
 
@@ -62,7 +61,7 @@ class LibrariesDao @Inject()(
       findByGroupIdAndArtifactId(Authorization.All, form.groupId, form.artifactId) match {
         case None => Nil
         case Some(lib) => {
-          if (Some(lib.id) == existing.map(_.id)) {
+          if (existing.map(_.id).contains(lib.id)) {
             Nil
           } else {
             Seq("Library with this group id and artifact id already exists")
@@ -111,7 +110,7 @@ class LibrariesDao @Inject()(
           }
         }
 
-        mainActor ! MainActor.Messages.LibraryCreated(id)
+        sync(id)
 
         Right(
           findById(Authorization.All, id).getOrElse {
@@ -133,7 +132,13 @@ class LibrariesDao @Inject()(
     }
 
     dbHelpers.delete(deletedBy.id, library.id)
-    mainActor ! MainActor.Messages.LibraryDeleted(library.id)
+    sync(library.id)
+  }
+
+  private[this] def sync(libraryId: String): Unit = {
+    internalTasksDao.createSyncIfNotQueued(
+      TaskDataSyncOne(libraryId, SyncType.Library)
+    )
   }
 
   def findByGroupIdAndArtifactId(
