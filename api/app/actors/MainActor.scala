@@ -14,11 +14,6 @@ object MainActor {
 
   object Messages {
 
-    case class ProjectCreated(id: String)
-    case class ProjectUpdated(id: String)
-    case class ProjectDeleted(id: String)
-    case class ProjectSync(id: String)
-
     case class ProjectLibraryCreated(projectId: String, id: String)
     case class ProjectLibrarySync(projectId: String, id: String)
     case class ProjectLibraryDeleted(projectId: String, id: String, version: String)
@@ -47,8 +42,7 @@ class MainActor @javax.inject.Inject() (
   librariesDao: LibrariesDao,
   resolversDao: ResolversDao,
   projectLibrariesDao: ProjectLibrariesDao,
-  batchEmailProcessor: BatchEmailProcessor,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
+  batchEmailProcessor: BatchEmailProcessor
 ) extends Actor with ActorLogging with Scheduler with InjectedActorSupport {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -77,26 +71,6 @@ class MainActor @javax.inject.Inject() (
 
     case MainActor.Messages.UserCreated(id) =>
       upsertUserActor(id) ! UserActor.Messages.Created
-
-    case MainActor.Messages.ProjectCreated(id) =>
-      val actor = upsertProjectActor(id)
-      actor ! ProjectActor.Messages.CreateHooks
-      actor ! ProjectActor.Messages.Sync
-      searchActor ! SearchActor.Messages.SyncProject(id)
-
-    case MainActor.Messages.ProjectUpdated(id) =>
-      upsertProjectActor(id) ! ProjectActor.Messages.Sync
-      searchActor ! SearchActor.Messages.SyncProject(id)
-
-    case MainActor.Messages.ProjectDeleted(id) =>
-      projectActors.remove(id).foreach { actor =>
-        actor ! ProjectActor.Messages.Deleted
-      }
-      searchActor ! SearchActor.Messages.SyncProject(id)
-
-    case MainActor.Messages.ProjectSync(id) =>
-      upsertProjectActor(id) ! ProjectActor.Messages.Sync
-      searchActor ! SearchActor.Messages.SyncProject(id)
 
     case MainActor.Messages.ProjectLibraryCreated(projectId, id) =>
       upsertProjectActor(projectId) ! ProjectActor.Messages.ProjectLibraryCreated(id)

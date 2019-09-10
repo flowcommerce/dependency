@@ -9,22 +9,27 @@ import io.flow.util.IdGenerator
 import anorm._
 import play.api.db._
 
+trait StaticUserProvider {
+  def systemUser: UserReference
+  def anonymousUser: UserReference
+}
+
 @Singleton
 class UsersDao @Inject()(
   db: Database,
   @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
-){
+) extends StaticUserProvider {
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
   private[db] val AnonymousEmailAddress = "anonymous@bryzek.com"
 
-  lazy val systemUser = UserReference(
+  override lazy val systemUser = UserReference(
     id = findAll(email = Some(SystemEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find system user[$SystemEmailAddress]")
     }
   )
 
-  lazy val anonymousUser = UserReference(
+  override lazy val anonymousUser = UserReference(
     id = findAll(email = Some(AnonymousEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find anonymous user[$AnonymousEmailAddress]")
     }
