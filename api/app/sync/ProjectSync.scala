@@ -1,7 +1,6 @@
 package sync
 
 import db._
-import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
 import io.flow.dependency.api.lib.{Dependencies, GithubDependencyProviderClient, GithubHelper, GithubUtil}
 import io.flow.dependency.v0.models._
@@ -47,7 +46,7 @@ class ProjectSync @Inject()(
     }
   }
 
-  def sync(user: UserReference, projectId: String)(implicit ec: ExecutionContext): Unit = {
+  def sync(projectId: String)(implicit ec: ExecutionContext): Unit = {
     projectsDao.findById(Authorization.All, projectId).foreach { project =>
       syncsDao.withStartedAndCompleted("project", project.id) {
         await {

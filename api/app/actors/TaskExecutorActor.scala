@@ -51,7 +51,7 @@ class TaskExecutorActor @Inject() (
 
     case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
       tasksUtil.process(taskId) {
-        projectSync.sync(staticUserProvider.systemUser, projectId)
+        projectSync.sync(projectId)
       }
     }
 
