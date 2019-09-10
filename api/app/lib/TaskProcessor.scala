@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 import scala.util.{Failure, Success, Try}
 
-class TaskUtil @Inject() (
+class TaskProcessor @Inject()(
   internalTasksDao: InternalTasksDao,
 ) {
 

@@ -5,7 +5,7 @@ import db.{InternalTasksDao, UsersDao}
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 import javax.inject.Inject
-import lib.TaskUtil
+import lib.TaskProcessor
 import sync.{BinarySync, LibrarySync, ProjectSync}
 
 object TaskExecutorActor {
@@ -23,7 +23,7 @@ class TaskExecutorActor @Inject() (
   librarySync: LibrarySync,
   projectSync: ProjectSync,
   internalTasksDao: InternalTasksDao,
-  taskUtil: TaskUtil,
+  taskProcessor: TaskProcessor,
   usersDao: UsersDao,
 ) extends Actor {
 
@@ -32,25 +32,25 @@ class TaskExecutorActor @Inject() (
   def receive: Receive = SafeReceive.withLogUnhandled {
 
     case TaskExecutorActor.Messages.SyncBinary(taskId: String, binaryId: String) => {
-      taskUtil.process(taskId) {
+      taskProcessor.process(taskId) {
         binarySync.sync(usersDao.systemUser, binaryId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncLibrary(taskId: String, libraryId: String) => {
-      taskUtil.process(taskId) {
+      taskProcessor.process(taskId) {
         librarySync.sync(usersDao.systemUser, libraryId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncProject(taskId: String, projectId: String) => {
-      taskUtil.process(taskId) {
+      taskProcessor.process(taskId) {
         projectSync.sync(usersDao.systemUser, projectId)
       }
     }
 
     case TaskExecutorActor.Messages.SyncAll(taskId) => {
-      taskUtil.process(taskId) {
+      taskProcessor.process(taskId) {
         binarySync.forall(internalTasksDao.createSyncIfNotQueued)
         librarySync.forall(internalTasksDao.createSyncIfNotQueued)
         projectSync.forall(internalTasksDao.createSyncIfNotQueued)
