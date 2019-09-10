@@ -219,7 +219,7 @@ class LibraryVersionsDao @Inject()(
           case None => s"library_versions.cross_build_version is null"
           case Some(_) => s"lower(library_versions.cross_build_version) = lower(trim({cross_build_version}))"
         }
-      ).bind("cross_build_version", crossBuildVersion.flatMap(v => v)).
+      ).bind("cross_build_version", crossBuildVersion.flatten).
       and(
         greaterThanVersion.map { _ =>
           """
