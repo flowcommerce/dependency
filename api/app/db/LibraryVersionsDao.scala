@@ -1,7 +1,6 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.{OrderBy, Query}
@@ -10,6 +9,7 @@ import io.flow.util.Version
 import io.flow.util.IdGenerator
 import anorm._
 import play.api.db._
+import sync.LibrarySync
 
 import scala.util.{Failure, Success, Try}
 
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success, Try}
 class LibraryVersionsDao @Inject()(
   db: Database,
   logger: RollbarLogger,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  librarySync: LibrarySync
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "library_versions")
@@ -112,7 +112,7 @@ class LibraryVersionsDao @Inject()(
       'updated_by_user_id -> createdBy.id
     ).execute()
 
-    mainActor ! MainActor.Messages.LibraryVersionCreated(id, libraryId)
+    librarySync.sync(createdBy, libraryId)
 
     findByIdWithConnection(Authorization.All, id).getOrElse {
       sys.error("Failed to create version")
@@ -121,7 +121,7 @@ class LibraryVersionsDao @Inject()(
 
   def delete(deletedBy: UserReference, lv: LibraryVersion): Unit = {
     dbHelpers.delete(deletedBy.id, lv.id)
-    mainActor ! MainActor.Messages.LibraryVersionDeleted(lv.id, lv.library.id)
+    librarySync.sync(deletedBy, lv.library.id)
   }
 
   def findByLibraryAndVersionAndCrossBuildVersion(
@@ -167,7 +167,7 @@ class LibraryVersionsDao @Inject()(
     greaterThanVersion: Option[String] = None,
     limit: Option[Long],
     offset: Long = 0
-  ) = {
+  ): Seq[LibraryVersion] = {
     db.withConnection { implicit c =>
       findAllWithConnection(
         auth,
@@ -215,11 +215,9 @@ class LibraryVersionsDao @Inject()(
         valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
       ).
       and(
-        crossBuildVersion.map { v =>
-          v match {
-            case None => s"library_versions.cross_build_version is null"
-            case Some(_) => s"lower(library_versions.cross_build_version) = lower(trim({cross_build_version}))"
-          }
+        crossBuildVersion.map {
+          case None => s"library_versions.cross_build_version is null"
+          case Some(_) => s"lower(library_versions.cross_build_version) = lower(trim({cross_build_version}))"
         }
       ).bind("cross_build_version", crossBuildVersion.flatMap(v => v)).
       and(

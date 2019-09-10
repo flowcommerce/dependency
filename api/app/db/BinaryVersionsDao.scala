@@ -1,7 +1,6 @@
 package db
 
 import javax.inject.Inject
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.{Binary, BinaryVersion}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.{OrderBy, Query}
@@ -9,13 +8,14 @@ import io.flow.common.v0.models.UserReference
 import io.flow.util.{IdGenerator, Version}
 import anorm._
 import play.api.db._
+import sync.BinarySync
 
 import scala.util.{Failure, Success, Try}
 
 class BinaryVersionsDao @Inject()(
   db: Database,
   logger: RollbarLogger,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  binarySync: BinarySync
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "binary_versions")
@@ -89,7 +89,7 @@ class BinaryVersionsDao @Inject()(
       'updated_by_user_id -> createdBy.id
     ).execute()
 
-    mainActor ! MainActor.Messages.BinaryVersionCreated(id, binaryId)
+    binarySync.sync(createdBy, binaryId)
 
     findByIdWithConnection(id).getOrElse {
       sys.error("Failed to create version")
@@ -98,7 +98,7 @@ class BinaryVersionsDao @Inject()(
 
   def delete(deletedBy: UserReference, bv: BinaryVersion): Unit = {
     dbHelpers.delete(deletedBy.id, bv.id)
-    mainActor ! MainActor.Messages.BinaryVersionDeleted(bv.id, bv.binary.id)
+    binarySync.sync(deletedBy, bv.binary.id)
   }
 
   def findByBinaryAndVersion(
@@ -136,7 +136,7 @@ class BinaryVersionsDao @Inject()(
     greaterThanVersion: Option[String] = None,
     limit: Long = 25,
     offset: Long = 0
-  ) = {
+  ): Seq[BinaryVersion] = {
     db.withConnection { implicit c =>
       findAllWithConnection(
         id = id,

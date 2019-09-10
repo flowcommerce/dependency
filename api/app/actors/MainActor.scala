@@ -36,12 +36,6 @@ object MainActor {
     case class LibrarySyncFuture(id: String, seconds: Int)
     case class LibrarySyncCompleted(id: String)
 
-    case class LibraryVersionCreated(id: String, libraryId: String)
-    case class LibraryVersionDeleted(id: String, libraryId: String)
-
-    case class BinaryVersionCreated(id: String, binaryId: String)
-    case class BinaryVersionDeleted(id: String, binaryId: String)
-    
     case class UserCreated(id: String)
   }
 }
