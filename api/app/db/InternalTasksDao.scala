@@ -12,7 +12,9 @@ object InternalTask {
   val LowestPriority = 10
 
   def assertPriorityValid(priority: Int): Unit = {
-    assert(priority >= HighestPriority && priority < LowestPriority, s"Invalid priority[$priority]")
+    assert(
+      priority >= HighestPriority && priority <= LowestPriority,
+      s"Invalid priority[$priority] - must be in range $LowestPriority - $HighestPriority")
   }
 }
 
