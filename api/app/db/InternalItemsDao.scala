@@ -8,6 +8,7 @@ import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.OrderBy
 import com.google.inject.Provider
+import io.flow.log.RollbarLogger
 import play.api.libs.json._
 
 case class InternalItemForm(
@@ -51,11 +52,13 @@ case class InternalItemForm(
 
 @Singleton
 class InternalItemsDao @Inject()(
+  rollbar: RollbarLogger,
   dao: generated.ItemsDao,
   librariesDaoProvider: Provider[LibrariesDao],
   projectsDaoProvider: Provider[ProjectsDao],
   organizationsCache: OrganizationsCache
 ){
+  private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
   private[this] def visibility(summary: ItemSummary): Visibility = {
     summary match {
@@ -197,7 +200,9 @@ class InternalItemsDao @Inject()(
       organization = OrganizationSummary(
         id = db.organizationId,
         key = organizationsCache.findByOrganizationId(db.organizationId).map(_.key).getOrElse {
-          // TODO: Log error
+          logger
+            .withKeyValue("organization_id", db.organizationId)
+            .warn("Could not find org in cache - key will be incorrect")
           db.organizationId
         }
       ),
