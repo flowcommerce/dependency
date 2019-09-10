@@ -76,6 +76,10 @@ class InternalTasksDao @Inject()(
     createSyncIfNotQueued(TaskDataSyncOne(project.id, SyncType.Project))
   }
 
+  def createUpserted(project: Project): Unit = {
+    createSyncIfNotQueued(TaskDataUpserted(project.id, SyncType.Project))
+  }
+
   def createSyncIfNotQueued(taskData: TaskData): Unit = {
     val existing = findAll(
       data = Some(taskData),

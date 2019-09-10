@@ -145,6 +145,7 @@ class ProjectsDao @Inject()(
           sys.error("Failed to create project")
         }
         internalTasksDao.createSyncIfNotQueued(project)
+        internalTasksDao.createUpserted(project)
         Right(project)
       }
       case errors => Left(errors)
@@ -176,6 +177,7 @@ class ProjectsDao @Inject()(
           sys.error("Failed to create project")
         }
         internalTasksDao.createSyncIfNotQueued(updated)
+        internalTasksDao.createUpserted(project)
         Right(updated)
       }
       case errors => Left(errors)

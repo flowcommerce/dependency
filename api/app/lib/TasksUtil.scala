@@ -2,7 +2,7 @@ package lib
 
 import actors.TaskExecutorActor
 import db.InternalTasksDao
-import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType}
+import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType, TaskDataUpserted}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
 import javax.inject.Inject
@@ -30,7 +30,7 @@ class TasksUtil @Inject() (
   }
 
   /**
-   * @limit Max # of tasks to process on this iteration
+   * @param limit Max # of tasks to process on this iteration
    * @return Number of tasks processed
    */
   def process(limit: Long): Long = {
@@ -61,6 +61,18 @@ class TasksUtil @Inject() (
             }
             case SyncType.Project => {
               taskExecutorActor ! TaskExecutorActor.Messages.SyncProject(taskId = taskId, projectId = data.id)
+            }
+            case SyncType.UNDEFINED(other) => {
+              logger.withKeyValue("type", other).warn("SyncType.UNDEFINED - marking task processed")
+            }
+          }
+        }
+        case data: TaskDataUpserted => {
+          data.`type` match {
+            case SyncType.Binary => // no-op
+            case SyncType.Library => // no-op
+            case SyncType.Project => {
+              taskExecutorActor ! TaskExecutorActor.Messages.UpsertedProject(taskId = taskId, projectId = data.id)
             }
             case SyncType.UNDEFINED(other) => {
               logger.withKeyValue("type", other).warn("SyncType.UNDEFINED - marking task processed")
