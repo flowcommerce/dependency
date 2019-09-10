@@ -48,7 +48,6 @@ class ProjectSync @Inject()(
   }
 
   def sync(user: UserReference, projectId: String)(implicit ec: ExecutionContext): Unit = {
-    println(s"project sync starting for user:$user")
     projectsDao.findById(Authorization.All, projectId).foreach { project =>
       syncsDao.withStartedAndCompleted("project", project.id) {
         await {

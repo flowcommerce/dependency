@@ -208,7 +208,6 @@ class DefaultGithub @Inject() (
       clientSecret = clientSecret,
       code = code
     )
-    println(s"form: $form")
     oauthClient.accessTokens.postAccessToken(
       form
     ).flatMap { response =>
