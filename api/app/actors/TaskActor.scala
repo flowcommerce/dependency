@@ -1,5 +1,7 @@
 package io.flow.dependency.actors
 
+import java.sql.SQLException
+
 import akka.actor.{Actor, ActorLogging, ActorSystem}
 import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
@@ -7,11 +9,13 @@ import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
 import javax.inject.Inject
 import lib.TasksUtil
+import play.api.{Environment, Mode}
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
 class TaskActor @Inject()(
+  env: Environment,
   system: ActorSystem,
   tasksUtil: TasksUtil,
   config: ApplicationConfig,
@@ -39,7 +43,17 @@ class TaskActor @Inject()(
             self ! ReactiveActor.Messages.Changed
           }
         }
-        case Failure(ex) => logger.warn("Error processing tasks", ex)
+        case Failure(ex) => {
+          if (env.mode == Mode.Test) {
+            ex match {
+              // Reduce verbosity of log in test for expected error on db connection closing
+              case e: SQLException if e.getMessage.contains("has been closed") => // no-op
+              case _ => logger.warn("Error processing tasks", ex)
+            }
+          } else {
+            logger.warn("Error processing tasks", ex)
+          }
+        }
       }
     }
   }
