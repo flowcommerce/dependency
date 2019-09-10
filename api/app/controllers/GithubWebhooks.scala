@@ -1,6 +1,5 @@
 package controllers
 
-import io.flow.dependency.actors.MainActor
 import io.flow.dependency.v0.models.json._
 import db.{Authorization, InternalTasksDao, LibrariesDao, ProjectsDao}
 import io.flow.log.RollbarLogger
@@ -14,8 +13,7 @@ class GithubWebhooks @javax.inject.Inject() (
   projectsDao: ProjectsDao,
   librariesDao: LibrariesDao,
   internalTasksDao: InternalTasksDao,
-  logger: RollbarLogger,
-  @javax.inject.Named("main-actor") mainActor: akka.actor.ActorRef
+  logger: RollbarLogger
 ) extends BaseController {
 
   def postByProjectId(projectId: String) = Action {

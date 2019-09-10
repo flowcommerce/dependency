@@ -1,7 +1,7 @@
 package actors
 
 import akka.actor.{Actor, ActorSystem}
-import db.{InternalTasksDao, StaticUserProvider, UsersDao}
+import db.{InternalTasksDao, StaticUserProvider}
 import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
 import javax.inject.Inject
