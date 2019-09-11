@@ -3,9 +3,17 @@ package db
 import java.util.UUID
 
 import io.flow.dependency.v0.models._
+import org.scalatest.BeforeAndAfterAll
 import util.DependencySpec
 
-class InternalItemsDaoSpec extends DependencySpec {
+class InternalItemsDaoSpec extends DependencySpec
+  with helpers.TaskHelpers
+  with BeforeAndAfterAll
+{
+
+  override def beforeAll(): Unit = {
+    deleteAllNonProcessedTasks()
+  }
 
   private[this] lazy val org = createOrganization()
 
