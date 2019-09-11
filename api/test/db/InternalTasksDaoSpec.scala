@@ -2,10 +2,16 @@ package db
 
 import io.flow.dependency.v0.models.{TaskDataSync, TaskDataSyncOne}
 import io.flow.test.utils.FlowPlaySpec
+import org.scalatest.BeforeAndAfterAll
 
 class InternalTasksDaoSpec extends FlowPlaySpec
     with helpers.TaskHelpers
+    with BeforeAndAfterAll
 {
+
+  override def beforeAll(): Unit = {
+    deleteAllNonProcessedTasks()
+  }
 
   "findAll by processed" in {
     val task1 = createTask()

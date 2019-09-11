@@ -9,6 +9,19 @@ trait TaskHelpers {
   def generatedTasksDao: db.generated.TasksDao = init[db.generated.TasksDao]
   def internalTasksDao: InternalTasksDao = init[InternalTasksDao]
 
+  def deleteAllNonProcessedTasks(): Unit = {
+    generatedTasksDao.deleteAll(
+      deletedBy = testUser,
+      ids = None,
+      numAttempts = None,
+      processedAt = None,
+      hasProcessedAt = None
+    ) { q =>
+      q.isNull("processed_at")
+    }
+    ()
+  }
+
   def createTask(data: TaskData = makeTaskDataSync()): InternalTask = {
     val id = internalTasksDao.create(data, priority = InternalTask.LowestPriority)
     internalTasksDao.findById(id).get

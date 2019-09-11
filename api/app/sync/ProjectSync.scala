@@ -10,6 +10,7 @@ import io.flow.log.RollbarLogger
 import io.flow.play.util.Config
 import io.flow.postgresql.Pager
 import javax.inject.Inject
+import play.api.{Environment, Mode}
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 
@@ -17,6 +18,7 @@ import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ProjectSync @Inject()(
+  env: Environment,
   config: Config,
   rollbar: RollbarLogger,
   projectsDao: ProjectsDao,
@@ -136,7 +138,12 @@ class ProjectSync @Inject()(
       case Right(repo) => {
         tokensDao.getCleartextGithubOauthTokenByUserId(project.user.id) match {
           case None => {
-            logger.withKeyValue("project", Json.toJson(project)).warn("No oauth token for user")
+            if (env.mode != Mode.Test) {
+              logger
+                .withKeyValue("project_id", project.id)
+                .withKeyValue("user_id", project.user.id)
+                .warn("No oauth token for user")
+            }
             Future.successful(Left(()))
           }
 
