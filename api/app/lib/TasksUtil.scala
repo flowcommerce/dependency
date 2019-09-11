@@ -1,6 +1,6 @@
 package lib
 
-import db.{InternalTasksDao, StaticUserProvider}
+import db.{InternalTask, InternalTasksDao, StaticUserProvider}
 import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataUndefinedType, TaskDataUpserted}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
@@ -37,15 +37,16 @@ class TasksUtil @Inject() (
 
   /**
    * @param limit Max # of tasks to process on this iteration
+   * @param accepts Returns true if this task should be processed. False otherwise
    * @return Number of tasks processed
    */
-  def process(limit: Long)(implicit ec: ExecutionContext): Long = {
+  def process(limit: Long)(accepts: InternalTask => Boolean)(implicit ec: ExecutionContext): Long = {
     val all = internalTasksDao.findAll(
       hasProcessedAt = Some(false),
       limit = Some(limit),
       orderBy = OrderBy("priority, num_attempts, created_at")
     )
-    all.foreach { t =>
+    all.filter(accepts).foreach { t =>
       processData(t.id, t.data)
       internalTasksDao.setProcessed(t.id)
     }

@@ -73,7 +73,7 @@ abstract class BaseTaskActor @Inject()(
   def receive: Receive = SafeReceive.withLogUnhandled {
     case ReactiveActor.Messages.Changed => {
       Try {
-        params.tasksUtil.process(MaxTasksPerIteration)
+        params.tasksUtil.process(MaxTasksPerIteration)(accepts)
       } match {
         case Success(numberProcessed) => {
           if (numberProcessed >= MaxTasksPerIteration) {
