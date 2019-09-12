@@ -60,26 +60,18 @@ abstract class BaseTaskActor @Inject()(
 
   def accepts(task: InternalTask): Boolean
 
-  private[this] implicit val configuredRollbar: RollbarLogger = params.logger.fingerprint(getClass.getName)
+  private[this] implicit val logger: RollbarLogger = params.logger.fingerprint(getClass.getName)
   private[this] implicit val ec: ExecutionContext = params.system.dispatchers.lookup(dispatcherName)
 
   private[this] val MaxTasksPerIteration = 100L
-
-  private[this] case object Purge
 
   scheduleRecurring(
     ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task.changed"),
     ReactiveActor.Messages.Changed
   )
 
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task.purge"),
-    Purge
-  )
-
   def receive: Receive = SafeReceive.withLogUnhandled {
     case ReactiveActor.Messages.Changed => processChanged()
-    case Purge => processPurge()
   }
 
   private[this] def processChanged(): Unit = {
@@ -104,10 +96,6 @@ abstract class BaseTaskActor @Inject()(
         }
       }
     }
-  }
-
-  private[this] def processPurge(): Unit = {
-    
   }
 }
 

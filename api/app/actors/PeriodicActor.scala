@@ -7,6 +7,7 @@ import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
+import org.joda.time.DateTime
 
 import scala.concurrent.ExecutionContext
 
@@ -48,7 +49,10 @@ class PeriodicActor @Inject()(
   )
 
   def receive: Receive = SafeReceive.withLogUnhandled {
-    case Purge => syncsDao.purgeOld()
+    case Purge => {
+      internalTasksDao.deleteAllNonProcessedTasks(DateTime.now.minusHours(12))
+      syncsDao.purgeOld()
+    }
     case SyncAll => internalTasksDao.queueAll()
   }
 
