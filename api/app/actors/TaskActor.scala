@@ -60,42 +60,43 @@ abstract class BaseTaskActor @Inject()(
 
   def accepts(task: InternalTask): Boolean
 
-  private[this] implicit val configuredRollbar: RollbarLogger = params.logger.fingerprint(getClass.getName)
+  private[this] implicit val logger: RollbarLogger = params.logger.fingerprint(getClass.getName)
   private[this] implicit val ec: ExecutionContext = params.system.dispatchers.lookup(dispatcherName)
 
   private[this] val MaxTasksPerIteration = 100L
 
   scheduleRecurring(
-    ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task"),
+    ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task.changed"),
     ReactiveActor.Messages.Changed
   )
 
   def receive: Receive = SafeReceive.withLogUnhandled {
-    case ReactiveActor.Messages.Changed => {
-      Try {
-        params.tasksUtil.process(MaxTasksPerIteration)(accepts)
-      } match {
-        case Success(numberProcessed) => {
-          if (numberProcessed >= MaxTasksPerIteration) {
-            // process all pending tasks immediately
-            self ! ReactiveActor.Messages.Changed
-          }
+    case ReactiveActor.Messages.Changed => processChanged()
+  }
+
+  private[this] def processChanged(): Unit = {
+    Try {
+      params.tasksUtil.process(MaxTasksPerIteration)(accepts)
+    } match {
+      case Success(numberProcessed) => {
+        if (numberProcessed >= MaxTasksPerIteration) {
+          // process all pending tasks immediately
+          self ! ReactiveActor.Messages.Changed
         }
-        case Failure(ex) => {
-          if (params.isTest) {
-            ex match {
-              // Reduce verbosity of log in test for expected error on db connection closing
-              case e: SQLException if e.getMessage.contains("has been closed") => // no-op
-              case _ => params.logger.warn("Error processing tasks", ex)
-            }
-          } else {
-            params.logger.warn("Error processing tasks", ex)
+      }
+      case Failure(ex) => {
+        if (params.isTest) {
+          ex match {
+            // Reduce verbosity of log in test for expected error on db connection closing
+            case e: SQLException if e.getMessage.contains("has been closed") => // no-op
+            case _ => params.logger.warn("Error processing tasks", ex)
           }
+        } else {
+          params.logger.warn("Error processing tasks", ex)
         }
       }
     }
   }
-
 }
 
 class TaskActorSyncAll @Inject()(

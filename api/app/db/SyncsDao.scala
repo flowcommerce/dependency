@@ -36,7 +36,7 @@ class SyncsDao @Inject()(
   """
 
   private[this] val PurgeQuery = """
-    delete from syncs where created_at < now() - interval '7 days'
+    delete from syncs where created_at < now() - interval '3 days'
   """
 
   def withStartedAndCompleted[T](
