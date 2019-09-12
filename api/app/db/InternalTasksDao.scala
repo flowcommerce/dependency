@@ -129,4 +129,17 @@ class InternalTasksDao @Inject()(
     }
   }
 
+  def deleteAllNonProcessedTasks(createdOnOrBefore: DateTime): Unit = {
+    dao.deleteAll(
+      deletedBy = staticUserProvider.systemUser,
+      ids = None,
+      numAttempts = None,
+      processedAt = None,
+      hasProcessedAt = None
+    ) { q =>
+      q.isNull("processed_at")
+      q.lessThanOrEquals("created_at", createdOnOrBefore)
+    }
+    ()
+  }
 }
