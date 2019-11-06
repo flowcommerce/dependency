@@ -61,7 +61,7 @@ lazy val api = project
       "org.postgresql" % "postgresql" % "42.2.5",
       "com.sendgrid"   %  "sendgrid-java" % "4.3.0",
       "org.apache.commons" % "commons-text" % "1.6",
-      "io.flow" %% "lib-play-graphite-play26" % "0.1.19",
+      "io.flow" %% "lib-play-graphite-play26" % "0.1.18",
       "io.flow" %% "lib-log" % "0.0.71",
       "io.flow" %% "lib-usage" % "0.0.88",
       "io.flow" %% "lib-test-utils" % "0.0.45" % Test,      
