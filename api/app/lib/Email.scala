@@ -2,11 +2,14 @@ package io.flow.dependency.api.lib
 
 import io.flow.common.v0.models.Name
 import io.flow.util.{Config, IdGenerator}
-import java.nio.file.{Path, Paths, Files}
+import java.nio.file.{Files, Path, Paths}
 import java.nio.charset.StandardCharsets
+
+import com.sendgrid.{Method, Request, SendGrid}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import com.sendgrid._
+import com.sendgrid.helpers.mail.Mail
+import com.sendgrid.helpers.mail.objects.{Content, Email => SendGridEmail}
 
 object Email {
 
@@ -18,7 +21,7 @@ object Email {
 
   private[this] def fromEmail(config: Config) = config.requiredString("mail.default.from.email")
 
-  def localDeliveryDir(config: Config) = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
+  def localDeliveryDir(config: Config): Option[Path] = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
 
   // Initialize sendgrid on startup to verify that all of our settings
   // are here. If using localDeliveryDir, set password to a test
@@ -38,14 +41,14 @@ object Email {
   ): Unit = {
     val prefixedSubject = subjectWithPrefix(config, subject)
 
-    val from = new com.sendgrid.Email(fromEmail(config))
+    val from = new SendGridEmail(fromEmail(config))
     val to = recipient.fullName match {
-      case Some(fn) => new com.sendgrid.Email(recipient.email, fn)
-      case None => new com.sendgrid.Email(recipient.email)
+      case Some(fn) => new SendGridEmail(recipient.email, fn)
+      case None => new SendGridEmail(recipient.email)
     }
     val content = new Content("text/html", body)
 
-    val mail = new com.sendgrid.Mail(from, prefixedSubject, to, content)
+    val mail = new Mail(from, prefixedSubject, to, content)
 
     localDeliveryDir(config) match {
       case Some(dir) => {
@@ -60,8 +63,8 @@ object Email {
         request.setBody(mail.build())
         val response = sendgrid(config).api(request)
         assert(
-          response.getStatusCode() == 202,
-          s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode()}]"
+          response.getStatusCode == 202,
+          s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode}]"
         )
       }
     }
