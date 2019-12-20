@@ -14,9 +14,8 @@ class BinaryVersionProviderSpec extends DependencySpec {
 
   "sbt" in {
     val versions = defaultBinaryVersionProvider.versions(BinaryType.Sbt).map(_.value)
-    versions.contains("0.13.8") must be(true)
-    versions.contains("0.13.9") must be(true)
     versions.contains("0.0.1") must be(false)
+    versions.contains("1.3.0") must be(true)
   }
 
   "undefined" in {
