@@ -9,8 +9,6 @@ import io.flow.dependency.v0.models._
 import io.flow.log.RollbarLogger
 import io.flow.util.{Config, IdGenerator, Random}
 import io.flow.test.utils.FlowPlaySpec
-import org.scalatest.concurrent.Eventually._
-import org.scalatest.time.{Seconds, Span}
 import play.api.db.Database
 
 trait DependencySpec extends FlowPlaySpec with Factories {
@@ -47,12 +45,6 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit def toUserReference(user: User) = UserReference(id = user.id)
 
   lazy val systemUser: User = createUser()
-
-  def eventuallyInNSeconds[T](n: Int)(f: => T): T = {
-    eventually(timeout(Span(n.toLong, Seconds))) {
-      f
-    }
-  }
 
   /**
     * Function called on each iteration until it returns true, up
