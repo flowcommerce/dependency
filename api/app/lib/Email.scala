@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import com.sendgrid._
+import com.sendgrid.helpers.mail.objects._
 
 object Email {
 
@@ -18,7 +19,7 @@ object Email {
 
   private[this] def fromEmail(config: Config) = config.requiredString("mail.default.from.email")
 
-  def localDeliveryDir(config: Config) = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
+  def localDeliveryDir(config: Config): Option[Path] = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
 
   // Initialize sendgrid on startup to verify that all of our settings
   // are here. If using localDeliveryDir, set password to a test
@@ -38,14 +39,14 @@ object Email {
   ): Unit = {
     val prefixedSubject = subjectWithPrefix(config, subject)
 
-    val from = new com.sendgrid.Email(fromEmail(config))
+    val from = new Email(fromEmail(config))
     val to = recipient.fullName match {
-      case Some(fn) => new com.sendgrid.Email(recipient.email, fn)
-      case None => new com.sendgrid.Email(recipient.email)
+      case Some(fn) => new Email(recipient.email, fn)
+      case None => new Email(recipient.email)
     }
     val content = new Content("text/html", body)
 
-    val mail = new com.sendgrid.Mail(from, prefixedSubject, to, content)
+    val mail = new com.sendgrid.helpers.mail.Mail(from, prefixedSubject, to, content)
 
     localDeliveryDir(config) match {
       case Some(dir) => {
