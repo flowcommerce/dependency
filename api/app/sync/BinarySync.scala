@@ -21,13 +21,14 @@ class BinarySync @Inject() (
   def sync(user: UserReference, binaryId: String): Unit = {
     binariesDao.findById(binaryId).foreach { binary =>
       syncsDao.withStartedAndCompleted("binary", binary.id) {
-        defaultBinaryVersionProvider.versions(binary.name).foreach { version =>
-          logger
-            .fingerprint(s"${getClass.getName}:results")
-            .withKeyValue("binary", binary.name.toString)
-            .withKeyValue("version", version.toString)
-            .info("result")
+        val versions = defaultBinaryVersionProvider.versions(binary.name)
+        logger
+          .fingerprint(s"${getClass.getName}:results")
+          .withKeyValue("binary", binary.toString)
+          .withKeyValue("versions", versions.toString)
+          .info("result")
 
+        versions.foreach { version =>
           binaryVersionsDao.upsert(user, binary.id, version.value)
         }
       }
