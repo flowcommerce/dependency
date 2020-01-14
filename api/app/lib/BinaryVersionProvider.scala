@@ -23,7 +23,7 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
 ) extends BinaryVersionProvider {
 
   private[this] val ScalaUrl = "https://www.scala-lang.org/download/all.html"
-  private[this] val SbtUrl = "https://repo1.maven.org/maven2/org/scala-sbt/sbt/"
+  private[this] val SbtUrl = "https://flow.jfrog.io/flow/libs-release/org/scala-sbt/sbt/"
 
   override def versions(
     binary: BinaryType
