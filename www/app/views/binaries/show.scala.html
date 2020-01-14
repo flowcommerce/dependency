@@ -51,10 +51,10 @@
   @if(projectBinaries.hasPrevious || projectBinaries.hasNext) {
     <ul class="pager">
       @if(projectBinaries.hasPrevious) {
-        <li><a href="@routes.LibrariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page - 1)">Previous</a></li>
+        <li><a href="@routes.BinariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page - 1)">Previous</a></li>
       }
       @if(projectBinaries.hasNext) {
-        <li><a href="@routes.LibrariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page + 1)">Next</a></li>
+        <li><a href="@routes.BinariesController.show(binary.id, versionsPage = versions.page, projectsPage = projectBinaries.page + 1)">Next</a></li>
       }
     </ul>
   }
