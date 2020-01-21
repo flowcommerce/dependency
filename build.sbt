@@ -32,7 +32,7 @@ lazy val lib = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-test" % "2.6.20",
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2",
-      "org.specs2" %% "specs2-core" % "4.7.1",
+      "org.specs2" %% "specs2-core" % "4.8.1",
       "com.typesafe.play" %% "play-specs2" % "2.6.20"
     )
   )
@@ -55,17 +55,17 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "io.flow" %% "lib-util" % "0.1.34",
-      "io.flow" %% "lib-akka" % "0.1.13",
-      "io.flow" %% "lib-postgresql-play26" % "0.1.41",
+      "io.flow" %% "lib-util" % "0.1.37",
+      "io.flow" %% "lib-akka" % "0.1.14",
+      "io.flow" %% "lib-postgresql-play26" % "0.1.43",
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.23",
-      "org.postgresql" % "postgresql" % "42.2.8",
+      "org.postgresql" % "postgresql" % "42.2.9",
       "com.sendgrid"   %  "sendgrid-java" % "4.4.1",
       "org.apache.commons" % "commons-text" % "1.8",
-      "io.flow" %% "lib-play-graphite-play26" % "0.1.29",
-      "io.flow" %% "lib-log" % "0.0.93",
-      "io.flow" %% "lib-usage" % "0.1.12",
-      "io.flow" %% "lib-test-utils" % "0.0.76" % Test,      
+      "io.flow" %% "lib-play-graphite-play26" % "0.1.32",
+      "io.flow" %% "lib-log" % "0.0.97",
+      "io.flow" %% "lib-usage" % "0.1.13",
+      "io.flow" %% "lib-test-utils" % "0.0.79" % Test,      
       "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
     ),
@@ -94,12 +94,12 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       guice,
-      "org.webjars" %% "webjars-play" % "2.6.3",
+      "org.webjars" %% "webjars-play" % "2.8.0",
       "org.webjars" % "bootstrap" % "3.3.7",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "org.webjars" % "font-awesome" % "5.11.2",
+      "org.webjars" % "font-awesome" % "5.12.0",
       "org.webjars" % "jquery" % "2.1.4",
-      "io.flow" %% "lib-test-utils" % "0.0.76" % Test,
+      "io.flow" %% "lib-test-utils" % "0.0.79" % Test,
       "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
     ),
@@ -119,9 +119,9 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play26" % "0.5.86",
+    "io.flow" %% "lib-play-play26" % "0.5.90",
     "com.typesafe.play" %% "play-json-joda" % "2.7.4",
-    "com.typesafe.play" %% "play-json" % "2.7.4"
+    "com.typesafe.play" %% "play-json" % "2.8.1"
   ),
   scalacOptions += "-feature",
   credentials += credsToUse,
