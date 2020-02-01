@@ -146,7 +146,7 @@ class UsersDaoSpec extends DependencySpec {
     }
 
     "creates user organization asynchronously" in {
-      val user = usersDao.create(None, createUserForm()).right.get
+      val user = usersDao.create(None, createUserForm()).rightValue
 
       waitFor { () =>
         organizationsDao.findAll(Authorization.All, forUserId = Some(user.id)).size == 1

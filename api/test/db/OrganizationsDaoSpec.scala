@@ -38,7 +38,7 @@ class OrganizationsDaoSpec extends DependencySpec {
 
   "create" in {
     val form = createOrganizationForm()
-    val organization = organizationsDao.create(systemUser, form).right.getOrElse {
+    val organization = organizationsDao.create(systemUser, form).getOrElse {
       sys.error("Failed to create org")
     }
     organization.key must be(form.key)
@@ -47,7 +47,7 @@ class OrganizationsDaoSpec extends DependencySpec {
   "creation users added as admin of org" in {
     val user = createUser()
     val form = createOrganizationForm()
-    val org = organizationsDao.create(user, form).right.getOrElse {
+    val org = organizationsDao.create(user, form).getOrElse {
       sys.error("Failed to create org")
     }
     val membership = membershipsDao.findByOrganizationIdAndUserId(Authorization.All, org.id, user.id).getOrElse {

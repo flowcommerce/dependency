@@ -9,7 +9,7 @@ class SubscriptionsDaoSpec extends DependencySpec {
 
   "upsert" in {
     val form = createSubscriptionForm()
-    subscriptionsDao.upsertByUserIdAndPublication(systemUser, form).right.get
+    subscriptionsDao.upsertByUserIdAndPublication(systemUser, form).rightValue
 
     subscriptionsDao.upsertByUserIdAndPublication(systemUser, form)
     val subscription = subscriptionsDao.findByUserIdAndPublication(form.userId, form.publication).get

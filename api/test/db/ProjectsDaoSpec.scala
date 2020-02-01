@@ -39,7 +39,7 @@ class ProjectsDaoSpec extends DependencySpec {
     val form = createProjectForm(org)
     val project = createProject(org)(form)
     val newName = project.name + "2"
-    val updated = projectsDao.update(systemUser, project, form.copy(name = newName)).right.get
+    val updated = projectsDao.update(systemUser, project, form.copy(name = newName)).rightValue
     updated.id must be(project.id)
     updated.name must be(newName)
   }

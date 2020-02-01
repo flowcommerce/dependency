@@ -20,9 +20,9 @@ class ResolversDaoSpec extends DependencySpec {
 
   "upsert" in {
     val form = createResolverForm(org)
-    val resolver1 = resolversDao.create(systemUser, form).right.get
+    val resolver1 = resolversDao.create(systemUser, form).rightValue
 
-    val resolver2 = resolversDao.upsert(systemUser, form).right.get
+    val resolver2 = resolversDao.upsert(systemUser, form).rightValue
     resolver1.id must be(resolver2.id)
 
     val resolver3 = createResolver(org)
