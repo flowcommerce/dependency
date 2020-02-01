@@ -28,6 +28,7 @@ class GitHubConfig @Inject()(config: FlowConfig) {
     ).flatten.toMap
 
     val queryParams = params
+      .view
       .mapValues(URLEncoder.encode(_, "UTF-8"))
       .map {
         case (key, value) => s"$key=$value"

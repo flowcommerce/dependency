@@ -1,10 +1,10 @@
 package controllers
 
-import io.flow.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.www.lib.{DependencyClientProvider, Section}
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 
 import scala.concurrent.ExecutionContext
 
@@ -15,13 +15,13 @@ class ApplicationController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section = Some(io.flow.dependency.www.lib.Section.Dashboard)
+  override def section: Some[Section.Dashboard.type] = Some(Section.Dashboard)
 
-  def redirect = Action { request =>
+  def redirect: Action[AnyContent] = Action { request =>
     Redirect(request.path + "/")
   }
 
-  def index(organization: Option[String], page: Int = 0) = User.async { implicit request =>
+  def index(organization: Option[String], page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       recommendations <- dependencyClient(request).recommendations.get(
         organization = organization,

@@ -1,5 +1,6 @@
 package controllers
 
+import _root_.controllers.BaseController
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{PaginatedCollection, Pagination}
@@ -17,7 +18,7 @@ class SyncsController @javax.inject.Inject() (
 
   override def section = None
 
-  def index(objectId: Option[String], page: Int = 0) = User.async { implicit request =>
+  def index(objectId: Option[String], page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       syncs <- dependencyClient(request).syncs.get(
         objectId = objectId,
@@ -29,19 +30,19 @@ class SyncsController @javax.inject.Inject() (
     }
   }
 
-  def postBinariesById(id: String) = User.async { implicit request =>
+  def postBinariesById(id: String): Action[AnyContent] = User.async { implicit request =>
     dependencyClient(request).syncs.postBinariesById(id).map { _ =>
       Redirect(routes.BinariesController.show(id)).flashing("success" -> "Sync requested")
     }
   }
 
-  def postLibrariesById(id: String) = User.async { implicit request =>
+  def postLibrariesById(id: String): Action[AnyContent] = User.async { implicit request =>
     dependencyClient(request).syncs.postLibrariesById(id).map { _ =>
       Redirect(routes.LibrariesController.show(id)).flashing("success" -> "Sync requested")
     }
   }
 
-  def postProjectsById(id: String) = User.async { implicit request =>
+  def postProjectsById(id: String): Action[AnyContent] = User.async { implicit request =>
     dependencyClient(request).syncs.postProjectsById(id).map { _ =>
       Redirect(routes.ProjectsController.show(id)).flashing("success" -> "Sync requested")
     }

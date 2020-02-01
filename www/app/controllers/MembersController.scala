@@ -1,8 +1,9 @@
 package controllers
 
+import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Membership, MembershipForm, Role}
-import io.flow.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.www.lib.{DependencyClientProvider, Section}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
@@ -19,9 +20,9 @@ class MembersController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section = Some(io.flow.dependency.www.lib.Section.Members)
+  override def section: Some[Section.Members.type] = Some(Section.Members)
 
-  def index(orgKey: String, page: Int = 0) = User.async { implicit request =>
+  def index(orgKey: String, page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       for {
         memberships <- dependencyClient(request).memberships.get(
@@ -41,7 +42,7 @@ class MembersController @javax.inject.Inject()(
     }
   }
 
-  def create(orgKey: String) = User.async { implicit request =>
+  def create(orgKey: String): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       Future {
         Ok(
@@ -55,7 +56,7 @@ class MembersController @javax.inject.Inject()(
     }
   }
 
-  def postCreate(orgKey: String) = User.async { implicit request =>
+  def postCreate(orgKey: String): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       val boundForm = MembersController.uiForm.bindFromRequest
 
@@ -99,7 +100,7 @@ class MembersController @javax.inject.Inject()(
     }
   }
 
-  def postDelete(orgKey: String, id: String) = User.async { implicit request =>
+  def postDelete(orgKey: String, id: String): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       dependencyClient(request).memberships.deleteById(id).map { _ =>
         Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"Membership deleted")
@@ -111,11 +112,11 @@ class MembersController @javax.inject.Inject()(
     }
   }
 
-  def postMakeMember(orgKey: String, id: String) = User.async { implicit request =>
+  def postMakeMember(orgKey: String, id: String): Action[AnyContent] = User.async { implicit request =>
     makeRole(request, orgKey, id, Role.Member)
   }
 
-  def postMakeAdmin(orgKey: String, id: String) = User.async { implicit request =>
+  def postMakeAdmin(orgKey: String, id: String): Action[AnyContent] = User.async { implicit request =>
     makeRole(request, orgKey, id, Role.Admin)
   }
 
@@ -151,7 +152,7 @@ class MembersController @javax.inject.Inject()(
     id: String
   )(
     f: Membership => Future[Result]
-  ) = {
+  ): Future[Result] = {
     dependencyClient(request).memberships.getById(id).flatMap { membership =>
       f(membership)
     }.recover {

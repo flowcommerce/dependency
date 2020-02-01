@@ -1,8 +1,9 @@
 package controllers
 
+import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Library, SyncEvent}
-import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
+import io.flow.dependency.www.lib.{Config, DependencyClientProvider, Section}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
@@ -17,9 +18,9 @@ class LibrariesController @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section = Some(io.flow.dependency.www.lib.Section.Libraries)
+  override def section: Some[Section.Libraries.type] = Some(Section.Libraries)
 
-  def index(page: Int = 0) = User.async { implicit request =>
+  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       libraries <- dependencyClient(request).libraries.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
@@ -39,7 +40,7 @@ class LibrariesController @javax.inject.Inject() (
     id: String,
     versionsPage: Int = 0,
     projectsPage: Int = 0
-  ) = User.async { implicit request =>
+  ): Action[AnyContent] = User.async { implicit request =>
     withLibrary(request, id) { library =>
       for {
         versions <- dependencyClient(request).libraryVersions.get(
@@ -76,7 +77,7 @@ class LibrariesController @javax.inject.Inject() (
     id: String
   )(
     f: Library => Future[Result]
-  ) = {
+  ): Future[Result] = {
     dependencyClient(request).libraries.getById(id).flatMap { library =>
       f(library)
     }.recover {

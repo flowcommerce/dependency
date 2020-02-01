@@ -1,9 +1,10 @@
 package controllers
 
+import _root_.controllers.BaseController
 import com.github.ghik.silencer.silent
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models._
-import io.flow.dependency.www.lib.DependencyClientProvider
+import io.flow.dependency.www.lib.{DependencyClientProvider, Section}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
@@ -20,9 +21,9 @@ class ProjectsController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section = Some(io.flow.dependency.www.lib.Section.Projects)
+  override def section: Some[Section.Projects.type] = Some(Section.Projects)
 
-  def index(page: Int = 0) = User.async { implicit request =>
+  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {
       projects <- dependencyClient(request).projects.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
@@ -38,7 +39,12 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def show(id: String, recommendationsPage: Int = 0, binariesPage: Int = 0, librariesPage: Int = 0) = User.async { implicit request =>
+  def show(
+    id: String,
+    recommendationsPage: Int = 0,
+    binariesPage: Int = 0,
+    librariesPage: Int = 0
+  ): Action[AnyContent] = User.async { implicit request =>
     withProject(request, id) { project =>
       for {
         recommendations <- dependencyClient(request).recommendations.get(
@@ -76,7 +82,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def github() = User.async { implicit request =>
+  def github(): Action[AnyContent] = User.async { implicit request =>
     for {
       orgs <- organizations(request)
     } yield {
@@ -98,7 +104,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def githubOrg(orgKey: String, repositoriesPage: Int = 0) = User.async { implicit request =>
+  def githubOrg(orgKey: String, repositoriesPage: Int = 0): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       for {
         repositories <- dependencyClient(request).repositories.getGithub(
@@ -123,7 +129,7 @@ class ProjectsController @javax.inject.Inject()(
     owner: String, // github owner, ex. flowcommerce    
     name: String, // github repo name, ex. user
     repositoriesPage: Int = 0
-  ) = User.async { implicit request =>
+  ): Action[AnyContent] = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       dependencyClient(request).repositories.getGithub(
         organizationId = Some(org.id),
@@ -156,7 +162,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def create() = User.async { implicit request =>
+  def create(): Action[AnyContent] = User.async { implicit request =>
     organizations(request).map { orgs =>
       Ok(
         views.html.projects.create(
@@ -168,7 +174,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def postCreate() = User.async { implicit request =>
+  def postCreate(): Action[AnyContent] = User.async { implicit request =>
     val boundForm = ProjectsController.uiForm.bindFromRequest
 
     organizations(request).flatMap { orgs =>
@@ -222,7 +228,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def postEdit(id: String) = User.async { implicit request =>
+  def postEdit(id: String): Action[AnyContent] = User.async { implicit request =>
     organizations(request).flatMap { orgs =>
       withProject(request, id) { project =>
         val boundForm = ProjectsController.uiForm.bindFromRequest
@@ -255,7 +261,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def postDelete(id: String) = User.async { implicit request =>
+  def postDelete(id: String): Action[AnyContent] = User.async { implicit request =>
     dependencyClient(request).projects.deleteById(id).map { _ =>
       Redirect(routes.ProjectsController.index()).flashing("success" -> s"Project deleted")
     }.recover {
@@ -269,7 +275,7 @@ class ProjectsController @javax.inject.Inject()(
     * Waits for the latest sync to complete for this project.
     */
   @silent
-  def sync(id: String, n: Int, librariesPage: Int = 0) = User.async { implicit request =>
+  def sync(id: String, n: Int, librariesPage: Int = 0): Action[AnyContent] = User.async { implicit request =>
     withProject(request, id) { _ =>
       for {
         syncs <- dependencyClient(request).syncs.get(
@@ -357,7 +363,7 @@ class ProjectsController @javax.inject.Inject()(
     id: String
   )(
     f: Project => Future[Result]
-  ) = {
+  ): Future[Result] = {
     dependencyClient(request).projects.getById(id).flatMap { project =>
       f(project)
     }.recover {
