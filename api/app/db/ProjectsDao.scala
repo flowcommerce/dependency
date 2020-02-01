@@ -130,14 +130,14 @@ class ProjectsDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            'id -> id,
-            'organization_id -> org.id,
-            'user_id -> createdBy.id,
-            'visibility -> form.visibility.toString,
-            'scms -> form.scms.toString,
-            'name -> form.name.trim,
-            'uri -> form.uri.trim,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> id,
+            Symbol("organization_id") -> org.id,
+            Symbol("user_id") -> createdBy.id,
+            Symbol("visibility") -> form.visibility.toString,
+            Symbol("scms") -> form.scms.toString,
+            Symbol("name") -> form.name.trim,
+            Symbol("uri") -> form.uri.trim,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
 
@@ -164,12 +164,12 @@ class ProjectsDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(UpdateQuery).on(
-            'id -> project.id,
-            'visibility -> form.visibility.toString,
-            'scms -> form.scms.toString,
-            'name -> form.name.trim,
-            'uri -> form.uri.trim,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> project.id,
+            Symbol("visibility") -> form.visibility.toString,
+            Symbol("scms") -> form.scms.toString,
+            Symbol("name") -> form.name.trim,
+            Symbol("uri") -> form.uri.trim,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
 

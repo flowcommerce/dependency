@@ -134,14 +134,14 @@ class ProjectLibrariesDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            'id -> id,
-            'project_id -> form.projectId,
-            'group_id -> form.groupId.trim,
-            'artifact_id -> form.artifactId.trim,
-            'version -> form.version.version.trim,
-            'cross_build_version -> Util.trimmedString(form.version.crossBuildVersion),
-            'path -> form.path.trim,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> id,
+            Symbol("project_id") -> form.projectId,
+            Symbol("group_id") -> form.groupId.trim,
+            Symbol("artifact_id") -> form.artifactId.trim,
+            Symbol("version") -> form.version.version.trim,
+            Symbol("cross_build_version") -> Util.trimmedString(form.version.crossBuildVersion),
+            Symbol("path") -> form.path.trim,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
           projectActor ! ProjectActor.Messages.ProjectLibraryCreated(form.projectId, id)
         }
@@ -159,8 +159,8 @@ class ProjectLibrariesDao @Inject()(
   def removeLibrary(user: UserReference, projectLibrary: ProjectLibrary): Unit = {
     db.withConnection { implicit c =>
       SQL(RemoveLibraryQuery).on(
-        'id -> projectLibrary.id,
-        'updated_by_user_id -> user.id
+        Symbol("id") -> projectLibrary.id,
+        Symbol("updated_by_user_id") -> user.id
       ).execute()
     }
     ()
@@ -184,9 +184,9 @@ class ProjectLibrariesDao @Inject()(
   def setLibrary(user: UserReference, projectLibrary: ProjectLibrary, library: Library): Unit = {
     db.withConnection { implicit c =>
       SQL(SetLibraryQuery).on(
-        'id -> projectLibrary.id,
-        'library_id -> library.id,
-        'updated_by_user_id -> user.id
+        Symbol("id") -> projectLibrary.id,
+        Symbol("library_id") -> library.id,
+        Symbol("updated_by_user_id") -> user.id
       ).execute()
     }
     ()

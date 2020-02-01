@@ -98,10 +98,10 @@ class OrganizationsDao @Inject()(
     val id = IdGenerator("org").randomId()
 
     SQL(InsertQuery).on(
-      'id -> id,
-      'user_id -> createdBy.id,
-      'key -> form.key.trim,
-      'updated_by_user_id -> createdBy.id
+      Symbol("id") -> id,
+      Symbol("user_id") -> createdBy.id,
+      Symbol("key") -> form.key.trim,
+      Symbol("updated_by_user_id") -> createdBy.id
     ).execute()
 
     membershipsDaoProvider.get.create(
@@ -120,9 +120,9 @@ class OrganizationsDao @Inject()(
       case Nil => {
         db.withConnection { implicit c =>
           SQL(UpdateQuery).on(
-            'id -> organization.id,
-            'key -> form.key.trim,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> organization.id,
+            Symbol("key") -> form.key.trim,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
 
@@ -162,10 +162,10 @@ class OrganizationsDao @Inject()(
         ))
 
         SQL(InsertUserOrganizationQuery).on(
-          'id -> IdGenerator("uso").randomId(),
-          'user_id -> user.id,
-          'organization_id -> orgId,
-          'updated_by_user_id -> user.id
+          Symbol("id") -> IdGenerator("uso").randomId(),
+          Symbol("user_id") -> user.id,
+          Symbol("organization_id") -> orgId,
+          Symbol("updated_by_user_id") -> user.id
         ).execute()
 
         orgId
@@ -191,7 +191,7 @@ class OrganizationsDao @Inject()(
             case (None, None) => random.alphaNumeric(DefaultUserNameLength)
             case (Some(first), None) => first
             case (None, Some(last)) => last
-            case (Some(first), Some(last)) => first(0) + last
+            case (Some(first), Some(last)) => s"${first(0)}$last"
           }
         }
       }

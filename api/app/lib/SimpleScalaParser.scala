@@ -28,8 +28,9 @@ trait SimpleScalaParser {
   def parseIntoLines(contents: String): Seq[String] = {
     contents.
       split("\n").
-      map(stripComments(_)).
+      map(stripComments).
       map(_.trim).
+      toSeq.
       filter(!_.isEmpty)
   }
 

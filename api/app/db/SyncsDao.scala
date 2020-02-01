@@ -73,11 +73,11 @@ class SyncsDao @Inject()(
 
     db.withConnection { implicit c =>
       SQL(InsertQuery).on(
-        'id -> id,
-        'type -> form.`type`,
-        'object_id -> form.objectId,
-        'event -> form.event.toString,
-        'updated_by_user_id -> systemUser.id
+        Symbol("id") -> id,
+        Symbol("type") -> form.`type`,
+        Symbol("object_id") -> form.objectId,
+        Symbol("event") -> form.event.toString,
+        Symbol("updated_by_user_id") -> systemUser.id
       ).execute()
     }
 

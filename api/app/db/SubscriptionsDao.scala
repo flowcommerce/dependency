@@ -56,10 +56,10 @@ class SubscriptionsDao @Inject()(
       case Nil => {
         db.withConnection { implicit c =>
           SQL(UpsertQuery).on(
-            'id -> idGenerator.randomId(),
-            'user_id -> form.userId,
-            'publication -> form.publication.toString,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> idGenerator.randomId(),
+            Symbol("user_id") -> form.userId,
+            Symbol("publication") -> form.publication.toString,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
         Right(())

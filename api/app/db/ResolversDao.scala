@@ -55,7 +55,7 @@ class ResolversDao @Inject()(
   def credentials(resolver: Resolver): Option[Credentials] = {
     resolver.credentials.flatMap { _ =>
       db.withConnection { implicit c =>
-        SQL(SelectCredentialsQuery).on('id -> resolver.id).as(
+        SQL(SelectCredentialsQuery).on(Symbol("id") -> resolver.id).as(
           SqlParser.str("credentials").*
         ).headOption.flatMap { parseCredentials(resolver.id, _) }
       }
@@ -132,13 +132,13 @@ class ResolversDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            'id -> id,
-            'organization_id -> org.id,
-            'visibility -> form.visibility.toString,
-            'credentials -> form.credentials.map { cred => Json.stringify(Json.toJson(cred)) },
-            'position -> nextPosition(org.id, form.visibility),
-            'uri -> form.uri.trim,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> id,
+            Symbol("organization_id") -> org.id,
+            Symbol("visibility") -> form.visibility.toString,
+            Symbol("credentials") -> form.credentials.map { cred => Json.stringify(Json.toJson(cred)) },
+            Symbol("position") -> nextPosition(org.id, form.visibility),
+            Symbol("uri") -> form.uri.trim,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
 
