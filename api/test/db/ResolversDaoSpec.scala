@@ -12,7 +12,7 @@ class ResolversDaoSpec extends DependencySpec {
   private[this] lazy val publicResolver = resolversDao.findAll(
     Authorization.All,
     visibility = Some(Visibility.Public),
-    uri = Some("http://jcenter.bintray.com/"),
+    uri = Some("https://jcenter.bintray.com/"),
     limit = 1
   ).headOption.getOrElse {
     sys.error("No public resolvers found")
