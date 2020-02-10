@@ -1,6 +1,5 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.OrganizationForm
 import io.flow.dependency.www.lib.DependencyClientProvider
@@ -22,11 +21,11 @@ class OrganizationsController @javax.inject.Inject() (
 
   override def section = None
 
-  def redirectToDashboard(org: String): Action[AnyContent] = User {
+  def redirectToDashboard(org: String) = User {
     Redirect(routes.ApplicationController.index(organization = Some(org)))
   }
 
-  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       organizations <- dependencyClient(request).organizations.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
@@ -42,7 +41,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def show(key: String, projectsPage: Int = 0): Action[AnyContent] = User.async { implicit request =>
+  def show(key: String, projectsPage: Int = 0) = User.async { implicit request =>
     withOrganization(request, key) { org =>
       for {
         projects <- dependencyClient(request).projects.get(
@@ -62,7 +61,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def create(): Action[AnyContent] = User { implicit request =>
+  def create() = User { implicit request =>
     Ok(
       views.html.organizations.create(
         uiData(request),
@@ -71,7 +70,7 @@ class OrganizationsController @javax.inject.Inject() (
     )
   }
 
-  def postCreate(): Action[AnyContent] = User.async { implicit request =>
+  def postCreate() = User.async { implicit request =>
     val boundForm = OrganizationsController.uiForm.bindFromRequest
     boundForm.fold (
 
@@ -91,7 +90,7 @@ class OrganizationsController @javax.inject.Inject() (
     )
   }
 
-  def edit(key: String): Action[AnyContent] = User.async { implicit request =>
+  def edit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
       Future {
         Ok(
@@ -109,7 +108,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def postEdit(key: String): Action[AnyContent] = User.async { implicit request =>
+  def postEdit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
       val boundForm = OrganizationsController.uiForm.bindFromRequest
       boundForm.fold (
@@ -131,7 +130,7 @@ class OrganizationsController @javax.inject.Inject() (
     }
   }
 
-  def postDelete(key: String): Action[AnyContent] = User.async { implicit request =>
+  def postDelete(key: String) = User.async { implicit request =>
     withOrganization(request, key) { org =>
       dependencyClient(request).organizations.deleteById(org.id).map { _ =>
         Redirect(routes.OrganizationsController.index()).flashing("success" -> s"Organization deleted")

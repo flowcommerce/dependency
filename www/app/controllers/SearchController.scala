@@ -1,6 +1,5 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.play.util.{PaginatedCollection, Pagination}
@@ -21,7 +20,7 @@ class SearchController @javax.inject.Inject() (
   def index(
     q: Option[String],
     page: Int
-  ): Action[AnyContent] = User.async { implicit request =>
+  ) = User.async { implicit request =>
     for {
       items <- dependencyClient(request).items.get(
         q = q,

@@ -1,6 +1,5 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Token, TokenForm}
 import io.flow.dependency.www.lib.DependencyClientProvider
@@ -22,7 +21,7 @@ class TokensController @javax.inject.Inject()(
 
   override def section = None
 
-  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       tokens <- dependencyClient(request).tokens.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
@@ -33,7 +32,7 @@ class TokensController @javax.inject.Inject()(
     }
   }
 
-  def show(id: String): Action[AnyContent] = User.async { implicit request =>
+  def show(id: String) = User.async { implicit request =>
     withToken(request, id) { token =>
       Future {
         Ok(views.html.tokens.show(uiData(request), token))
@@ -41,11 +40,11 @@ class TokensController @javax.inject.Inject()(
     }
   }
 
-  def create(): Action[AnyContent] = User { implicit request =>
+  def create() = User { implicit request =>
     Ok(views.html.tokens.create(uiData(request), TokensController.tokenForm))
   }
 
-  def postCreate: Action[AnyContent] = User.async { implicit request =>
+  def postCreate = User.async { implicit request =>
     val form = TokensController.tokenForm.bindFromRequest
     form.fold(
 
@@ -71,7 +70,7 @@ class TokensController @javax.inject.Inject()(
     )
   }
 
-  def postDelete(id: String): Action[AnyContent] = User.async { implicit request =>
+  def postDelete(id: String) = User.async { implicit request =>
     dependencyClient(request).tokens.deleteById(id).map { _ =>
       Redirect(routes.TokensController.index()).flashing("success" -> s"Token deleted")
     }.recover {
@@ -86,7 +85,7 @@ class TokensController @javax.inject.Inject()(
     id: String
   )(
     f: Token => Future[Result]
-  ): Future[Result] = {
+  ) = {
     dependencyClient(request).tokens.getById(id).flatMap { token =>
       f(token)
     }.recover {

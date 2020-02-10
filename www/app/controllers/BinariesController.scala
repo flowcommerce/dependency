@@ -1,9 +1,8 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Binary, SyncEvent}
-import io.flow.dependency.www.lib.{Config, DependencyClientProvider, Section}
+import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{Config, PaginatedCollection, Pagination}
 import play.api.mvc._
@@ -17,7 +16,7 @@ class BinariesController @javax.inject.Inject()(
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section: Some[Section.Binaries.type] = Some(Section.Binaries)
+  override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 
   def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
     for {

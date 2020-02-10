@@ -1,6 +1,5 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.common.v0.models.{User, UserReference}
 import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
@@ -33,24 +32,18 @@ class SubscriptionsController @javax.inject.Inject()(
   // needs to specify a section for BaseController
   override def section = None
 
-  def index(): Action[AnyContent] = User.async { implicit request =>
-    dependencyClientProvider.newClient(
-      user = Some(request.user),
-      requestId = None
-    ).users.getIdentifierById(request.user.id).map { id =>
+  def index() = User.async { implicit request =>
+    dependencyClientProvider.newClient(user = Some(request.user), requestId = None).users.getIdentifierById(request.user.id).map { id =>
       Redirect(routes.SubscriptionsController.identifier(id.value))
     }
   }
 
-  def identifier(identifier: String): Action[AnyContent] = Action.async { implicit request =>
+  def identifier(identifier: String) = Action.async { implicit request =>
     for {
       users <- client.users.get(
         identifier = Some(identifier)
       )
-      subscriptions <- dependencyClientProvider.newClient(
-        user = users.headOption.map(u => UserReference(u.id)),
-        requestId = None
-      ).subscriptions.get(
+      subscriptions <- dependencyClientProvider.newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None).subscriptions.get(
         identifier = Some(identifier),
         limit = Publication.all.size.toLong + 1L
       )
@@ -65,17 +58,14 @@ class SubscriptionsController @javax.inject.Inject()(
     }
   }
 
-  def postToggle(identifier: String, publication: Publication): Action[AnyContent] = Action.async {
+  def postToggle(identifier: String, publication: Publication) = Action.async {
     client.users.get(identifier = Some(identifier)).flatMap { users =>
       users.headOption match {
         case None => Future {
           Redirect(routes.SubscriptionsController.index()).flashing("warning" -> "User could not be found")
         }
         case Some(user) => {
-          val identifiedClient = dependencyClientProvider.newClient(
-            user = Some(UserReference(user.id)),
-            requestId = None
-          )
+          val identifiedClient = dependencyClientProvider.newClient(user = Some(UserReference(user.id)), requestId = None)
           identifiedClient.subscriptions.get(
             identifier = Some(identifier),
             publication = Some(publication)

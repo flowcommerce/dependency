@@ -1,9 +1,8 @@
 package controllers
 
-import _root_.controllers.BaseController
 import io.flow.dependency.v0.errors.UnitResponse
 import io.flow.dependency.v0.models.{Resolver, ResolverForm, UsernamePassword, Visibility}
-import io.flow.dependency.www.lib.{DependencyClientProvider, Section}
+import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
@@ -20,9 +19,9 @@ class ResolversController @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents
 )(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
 
-  override def section: Some[Section.Resolvers.type] = Some(Section.Resolvers)
+  override def section = Some(io.flow.dependency.www.lib.Section.Resolvers)
 
-  def index(page: Int = 0): Action[AnyContent] = User.async { implicit request =>
+  def index(page: Int = 0) = User.async { implicit request =>
     for {
       resolvers <- dependencyClient(request).resolvers.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
@@ -38,7 +37,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def show(id: String, librariesPage: Int = 0): Action[AnyContent] = User.async { implicit request =>
+  def show(id: String, librariesPage: Int = 0) = User.async { implicit request =>
     withResolver(request, id) { resolver =>
       for {
         libraries <- dependencyClient(request).libraries.get(
@@ -58,7 +57,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def create(): Action[AnyContent] = User.async { implicit request =>
+  def create() = User.async { implicit request =>
     organizations(request).map { orgs =>
       Ok(
         views.html.resolvers.create(
@@ -68,7 +67,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def postCreate(): Action[AnyContent] = User.async { implicit request =>
+  def postCreate() = User.async { implicit request =>
     val boundForm = ResolversController.uiForm.bindFromRequest
 
     organizations(request).flatMap { orgs =>
@@ -98,7 +97,7 @@ class ResolversController @javax.inject.Inject() (
     id: String
   )(
     f: Resolver => Future[Result]
-  ): Future[Result] = {
+  ) = {
     dependencyClient(request).resolvers.getById(id).flatMap { resolver =>
       f(resolver)
     }.recover {
@@ -108,7 +107,7 @@ class ResolversController @javax.inject.Inject() (
     }
   }
 
-  def postDelete(id: String): Action[AnyContent] = User.async { implicit request =>
+  def postDelete(id: String) = User.async { implicit request =>
     dependencyClient(request).resolvers.deleteById(id).map { _ =>
       Redirect(routes.ResolversController.index()).flashing("success" -> s"Resolver deleted")
     }.recover {
@@ -129,14 +128,14 @@ object ResolversController {
     password: Option[String]
   ) {
 
-    def resolverForm(): ResolverForm = ResolverForm(
+    def resolverForm() = ResolverForm(
       organization = organization,
       visibility = Visibility.Private,
       uri = uri,
       credentials = credentials
     )
 
-    val credentials: Option[UsernamePassword] = username.map(_.trim) match {
+    val credentials = username.map(_.trim) match {
       case None => None
       case Some("") => None
       case Some(username) => {
