@@ -17,7 +17,7 @@ class ResolversController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Resolvers)
 
