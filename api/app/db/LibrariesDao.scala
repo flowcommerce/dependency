@@ -98,12 +98,12 @@ class LibrariesDao @Inject()(
 
         db.withTransaction { implicit c =>
           SQL(InsertQuery).on(
-            'id -> id,
-            'organization_id -> form.organizationId,
-            'group_id -> form.groupId.trim,
-            'artifact_id -> form.artifactId.trim,
-            'resolver_id -> form.resolverId,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> id,
+            Symbol("organization_id") -> form.organizationId,
+            Symbol("group_id") -> form.groupId.trim,
+            Symbol("artifact_id") -> form.artifactId.trim,
+            Symbol("resolver_id") -> form.resolverId,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
           form.version.foreach { version =>
             libraryVersionsDaoProvider.get.upsertWithConnection(createdBy, id, version)

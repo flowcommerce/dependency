@@ -67,10 +67,10 @@ class LastEmailsDao @Inject()(
   ): String = {
     val id = IdGenerator("lse").randomId()
     SQL(InsertQuery).on(
-      'id -> id,
-      'user_id -> form.userId,
-      'publication -> form.publication.toString,
-      'updated_by_user_id -> createdBy.id
+      Symbol("id") -> id,
+      Symbol("user_id") -> form.userId,
+      Symbol("publication") -> form.publication.toString,
+      Symbol("updated_by_user_id") -> createdBy.id
     ).execute()
     id
   }

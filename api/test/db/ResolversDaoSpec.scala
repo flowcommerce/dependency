@@ -12,7 +12,7 @@ class ResolversDaoSpec extends DependencySpec {
   private[this] lazy val publicResolver = resolversDao.findAll(
     Authorization.All,
     visibility = Some(Visibility.Public),
-    uri = Some("http://jcenter.bintray.com/"),
+    uri = Some("https://jcenter.bintray.com/"),
     limit = 1
   ).headOption.getOrElse {
     sys.error("No public resolvers found")
@@ -20,9 +20,9 @@ class ResolversDaoSpec extends DependencySpec {
 
   "upsert" in {
     val form = createResolverForm(org)
-    val resolver1 = resolversDao.create(systemUser, form).right.get
+    val resolver1 = resolversDao.create(systemUser, form).rightValue
 
-    val resolver2 = resolversDao.upsert(systemUser, form).right.get
+    val resolver2 = resolversDao.upsert(systemUser, form).rightValue
     resolver1.id must be(resolver2.id)
 
     val resolver3 = createResolver(org)

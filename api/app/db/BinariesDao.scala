@@ -64,10 +64,10 @@ class BinariesDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            'id -> id,
-            'organization_id -> form.organizationId,
-            'name -> form.name.toString.toLowerCase,
-            'updated_by_user_id -> createdBy.id
+            Symbol("id") -> id,
+            Symbol("organization_id") -> form.organizationId,
+            Symbol("name") -> form.name.toString.toLowerCase,
+            Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
 

@@ -145,16 +145,16 @@ class ItemsDao @Inject() (
 
   private[this] def toNamedParameter(updatedBy: UserReference, form: ItemForm): Seq[NamedParameter] = {
     Seq(
-      'id -> randomId(),
-      'organization_id -> form.organizationId,
-      'visibility -> form.visibility,
-      'object_id -> form.objectId,
-      'label -> form.label,
-      'description -> form.description,
-      'summary -> form.summary.map { _.toString },
-      'contents -> form.contents,
-      'updated_by_user_id -> updatedBy.id,
-      'hash_code -> form.hashCode()
+      Symbol("id") -> randomId(),
+      Symbol("organization_id") -> form.organizationId,
+      Symbol("visibility") -> form.visibility,
+      Symbol("object_id") -> form.objectId,
+      Symbol("label") -> form.label,
+      Symbol("description") -> form.description,
+      Symbol("summary") -> form.summary.map { _.toString },
+      Symbol("contents") -> form.contents,
+      Symbol("updated_by_user_id") -> updatedBy.id,
+      Symbol("hash_code") -> form.hashCode()
     )
   }
 

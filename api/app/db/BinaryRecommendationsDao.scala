@@ -47,7 +47,7 @@ class BinaryRecommendationsDao @Inject()(
       }
     }
 
-    recommendations
+    recommendations.toSeq
   }
 
   def recommend(current: ProjectBinary, others: Seq[BinaryVersion]): Option[BinaryVersion] = {
@@ -77,7 +77,7 @@ class BinaryRecommendationsDao @Inject()(
     }.foreach { binaryVersion =>
       recommendations ++= Seq(binaryVersion)
     }
-    recommendations
+    recommendations.toSeq
   }
 
 }

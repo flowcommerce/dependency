@@ -45,7 +45,7 @@ class LibraryRecommendationsDao @Inject()(
       }
     }
 
-    recommendations
+    recommendations.toSeq
   }
 
   def recommend(current: ProjectLibrary, others: Seq[LibraryVersion]): Option[LibraryVersion] = {

@@ -6,15 +6,13 @@ import db._
 import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
-import io.flow.log.RollbarLogger
-import io.flow.util.{Config, IdGenerator, Random}
 import io.flow.test.utils.FlowPlaySpec
+import io.flow.util.{Config, IdGenerator, Random}
 import play.api.db.Database
 
 trait DependencySpec extends FlowPlaySpec with Factories {
 
   implicit val defaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
-  implicit val logger = init[RollbarLogger]
   implicit val organizationsDao = init[OrganizationsDao]
   implicit val binariesDao = init[BinariesDao]
   implicit val binaryVersionsDao = init[BinaryVersionsDao]
@@ -41,7 +39,6 @@ trait DependencySpec extends FlowPlaySpec with Factories {
 
   val random = Random()
 
-  import scala.language.implicitConversions
   implicit def toUserReference(user: User) = UserReference(id = user.id)
 
   lazy val systemUser: User = createUser()
@@ -72,7 +69,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     form: OrganizationForm = createOrganizationForm(),
     user: User = systemUser
   ): Organization = {
-    organizationsDao.create(user, form).right.getOrElse {
+    organizationsDao.create(user, form).getOrElse {
       sys.error("Failed to create organization")
     }
   }
@@ -92,7 +89,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: BinaryForm = createBinaryForm(org)
   ): Binary = {
-    binariesDao.create(systemUser, form).right.getOrElse {
+    binariesDao.create(systemUser, form).getOrElse {
       sys.error("Failed to create binary")
     }
   }
@@ -119,7 +116,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: LibraryForm = createLibraryForm(org, user)
   ): Library = {
-    librariesDao.create(user, form).right.getOrElse {
+    librariesDao.create(user, form).getOrElse {
       sys.error("Failed to create library")
     }
   }
