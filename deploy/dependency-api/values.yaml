@@ -37,13 +37,13 @@ ingress:
 services:
   live:
     hosts:
-      - dependency
+      - dependency-api
       - dependency.api.flow.io
-      - dependency.flo.pub
+      - dependency-api.flo.pub
     gateways:
       - mesh
-      - dependency-flow-io
-      - dependency-flow-pub
+      - dependency-api-flow-io
+      - dependency-api-flow-pub
     stages:
       - deployment: live
         weight: 100
