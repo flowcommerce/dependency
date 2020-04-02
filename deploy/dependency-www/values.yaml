@@ -1,0 +1,58 @@
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  port: 9000
+
+iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
+image:
+  repository: flowcommerce/dependency-www
+  pullPolicy: IfNotPresent
+resources:
+  limits:
+    memory: "3400Mi"
+    cpu: 1
+  requests:
+    memory: "3400Mi"
+    cpu: .05
+
+jvmMemory: 3000
+
+nodeSelector: {}
+affinity: {}
+tolerations: {}
+
+ingress:
+  enabled: true
+  gateways:
+    - key: dependency-flow-io
+      tld: flow.io
+      hosts:
+        - dependency.flow.io
+    - key: dependency-flow-pub
+      tld: flo.pub
+      hosts:
+        - dependency.flo.pub
+
+services:
+  live:
+    hosts:
+      - dependency
+      - dependency.flow.io
+      - dependency.flo.pub
+    gateways:
+      - mesh
+      - dependency-flow-io
+      - dependency-flow-pub
+    stages:
+      - deployment: live
+        weight: 100
+
+deployments:
+  live:
+    minReplicas: 2
+    maxReplicas: 2
+    maxUnavailable: 1
+    disruptionBudgetEnabled: true
+    targetCPUUtilizationPercentage: 80
+    version: #from commandline
