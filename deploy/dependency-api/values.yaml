@@ -25,11 +25,11 @@ tolerations: {}
 ingress:
   enabled: true
   gateways:
-    - key: dependency-flow-io
+    - key: dependency-api-flow-io
       tld: api.flow.io
       hosts:
         - dependency.api.flow.io
-    - key: dependency-flow-pub
+    - key: dependency-api-flow-pub
       tld: flo.pub
       hosts:
         - dependency-api.flo.pub
