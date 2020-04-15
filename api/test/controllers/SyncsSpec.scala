@@ -7,10 +7,9 @@ class SyncsSpec extends DependencySpec with MockDependencyClient with ScalaFutur
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val library = createLibrary()
-
   "POST /syncs" in {
-    val futureResult = identifiedClient().syncs.postLibraries(Some("io.flow"))
-    await(futureResult)
+    await(
+      identifiedClient().syncs.postLibrariesByOrganization(createTestId())
+    )
   }
 }
