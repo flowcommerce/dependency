@@ -41,11 +41,6 @@ class Syncs @javax.inject.Inject()(
     )
   }
 
-  def postAll() = IdentifiedWithFallback {
-    internalTasksDao.queueAll()
-    NoContent
-  }
-
   def postBinariesById(id: String) = IdentifiedWithFallback {
     binaryHelper.withBinary(id) { binary =>
       internalTasksDao.queueBinary(binary)
@@ -58,6 +53,11 @@ class Syncs @javax.inject.Inject()(
       internalTasksDao.queueLibrary(library, priority = InternalTask.HighestPriority)
       NoContent
     }
+  }
+
+  def postLibrariesByOrganization(organization: String) = IdentifiedWithFallback { _ =>
+    internalTasksDao.queueOrganizationLibraries(organization, priority = InternalTask.MediumPriority)
+    NoContent
   }
 
   def postProjectsById(id: String) = IdentifiedWithFallback { request =>

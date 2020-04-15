@@ -3,7 +3,6 @@ flow:
   common:
     anorm_2_8_parsers:
     - api/app/generated/FlowCommonV0Conversions.scala
-    - api/app/generated/FlowCommonV0Parsers.scala
     play_2_8_client:
     - generated/app/FlowCommonV0Client.scala
   dependency:
@@ -23,13 +22,11 @@ flow:
   error:
     anorm_2_8_parsers:
     - api/app/generated/FlowErrorV0Conversions.scala
-    - api/app/generated/FlowErrorV0Parsers.scala
     play_2_8_client:
     - generated/app/FlowErrorV0Client.scala
   github:
     anorm_2_8_parsers:
     - api/app/generated/FlowGithubV0Conversions.scala
-    - api/app/generated/FlowGithubV0Parsers.scala
     play_2_8_client:
     - generated/app/FlowGithubV0Client.scala
   github-oauth:

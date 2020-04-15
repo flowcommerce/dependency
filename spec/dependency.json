@@ -30,7 +30,8 @@
       "types": [
         { "type": "task_data_upserted" },
         { "type": "task_data_sync" },
-        { "type": "task_data_sync_one" }
+        { "type": "task_data_sync_one" },
+        { "type": "task_data_sync_organization_libraries" }        
       ]
     }
   },
@@ -105,6 +106,12 @@
       "fields": [
         { "name": "id", "type": "string" },
         { "name": "type", "type": "sync_type" }
+      ]
+    },
+
+    "task_data_sync_organization_libraries": {
+      "fields": [
+        { "name": "organization_id", "type": "string" }
       ]
     },
 
@@ -1189,20 +1196,8 @@
 
         {
           "method": "POST",
-          "path": "/all",
-          "responses": {
-            "204": { "type": "unit" },
-            "404": { "type": "unit" }
-          }
-        },
-
-        {
-          "method": "POST",
-          "path": "/libraries",
-          "description": "Synchronize libraries with given params",
-          "parameters": [
-            { "name": "group_id", "type": "string", "required": false, "location": "query", "description": "Synchronize libraries with given group_id" }
-          ],
+          "path": "/:organization/libraries",
+          "description": "Synchronize libraries for resolvers associated with this organization",
           "responses": {
             "204": { "type": "unit" },
             "404": { "type": "unit" }
