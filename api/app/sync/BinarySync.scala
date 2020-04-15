@@ -35,7 +35,7 @@ class BinarySync @Inject() (
     }
     searchActor ! SearchActor.Messages.SyncBinary(binaryId)
   }
-  def forall(f: Binary => Any): Unit = {
+  def iterateAll()(f: Binary => Any): Unit = {
     Pager.create { offset =>
       binariesDao.findAll(offset = offset, limit = 1000)
     }.foreach { rec =>

@@ -9,6 +9,7 @@ import play.api.libs.json.Json
 
 object InternalTask {
   val HighestPriority = 0
+  val MediumPriority = 5
   val LowestPriority = 10
 
   def assertPriorityValid(priority: Int): Unit = {
@@ -84,6 +85,10 @@ class InternalTasksDao @Inject()(
 
   def queueLibrary(library: Library, priority: Int = InternalTask.LowestPriority): Unit = {
     createSyncIfNotQueued(TaskDataSyncOne(library.id, SyncType.Library), priority = priority)
+  }
+
+  def queueOrganizationLibraries(organization: String, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataSyncOrganizationLibraries(organization), priority = priority)
   }
 
   def queueProject(project: Project, priority: Int = InternalTask.LowestPriority): Unit = {

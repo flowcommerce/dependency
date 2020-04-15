@@ -59,7 +59,7 @@ class ProjectSync @Inject()(
     searchActor ! SearchActor.Messages.SyncProject(projectId)
   }
 
-  def forall(f: Project => Any): Unit = {
+  def iterateAll()(f: Project => Any): Unit = {
     Pager.create { offset =>
       projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
     }.foreach { rec =>
