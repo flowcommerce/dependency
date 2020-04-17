@@ -3,8 +3,8 @@ package sync
 import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
-import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
-import io.flow.dependency.v0.models.{Library, VersionForm}
+import io.flow.dependency.api.lib.{ArtifactVersion, DefaultLibraryArtifactProvider}
+import io.flow.dependency.v0.models.{Library, LibraryVersion, VersionForm}
 import io.flow.postgresql.Pager
 import javax.inject.Inject
 
@@ -18,8 +18,22 @@ class LibrarySync @Inject()(
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
 
+  private[this] def toVersionForm(version: ArtifactVersion): VersionForm = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
+  private[this] def toVersionForm(lv: LibraryVersion): VersionForm = VersionForm(lv.version, lv.crossBuildVersion)
+
+  private[this] def existingVersions(libraryId: String): Set[VersionForm] = {
+    libraryVersionsDao.findAll(
+      Authorization.All,
+      libraryId = Some(libraryId),
+      limit = None,
+    ).map(toVersionForm).toSet
+  }
+
   def sync(user: UserReference, libraryId: String): Unit = {
     librariesDao.findById(Authorization.All, libraryId).foreach { lib =>
+      lazy val existing = existingVersions(lib.id)
+      var foundNewVersion = false
+
       syncsDao.withStartedAndCompleted("library", lib.id) {
         resolversDao.findById(Authorization.All, lib.resolver.id).map { resolver =>
           DefaultLibraryArtifactProvider().resolve(
@@ -28,17 +42,23 @@ class LibrarySync @Inject()(
             groupId = lib.groupId,
             artifactId = lib.artifactId
           ).map { resolution =>
-            resolution.versions.foreach { version =>
-              libraryVersionsDao.upsert(
-                createdBy = user,
-                libraryId = lib.id,
-                form = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
-              )
+            resolution.versions.map(toVersionForm).foreach { versionForm =>
+              if (!existing.contains(versionForm)) {
+                foundNewVersion = true
+                libraryVersionsDao.upsert(
+                  createdBy = user,
+                  libraryId = lib.id,
+                  form = versionForm,
+                )
+              }
             }
           }
         }
       }
-      createTaskToSyncProjectsDependentOnLibrary(lib.id)
+      if (foundNewVersion) {
+        createTaskToSyncProjectsDependentOnLibrary(lib.id)
+      }
+
     }
     searchActor ! SearchActor.Messages.SyncLibrary(libraryId)
   }
