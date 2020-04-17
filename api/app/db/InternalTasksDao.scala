@@ -91,8 +91,14 @@ class InternalTasksDao @Inject()(
     createSyncIfNotQueued(TaskDataSyncOrganizationLibraries(organization), priority = priority)
   }
 
+  def queueProjects(projectIds: Seq[String], priority: Int = InternalTask.LowestPriority): Unit = {
+    projectIds.distinct.foreach { projectId =>
+      createSyncIfNotQueued(TaskDataSyncOne(projectId, SyncType.Project), priority = priority)
+    }
+  }
+
   def queueProject(project: Project, priority: Int = InternalTask.LowestPriority): Unit = {
-    createSyncIfNotQueued(TaskDataSyncOne(project.id, SyncType.Project), priority = priority)
+    queueProjects(Seq(project.id), priority = priority)
   }
 
   def createUpserted(project: Project, priority: Int = InternalTask.LowestPriority): Unit = {
