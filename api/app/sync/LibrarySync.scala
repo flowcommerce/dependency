@@ -1,6 +1,6 @@
 package sync
 
-import db.{Authorization, LibrariesDao, LibraryVersionsDao, ResolversDao, SyncsDao}
+import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
 import io.flow.dependency.api.lib.DefaultLibraryArtifactProvider
@@ -12,6 +12,8 @@ class LibrarySync @Inject()(
   librariesDao: LibrariesDao,
   resolversDao: ResolversDao,
   libraryVersionsDao: LibraryVersionsDao,
+  projectLibrariesDao: ProjectLibrariesDao,
+  internalTasksDao: InternalTasksDao,
   syncsDao: SyncsDao,
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
@@ -36,7 +38,7 @@ class LibrarySync @Inject()(
           }
         }
       }
-      createTaskToSyncProjectsDependentOnLibrary(lib)
+      createTaskToSyncProjectsDependentOnLibrary(lib.id)
     }
     searchActor ! SearchActor.Messages.SyncLibrary(libraryId)
   }
@@ -50,6 +52,13 @@ class LibrarySync @Inject()(
   }
 
   def createTaskToSyncProjectsDependentOnLibrary(libraryId: String): Unit = {
-    zzz
+    val projectIds = projectLibrariesDao.findAll(
+      Authorization.All,
+      libraryId = Some(libraryId),
+      limit = None,
+    ).map(_.project.id).distinct
+    if (projectIds.nonEmpty) {
+      internalTasksDao.queueProjects(projectIds, priority = InternalTask.MediumPriority)
+    }
   }
 }
