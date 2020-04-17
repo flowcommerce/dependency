@@ -36,6 +36,7 @@ class LibrarySync @Inject()(
           }
         }
       }
+      createTaskToSyncProjectsDependentOnLibrary(lib)
     }
     searchActor ! SearchActor.Messages.SyncLibrary(libraryId)
   }
@@ -46,5 +47,9 @@ class LibrarySync @Inject()(
     }.foreach { rec =>
       f(rec)
     }
+  }
+
+  def createTaskToSyncProjectsDependentOnLibrary(libraryId: String): Unit = {
+    zzz
   }
 }

@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorLogging, ActorSystem}
 import db.InternalTask
 import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
-import io.flow.dependency.v0.models.{SyncType, TaskDataSync, TaskDataSyncOne, TaskDataUpserted}
+import io.flow.dependency.v0.models.{SyncType, TaskDataSync, TaskDataSyncOne, TaskDataSyncOrganizationLibraries, TaskDataUpserted}
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
 import javax.inject.Inject
@@ -150,6 +150,20 @@ class TaskActorSyncOneLibrary @Inject()(
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case s: TaskDataSyncOne => s.`type` == SyncType.Library
+      case _ => false
+    }
+  }
+}
+
+class TaskActorSyncOrganizationLibraries @Inject()(
+  params: TaskActorParameters
+) extends BaseTaskActor(
+  params,
+  "tasks-sync-organization-libraries-context"
+) {
+  override def accepts(task: InternalTask): Boolean = {
+    task.data match {
+      case _: TaskDataSyncOrganizationLibraries => true
       case _ => false
     }
   }
