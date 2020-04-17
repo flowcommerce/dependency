@@ -204,7 +204,7 @@ class LibrariesDao @Inject()(
         equals("libraries.resolver_id", resolverId).
         and(
           prefix.map { _ =>
-            "lower(artifact_id) like lower(:prefix) || '*'"
+            "lower(artifact_id) like lower(trim({prefix})) || '%'"
           }
         ).bind("prefix", prefix).
         as(

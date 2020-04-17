@@ -2,12 +2,12 @@ package db
 
 import java.util.UUID
 
-import io.flow.dependency.v0.models.Visibility
+import io.flow.dependency.v0.models.{Organization, Visibility}
 import util.DependencySpec
 
 class LibrariesDaoSpec extends  DependencySpec {
 
-  lazy val org = createOrganization()
+  private[this] lazy val org: Organization = createOrganization()
 
   "findByGroupIdAndArtifactId" in {
     val library = createLibrary(org)
@@ -61,6 +61,7 @@ class LibrariesDaoSpec extends  DependencySpec {
   }
 
   "findAll by prefix" in {
+    val org = createOrganization()
     val resolver = createResolver(org)
     val library1 = createLibrary(org)(
       createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-bar")
@@ -70,8 +71,13 @@ class LibrariesDaoSpec extends  DependencySpec {
     )
 
     def ids(prefix: String) = {
-      librariesDao.findAll(Authorization.All, prefix = Some(prefix)).map(_.id).sorted
+      librariesDao.findAll(
+        Authorization.All,
+        organizationId = Some(org.id),
+        prefix = Some(prefix),
+      ).map(_.id).sorted
     }
+
     ids("foo") must equal(Seq(library1.id, library2.id).sorted)
     ids("foo-bar") must equal(Seq(library1.id))
     ids("foo-baz") must equal(Seq(library2.id))
