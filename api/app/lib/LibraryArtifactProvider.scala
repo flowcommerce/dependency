@@ -7,14 +7,14 @@ case class ArtifactResolution(
   resolver: ResolverSummary,
   versions: Seq[ArtifactVersion]
 ) {
-  assert(!versions.isEmpty, "Must have at least one version")
+  assert(versions.nonEmpty, "Must have at least one version")
 }
 
 trait LibraryArtifactProvider {
 
   /**
     * Returns the artifacts for this library.
-    * 
+    *
     * @param organization Used to look up private resolvers for this organization.
 //    * @param resolver If specified, we search this resolver first
     */
