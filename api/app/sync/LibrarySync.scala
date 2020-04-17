@@ -51,14 +51,14 @@ class LibrarySync @Inject()(
     }
   }
 
-  def createTaskToSyncProjectsDependentOnLibrary(libraryId: String): Unit = {
-    val projectIds = projectLibrariesDao.findAll(
-      Authorization.All,
-      libraryId = Some(libraryId),
-      limit = None,
-    ).map(_.project.id).distinct
-    if (projectIds.nonEmpty) {
-      internalTasksDao.queueProjects(projectIds, priority = InternalTask.MediumPriority)
-    }
+  private[this] def createTaskToSyncProjectsDependentOnLibrary(libraryId: String): Unit = {
+    internalTasksDao.queueProjects(
+      projectIds = projectLibrariesDao.findAll(
+        Authorization.All,
+        libraryId = Some(libraryId),
+        limit = None,
+      ).map(_.project.id),
+      priority = InternalTask.MediumPriority
+    )
   }
 }

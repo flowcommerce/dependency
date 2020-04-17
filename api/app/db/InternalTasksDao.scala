@@ -92,7 +92,7 @@ class InternalTasksDao @Inject()(
   }
 
   def queueProjects(projectIds: Seq[String], priority: Int = InternalTask.LowestPriority): Unit = {
-    projectIds.foreach { projectId =>
+    projectIds.distinct.foreach { projectId =>
       createSyncIfNotQueued(TaskDataSyncOne(projectId, SyncType.Project), priority = priority)
     }
   }
