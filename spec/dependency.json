@@ -31,7 +31,8 @@
         { "type": "task_data_upserted" },
         { "type": "task_data_sync" },
         { "type": "task_data_sync_one" },
-        { "type": "task_data_sync_organization_libraries" }        
+        { "type": "task_data_sync_libraries_by_prefix" },
+        { "type": "task_data_sync_organization_libraries" }
       ]
     }
   },
@@ -106,6 +107,13 @@
       "fields": [
         { "name": "id", "type": "string" },
         { "name": "type", "type": "sync_type" }
+      ]
+    },
+
+    "task_data_sync_libraries_by_prefix": {
+      "fields": [
+        { "name": "user_id", "type": "string" },
+        { "name": "prefix", "type": "string" }
       ]
     },
 
@@ -1207,6 +1215,16 @@
         {
           "method": "POST",
           "path": "/binaries/:id",
+          "responses": {
+            "204": { "type": "unit" },
+            "404": { "type": "unit" }
+          }
+        },
+
+        {
+          "method": "POST",
+          "description": "Will sync all libraries where the artifact id starts with the specified artifact_id_refix*",
+          "path": "/libraries/prefix/:artifact_id_prefix",
           "responses": {
             "204": { "type": "unit" },
             "404": { "type": "unit" }

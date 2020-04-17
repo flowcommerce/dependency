@@ -1,5 +1,6 @@
 package db
 
+import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
 import io.flow.postgresql.OrderBy
@@ -85,6 +86,13 @@ class InternalTasksDao @Inject()(
 
   def queueLibrary(library: Library, priority: Int = InternalTask.LowestPriority): Unit = {
     createSyncIfNotQueued(TaskDataSyncOne(library.id, SyncType.Library), priority = priority)
+  }
+
+  def queueLibrariesByPrefix(user: UserReference, prefix: String, priority: Int = InternalTask.LowestPriority): Unit = {
+    createSyncIfNotQueued(TaskDataSyncLibrariesByPrefix(
+      userId = user.id,
+      prefix = prefix,
+    ), priority = priority)
   }
 
   def queueOrganizationLibraries(organization: String, priority: Int = InternalTask.LowestPriority): Unit = {

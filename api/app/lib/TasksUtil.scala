@@ -1,7 +1,7 @@
 package lib
 
-import db.{InternalTask, InternalTasksDao, StaticUserProvider}
-import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne, TaskDataSyncOrganizationLibraries, TaskDataUndefinedType, TaskDataUpserted}
+import db.{Authorization, InternalTask, InternalTasksDao, StaticUserProvider}
+import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncLibrariesByPrefix, TaskDataSyncOne, TaskDataSyncOrganizationLibraries, TaskDataUndefinedType, TaskDataUpserted}
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
 import javax.inject.Inject
@@ -58,13 +58,24 @@ class TasksUtil @Inject() (
         case _: TaskDataSync => {
           process(taskId) {
             binarySync.iterateAll() { r => internalTasksDao.queueBinary(r) }
-            librarySync.iterateAll() { r => internalTasksDao.queueLibrary(r) }
+            librarySync.iterateAll(Authorization.All) { r => internalTasksDao.queueLibrary(r) }
             projectSync.iterateAll() { r => internalTasksDao.queueProject(r) }
           }
         }
         case data: TaskDataSyncOrganizationLibraries => {
           process(taskId) {
-            librarySync.iterateAll(organizationId = Some(data.organizationId)) { r => internalTasksDao.queueLibrary(r) }
+            librarySync.iterateAll(
+              Authorization.All,
+              organizationId = Some(data.organizationId)
+            ) { r => internalTasksDao.queueLibrary(r) }
+          }
+        }
+        case data: TaskDataSyncLibrariesByPrefix => {
+          process(taskId) {
+            librarySync.iterateAll(
+              Authorization.User(data.userId),
+              prefix = Some(data.prefix)
+            ) { r => internalTasksDao.queueLibrary(r) }
           }
         }
         case data: TaskDataSyncOne => {

@@ -167,6 +167,7 @@ class LibrariesDao @Inject()(
     groupId: Option[String] = None,
     artifactId: Option[String] = None,
     resolverId: Option[String] = None,
+    prefix: Option[String] = None,
     orderBy: OrderBy = OrderBy("lower(libraries.group_id), lower(libraries.artifact_id), libraries.created_at"),
     limit: Long = 25,
     offset: Long = 0
@@ -201,6 +202,11 @@ class LibrariesDao @Inject()(
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
         ).
         equals("libraries.resolver_id", resolverId).
+        and(
+          prefix.map { _ =>
+            "lower(artifact_id) like lower(:prefix) || '*'"
+          }
+        ).bind("prefix", prefix).
         as(
           io.flow.dependency.v0.anorm.parsers.Library.parser().*
         )

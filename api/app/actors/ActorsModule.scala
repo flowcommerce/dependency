@@ -20,6 +20,7 @@ class ActorsModule extends AbstractModule with AkkaGuiceSupport {
     bindActor[TaskActorSyncOneBinary]("task-actor-sync-one-binary")
     bindActor[TaskActorSyncOneLibrary]("task-actor-sync-one-library")
     bindActor[TaskActorSyncOrganizationLibraries]("task-actor-sync-organization-libraries")
+    bindActor[TaskActorSyncLibrariesByPrefix](name = "task-actor-sync-libraries-by-prefix")
     bindActor[TaskActorSyncOneProject]("task-actor-sync-one-project")
   }
 }

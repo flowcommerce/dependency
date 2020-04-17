@@ -48,6 +48,11 @@ class Syncs @javax.inject.Inject()(
     }
   }
 
+  def postLibrariesAndPrefixByArtifactIdPrefix(prefix: String) = IdentifiedWithFallback { request =>
+    internalTasksDao.queueLibrariesByPrefix(request.user, prefix)
+    NoContent
+  }
+
   def postLibrariesById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
       internalTasksDao.queueLibrary(library, priority = InternalTask.HighestPriority)

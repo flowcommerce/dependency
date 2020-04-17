@@ -72,9 +72,19 @@ class LibrarySync @Inject()(
     searchActor ! SearchActor.Messages.SyncLibrary(libraryId)
   }
 
-  def iterateAll(organizationId: Option[String] = None)(f: Library => Any): Unit = {
+  def iterateAll(
+    auth: Authorization,
+    organizationId: Option[String] = None,
+    prefix: Option[String] = None,
+  )(f: Library => Any): Unit = {
     Pager.create { offset =>
-      librariesDao.findAll(Authorization.All, organizationId = organizationId, offset = offset, limit = 1000)
+      librariesDao.findAll(
+        auth,
+        organizationId = organizationId,
+        prefix = prefix,
+        offset = offset,
+        limit = 1000,
+      )
     }.foreach { rec =>
       f(rec)
     }

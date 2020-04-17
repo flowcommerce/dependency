@@ -169,6 +169,20 @@ class TaskActorSyncOrganizationLibraries @Inject()(
   }
 }
 
+class TaskActorSyncLibrariesByPrefix @Inject()(
+  params: TaskActorParameters
+) extends BaseTaskActor(
+  params,
+  "tasks-sync-libraries-by-prefix-context"
+) {
+  override def accepts(task: InternalTask): Boolean = {
+    task.data match {
+      case _: TaskActorSyncLibrariesByPrefix => true
+      case _ => false
+    }
+  }
+}
+
 class TaskActorUpserted @Inject()(
   params: TaskActorParameters
 ) extends BaseTaskActor(

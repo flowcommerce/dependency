@@ -60,6 +60,24 @@ class LibrariesDaoSpec extends  DependencySpec {
     librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id)).map(_.id) must be(Seq(library.id))
   }
 
+  "findAll by prefix" in {
+    val resolver = createResolver(org)
+    val library1 = createLibrary(org)(
+      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-bar")
+    )
+    val library2 = createLibrary(org)(
+      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-baz")
+    )
+
+    def ids(prefix: String) = {
+      librariesDao.findAll(Authorization.All, prefix = Some(prefix)).map(_.id).sorted
+    }
+    ids("foo") must equal(Seq(library1.id, library2.id).sorted)
+    ids("foo-bar") must equal(Seq(library1.id))
+    ids("foo-baz") must equal(Seq(library2.id))
+    ids(createTestId()) must be(Nil)
+  }
+
   "create" must {
     "validates empty group id" in {
       val form = createLibraryForm(org).copy(groupId = "   ")
