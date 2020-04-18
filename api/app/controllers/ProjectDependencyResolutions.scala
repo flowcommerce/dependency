@@ -20,11 +20,11 @@ class ProjectDependencyResolutions @Inject() (
   service: ProjectDependencyResolutionService,
 ) extends BaseIdentifiedControllerWithFallback {
 
-  def get(organization: String): Action[AnyContent] = IdentifiedWithFallback { request =>
+  def get(organization: String, groupId: String): Action[AnyContent] = IdentifiedWithFallback { request =>
     withValidatedMember(request.user, organization) {
       Ok(
         Json.toJson(
-          service.getByOrganizationId(organization)
+          service.getByOrganizationId(organization, groupId = groupId)
         )
       )
     }

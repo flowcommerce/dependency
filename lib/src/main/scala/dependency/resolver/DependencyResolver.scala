@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 case class DependencyResolution(
   resolved: List[Seq[ProjectInfo]],
-  circular: Seq[ProjectInfo],
+  unresolved: Seq[ProjectInfo],
 ) {
 
   private[this] lazy val allResolvedLibraries: Set[String] = resolved.flatMap(_.flatMap { p => p.provides.map(_.identifier) }).toSet
@@ -14,18 +14,23 @@ case class DependencyResolution(
 }
 
 object DependencyResolution {
-  val empty: DependencyResolution = DependencyResolution(resolved = Nil, circular = Nil)
+  val empty: DependencyResolution = DependencyResolution(resolved = Nil, unresolved = Nil)
 }
 
 /**
- * @param identifier The group id and artifact id - eg. "io.flow.lib-s3"
+ * @param groupId e.g. io.flow
+ * @param artifactId e.g. lib-s3
  */
-case class LibraryReference(identifier: String)
+case class LibraryReference(groupId: String, artifactId: String) {
+  val identifier: String = s"$groupId.$artifactId"
+}
 
 case class ProjectInfo(
   projectId: String,
   dependsOn: Seq[LibraryReference],
   provides: Seq[LibraryReference],
+  resolvedDependencies: Seq[LibraryReference] = Nil,
+  unresolvedDependencies: Seq[LibraryReference] = Nil,
 )
 
 /**
@@ -52,9 +57,19 @@ case class DependencyResolver() {
     }
 
     resolved match {
-      case Nil => resolution.copy(
-        circular = resolution.circular ++ remaining,
-      )
+      case Nil => {
+        resolution.copy(
+          unresolved = resolution.unresolved ++ remaining.map { p =>
+            val (r, u) = p.dependsOn.partition { l =>
+              areDependenciesSatisfied(resolution, Seq(l))
+            }
+            p.copy(
+              resolvedDependencies = r,
+              unresolvedDependencies = u,
+            )
+          },
+        )
+      }
       case _ => {
         resolve(resolution.copy(
           resolved = resolution.resolved ++ Seq(resolved),
