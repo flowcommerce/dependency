@@ -2,7 +2,7 @@ package io.flow.dependency.actors
 
 import java.sql.SQLException
 
-import akka.actor.{Actor, ActorLogging, ActorSystem}
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem}
 import db.InternalTask
 import io.flow.akka.SafeReceive
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
@@ -31,17 +31,20 @@ class TaskActorParameters @Inject()(
  */
 class TaskActor @Inject()(
   rollbar: RollbarLogger,
-  @javax.inject.Named("task-actor-upserted") taskActorUpserted: akka.actor.ActorRef,
-  @javax.inject.Named("task-actor-sync-all") taskActorSyncAll: akka.actor.ActorRef,
-  @javax.inject.Named("task-actor-sync-one-binary") taskActorSyncOneBinary: akka.actor.ActorRef,
-  @javax.inject.Named("task-actor-sync-one-library") taskActorSyncOneLibrary: akka.actor.ActorRef,
-  @javax.inject.Named("task-actor-sync-one-project") taskActorSyncOneProject: akka.actor.ActorRef,
+  @javax.inject.Named("task-actor-upserted") taskActorUpserted: ActorRef,
+  @javax.inject.Named("task-actor-sync-all") taskActorSyncAll: ActorRef,
+  @javax.inject.Named("task-actor-sync-one-binary") taskActorSyncOneBinary: ActorRef,
+  @javax.inject.Named("task-actor-sync-one-library") taskActorSyncOneLibrary: ActorRef,
+  @javax.inject.Named("task-actor-sync-one-project") taskActorSyncOneProject: ActorRef,
+  @javax.inject.Named("task-actor-sync-organization-libraries") taskActorSyncOrganizationLibraries: ActorRef,
+  @javax.inject.Named("task-actor-sync-libraries-by-prefix") taskActorSyncLibrariesByPrefix: ActorRef,
 ) extends Actor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val allActors = Seq(
     taskActorUpserted, taskActorSyncAll,
-    taskActorSyncOneBinary, taskActorSyncOneLibrary, taskActorSyncOneProject
+    taskActorSyncOneBinary, taskActorSyncOneLibrary, taskActorSyncOneProject,
+    taskActorSyncOrganizationLibraries, taskActorSyncLibrariesByPrefix,
   )
 
   def receive: Receive = SafeReceive.withLogUnhandled {
