@@ -2,12 +2,35 @@ package db
 
 import java.util.UUID
 
-import io.flow.dependency.v0.models.{Organization, Visibility}
+import io.flow.dependency.v0.models.{Library, Organization, Visibility}
 import util.DependencySpec
 
 class LibrariesDaoSpec extends  DependencySpec {
 
   private[this] lazy val org: Organization = createOrganization()
+
+  private[this] def findAll(
+               auth: Authorization = Authorization.All,
+               id: Option[String] = None,
+               ids: Option[Seq[String]] = None,
+               organizationId: Option[String] = None,
+               resolverId: Option[String] = None,
+               prefix: Option[String] = None,
+               limit: Option[Long] = None,
+               offset: Long = 0,
+             ): Seq[Library] = {
+    librariesDao.findAll(
+      auth,
+      id = id,
+      ids = ids,
+      organizationId = organizationId,
+      resolverId = resolverId,
+      prefix = prefix,
+      limit = limit,
+      offset = offset,
+    )
+  }
+
 
   "findByGroupIdAndArtifactId" in {
     val library = createLibrary(org)
@@ -43,13 +66,13 @@ class LibrariesDaoSpec extends  DependencySpec {
     val library1 = createLibrary(org)
     val library2 = createLibrary(org)
 
-    librariesDao.findAll(Authorization.All, ids = Some(Seq(library1.id, library2.id))).map(_.id) must be(
+    findAll(ids = Some(Seq(library1.id, library2.id))).map(_.id) must be(
       Seq(library1, library2).sortWith { (x,y) => x.groupId.toString < y.groupId.toString }.map(_.id)
     )
 
-    librariesDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
-    librariesDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    librariesDao.findAll(Authorization.All, ids = Some(Seq(library1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(library1.id))
+    findAll(ids = Some(Nil)) must be(Nil)
+    findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
+    findAll(ids = Some(Seq(library1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(library1.id))
   }
 
   "findAll by resolver" in {
@@ -57,7 +80,7 @@ class LibrariesDaoSpec extends  DependencySpec {
     val form = createLibraryForm(org).copy(resolverId = resolver.id)
     val library = createLibrary(org)(form)
 
-    librariesDao.findAll(Authorization.All, resolverId = Some(resolver.id)).map(_.id) must be(Seq(library.id))
+    findAll(resolverId = Some(resolver.id)).map(_.id) must be(Seq(library.id))
   }
 
   "findAll by prefix" in {
@@ -71,7 +94,7 @@ class LibrariesDaoSpec extends  DependencySpec {
     )
 
     def ids(prefix: String) = {
-      librariesDao.findAll(
+      findAll(
         Authorization.All,
         organizationId = Some(org.id),
         prefix = Some(prefix),
@@ -121,11 +144,11 @@ class LibrariesDaoSpec extends  DependencySpec {
       )
       val lib = createLibrary(org, user = user)(createLibraryForm(org)(resolver = resolver))
 
-      librariesDao.findAll(Authorization.PublicOnly, id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.All, id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.Organization(org.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.Organization(createOrganization().id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.User(user.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.PublicOnly, id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.Organization(org.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.Organization(createOrganization().id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.User(user.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
     }
 
     "allow only users of an org to access a library w/ a private resolver" in {
@@ -137,12 +160,12 @@ class LibrariesDaoSpec extends  DependencySpec {
       val lib = createLibrary(org, user = user)(createLibraryForm(org)(resolver = resolver))
       lib.resolver.visibility must be(Visibility.Private)
 
-      librariesDao.findAll(Authorization.PublicOnly, id = Some(lib.id))must be(Nil)
-      librariesDao.findAll(Authorization.All, id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.Organization(org.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.Organization(createOrganization().id), id = Some(lib.id))must be(Nil)
-      librariesDao.findAll(Authorization.User(user.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
-      librariesDao.findAll(Authorization.User(createUser().id), id = Some(lib.id)) must be(Nil)
+      findAll(Authorization.PublicOnly, id = Some(lib.id))must be(Nil)
+      findAll(id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.Organization(org.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.Organization(createOrganization().id), id = Some(lib.id))must be(Nil)
+      findAll(Authorization.User(user.id), id = Some(lib.id)).map(_.id) must be(Seq(lib.id))
+      findAll(Authorization.User(createUser().id), id = Some(lib.id)) must be(Nil)
     }
 
   }

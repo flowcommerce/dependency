@@ -61,7 +61,7 @@ class ProjectSync @Inject()(
 
   def iterateAll()(f: Project => Any): Unit = {
     Pager.create { offset =>
-      projectsDao.findAll(Authorization.All, offset = offset, limit = 1000)
+      projectsDao.findAll(Authorization.All, offset = offset, limit = Some(1000))
     }.foreach { rec =>
       f(rec)
     }

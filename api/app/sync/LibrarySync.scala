@@ -83,7 +83,7 @@ class LibrarySync @Inject()(
         organizationId = organizationId,
         prefix = prefix,
         offset = offset,
-        limit = 1000,
+        limit = Some(1000),
       )
     }.foreach { rec =>
       f(rec)

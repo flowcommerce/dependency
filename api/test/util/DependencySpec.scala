@@ -69,8 +69,8 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     form: OrganizationForm = createOrganizationForm(),
     user: User = systemUser
   ): Organization = {
-    organizationsDao.create(user, form).getOrElse {
-      sys.error("Failed to create organization")
+    rightOrErrors {
+      organizationsDao.create(user, form)
     }
   }
 
@@ -78,7 +78,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     s"z-test-${UUID.randomUUID.toString.toLowerCase}"
   }
 
-  def createOrganizationForm() = {
+  def createOrganizationForm(): OrganizationForm = {
     OrganizationForm(
       key = createTestKey()
     )
@@ -89,14 +89,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit form: BinaryForm = createBinaryForm(org)
   ): Binary = {
-    binariesDao.create(systemUser, form).getOrElse {
-      sys.error("Failed to create binary")
+    rightOrErrors {
+      binariesDao.create(systemUser, form)
     }
   }
 
   def createBinaryForm(
     org: Organization = createOrganization()
-  ) = BinaryForm(
+  ): BinaryForm = BinaryForm(
     organizationId = org.id,
     name = BinaryType.UNDEFINED(createTestId())
   )
@@ -110,14 +110,26 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     binaryVersionsDao.create(systemUser, binary.id, version)
   }
 
+  def upsertLibrary(groupId: String, artifactId: String): Library = {
+    librariesDao.findByGroupIdAndArtifactId(Authorization.All, groupId, artifactId).getOrElse {
+      val org = createOrganization()
+      createLibrary(org, systemUser)(
+        createLibraryForm(org, systemUser).copy(
+          groupId = groupId,
+          artifactId = artifactId,
+        )
+      )
+    }
+  }
+
   def createLibrary(
     org: Organization = createOrganization(),
     user: User = systemUser
   ) (
     implicit form: LibraryForm = createLibraryForm(org, user)
   ): Library = {
-    librariesDao.create(user, form).getOrElse {
-      sys.error("Failed to create library")
+    rightOrErrors {
+      librariesDao.create(user, form)
     }
   }
 
@@ -167,11 +179,12 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   }
 
   def createProjectForm(
-    org: Organization = createOrganization()
+    org: Organization = createOrganization(),
+    name: String = createTestName(),
   ): ProjectForm = {
     ProjectForm(
       organization = org.key,
-      name = createTestName(),
+      name = name,
       visibility = Visibility.Private,
       scms = Scms.Github,
       uri = s"http://github.com/test/${UUID.randomUUID.toString}"

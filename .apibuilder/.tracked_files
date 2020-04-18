@@ -9,6 +9,8 @@ flow:
     anorm_2_8_parsers:
     - api/app/generated/FlowDependencyV0Conversions.scala
     - api/app/generated/FlowDependencyV0Parsers.scala
+    play_2_6_controllers:
+    - api/app/generated/DependencyControllers.scala
     play_2_8_client:
     - generated/app/FlowDependencyV0Client.scala
     play_2_x_routes:

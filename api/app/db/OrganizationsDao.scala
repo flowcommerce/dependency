@@ -66,7 +66,7 @@ class OrganizationsDao @Inject()(
           findByKey(Authorization.All, form.key) match {
             case None => Seq.empty
             case Some(p) => {
-              Some(p.id) == existing.map(_.id) match {
+              existing.map(_.id).contains(p.id) match {
                 case true => Nil
                 case false => Seq("Organization with this key already exists")
               }
@@ -138,7 +138,7 @@ class OrganizationsDao @Inject()(
 
   def delete(deletedBy: UserReference, organization: Organization): Unit = {
     Pager.create { offset =>
-      projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
+      projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), limit = None, offset = offset)
     }.foreach { project =>
       projectsDaoProvider.get.delete(deletedBy, project)
     }
