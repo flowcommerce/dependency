@@ -159,7 +159,8 @@ class ResolversDao @Inject()(
       librariesDaoProvider.get.findAll(
         Authorization.All,
         resolverId = Some(resolver.id),
-        offset = offset
+        limit = Some(1000),
+        offset = offset,
       )
     }.foreach { library =>
       librariesDaoProvider.get.delete(staticUserProviderProvider.get.systemUser, library)

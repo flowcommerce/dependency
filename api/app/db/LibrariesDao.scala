@@ -150,12 +150,12 @@ class LibrariesDao @Inject()(
       auth,
       groupId = Some(groupId),
       artifactId = Some(artifactId),
-      limit = 1
+      limit = Some(1)
     ).headOption
   }
 
   def findById(auth: Authorization, id: String): Option[Library] = {
-    findAll(auth, id = Some(id), limit = 1).headOption
+    findAll(auth, id = Some(id), limit = Some(1)).headOption
   }
 
   def findAll(
@@ -169,11 +169,11 @@ class LibrariesDao @Inject()(
     resolverId: Option[String] = None,
     prefix: Option[String] = None,
     orderBy: OrderBy = OrderBy("lower(libraries.group_id), lower(libraries.artifact_id), libraries.created_at"),
-    limit: Long = 25,
+    limit: Option[Long],
     offset: Long = 0
   ): Seq[Library] = {
     db.withConnection { implicit c =>
-      Standards.query(
+      Standards.queryWithOptionalLimit(
         BaseQuery,
         tableName = "libraries",
         auth = auth.organizations("organizations.id", Some("resolvers.visibility")),

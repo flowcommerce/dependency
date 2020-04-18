@@ -48,7 +48,7 @@ class Projects @javax.inject.Inject() (
           libraryId = libraryId,
           binary = binary,
           binaryId = binaryId,
-          limit = limit,
+          limit = Some(limit),
           offset = offset
         )
       )

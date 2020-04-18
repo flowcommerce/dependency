@@ -224,6 +224,7 @@ class ProjectLibrariesDao @Inject()(
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,
     projectId: Option[String] = None,
+    projectIds: Option[Seq[String]] = None,
     libraryId: Option[String] = None,
     groupId: Option[String] = None,
     artifactId: Option[String] = None,
@@ -248,6 +249,7 @@ class ProjectLibrariesDao @Inject()(
         offset = offset
       ).
         equals("project_libraries.project_id", projectId).
+        optionalIn("project_libraries.project_id", projectIds).
         equals("project_libraries.library_id", libraryId).
         optionalText(
           "project_libraries.group_id",

@@ -202,11 +202,11 @@ class ProjectsDao @Inject()(
   }
 
   def findByOrganizationKeyAndName(auth: Authorization, organizationKey: String, name: String): Option[Project] = {
-    findAll(auth, organizationKey = Some(organizationKey), name = Some(name), limit = 1).headOption
+    findAll(auth, organizationKey = Some(organizationKey), name = Some(name), limit = Some(1)).headOption
   }
 
   def findById(auth: Authorization, id: String): Option[Project] = {
-    findAll(auth, id = Some(id), limit = 1).headOption
+    findAll(auth, id = Some(id), limit = Some(1)).headOption
   }
 
   def findAll(
@@ -228,7 +228,7 @@ class ProjectsDao @Inject()(
   ): Seq[Project] = {
 
     db.withConnection { implicit c =>
-      Standards.query(
+      Standards.queryWithOptionalLimit(
         BaseQuery,
         tableName = "projects",
         auth = auth.organizations("projects.organization_id", Some("projects.visibility")),

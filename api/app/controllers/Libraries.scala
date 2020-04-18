@@ -40,7 +40,7 @@ class Libraries @javax.inject.Inject() (
           groupId = groupId,
           artifactId = artifactId,
           resolverId = resolverId,
-          limit = limit,
+          limit = Some(limit),
           offset = offset
         )
       )
