@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 @ImplementedBy(classOf[ProjectDependencyResolutionServiceImpl])
 trait ProjectDependencyResolutionService {
-  def getByOrganizationId(organizationId: String): ProjectDependencyResolution
+  def getByOrganizationId(organizationKey: String): ProjectDependencyResolution
 }
 
 class ProjectDependencyResolutionServiceImpl @Inject() (
@@ -17,8 +17,8 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   librariesDao: LibrariesDao,
 ) extends ProjectDependencyResolutionService {
 
-  override def getByOrganizationId(organizationId: String): ProjectDependencyResolution = {
-    val allProjects = projects(organizationId)
+  override def getByOrganizationId(organizationKey: String): ProjectDependencyResolution = {
+    val allProjects = projects(organizationKey)
     val r = DependencyResolver().resolve(buildProjectInfo(allProjects.values.toSeq))
 
     def toSummary(projectId: String) = projectsDao.toSummary(allProjects(projectId))
@@ -70,10 +70,10 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     }
   }
 
-  private[this] def projects(organizationId: String): Map[String, Project] = {
+  private[this] def projects(organizationKey: String): Map[String, Project] = {
     projectsDao.findAll(
       Authorization.All,
-      organizationId = Some(organizationId),
+      organizationKey = Some(organizationKey),
       limit = None,
     ).map { p => p.id -> p }.toMap
   }

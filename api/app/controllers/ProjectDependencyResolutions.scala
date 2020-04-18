@@ -30,8 +30,8 @@ class ProjectDependencyResolutions @Inject() (
     }
   }
 
-  private[this] def withValidatedMember(user: UserReference, organizationId: String)(f: => Result): Result = {
-    membershipsDao.findByOrganizationAndUserId(Authorization.All, organizationId, user.id) match {
+  private[this] def withValidatedMember(user: UserReference, organizationKey: String)(f: => Result): Result = {
+    membershipsDao.findByOrganizationAndUserId(Authorization.All, organizationKey, user.id) match {
       case None => Unauthorized
       case Some(_) => f
     }

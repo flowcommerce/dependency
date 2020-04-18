@@ -164,7 +164,7 @@ class MembershipsDao @Inject()(
     auth: Authorization,
     id: Option[String] = None,
     ids: Option[Seq[String]] = None,
-     organization: Option[String] = None,
+    organization: Option[String] = None,
     organizationId: Option[String] = None,
     userId: Option[String] = None,
     role: Option[Role] = None,
