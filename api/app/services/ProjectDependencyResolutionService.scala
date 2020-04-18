@@ -26,7 +26,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ProjectDependencyResolution(
       resolved = r.resolved.zipWithIndex.map { case (p, pos) =>
         ProjectDependencyResolutionResolved(
-          position = pos+1,
+          position = pos+1L,
           projects = p.map(_.projectId).map(toSummary),
         )
       },
@@ -40,11 +40,17 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     allProjects.map { p =>
       ProjectInfo(
         projectId = p.id,
-        dependsOn = Nil,
-        provides = Nil,
+        dependsOn = allDependentLibraries.getOrElse(p.id, Nil),
+        provides = findProvides(p, allLibraries),
       )
     }
   }
+
+  // Find all libraries where artifact id starts with project id
+  private[this] def findProvides(project: Project, libraries: Seq[Library]): Seq[LibraryReference] = {
+    libraries.filter(_.artifactId.startsWith(project.id)).map { l => LibraryReference(l.id) }
+  }
+
 
   private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[LibraryReference]] = {
     projectLibrariesDao.findAll(
@@ -64,16 +70,12 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ).map { p => p.id -> p }.toMap
   }
 
-  private[this] def libraries(libraryIds: Seq[String]): Map[String, Library] = {
+  private[this] def libraries(libraryIds: Seq[String]): Seq[Library] = {
     librariesDao.findAll(
       Authorization.All,
       ids = Some(libraryIds),
       limit = None,
-    ).map { l => l.id -> l }.toMap
-  }
-
-  private[this] def toProjectInfo(p: Project): ProjectInfo = {
-    ProjectInfo(projectId = p.id, dependsOn = Nil, provides = Nil)
+    )
   }
 
   private[this] def toLibraryReference(library: Reference): LibraryReference = LibraryReference(library.id)

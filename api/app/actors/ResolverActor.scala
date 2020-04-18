@@ -41,7 +41,7 @@ class ResolverActor @Inject()(
 
     case ResolverActor.Messages.Deleted(resolverId) =>
       Pager.create { offset =>
-        librariesDao.findAll(Authorization.All, resolverId = Some(resolverId), offset = offset)
+        librariesDao.findAll(Authorization.All, resolverId = Some(resolverId), limit = None, offset = offset)
       }.foreach { library =>
         librariesDao.delete(SystemUser, library)
       }
