@@ -1,6 +1,4 @@
-package lib.resolver
-
-import javax.inject.Inject
+package dependency.resolver
 
 import scala.annotation.tailrec
 
@@ -32,7 +30,7 @@ case class ProjectInfo(
  * to return an ordered list of sets of projects to upgrade at
  * one time.
  */
-class DependencyResolver @Inject() () {
+case class DependencyResolver() {
 
   def resolve(projects: Seq[ProjectInfo]): DependencyResolution = {
     resolve(DependencyResolution.empty, projects.toList)
@@ -52,11 +50,11 @@ class DependencyResolver @Inject() () {
 
     resolved match {
       case Nil => resolution.copy(
-        circular = resolution.circular ++ Seq(remaining),
+        circular = resolution.circular ++ remaining,
       )
       case _ => {
         resolve(resolution.copy(
-          resolved = resolution.resolved ++ resolved,
+          resolved = resolution.resolved ++ Seq(resolved),
         ), remaining)
       }
     }
