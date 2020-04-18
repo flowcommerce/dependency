@@ -223,7 +223,7 @@ class ProjectsDao @Inject()(
     binary: Option[String] = None,
     binaryId: Option[String] = None,
     orderBy: OrderBy = OrderBy("lower(projects.name), projects.created_at"),
-    limit: Long = 25,
+    limit: Option[Long],
     offset: Long = 0
   ): Seq[Project] = {
 

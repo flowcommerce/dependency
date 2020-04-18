@@ -27,8 +27,8 @@ case class ProjectInfo(
 
 /**
  * Given a list of projects, resolves the dependencies among them
- * to return an ordered list of sets of projects to upgrade at
- * one time.
+ * to return an ordered list of sets of projects that can be upgraded
+ * at one time.
  */
 case class DependencyResolver() {
 

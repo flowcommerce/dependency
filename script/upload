@@ -22,3 +22,9 @@ puts "==> #{cmd}"
 if !system(cmd)
   exit(1)
 end
+
+cmd = "apibuilder update --app dependency"
+puts "==> #{cmd}"
+if !system(cmd)
+  exit(1)
+end

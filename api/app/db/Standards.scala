@@ -39,7 +39,7 @@ private[db] case object Standards {
     id: Option[String],
     ids: Option[Seq[String]],
     orderBy: Option[String],
-    limit: Long,
+    limit: Option[Long],
     offset: Long = 0
   ): Query = {
     query.

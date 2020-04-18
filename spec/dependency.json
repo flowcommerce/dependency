@@ -488,6 +488,21 @@
       "fields": [
         { "name": "id", "type": "long" }
       ]
+    },
+
+    "project_dependency_resolution": {
+      "description": "Provides an ordered set of projects such that each set of projects is sure to have its dependencies resolved. ie. when upgrading projects, you can efficiently upgrade each set of projects in resolved togther.",
+      "fields": [
+        { "name": "resolved", "type": "[project_dependency_resolution_resolved]" },
+        { "name": "circular", "type": "[project_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" }
+      ]
+    },
+
+    "project_dependency_resolution_resolved": {
+      "fields": [
+        { "name": "position", "type": "long", "minimum": 1 },
+        { "name": "projects", "type": "[project_summary]" }
+      ]
     }
 
   },
@@ -1312,6 +1327,22 @@
           "method": "POST",
           "path": "/:project_id",
           "description": "Receives a webhook on push for this particular project"
+        }
+      ]
+    },
+
+    "project_dependency_resolution": {
+      "path": "/:organization/project/dependencies",
+
+      "operations": [
+        {
+          "method": "GET",
+          "description": "Used to fetch one token",
+          "responses": {
+            "200": { "type": "project_dependency_resolution" },
+            "401": { "type": "unit" },
+            "404": { "type": "unit" }
+          }
         }
       ]
     }
