@@ -34,6 +34,10 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     )
   }
 
+  // For the set of projects,
+  //   1. find all dependent libraries
+  //   2. find all libraries where the artifact starts with the projects id
+  // and use that to build up the project info we need to resolve dependencies
   private[this] def buildProjectInfo(allProjects: Seq[Project]): Seq[ProjectInfo] = {
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id))
     val allLibraries = libraries(allDependentLibraries.values.flatten.toSeq)

@@ -11,6 +11,40 @@ class ProjectsDaoSpec extends DependencySpec {
   private[this] lazy val project1: Project = createProject(org)
   private[this] lazy val project2: Project = createProject(org)
 
+  private[this] def findAll(
+    auth: Authorization = Authorization.All,
+    id: Option[String] = None,
+    ids: Option[Seq[String]] = None,
+    organizationId: Option[String] = None,
+    name: Option[String] = None,
+    organizationKey: Option[String] = None,
+    groupId: Option[String] = None,
+    artifactId: Option[String] = None,
+    binary: Option[String] = None,
+    binaryId: Option[String] = None,
+    version: Option[String] = None,
+    libraryId: Option[String] = None,
+    limit: Option[Long] = None,
+    offset: Long = 0,
+  ): Seq[Project] = {
+    projectsDao.findAll(
+      auth,
+      id = id,
+      ids = ids,
+      organizationId = organizationId,
+      name = name,
+      organizationKey = organizationKey,
+      groupId = groupId,
+      artifactId = artifactId,
+      binary = binary,
+      binaryId = binaryId,
+      version = version,
+      libraryId = libraryId,
+      limit = limit,
+      offset = offset,
+    )
+  }
+
   "findByOrganizationIdAndName" in {
     projectsDao.findByOrganizationKeyAndName(Authorization.All, org.key, project1.name).map(_.id) must be(
       Some(project1.id)
@@ -83,37 +117,37 @@ class ProjectsDaoSpec extends DependencySpec {
   "findAll" must {
 
     "ids" in {
-      projectsDao.findAll(Authorization.All, ids = Some(Seq(project1.id, project2.id))).map(_.id).sorted must be(
+      findAll(ids = Some(Seq(project1.id, project2.id))).map(_.id).sorted must be(
         Seq(project1.id, project2.id).sorted
       )
 
-      projectsDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
-      projectsDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-      projectsDao.findAll(Authorization.All, ids = Some(Seq(project1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(project1.id))
+      findAll(ids = Some(Nil)) must be(Nil)
+      findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
+      findAll(ids = Some(Seq(project1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(project1.id))
     }
 
     "name" in {
-      projectsDao.findAll(Authorization.All, name = Some(project1.name.toUpperCase)).map(_.id) must be(
+      findAll(name = Some(project1.name.toUpperCase)).map(_.id) must be(
         Seq(project1.id)
       )
 
-      projectsDao.findAll(Authorization.All, name = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
+      findAll(name = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
     }
 
     "organizationId" in {
-      projectsDao.findAll(Authorization.All, id = Some(project1.id), organizationId = Some(org.id)).map(_.id) must be(
+      findAll(id = Some(project1.id), organizationId = Some(org.id)).map(_.id) must be(
         Seq(project1.id)
       )
 
-      projectsDao.findAll(Authorization.All, id = Some(project1.id), organizationId = Some(createOrganization().id)) must be(Nil)
+      findAll(id = Some(project1.id), organizationId = Some(createOrganization().id)) must be(Nil)
     }
 
     "organizationKey" in {
-      projectsDao.findAll(Authorization.All, id = Some(project1.id), organizationKey = Some(org.key)).map(_.id) must be(
+      findAll(id = Some(project1.id), organizationKey = Some(org.key)).map(_.id) must be(
         Seq(project1.id)
       )
 
-      projectsDao.findAll(Authorization.All, id = Some(project1.id), organizationKey = Some(createOrganization().key)) must be(Nil)
+      findAll(id = Some(project1.id), organizationKey = Some(createOrganization().key)) must be(Nil)
     }
 
     "with library" must {
@@ -121,41 +155,41 @@ class ProjectsDaoSpec extends DependencySpec {
       "groupId" in {
         val (project, version) = createProjectWithLibrary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), groupId = Some(version.library.groupId)).map(_.id) must be(
+        findAll(id = Some(project.id), groupId = Some(version.library.groupId)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), groupId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
+        findAll(id = Some(project.id), groupId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
       }
 
       "artifactId" in {
         val (project, version) = createProjectWithLibrary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), artifactId = Some(version.library.artifactId)).map(_.id) must be(
+        findAll(id = Some(project.id), artifactId = Some(version.library.artifactId)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), artifactId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
+        findAll(id = Some(project.id), artifactId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
       }
 
       "version" in {
         val (project, version) = createProjectWithLibrary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), version = Some(version.version)).map(_.id) must be(
+        findAll(id = Some(project.id), version = Some(version.version)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), version = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
+        findAll(id = Some(project.id), version = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
       }
 
       "libraryId" in {
         val (project, version) = createProjectWithLibrary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), libraryId = Some(version.library.id)).map(_.id) must be(
+        findAll(id = Some(project.id), libraryId = Some(version.library.id)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), libraryId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
+        findAll(id = Some(project.id), libraryId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
       }
     }
 
@@ -164,21 +198,21 @@ class ProjectsDaoSpec extends DependencySpec {
       "binary name" in {
         val (project, version) = createProjectWithBinary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
+        findAll(id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
+        findAll(id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
       }
 
       "binary id" in {
         val (project, version) = createProjectWithBinary(org)
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), binaryId = Some(version.binary.id)).map(_.id) must be(
+        findAll(id = Some(project.id), binaryId = Some(version.binary.id)).map(_.id) must be(
           Seq(project.id)
         )
 
-        projectsDao.findAll(Authorization.All, id = Some(project.id), binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
+        findAll(id = Some(project.id), binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
       }
 
     }
@@ -188,11 +222,11 @@ class ProjectsDaoSpec extends DependencySpec {
       val org = createOrganization(user = user)
       val project = createProject(org)(createProjectForm(org).copy(visibility = Visibility.Public))
 
-      projectsDao.findAll(Authorization.PublicOnly, id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.All, id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.PublicOnly, id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
     }
 
     "authorization for private projects" in {
@@ -200,12 +234,12 @@ class ProjectsDaoSpec extends DependencySpec {
       val org = createOrganization(user = user)
       val project = createProject(org)(createProjectForm(org).copy(visibility = Visibility.Private))
 
-      projectsDao.findAll(Authorization.PublicOnly, id = Some(project.id)) must be(Nil)
-      projectsDao.findAll(Authorization.All, id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)) must be(Nil)
-      projectsDao.findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      projectsDao.findAll(Authorization.User(createUser().id), id = Some(project.id)) must be(Nil)
+      findAll(Authorization.PublicOnly, id = Some(project.id)) must be(Nil)
+      findAll(id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)) must be(Nil)
+      findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.User(createUser().id), id = Some(project.id)) must be(Nil)
     }
 
   }
