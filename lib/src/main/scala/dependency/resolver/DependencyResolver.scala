@@ -7,9 +7,9 @@ case class DependencyResolution(
   circular: Seq[ProjectInfo],
 ) {
 
-  private[this] lazy val allResolvedLibraries: Set[String] = resolved.flatMap(_.flatMap { p => p.provides.map(_.libraryId) }).toSet
+  private[this] lazy val allResolvedLibraries: Set[String] = resolved.flatMap(_.flatMap { p => p.provides.map(_.identifier) }).toSet
 
-  def isLibraryResolved(libraryId: String): Boolean = allResolvedLibraries.contains(libraryId)
+  def isLibraryResolved(identifier: String): Boolean = allResolvedLibraries.contains(identifier)
 
 }
 
@@ -17,7 +17,10 @@ object DependencyResolution {
   val empty: DependencyResolution = DependencyResolution(resolved = Nil, circular = Nil)
 }
 
-case class LibraryReference(libraryId: String)
+/**
+ * @param identifier The group id and artifact id - eg. "io.flow.lib-s3"
+ */
+case class LibraryReference(identifier: String)
 
 case class ProjectInfo(
   projectId: String,
@@ -38,7 +41,7 @@ case class DependencyResolver() {
 
   private[this] def areDependenciesSatisfied(resolution: DependencyResolution, libraries: Seq[LibraryReference]): Boolean = {
     libraries.forall { l =>
-      resolution.isLibraryResolved(l.libraryId)
+      resolution.isLibraryResolved(l.identifier)
     }
   }
 

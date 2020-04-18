@@ -6,10 +6,6 @@ trait ResolverHelpers {
   private[this] val random: Random = Random()
   private[this] def createTestId(): String = "tst-" + random.alphaNumeric(36)
 
-  def makeLibraryReference(libraryId: String = createTestId()): LibraryReference = {
-    LibraryReference(libraryId = libraryId)
-  }
-
   def makeProjectInfo(
     projectId: String = createTestId(),
     dependsOn: Seq[String] = Nil,
@@ -17,8 +13,8 @@ trait ResolverHelpers {
   ): ProjectInfo = {
     ProjectInfo(
       projectId = projectId,
-      dependsOn = dependsOn.map(makeLibraryReference),
-      provides = provides.map(makeLibraryReference),
+      dependsOn = dependsOn.map(LibraryReference),
+      provides = provides.map(LibraryReference),
     )
   }
 }

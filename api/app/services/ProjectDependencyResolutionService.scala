@@ -38,9 +38,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   //   1. find all dependent libraries
   //   2. find all libraries where the artifact starts with the projects id
   // and use that to build up the project info we need to resolve dependencies
-  private[this] def buildProjectInfo(allProjects: Seq[Project]): Seq[ProjectInfo] = {
+  def buildProjectInfo(allProjects: Seq[Project]): Seq[ProjectInfo] = {
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id))
-    val allLibraries = libraries(allDependentLibraries.values.flatten.toSeq)
+    val allLibraries = libraries()
     allProjects.map { p =>
       ProjectInfo(
         projectId = p.id,
@@ -50,11 +50,12 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     }
   }
 
-  // Find all libraries where artifact id starts with project id
+  // Find all libraries where artifact id starts with project name
   private[this] def findProvides(project: Project, libraries: Seq[Library]): Seq[LibraryReference] = {
-    libraries.filter(_.artifactId.startsWith(project.id)).map { l => LibraryReference(l.id) }
+    libraries.filter(_.artifactId.toLowerCase().startsWith(project.name.toLowerCase())).map { l =>
+      toLibraryReference(l)
+    }
   }
-
 
   private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[String]] = {
     projectLibrariesDao.findAll(
@@ -74,16 +75,15 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ).map { p => p.id -> p }.toMap
   }
 
-  private[this] def libraries(libraryIds: Seq[String]): Map[String, Library] = {
+  private[this] def libraries(): Map[String, Library] = {
     librariesDao.findAll(
       Authorization.All,
-      ids = Some(libraryIds),
       limit = None,
     ).map { l => l.id -> l }.toMap
   }
 
   private[this] def toLibraryReference(library: Library): LibraryReference = {
-    LibraryReference(s"${library.groupId}.${library.artifactId}")
+    LibraryReference(identifier = s"${library.groupId}.${library.artifactId}")
   }
 
 }
