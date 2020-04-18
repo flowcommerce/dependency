@@ -3,7 +3,7 @@ package services
 import com.google.inject.ImplementedBy
 import db.{Authorization, LibrariesDao, ProjectLibrariesDao, ProjectsDao}
 import dependency.resolver.{DependencyResolver, LibraryReference, ProjectInfo}
-import io.flow.dependency.v0.models.{Library, Project, ProjectDependencyResolution, ProjectDependencyResolutionResolved, Reference}
+import io.flow.dependency.v0.models.{Library, Project, ProjectDependencyResolution, ProjectDependencyResolutionResolved}
 import javax.inject.Inject
 
 @ImplementedBy(classOf[ProjectDependencyResolutionServiceImpl])
@@ -36,12 +36,12 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
 
   private[this] def buildProjectInfo(allProjects: Seq[Project]): Seq[ProjectInfo] = {
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id))
-    val allLibraries = libraries(allDependentLibraries.values.flatMap(_.map(_.libraryId)).toSeq.distinct)
+    val allLibraries = libraries(allDependentLibraries.values.flatten.toSeq)
     allProjects.map { p =>
       ProjectInfo(
         projectId = p.id,
-        dependsOn = allDependentLibraries.getOrElse(p.id, Nil),
-        provides = findProvides(p, allLibraries),
+        dependsOn = allDependentLibraries.getOrElse(p.id, Nil).map { id => toLibraryReference(allLibraries(id)) },
+        provides = findProvides(p, allLibraries.values.toSeq),
       )
     }
   }
@@ -52,13 +52,13 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   }
 
 
-  private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[LibraryReference]] = {
+  private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[String]] = {
     projectLibrariesDao.findAll(
       Authorization.All,
       projectIds = Some(projectIds),
       limit = None
     ).groupBy(_.project.id).map { case (pid, libs) =>
-      pid -> libs.flatMap(_.library.map(toLibraryReference))
+      pid -> libs.flatMap(_.library.map(_.id))
     }
   }
 
@@ -70,14 +70,16 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ).map { p => p.id -> p }.toMap
   }
 
-  private[this] def libraries(libraryIds: Seq[String]): Seq[Library] = {
+  private[this] def libraries(libraryIds: Seq[String]): Map[String, Library] = {
     librariesDao.findAll(
       Authorization.All,
       ids = Some(libraryIds),
       limit = None,
-    )
+    ).map { l => l.id -> l }.toMap
   }
 
-  private[this] def toLibraryReference(library: Reference): LibraryReference = LibraryReference(library.id)
+  private[this] def toLibraryReference(library: Library): LibraryReference = {
+    LibraryReference(s"${library.groupId}.${library.artifactId}")
+  }
 
 }
