@@ -41,29 +41,32 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   def buildProjectInfo(allProjects: Seq[Project]): Seq[ProjectInfo] = {
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id))
     val allLibraries = libraries()
+
     allProjects.map { p =>
       ProjectInfo(
         projectId = p.id,
-        dependsOn = allDependentLibraries.getOrElse(p.id, Nil).map { id => toLibraryReference(allLibraries(id)) },
-        provides = findProvides(p, allLibraries.values.toSeq),
+        dependsOn = allDependentLibraries.getOrElse(p.id, Nil),
+        provides = findProvides(p, allLibraries),
       )
     }
   }
 
   // Find all libraries where artifact id starts with project name
   private[this] def findProvides(project: Project, libraries: Seq[Library]): Seq[LibraryReference] = {
+    println(s" - project name: ${project.name}")
+    println(s" - library artifacts: ${libraries.map(_.artifactId)}")
     libraries.filter(_.artifactId.toLowerCase().startsWith(project.name.toLowerCase())).map { l =>
-      toLibraryReference(l)
+      toLibraryReference(l.groupId, l.artifactId)
     }
   }
 
-  private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[String]] = {
+  private[this] def dependentLibraries(projectIds: Seq[String]): Map[String, Seq[LibraryReference]] = {
     projectLibrariesDao.findAll(
       Authorization.All,
       projectIds = Some(projectIds),
       limit = None
     ).groupBy(_.project.id).map { case (pid, libs) =>
-      pid -> libs.flatMap(_.library.map(_.id))
+      pid -> libs.map { l => toLibraryReference(l.groupId, l.artifactId) }
     }
   }
 
@@ -75,15 +78,15 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ).map { p => p.id -> p }.toMap
   }
 
-  private[this] def libraries(): Map[String, Library] = {
+  private[this] def libraries(): Seq[Library] = {
     librariesDao.findAll(
       Authorization.All,
       limit = None,
-    ).map { l => l.id -> l }.toMap
+    )
   }
 
-  private[this] def toLibraryReference(library: Library): LibraryReference = {
-    LibraryReference(identifier = s"${library.groupId}.${library.artifactId}")
+  private[this] def toLibraryReference(groupId: String, artifactId: String): LibraryReference = {
+    LibraryReference(identifier = s"${groupId}.${artifactId}")
   }
 
 }
