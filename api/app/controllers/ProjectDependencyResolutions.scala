@@ -1,5 +1,6 @@
 package controllers
 
+import cache.ProjectDependencyResolutionServiceCache
 import db.{Authorization, MembershipsDao}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.v0.models.json._
@@ -8,7 +9,6 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 import io.flow.util.Config
 import play.api.libs.json.Json
-import services.ProjectDependencyResolutionService
 
 @Singleton
 class ProjectDependencyResolutions @Inject() (
@@ -17,7 +17,7 @@ class ProjectDependencyResolutions @Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   membershipsDao: MembershipsDao,
-  service: ProjectDependencyResolutionService,
+  service: ProjectDependencyResolutionServiceCache,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(organization: String, groupId: String): Action[AnyContent] = IdentifiedWithFallback { request =>
