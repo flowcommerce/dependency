@@ -243,9 +243,11 @@ package io.flow.dependency.v0.models {
    * have its dependencies resolved. ie. when upgrading projects, you can efficiently
    * upgrade each set of projects in resolved togther.
    *
+   * @param depth Represents the depth of the dependency tree (length of resolved array)
    * @param unresolved A list of projects that could not be resolved due to circular dependencies
    */
   final case class ProjectDependencyResolution(
+    depth: Long,
     resolved: Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved],
     unresolved: Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]
   )
@@ -1591,13 +1593,15 @@ package io.flow.dependency.v0.models {
 
     implicit def jsonReadsDependencyProjectDependencyResolution: play.api.libs.json.Reads[ProjectDependencyResolution] = {
       for {
+        depth <- (__ \ "depth").read[Long]
         resolved <- (__ \ "resolved").read[Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved]]
         unresolved <- (__ \ "unresolved").read[Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]]
-      } yield ProjectDependencyResolution(resolved, unresolved)
+      } yield ProjectDependencyResolution(depth, resolved, unresolved)
     }
 
     def jsObjectProjectDependencyResolution(obj: io.flow.dependency.v0.models.ProjectDependencyResolution): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
+        "depth" -> play.api.libs.json.JsNumber(obj.depth),
         "resolved" -> play.api.libs.json.Json.toJson(obj.resolved),
         "unresolved" -> play.api.libs.json.Json.toJson(obj.unresolved)
       )

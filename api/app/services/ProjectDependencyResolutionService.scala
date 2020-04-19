@@ -24,12 +24,15 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       buildProjectInfo(allProjects.values.toSeq, groupId = groupId)
     ).resolution
 
+    val resolved = r.resolved.map { p =>
+      ProjectDependencyResolutionResolved(
+        projects = p.map(_.projectId).map(allProjects),
+      )
+    }
+
     ProjectDependencyResolution(
-      resolved = r.resolved.map { p =>
-        ProjectDependencyResolutionResolved(
-          projects = p.map(_.projectId).map(allProjects),
-        )
-      },
+      depth = resolved.length.toLong,
+      resolved = resolved,
       unresolved = r.unresolved.map { p =>
         ProjectUnresolvedSummary(
           project = allProjects(p.projectId),
@@ -51,12 +54,14 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     val allLibraries = libraries(groupId)
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id), groupId)
 
+    // project scala-fix depends on itself... so remove own project from depends on
+    // to allow resolution to succeed
+
     allProjects.map { p =>
-      val dependsOn = allDependentLibraries.getOrElse(p.id, Nil)
+      val dependsOn = allDependentLibraries.getOrElse(p.id, Nil).filterNot { l =>
+        l.groupId == groupId && l.artifactId == p.name
+      }
       val provides = findProvides(p, allLibraries)
-      println(s" - project[${p.name}]")
-      println(s"    - provides: ${provides.map(_.identifier).mkString(", ")}")
-      println(s"    - dependsOn: ${dependsOn.map(_.identifier).mkString(", ")}")
       ProjectInfo(
         projectId = p.id,
         projectName = p.name,
