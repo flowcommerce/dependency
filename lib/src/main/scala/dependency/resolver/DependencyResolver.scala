@@ -52,12 +52,6 @@ case class DependencyResolver(projects: Seq[ProjectInfo]) {
     }
   }
 
-  private[this] def hasMatchingProject(libraryReference: LibraryReference): Boolean = {
-    projects.exists { p =>
-      libraryReference.artifactId.startsWith(p.projectName)
-    }
-  }
-
   @tailrec
   private[this] def resolve(resolution: DependencyResolution, remainingProjects: List[ProjectInfo]): DependencyResolution = {
     val (resolved, remaining) = remainingProjects.partition { p =>
@@ -68,15 +62,13 @@ case class DependencyResolver(projects: Seq[ProjectInfo]) {
       case Nil => {
         resolution.copy(
           unresolved = resolution.unresolved ++ remaining.map { p =>
-            val (resolvedDependencies, allUnresolved) = p.dependsOn.partition { l =>
+            val (resolvedDependencies, unresolvedDependencies) = p.dependsOn.partition { l =>
               areDependenciesSatisfied(resolution, Seq(l))
             }
-            val (unresolvedDependencies, unknownLibraries) = allUnresolved.partition(hasMatchingProject)
 
             p.copy(
               resolvedDependencies = resolvedDependencies,
               unresolvedDependencies = unresolvedDependencies,
-              unknownLibraries = unknownLibraries,
             )
           },
         )

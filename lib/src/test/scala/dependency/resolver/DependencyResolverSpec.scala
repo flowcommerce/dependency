@@ -72,7 +72,7 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
   "projects w/ circular dependencies" in {
     val libA = makeProjectInfo(
       projectId = "lib-a",
-      dependsOn = Seq(makeFlowLibRef("lib-b"), makeFlowLibRef("lib-s3"), makeFlowLibRef("other")),
+      dependsOn = Seq(makeFlowLibRef("lib-b"), makeFlowLibRef("lib-s3")),
       provides = Seq(makeFlowLibRef("lib-a")),
     )
     val libB = makeProjectInfo(
@@ -95,17 +95,14 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
     find(libA) { i =>
       i.resolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-s3"))
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-b"))
-      i.unknownLibraries.map(_.identifier) must equal(Seq("io.flow.other"))
     }
     find(libB) { i =>
       i.resolvedDependencies must be(Nil)
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-c"))
-      i.unknownLibraries.map(_.identifier) must equal(Nil)
     }
     find(libC) { i =>
       i.resolvedDependencies must be(Nil)
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-a"))
-      i.unknownLibraries.map(_.identifier) must equal(Nil)
     }
   }
 }

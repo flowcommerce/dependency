@@ -76,7 +76,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   // Find all libraries where artifact id starts with project name
   private[this] def findProvides(project: ProjectSummary, libraries: Seq[LibrarySummary]): Seq[LibraryReference] = {
     libraries
-      .filter(_.artifactId.toLowerCase().startsWith(project.name.toLowerCase()))
+      .filter { l => ArtifactNameMatcher.matches(l.artifactId, project.name) }
       .map { l => LibraryReference(l.groupId, l.artifactId) }
   }
 

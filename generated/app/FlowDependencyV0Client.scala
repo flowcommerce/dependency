@@ -244,13 +244,10 @@ package io.flow.dependency.v0.models {
    * upgrade each set of projects in resolved togther.
    *
    * @param unresolved A list of projects that could not be resolved due to circular dependencies
-   * @param unknown A list of libraries that were unknown, likely indicating that the project that
-   *        builds these libraries is itself not a project in dependency
    */
   final case class ProjectDependencyResolution(
     resolved: Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved],
-    unresolved: Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary],
-    unknown: Seq[io.flow.dependency.v0.models.LibrarySummary]
+    unresolved: Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]
   )
 
   final case class ProjectDependencyResolutionResolved(
@@ -1596,15 +1593,13 @@ package io.flow.dependency.v0.models {
       for {
         resolved <- (__ \ "resolved").read[Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved]]
         unresolved <- (__ \ "unresolved").read[Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]]
-        unknown <- (__ \ "unknown").read[Seq[io.flow.dependency.v0.models.LibrarySummary]]
-      } yield ProjectDependencyResolution(resolved, unresolved, unknown)
+      } yield ProjectDependencyResolution(resolved, unresolved)
     }
 
     def jsObjectProjectDependencyResolution(obj: io.flow.dependency.v0.models.ProjectDependencyResolution): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "resolved" -> play.api.libs.json.Json.toJson(obj.resolved),
-        "unresolved" -> play.api.libs.json.Json.toJson(obj.unresolved),
-        "unknown" -> play.api.libs.json.Json.toJson(obj.unknown)
+        "unresolved" -> play.api.libs.json.Json.toJson(obj.unresolved)
       )
     }
 
