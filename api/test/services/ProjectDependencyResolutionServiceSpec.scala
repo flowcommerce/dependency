@@ -30,13 +30,12 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   "buildProjectInfo for no project" in {
-    projectDependencyResolutionService.buildProjectInfo(Nil, Nil, groupId = createTestId()) must be(Nil)
+    projectDependencyResolutionService.buildProjectInfo(Nil, groupId = createTestId()) must be(Nil)
   }
 
   "buildProjectInfo 'depends' and 'provides'" in {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
-      projectDependencyResolutionService.libraries(defaultGroupId),
       groupId = defaultGroupId,
     ).toList
     all.size must equal(2)
@@ -58,6 +57,5 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
       case _ => sys.error("Expected two entries")
     }
     resolution.unresolved must be(Nil)
-    resolution.unknown must be(Nil)
   }
 }

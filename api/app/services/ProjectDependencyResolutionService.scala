@@ -19,13 +19,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
 
   override def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     val allProjects = projects(organizationKey)
-    val allLibraries = libraries(groupId)
-    lazy val allLibrariesByIdentifier = allLibraries.map { l =>
-      LibraryReference(l.groupId, l.artifactId).identifier -> l
-    }.toMap
 
     val r = DependencyResolver(
-      buildProjectInfo(allProjects.values.toSeq, allLibraries, groupId = groupId)
+      buildProjectInfo(allProjects.values.toSeq, groupId = groupId)
     ).resolution
 
     ProjectDependencyResolution(
@@ -41,9 +37,6 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
           unresolvedLibraries = p.unresolvedDependencies.map(_.identifier),
         )
       },
-      unknown = r.allUnknownLibraries.map { l =>
-        allLibrariesByIdentifier(l.identifier)
-      },
     )
   }
 
@@ -53,9 +46,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   // and use that to build up the project info we need to resolve dependencies
   private[services] def buildProjectInfo(
     allProjects: Seq[ProjectSummary],
-    allLibraries: Seq[LibrarySummary],
     groupId: String,
   ): Seq[ProjectInfo] = {
+    val allLibraries = libraries(groupId)
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id), groupId)
 
     allProjects.map { p =>
@@ -99,7 +92,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     ).map { p => p.id -> projectsDao.toSummary(p) }.toMap
   }
 
-  private[services] def libraries(groupId: String): Seq[LibrarySummary] = {
+  private[this] def libraries(groupId: String): Seq[LibrarySummary] = {
     librariesDao.findAll(
       Authorization.All,
       groupId = Some(groupId),
