@@ -493,9 +493,9 @@
     "project_dependency_resolution": {
       "description": "Provides an ordered set of projects such that each set of projects is sure to have its dependencies resolved. ie. when upgrading projects, you can efficiently upgrade each set of projects in resolved togther.",
       "fields": [
-        { "name": "depth", "type": "long", "description": "Represents the depth of the dependency tree (length of resolved array)" },
         { "name": "resolved", "type": "[project_dependency_resolution_resolved]" },
-        { "name": "unresolved", "type": "[project_unresolved_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" }
+        { "name": "unresolved", "type": "[project_unresolved_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" },
+        { "name": "ordered", "type": "map[string]" }        
       ]
     },
 

@@ -31,8 +31,10 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     }
 
     ProjectDependencyResolution(
-      depth = resolved.length.toLong,
       resolved = resolved,
+      ordered = r.resolved.zipWithIndex.map { case (projects, index) =>
+        (index+1).toString -> projects.map(_.projectName).sorted.mkString(" ")
+      }.toMap,
       unresolved = r.unresolved.map { p =>
         ProjectUnresolvedSummary(
           project = allProjects(p.projectId),
