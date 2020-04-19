@@ -493,15 +493,23 @@
     "project_dependency_resolution": {
       "description": "Provides an ordered set of projects such that each set of projects is sure to have its dependencies resolved. ie. when upgrading projects, you can efficiently upgrade each set of projects in resolved togther.",
       "fields": [
+        { "name": "depth", "type": "long", "description": "Represents the depth of the dependency tree (length of resolved array)" },
         { "name": "resolved", "type": "[project_dependency_resolution_resolved]" },
-        { "name": "circular", "type": "[project_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" }
+        { "name": "unresolved", "type": "[project_unresolved_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" }
       ]
     },
 
     "project_dependency_resolution_resolved": {
       "fields": [
-        { "name": "position", "type": "long", "minimum": 1 },
         { "name": "projects", "type": "[project_summary]" }
+      ]
+    },
+
+    "project_unresolved_summary": {
+      "fields": [
+        { "name": "project", "type": "project_summary" },
+        { "name": "resolved_libraries", "type": "[string]" },
+        { "name": "unresolved_libraries", "type": "[string]", "minimum": 1 }
       ]
     }
 
@@ -1332,12 +1340,11 @@
     },
 
     "project_dependency_resolution": {
-      "path": "/:organization/project/dependencies",
+      "path": "/:organization/project/dependencies/group/:group_id",
 
       "operations": [
         {
           "method": "GET",
-          "description": "Used to fetch one token",
           "responses": {
             "200": { "type": "project_dependency_resolution" },
             "401": { "type": "unit" },
