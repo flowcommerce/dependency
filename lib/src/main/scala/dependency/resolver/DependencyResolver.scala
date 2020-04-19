@@ -11,6 +11,8 @@ case class DependencyResolution(
 
   def isLibraryResolved(identifier: String): Boolean = allResolvedLibraries.contains(identifier)
 
+  def allUnknownLibraries: Seq[LibraryReference] = resolved.flatMap(_.flatMap(_.unknownLibraries)).distinct.sortBy(_.identifier)
+
 }
 
 object DependencyResolution {
