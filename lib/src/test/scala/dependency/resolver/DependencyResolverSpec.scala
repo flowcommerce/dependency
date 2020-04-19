@@ -4,8 +4,6 @@ import org.scalatest.{Assertion, MustMatchers, WordSpec}
 
 class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHelpers {
 
-  private[this] val dependencyResolver: DependencyResolver = DependencyResolver()
-
   private[this] def makeFlowLibRef(artifactId: String): LibraryReference = makeLibraryReference(
     groupId = "io.flow",
     artifactId = artifactId,
@@ -37,7 +35,7 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
   private[this] val EmptyDependencyResolutionIds = DependencyResolutionIds(resolved = Nil, circular = Nil)
 
   private[this] def resolve(projects: Seq[ProjectInfo]): DependencyResolutionIds = {
-    val r = dependencyResolver.resolve(projects)
+    val r = DependencyResolver(projects).resolution
     DependencyResolutionIds(
       resolved = r.resolved.map(_.map(_.projectId).sorted),
       circular = r.unresolved.map(_.projectId).sorted,
@@ -45,7 +43,7 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
   }
 
   "no projects" in {
-    dependencyResolver.resolve(Nil) must equal(DependencyResolution.empty)
+    DependencyResolver(Nil).resolution must equal(DependencyResolution.empty)
   }
 
   "projects w/ no dependencies" in {
@@ -74,7 +72,7 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
   "projects w/ circular dependencies" in {
     val libA = makeProjectInfo(
       projectId = "lib-a",
-      dependsOn = Seq(makeFlowLibRef("lib-b"), makeFlowLibRef("lib-s3")),
+      dependsOn = Seq(makeFlowLibRef("lib-b"), makeFlowLibRef("lib-s3"), makeFlowLibRef("other")),
       provides = Seq(makeFlowLibRef("lib-a")),
     )
     val libB = makeProjectInfo(
@@ -88,7 +86,7 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
       provides = Seq(makeFlowLibRef("lib-c")),
     )
 
-    val r = dependencyResolver.resolve(Seq(libA, libB, libC, libS3))
+    val r = DependencyResolver(Seq(libA, libB, libC, libS3)).resolution
     r.unresolved.size must equal(3)
     def find(p: ProjectInfo)(f: ProjectInfo => Assertion) = {
       f(r.unresolved.find(_.projectId == p.projectId).get)
@@ -97,14 +95,17 @@ class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHel
     find(libA) { i =>
       i.resolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-s3"))
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-b"))
+      i.unknownLibraries.map(_.identifier) must equal(Seq("io.flow.other"))
     }
     find(libB) { i =>
       i.resolvedDependencies must be(Nil)
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-c"))
+      i.unknownLibraries.map(_.identifier) must equal(Nil)
     }
     find(libC) { i =>
       i.resolvedDependencies must be(Nil)
       i.unresolvedDependencies.map(_.identifier) must equal(Seq("io.flow.lib-a"))
+      i.unknownLibraries.map(_.identifier) must equal(Nil)
     }
   }
 }

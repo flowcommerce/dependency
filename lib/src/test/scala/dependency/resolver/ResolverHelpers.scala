@@ -20,6 +20,7 @@ trait ResolverHelpers {
   ): ProjectInfo = {
     ProjectInfo(
       projectId = projectId,
+      projectName = projectId.split("\\.").last, // eg. io.flow.lib-s3 becomes lib-s3
       dependsOn = dependsOn,
       provides = provides,
     )

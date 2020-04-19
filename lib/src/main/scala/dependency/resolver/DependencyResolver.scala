@@ -27,10 +27,12 @@ case class LibraryReference(groupId: String, artifactId: String) {
 
 case class ProjectInfo(
   projectId: String,
+  projectName: String,
   dependsOn: Seq[LibraryReference],
   provides: Seq[LibraryReference],
   resolvedDependencies: Seq[LibraryReference] = Nil,
   unresolvedDependencies: Seq[LibraryReference] = Nil,
+  unknownLibraries: Seq[LibraryReference] = Nil,
 )
 
 /**
@@ -38,11 +40,9 @@ case class ProjectInfo(
  * to return an ordered list of sets of projects that can be upgraded
  * at one time.
  */
-case class DependencyResolver() {
+case class DependencyResolver(projects: Seq[ProjectInfo]) {
 
-  def resolve(projects: Seq[ProjectInfo]): DependencyResolution = {
-    resolve(DependencyResolution.empty, projects.toList)
-  }
+  lazy val resolution: DependencyResolution = resolve(DependencyResolution.empty, projects.toList)
 
   private[this] def areDependenciesSatisfied(resolution: DependencyResolution, libraries: Seq[LibraryReference]): Boolean = {
     libraries.forall { l =>
@@ -50,9 +50,15 @@ case class DependencyResolver() {
     }
   }
 
+  private[this] def hasMatchingProject(libraryReference: LibraryReference): Boolean = {
+    projects.exists { p =>
+      libraryReference.artifactId.startsWith(p.projectName)
+    }
+  }
+
   @tailrec
-  private[this] def resolve(resolution: DependencyResolution, projects: List[ProjectInfo]): DependencyResolution = {
-    val (resolved, remaining) = projects.partition { p =>
+  private[this] def resolve(resolution: DependencyResolution, remainingProjects: List[ProjectInfo]): DependencyResolution = {
+    val (resolved, remaining) = remainingProjects.partition { p =>
       areDependenciesSatisfied(resolution, p.dependsOn)
     }
 
@@ -60,12 +66,15 @@ case class DependencyResolver() {
       case Nil => {
         resolution.copy(
           unresolved = resolution.unresolved ++ remaining.map { p =>
-            val (r, u) = p.dependsOn.partition { l =>
+            val (resolvedDependencies, allUnresolved) = p.dependsOn.partition { l =>
               areDependenciesSatisfied(resolution, Seq(l))
             }
+            val (unresolvedDependencies, unknownLibraries) = allUnresolved.partition(hasMatchingProject)
+
             p.copy(
-              resolvedDependencies = r,
-              unresolvedDependencies = u,
+              resolvedDependencies = resolvedDependencies,
+              unresolvedDependencies = unresolvedDependencies,
+              unknownLibraries = unknownLibraries,
             )
           },
         )

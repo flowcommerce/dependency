@@ -35,7 +35,8 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
           resolvedLibraries = p.resolvedDependencies.map(_.identifier),
           unresolvedLibraries = p.unresolvedDependencies.map(_.identifier),
         )
-      }
+      },
+      unknown = r.unknownLibraries,
     )
   }
 
