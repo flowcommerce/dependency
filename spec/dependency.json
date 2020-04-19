@@ -495,7 +495,7 @@
       "fields": [
         { "name": "resolved", "type": "[project_dependency_resolution_resolved]" },
         { "name": "unresolved", "type": "[project_unresolved_summary]", "description": "A list of projects that could not be resolved due to circular dependencies" },
-        { "name": "ordered", "type": "map[string]" }        
+        { "name": "steps", "type": "map[string]" }        
       ]
     },
 

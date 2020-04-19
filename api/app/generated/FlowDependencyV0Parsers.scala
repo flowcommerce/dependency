@@ -645,17 +645,17 @@ package io.flow.dependency.v0.anorm.parsers {
     def parser(
       resolved: String = "resolved",
       unresolved: String = "unresolved",
-      ordered: String = "ordered",
+      steps: String = "steps",
       prefixOpt: Option[String] = None
     ): RowParser[io.flow.dependency.v0.models.ProjectDependencyResolution] = {
       SqlParser.get[Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved]](prefixOpt.getOrElse("") + resolved) ~
       SqlParser.get[Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]](prefixOpt.getOrElse("") + unresolved) ~
-      SqlParser.get[Map[String, String]](prefixOpt.getOrElse("") + ordered) map {
-        case resolved ~ unresolved ~ ordered => {
+      SqlParser.get[Map[String, String]](prefixOpt.getOrElse("") + steps) map {
+        case resolved ~ unresolved ~ steps => {
           io.flow.dependency.v0.models.ProjectDependencyResolution(
             resolved = resolved,
             unresolved = unresolved,
-            ordered = ordered
+            steps = steps
           )
         }
       }

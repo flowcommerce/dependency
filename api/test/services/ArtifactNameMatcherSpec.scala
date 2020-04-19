@@ -9,6 +9,7 @@ class ArtifactNameMatcherSpec extends FlowPlaySpec {
     matches("foo", "foo") must be(true)
     matches("foo-bar", "foo-bar") must be(true)
     matches("foo", "foo1") must be(false)
+    matches("lib-query-sql-play28", "lib-feature") must be(false)
   }
 
   "known suffixes" in {

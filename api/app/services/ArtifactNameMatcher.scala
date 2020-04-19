@@ -17,8 +17,8 @@ object ArtifactNameMatcher {
     val fProjectName = format(projectName)
     if (fArtifactId == fProjectName) {
       true
-    } else {
-      val suffix = fArtifactId.split("\\-").last
+    } else if (fArtifactId.startsWith(fProjectName + "-")) {
+      val suffix = fArtifactId.drop(fProjectName.length + 1)
       KnownSuffixes.exists { s =>
         if (suffix.startsWith(s)) {
           val remaining = suffix.drop(s.length)
@@ -27,6 +27,8 @@ object ArtifactNameMatcher {
           false
         }
       }
+    } else {
+      false
     }
   }
 

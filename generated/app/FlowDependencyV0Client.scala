@@ -248,7 +248,7 @@ package io.flow.dependency.v0.models {
   final case class ProjectDependencyResolution(
     resolved: Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved],
     unresolved: Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary],
-    ordered: Map[String, String]
+    steps: Map[String, String]
   )
 
   final case class ProjectDependencyResolutionResolved(
@@ -1594,15 +1594,15 @@ package io.flow.dependency.v0.models {
       for {
         resolved <- (__ \ "resolved").read[Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved]]
         unresolved <- (__ \ "unresolved").read[Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary]]
-        ordered <- (__ \ "ordered").read[Map[String, String]]
-      } yield ProjectDependencyResolution(resolved, unresolved, ordered)
+        steps <- (__ \ "steps").read[Map[String, String]]
+      } yield ProjectDependencyResolution(resolved, unresolved, steps)
     }
 
     def jsObjectProjectDependencyResolution(obj: io.flow.dependency.v0.models.ProjectDependencyResolution): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "resolved" -> play.api.libs.json.Json.toJson(obj.resolved),
         "unresolved" -> play.api.libs.json.Json.toJson(obj.unresolved),
-        "ordered" -> play.api.libs.json.Json.toJson(obj.ordered)
+        "steps" -> play.api.libs.json.Json.toJson(obj.steps)
       )
     }
 

@@ -32,7 +32,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
 
     ProjectDependencyResolution(
       resolved = resolved,
-      ordered = r.resolved.zipWithIndex.map { case (projects, index) =>
+      steps = r.resolved.zipWithIndex.map { case (projects, index) =>
         (index+1).toString -> projects.map(_.projectName).sorted.mkString(" ")
       }.toMap,
       unresolved = r.unresolved.map { p =>
@@ -56,11 +56,10 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
     val allLibraries = libraries(groupId)
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id), groupId)
 
-    // project scala-fix depends on itself... so remove own project from depends on
-    // to allow resolution to succeed
-
     allProjects.map { p =>
       val dependsOn = allDependentLibraries.getOrElse(p.id, Nil).filterNot { l =>
+        // project scala-fix depends on itself... so remove own project from depends on
+        // to allow resolution to succeed
         l.groupId == groupId && l.artifactId == p.name
       }
       val provides = findProvides(p, allLibraries)
