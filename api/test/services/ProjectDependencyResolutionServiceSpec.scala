@@ -7,7 +7,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
   private[this] val defaultOrg = createOrganization()
-  private[this] val defaultGroupId = "io.flow"
+  private[this] val defaultGroupId = createTestId()
   private[this] val libS3Project = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-s3")
@@ -52,12 +52,15 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   "getByOrganization" in {
-    val resolution = projectDependencyResolutionService.getByOrganizationId(defaultOrg.id, defaultGroupId)
+    val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
     resolution.resolved.toList match {
-      case a :: b :: Nil =>
+      case a :: b :: Nil => {
         a.projects.map(_.name) must equal(Seq("lib-s3"))
         b.projects.map(_.name) must equal(Seq("lib-invoice"))
-      case _ => sys.error("Expected two entries")
+      }
+      case other => {
+        sys.error(s"Expected two entries but found ${other.size}")
+      }
     }
     resolution.unresolved must be(Nil)
   }

@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 @ImplementedBy(classOf[ProjectDependencyResolutionServiceImpl])
 trait ProjectDependencyResolutionService {
-  def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution
+  def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution
 }
 
 class ProjectDependencyResolutionServiceImpl @Inject() (
@@ -17,8 +17,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   librariesDao: LibrariesDao,
 ) extends ProjectDependencyResolutionService {
 
-  override def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution = {
+  override def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     val allProjects = projects(organizationKey)
+    println(s" all pojects: ${allProjects.keys}")
 
     val r = DependencyResolver(
       buildProjectInfo(allProjects.values.toSeq, groupId = groupId)

@@ -192,7 +192,6 @@ class InternalProjectLibrariesDao @Inject()(
       offset = offset,
     ) { q =>
       q
-        .withDebugging()
         .and(auth.organizationProjects("organization_id", "project_id").sql)
         .equals("id", id)
         .optionalIn("project_id", projectIds)
