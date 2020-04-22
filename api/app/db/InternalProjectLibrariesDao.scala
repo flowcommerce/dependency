@@ -176,7 +176,7 @@ class InternalProjectLibrariesDao @Inject()(
     crossBuildVersion: Option[Option[String]] = None,
     isSynced: Option[Boolean] = None,
     hasLibrary: Option[Boolean] = None,
-    orderBy: Option[OrderBy], //  OrderBy("lower(project_libraries.group_id), lower(project_libraries.artifact_id), project_libraries.created_at"),
+    orderBy: Option[OrderBy],
     limit: Option[Long],
     offset: Long = 0
   ): Seq[InternalProjectLibrary] = {
@@ -192,19 +192,20 @@ class InternalProjectLibrariesDao @Inject()(
       offset = offset,
     ) { q =>
       q
-        .and(auth.organizations("organization_id", Some("projects.visibility")).sql)
+        .withDebugging()
+        .and(auth.organizationProjects("organization_id", "project_id").sql)
         .equals("id", id)
-        .optionalIn("project_libraries.project_id", projectIds)
+        .optionalIn("project_id", projectIds)
         .and(
           crossBuildVersion.map {
-            case None => "project_libraries.cross_build_version is null"
-            case Some(_) => "project_libraries.cross_build_version = {cross_build_version}"
+            case None => "cross_build_version is null"
+            case Some(_) => "cross_build_version = {cross_build_version}"
           }
         )
         .bind("cross_build_version", crossBuildVersion.flatten)
         .and(
           isSynced.map { value =>
-            val clause = "select 1 from syncs where object_id = project_libraries.id and event = {sync_event_completed}"
+            val clause = "select 1 from syncs where object_id = id and event = {sync_event_completed}"
             if (value) {
               s"exists ($clause)"
             } else {
@@ -213,7 +214,7 @@ class InternalProjectLibrariesDao @Inject()(
           }
         )
         .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
-        .nullBoolean("project_libraries.library_id", hasLibrary)
+        .nullBoolean("library_id", hasLibrary)
     }.map(InternalProjectLibrary.apply)
   }
 
