@@ -17,15 +17,18 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   private[this] val libInvoiceProject = {
+    println(s"Creating lib invoice")
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
+    println(s"Creating project library for id: ${p.id}")
     createProjectLibrary(p)(
       createProjectLibraryForm(p).copy(
         groupId = defaultGroupId,
         artifactId = "lib-s3",
       )
     )
+    println(s"Creating lib invoice")
     projectsDao.toSummary(p)
   }
 
@@ -37,7 +40,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
-    ).toList
+    )
     all.size must equal(2)
     val s3 = all.find(_.projectId == libS3Project.id).get
     s3.dependsOn must be(Nil)

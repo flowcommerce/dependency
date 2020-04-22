@@ -1,6 +1,6 @@
 package sync
 
-import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, LibraryVersionsDao, ProjectLibrariesDao, ResolversDao, SyncsDao}
+import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, LibraryVersionsDao, InternalProjectLibrariesDao, ResolversDao, SyncsDao}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
 import io.flow.dependency.api.lib.{ArtifactVersion, DefaultLibraryArtifactProvider}
@@ -12,13 +12,12 @@ class LibrarySync @Inject()(
   librariesDao: LibrariesDao,
   resolversDao: ResolversDao,
   libraryVersionsDao: LibraryVersionsDao,
-  projectLibrariesDao: ProjectLibrariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
   internalTasksDao: InternalTasksDao,
+  artifactProvider: DefaultLibraryArtifactProvider,
   syncsDao: SyncsDao,
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
-
-  private[this] val artifactProvider = DefaultLibraryArtifactProvider()
 
   private[this] def toVersionForm(version: ArtifactVersion): VersionForm = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
   private[this] def toVersionForm(lv: LibraryVersion): VersionForm = VersionForm(lv.version, lv.crossBuildVersion)
@@ -39,7 +38,6 @@ class LibrarySync @Inject()(
    */
   private[this] def versionsOnResolver(lib: Library, resolver: Resolver): Seq[VersionForm] = {
     artifactProvider.resolve(
-      resolversDao = resolversDao,
       resolver = resolver,
       groupId = lib.groupId,
       artifactId = lib.artifactId
@@ -96,7 +94,8 @@ class LibrarySync @Inject()(
         Authorization.All,
         libraryId = Some(libraryId),
         limit = None,
-      ).map(_.project.id),
+        orderBy = None,
+      ).map(_.projectId),
       priority = InternalTask.MediumPriority
     )
   }

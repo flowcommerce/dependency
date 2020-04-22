@@ -1,7 +1,9 @@
 package io.flow.dependency.api.lib
 
+import cache.OrganizationsCache
 import db.{Authorization, ResolversDao}
-import io.flow.dependency.v0.models.{OrganizationSummary, ResolverSummary, Resolver, Visibility}
+import io.flow.dependency.v0.models.{Resolver, ResolverSummary, Visibility}
+import javax.inject.Inject
 
 case class ArtifactResolution(
   resolver: ResolverSummary,
@@ -12,15 +14,15 @@ case class ArtifactResolution(
 
 trait LibraryArtifactProvider {
 
+  def resolversDao: ResolversDao
+
   /**
     * Returns the artifacts for this library.
     *
-    * @param organization Used to look up private resolvers for this organization.
-//    * @param resolver If specified, we search this resolver first
+    * @param organizationId Used to look up private resolvers for this organization.
     */
   def resolve(
-    resolversDao: ResolversDao,
-    organization: OrganizationSummary,
+    organizationId: String,
     groupId: String,
     artifactId: String
   ): Option[ArtifactResolution]
@@ -31,7 +33,6 @@ trait LibraryArtifactProvider {
     * groupId/artifactId on this resolver.
     */
   def resolve(
-    resolversDao: ResolversDao,
     resolver: Resolver,
     groupId: String,
     artifactId: String
@@ -50,17 +51,18 @@ trait LibraryArtifactProvider {
 }
 
 
-case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
+class DefaultLibraryArtifactProvider @Inject() (
+  override val resolversDao: ResolversDao,
+  organizationsCache: OrganizationsCache,
+) extends LibraryArtifactProvider {
 
   override def resolve(
-    resolversDao: ResolversDao,
-    organization: OrganizationSummary,
+    organizationId: String,
     groupId: String,
     artifactId: String
   ): Option[ArtifactResolution] = {
     internalResolve(
-      resolversDao,
-      organization = organization,
+      organizationId = organizationId,
       groupId = groupId,
       artifactId = artifactId,
       limit = 100,
@@ -69,17 +71,16 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
   }
 
   private[this] def internalResolve(
-    resolversDao: ResolversDao,
-    organization: OrganizationSummary,
+    organizationId: String,
     groupId: String,
     artifactId: String,
     limit: Long,
     offset: Long
   ): Option[ArtifactResolution] = {
     resolversDao.findAll(
-      Authorization.Organization(organization.id),
+      Authorization.Organization(organizationId),
       limit = limit,
-      offset = offset
+      offset = offset,
     ) match {
       case Nil => {
         None
@@ -94,27 +95,13 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
           ) match {
             case Nil => {}
             case versions => {
-              return Some(
-                ArtifactResolution(
-                  ResolverSummary(
-                    id = resolver.id,
-                    organization = resolver.visibility match {
-                      case Visibility.Public => None
-                      case Visibility.Private | Visibility.UNDEFINED(_) => Some(organization)
-                    },
-                    visibility = resolver.visibility,
-                    uri = resolver.uri
-                  ),
-                  versions
-                )
-              )
+              return Some(ArtifactResolution(toResolverSummary(organizationId, resolver), versions))
             }
           }
         }
 
         internalResolve(
-          resolversDao,
-          organization = organization,
+          organizationId = organizationId,
           groupId = groupId,
           artifactId = artifactId,
           limit = limit,
@@ -122,6 +109,18 @@ case class DefaultLibraryArtifactProvider() extends LibraryArtifactProvider {
         )
       }
     }
+  }
+
+  private[this] def toResolverSummary(organizationId: String, resolver: Resolver): ResolverSummary = {
+    ResolverSummary(
+      id = resolver.id,
+      organization = resolver.visibility match {
+        case Visibility.Public => None
+        case Visibility.Private | Visibility.UNDEFINED(_) => organizationsCache.findSummaryByOrganizationId(organizationId)
+      },
+      visibility = resolver.visibility,
+      uri = resolver.uri,
+    )
   }
 
 }

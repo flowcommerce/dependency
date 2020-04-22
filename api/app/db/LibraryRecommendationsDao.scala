@@ -3,7 +3,7 @@ package db
 import javax.inject.{Inject, Singleton}
 
 import io.flow.dependency.api.lib.Recommendations
-import io.flow.dependency.v0.models.{Library, LibraryVersion, Project, ProjectLibrary, VersionForm}
+import io.flow.dependency.v0.models.{Library, LibraryVersion, Project, VersionForm}
 import com.google.inject.Provider
 
 case class LibraryRecommendation(
@@ -16,8 +16,8 @@ case class LibraryRecommendation(
 @Singleton
 class LibraryRecommendationsDao @Inject()(
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  projectLibrariesDaoProvider: Provider[ProjectLibrariesDao],
-  librariesDaoProvider: Provider[LibrariesDao]
+  projectLibrariesDaoProvider: Provider[InternalProjectLibrariesDao],
+  librariesDaoProvider: Provider[LibrariesDao],
 ){
 
   def forProject(project: Project): Seq[LibraryRecommendation] = {
@@ -28,15 +28,16 @@ class LibraryRecommendationsDao @Inject()(
       Authorization.Organization(project.organization.id),
       projectId = Some(project.id),
       hasLibrary = Some(true),
-      limit = None
+      limit = None,
+      orderBy = None,
     ).foreach { projectLibrary =>
-      projectLibrary.library.flatMap { lib => librariesDaoProvider.get.findById(auth, lib.id) }.map { library =>
-        val recentVersions = versionsGreaterThan(auth, library, projectLibrary.version)
+      projectLibrary.db.libraryId.flatMap { libraryId => librariesDaoProvider.get.findById(auth, libraryId) }.map { library =>
+        val recentVersions = versionsGreaterThan(auth, library, projectLibrary.db.version)
         recommend(projectLibrary, recentVersions).map { v =>
           recommendations ++= Seq(
             LibraryRecommendation(
               library = library,
-              from = projectLibrary.version,
+              from = projectLibrary.db.version,
               to = v,
               latest = recentVersions.headOption.getOrElse(v)
             )
@@ -48,9 +49,9 @@ class LibraryRecommendationsDao @Inject()(
     recommendations.toSeq
   }
 
-  def recommend(current: ProjectLibrary, others: Seq[LibraryVersion]): Option[LibraryVersion] = {
+  def recommend(current: InternalProjectLibrary, others: Seq[LibraryVersion]): Option[LibraryVersion] = {
     Recommendations.version(
-      VersionForm(current.version, current.crossBuildVersion),
+      VersionForm(current.db.version, current.db.crossBuildVersion),
       others.map(v => VersionForm(v.version, v.crossBuildVersion))
     ).map { version =>
       others.find { _.version == version }.getOrElse {

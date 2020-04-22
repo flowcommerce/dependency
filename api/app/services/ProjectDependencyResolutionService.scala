@@ -1,7 +1,7 @@
 package services
 
 import com.google.inject.ImplementedBy
-import db.{Authorization, LibrariesDao, ProjectLibrariesDao, ProjectsDao}
+import db.{Authorization, LibrariesDao, InternalProjectLibrariesDao, ProjectsDao}
 import dependency.resolver.{DependencyResolver, LibraryReference, ProjectInfo}
 import io.flow.dependency.v0.models.{Library, LibrarySummary, ProjectDependencyResolution, ProjectDependencyResolutionResolved, ProjectSummary, ProjectUnresolvedSummary}
 import javax.inject.Inject
@@ -13,7 +13,7 @@ trait ProjectDependencyResolutionService {
 
 class ProjectDependencyResolutionServiceImpl @Inject() (
   projectsDao: ProjectsDao,
-  projectLibrariesDao: ProjectLibrariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
   librariesDao: LibrariesDao,
 ) extends ProjectDependencyResolutionService {
 
@@ -84,8 +84,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       Authorization.All,
       projectIds = Some(projectIds),
       groupId = Some(groupId),
-      limit = None
-    ).groupBy(_.project.id).map { case (pid, libs) =>
+      limit = None,
+      orderBy = None,
+    ).groupBy(_.projectId).map { case (pid, libs) =>
       pid -> libs.map { l => LibraryReference(l.groupId, l.artifactId) }
     }
   }

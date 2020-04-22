@@ -24,7 +24,7 @@ object ResolverActor {
 class ResolverActor @Inject()(
   resolversCache: ResolversCache,
   librariesDao: LibrariesDao,
-  projectLibrariesDao: ProjectLibrariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
   staticUserProvider: StaticUserProvider,
   rollbar: RollbarLogger,
   @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
@@ -60,10 +60,8 @@ class ResolverActor @Inject()(
         }
       }
 
-      Pager.create { offset =>
-        projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = Some(100), offset = offset)
-      }.foreach { projectLibrary =>
-        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.project.id, projectLibrary.id)
+      projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = None, orderBy = None).foreach { projectLibrary =>
+        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.projectId, projectLibrary.id)
       }
     }
   }

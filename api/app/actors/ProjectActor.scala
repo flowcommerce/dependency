@@ -3,7 +3,7 @@ package io.flow.dependency.actors
 import io.flow.dependency.api.lib._
 import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
-import io.flow.postgresql.Pager
+import io.flow.postgresql.{OrderBy, Pager}
 import db._
 import akka.actor.Actor
 import cache.ProjectsCache
@@ -38,12 +38,12 @@ class ProjectActor @javax.inject.Inject() (
   projectsCache: ProjectsCache,
   syncsDao: SyncsDao,
   projectBinariesDao:ProjectBinariesDao,
-  projectLibrariesDao: ProjectLibrariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
   recommendationsDao: RecommendationsDao,
   librariesDao: LibrariesDao,
   binariesDao: BinariesDao,
   staticUserProvider: StaticUserProvider,
-  resolversDao: ResolversDao,
+  defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider,
 ) extends Actor {
 
   private[this] lazy val SystemUser = staticUserProvider.systemUser
@@ -159,7 +159,8 @@ class ProjectActor @javax.inject.Inject() (
       Authorization.All,
       projectId = Some(project.id),
       isSynced = Some(false),
-      limit = None
+      limit = None,
+      orderBy = Some(OrderBy("group_id,artifact_id")),
     ).map( lib => s"Library ${lib.groupId}.${lib.artifactId}" ) ++
     projectBinariesDao.findAll(
       Authorization.All,
@@ -168,15 +169,14 @@ class ProjectActor @javax.inject.Inject() (
     ).map( bin => s"Binary ${bin.name}" )
   }
 
-  private[this] def resolveLibrary(projectLibrary: ProjectLibrary): Option[Library] = {
+  private[this] def resolveLibrary(projectLibrary: InternalProjectLibrary): Option[Library] = {
     librariesDao.findByGroupIdAndArtifactId(Authorization.All, projectLibrary.groupId, projectLibrary.artifactId) match {
       case Some(lib) => {
         Some(lib)
       }
       case None => {
-        DefaultLibraryArtifactProvider().resolve(
-          resolversDao = resolversDao,
-          organization = projectLibrary.project.organization,
+        defaultLibraryArtifactProvider.resolve(
+          organizationId = projectLibrary.organizationId,
           groupId = projectLibrary.groupId,
           artifactId = projectLibrary.artifactId
         ) match {
@@ -187,14 +187,17 @@ class ProjectActor @javax.inject.Inject() (
             librariesDao.upsert(
               SystemUser,
               form = LibraryForm(
-                organizationId = projectLibrary.project.organization.id,
+                organizationId = projectLibrary.organizationId,
                 groupId = projectLibrary.groupId,
                 artifactId = projectLibrary.artifactId,
                 resolverId = resolution.resolver.id
               )
             ) match {
               case Left(errors) => {
-                logger.withKeyValue("project", Json.toJson(projectLibrary)).withKeyValue("errors", errors).error(s"Error upserting library")
+                logger
+                  .organization(projectLibrary.organizationId)
+                  .withKeyValue("project_id", projectLibrary.projectId)
+                  .withKeyValue("errors", errors).error("Error upserting library")
                 None
               }
               case Right(library) => {
