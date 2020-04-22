@@ -396,7 +396,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
           path = "test.sbt",
           version = libraryVersion.version,
           crossBuildVersion = libraryVersion.crossBuildVersion,
-          libraryId = Some(libraryVersion.library.id),
+          libraryId = None,
         )
       )
     )

@@ -204,7 +204,7 @@ class InternalProjectLibrariesDao @Inject()(
         .bind("cross_build_version", crossBuildVersion.flatten)
         .and(
           isSynced.map { value =>
-            val clause = "select 1 from syncs where object_id = id and event = {sync_event_completed}"
+            val clause = "select 1 from syncs where object_id = project_libraries.id and event = {sync_event_completed}"
             if (value) {
               s"exists ($clause)"
             } else {
