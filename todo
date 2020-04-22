@@ -1,8 +1,0 @@
-project_libraries: add organization_id column
-
-[info] *** 3 TESTS FAILED ***
-[error] Failed: Total 262, Failed 3, Errors 0, Passed 259
-[error] Failed tests:
-[error] 	db.ProjectBinariesDaoSpec
-[error] 	db.RecommendationsDaoSpec
-[error] 	db.InternalProjectLibrariesDaoSpec

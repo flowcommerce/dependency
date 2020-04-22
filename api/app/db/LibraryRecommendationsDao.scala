@@ -15,8 +15,8 @@ case class LibraryRecommendation(
 
 @Singleton
 class LibraryRecommendationsDao @Inject()(
+  internalProjectLibrariesDao: InternalProjectLibrariesDao,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  projectLibrariesDaoProvider: Provider[InternalProjectLibrariesDao],
   librariesDaoProvider: Provider[LibrariesDao],
 ){
 
@@ -24,7 +24,7 @@ class LibraryRecommendationsDao @Inject()(
     val recommendations = scala.collection.mutable.ListBuffer[LibraryRecommendation]()
     val auth = Authorization.Organization(project.organization.id)
 
-    projectLibrariesDaoProvider.get.findAll(
+    internalProjectLibrariesDao.findAll(
       Authorization.Organization(project.organization.id),
       projectId = Some(project.id),
       hasLibrary = Some(true),
