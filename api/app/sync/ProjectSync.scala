@@ -18,18 +18,18 @@ import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class ProjectSync @Inject()(
-  env: Environment,
-  config: Config,
-  rollbar: RollbarLogger,
-  projectsDao: ProjectsDao,
-  projectBinariesDao:ProjectBinariesDao,
-  projectLibrariesDao: ProjectLibrariesDao,
-  recommendationsDao: RecommendationsDao,
-  syncsDao: SyncsDao,
-  tokensDao: TokensDao,
-  staticUserProvider: StaticUserProvider,
-  wsClient: WSClient,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
+                             env: Environment,
+                             config: Config,
+                             rollbar: RollbarLogger,
+                             projectsDao: ProjectsDao,
+                             projectBinariesDao:ProjectBinariesDao,
+                             projectLibrariesDao: InternalProjectLibrariesDao,
+                             recommendationsDao: RecommendationsDao,
+                             syncsDao: SyncsDao,
+                             tokensDao: TokensDao,
+                             staticUserProvider: StaticUserProvider,
+                             wsClient: WSClient,
+                             @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
   private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"

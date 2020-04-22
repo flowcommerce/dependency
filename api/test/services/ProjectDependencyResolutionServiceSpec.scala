@@ -7,7 +7,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
   private[this] val defaultOrg = createOrganization()
-  private[this] val defaultGroupId = "io.flow"
+  private[this] val defaultGroupId = createTestId()
   private[this] val libS3Project = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-s3")
@@ -17,15 +17,18 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   private[this] val libInvoiceProject = {
+    println(s"Creating lib invoice")
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
+    println(s"Creating project library for id: ${p.id}")
     createProjectLibrary(p)(
       createProjectLibraryForm(p).copy(
         groupId = defaultGroupId,
         artifactId = "lib-s3",
       )
     )
+    println(s"Creating lib invoice")
     projectsDao.toSummary(p)
   }
 
@@ -37,7 +40,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
-    ).toList
+    )
     all.size must equal(2)
     val s3 = all.find(_.projectId == libS3Project.id).get
     s3.dependsOn must be(Nil)
@@ -49,12 +52,15 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   "getByOrganization" in {
-    val resolution = projectDependencyResolutionService.getByOrganizationId(defaultOrg.id, defaultGroupId)
+    val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
     resolution.resolved.toList match {
-      case a :: b :: Nil =>
+      case a :: b :: Nil => {
         a.projects.map(_.name) must equal(Seq("lib-s3"))
         b.projects.map(_.name) must equal(Seq("lib-invoice"))
-      case _ => sys.error("Expected two entries")
+      }
+      case other => {
+        sys.error(s"Expected two entries but found ${other.size}")
+      }
     }
     resolution.unresolved must be(Nil)
   }

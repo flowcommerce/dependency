@@ -1,0 +1,56 @@
+ {
+  "name": "generator-dependency-dao",
+  "models": {
+    "project_library": {
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "organization_id", "type": "string" },
+        { "name": "project_id", "type": "string" },
+        { "name": "group_id", "type": "string" },
+        { "name": "artifact_id", "type": "string" },
+        { "name": "version", "type": "string" },
+        { "name": "cross_build_version", "type": "string", "required": false },
+        { "name": "path", "type": "string" },
+        { "name": "library_id", "type": "string", "required": false }
+      ],
+      "attributes": [
+        {
+          "name": "scala",
+          "value": {
+            "package": "db.generated",
+            "order_by": { "optional": true },
+            "id_generator": {
+              "prefix": "prl"
+            }
+          }
+        },
+        {
+          "name": "psql",
+          "value": {
+            "pkey": "id",
+            "indexes": [
+              {
+                "fields": ["organization_id"]
+              },
+              {
+                "fields": ["project_id"]
+              },
+              {
+                "fields": ["artifact_id"]
+              },
+              {
+                "fields": ["group_id"]
+              },
+              {
+                "fields": ["library_id"]
+              },
+              {
+                "fields": ["version"]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

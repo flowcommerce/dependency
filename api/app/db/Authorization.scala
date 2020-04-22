@@ -49,6 +49,11 @@ sealed trait Authorization {
     }
   }
 
+  def organizationProjects(
+    organizationIdColumn: String,
+    projectIdColumn: String,
+  ): Clause
+
   def organizations(
     organizationIdColumn: String,
     visibilityColumnName: Option[String] = None
@@ -67,6 +72,10 @@ object Authorization {
     s"$column = '${Visibility.Public}'"
   }
 
+  private[this] def publicProjectsClause(projectIdColumn: String) = {
+    s"${projectIdColumn} in (select id from projects where ${publicVisibilityClause("visibility")})"
+  }
+
   case object PublicOnly extends Authorization {
 
     override def organizations(
@@ -77,6 +86,13 @@ object Authorization {
         case None => Clause.False
         case Some(col) => Clause.single(publicVisibilityClause(col))
       }
+    }
+
+    override def organizationProjects(
+      organizationIdColumn: String,
+      projectIdColumn: String,
+    ): Clause = {
+      Clause.single(publicProjectsClause(projectIdColumn))
     }
 
     override def users(
@@ -90,6 +106,11 @@ object Authorization {
     override def organizations(
       organizationIdColumn: String,
       visibilityColumnName: Option[String] = None
+    ): Clause = Clause.True
+
+    override def organizationProjects(
+      organizationIdColumn: String,
+      projectIdColumn: String,
     ): Clause = Clause.True
 
     override def users(
@@ -113,6 +134,15 @@ object Authorization {
       }
     }
 
+    override def organizationProjects(
+      organizationIdColumn: String,
+      projectIdColumn: String,
+    ): Clause = {
+      // TODO: Bind
+      val userClause = s"$organizationIdColumn in (select organization_id from memberships where user_id = '$id')"
+      Clause.Or(Seq(userClause, publicProjectsClause(projectIdColumn)))
+    }
+
     override def users(
       userIdColumn: String
     ) = Clause.single(s"$userIdColumn = '$id'")
@@ -131,6 +161,15 @@ object Authorization {
         case None => Clause.single(orgClause)
         case Some(col) => Clause.Or(Seq(orgClause, publicVisibilityClause(col)))
       }
+    }
+
+    override def organizationProjects(
+      organizationIdColumn: String,
+      projectIdColumn: String,
+    ): Clause = {
+      // TODO: Bind
+      val orgClause = s"$organizationIdColumn = '$id'"
+      Clause.Or(Seq(orgClause, publicProjectsClause(projectIdColumn)))
     }
 
     override def users(

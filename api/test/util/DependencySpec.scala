@@ -3,6 +3,7 @@ package util
 import java.util.UUID
 
 import db._
+import db.generated.ProjectLibraryForm
 import io.flow.common.v0.models.{Name, User, UserReference}
 import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
@@ -20,7 +21,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit val libraryVersionsDao = init[LibraryVersionsDao]
   implicit val usersDao = init[UsersDao]
   implicit val projectsDao = init[ProjectsDao]
-  implicit val projectLibrariesDao = init[ProjectLibrariesDao]
+  implicit val projectLibrariesDao = init[InternalProjectLibrariesDao]
   implicit val projectBinariesDao = init[ProjectBinariesDao]
   implicit val githubUsersDao = init[GithubUsersDao]
   implicit val tokensDao = init[TokensDao]
@@ -139,7 +140,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   ) (
     implicit versionForm: VersionForm = VersionForm("0.0.1"),
              resolver: Resolver = createResolver(org, user)
-  ) = LibraryForm(
+  ): LibraryForm = LibraryForm(
     organizationId = org.id,
     groupId = s"z-test.${UUID.randomUUID.toString}".toLowerCase,
     artifactId = s"z-test-${UUID.randomUUID.toString}".toLowerCase,
@@ -160,7 +161,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createVersionForm(
     version: String = s"0.0.1-${UUID.randomUUID.toString}".toLowerCase,
     crossBuildVersion: Option[String] = None
-  ) = {
+  ): VersionForm = {
     VersionForm(version, crossBuildVersion)
   }
 
@@ -251,7 +252,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     )
   }
 
-  def makeUserForm() = UserForm(
+  def makeUserForm(): UserForm = UserForm(
     email = None,
     name = None
   )
@@ -263,9 +264,9 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   }
 
   def createUserForm(
-                      email: String = createTestEmail(),
-                      name: Option[Name] = None
-                    ) = UserForm(
+    email: String = createTestEmail(),
+    name: Option[Name] = None
+  ): UserForm = UserForm(
     email = Some(email),
     name = name
   )
@@ -284,7 +285,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     user: User = createUser(),
     githubUserId: Long = random.positiveLong(),
     login: String = createTestKey()
-  ) = {
+  ): GithubUserForm = {
     GithubUserForm(
       userId = user.id,
       githubUserId = githubUserId,
@@ -388,11 +389,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
       projectLibrariesDao.upsert(
         systemUser,
         ProjectLibraryForm(
+          organizationId = project.organization.id,
           projectId = project.id,
           groupId = libraryVersion.library.groupId,
           artifactId = libraryVersion.library.artifactId,
           path = "test.sbt",
-          version = VersionForm(libraryVersion.version, libraryVersion.crossBuildVersion)
+          version = libraryVersion.version,
+          crossBuildVersion = libraryVersion.crossBuildVersion,
+          libraryId = None,
         )
       )
     )
@@ -492,7 +496,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   def createLastEmailForm(
     user: User = createUser(),
     publication: Publication = Publication.DailySummary
-  ) = LastEmailForm(
+  ): LastEmailForm = LastEmailForm(
     userId = user.id,
     publication = publication
   )
@@ -501,7 +505,7 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     project: Project = createProject()
   ) (
     implicit form: ProjectLibraryForm = createProjectLibraryForm(project)
-  ): ProjectLibrary = {
+  ): InternalProjectLibrary = {
     rightOrErrors(projectLibrariesDao.create(systemUser, form))
   }
 
@@ -514,11 +518,14 @@ trait DependencySpec extends FlowPlaySpec with Factories {
     crossBuildVersion: Option[String] = None
   ): ProjectLibraryForm = {
     ProjectLibraryForm(
+      organizationId = project.organization.id,
       projectId = project.id,
       groupId = groupId,
       artifactId = artifactId,
       path = path,
-      version = VersionForm(version, crossBuildVersion)
+      version = version,
+      crossBuildVersion = crossBuildVersion,
+      libraryId = None,
     )
   }
 

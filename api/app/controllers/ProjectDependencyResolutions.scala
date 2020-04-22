@@ -24,7 +24,7 @@ class ProjectDependencyResolutions @Inject() (
     withValidatedMember(request.user, organization) {
       Ok(
         Json.toJson(
-          service.getByOrganizationId(organization, groupId = groupId)
+          service.getByOrganizationKey(organization, groupId = groupId)
         )
       )
     }
