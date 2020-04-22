@@ -15,12 +15,12 @@ import play.api.db._
 class ProjectsDao @Inject()(
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
-  projectLibrariesDaoProvider: Provider[ProjectLibrariesDao],
+  projectLibrariesDao: generated.ProjectLibrariesDao,
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
   recommendationsDaoProvider: Provider[RecommendationsDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ){
 
   private[this] val dbHelpers = DbHelpers(db, "projects")
@@ -185,9 +185,7 @@ class ProjectsDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, project: Project): Unit = {
-    Pager.create { offset =>
-      projectLibrariesDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), limit = Some(100), offset = offset)
-    }.foreach { projectLibrariesDaoProvider.get.delete(deletedBy, _) }
+    projectLibrariesDao.deleteAllByProjectId(deletedBy, project.id)
 
     Pager.create { offset =>
       projectBinariesDaoProvider.get().findAll(Authorization.All, projectId = Some(project.id), offset = offset)

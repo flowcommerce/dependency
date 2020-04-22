@@ -17,13 +17,13 @@ case class ProjectDependencyResolutionServiceCache @javax.inject.Inject()(
 {
 
   override def refresh(key: ProjectDependencyResolutionServiceCacheKey): ProjectDependencyResolution = {
-    service.getByOrganizationId(
+    service.getByOrganizationKey(
       organizationKey = key.organizationKey,
       groupId = key.groupId,
     )
   }
 
-  override def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution = {
+  override def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     get(
       ProjectDependencyResolutionServiceCacheKey(
         organizationKey = organizationKey,

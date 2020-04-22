@@ -1,24 +1,25 @@
 package services
 
 import com.google.inject.ImplementedBy
-import db.{Authorization, LibrariesDao, ProjectLibrariesDao, ProjectsDao}
+import db.{Authorization, LibrariesDao, InternalProjectLibrariesDao, ProjectsDao}
 import dependency.resolver.{DependencyResolver, LibraryReference, ProjectInfo}
 import io.flow.dependency.v0.models.{Library, LibrarySummary, ProjectDependencyResolution, ProjectDependencyResolutionResolved, ProjectSummary, ProjectUnresolvedSummary}
 import javax.inject.Inject
 
 @ImplementedBy(classOf[ProjectDependencyResolutionServiceImpl])
 trait ProjectDependencyResolutionService {
-  def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution
+  def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution
 }
 
 class ProjectDependencyResolutionServiceImpl @Inject() (
   projectsDao: ProjectsDao,
-  projectLibrariesDao: ProjectLibrariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
   librariesDao: LibrariesDao,
 ) extends ProjectDependencyResolutionService {
 
-  override def getByOrganizationId(organizationKey: String, groupId: String): ProjectDependencyResolution = {
+  override def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     val allProjects = projects(organizationKey)
+    println(s" all pojects: ${allProjects.keys}")
 
     val r = DependencyResolver(
       buildProjectInfo(allProjects.values.toSeq, groupId = groupId)
@@ -84,8 +85,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       Authorization.All,
       projectIds = Some(projectIds),
       groupId = Some(groupId),
-      limit = None
-    ).groupBy(_.project.id).map { case (pid, libs) =>
+      limit = None,
+      orderBy = None,
+    ).groupBy(_.projectId).map { case (pid, libs) =>
       pid -> libs.map { l => LibraryReference(l.groupId, l.artifactId) }
     }
   }

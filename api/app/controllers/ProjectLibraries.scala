@@ -1,9 +1,11 @@
 package controllers
 
-import db.{Authorization, ProjectLibrariesDao}
+import db.{Authorization, InternalProjectLibrariesDao}
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.util.Config
 import io.flow.dependency.v0.models.json._
+import io.flow.postgresql.OrderBy
+import lib.Conversions
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -12,8 +14,9 @@ class ProjectLibraries @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
-  projectLibrariesDao: ProjectLibrariesDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
+  projectLibrariesDao: InternalProjectLibrariesDao,
+  conversions: Conversions,
 ) extends BaseIdentifiedControllerWithFallback  {
 
   def get(
@@ -24,18 +27,21 @@ class ProjectLibraries @javax.inject.Inject() (
     isSynced: Option[Boolean],
     limit: Long = 25,
     offset: Long = 0
-  ) = IdentifiedWithFallback { request =>
+  ): Action[AnyContent] = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
-        projectLibrariesDao.findAll(
-          Authorization.User(request.user.id),
-          id = id,
-          ids = optionals(ids),
-          projectId = projectId,
-          libraryId = libraryId,
-          isSynced = isSynced,
-          limit = Some(limit),
-          offset = offset
+        conversions.toProjectLibraryModels(
+          projectLibrariesDao.findAll(
+            Authorization.User(request.user.id),
+            id = id,
+            ids = optionals(ids),
+            projectId = projectId,
+            libraryId = libraryId,
+            isSynced = isSynced,
+            limit = Some(limit),
+            offset = offset,
+            orderBy = Some(OrderBy("created_at"))
+          )
         )
       )
     )
