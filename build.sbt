@@ -30,8 +30,8 @@ lazy val lib = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-test" % "2.8.1",
       "com.typesafe.play" %% "play-specs2" % "2.8.1",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0",
-      "org.specs2" %% "specs2-core" % "4.9.2",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
+      "org.specs2" %% "specs2-core" % "4.9.4",
     )
   )
 
@@ -53,13 +53,13 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.4.7",
-      "io.flow" %% "lib-event-sync-play28" % "0.4.83",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.45",
-      "io.flow" %% "lib-log" % "0.1.9",
-      "io.flow" %% "lib-usage-play28" % "0.1.25",
-      "io.flow" %% "lib-test-utils-play28" % "0.0.92" % Test,
-      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.23",
+      "com.sendgrid" % "sendgrid-java" % "4.5.0",
+      "io.flow" %% "lib-event-sync-play28" % "0.4.87",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.46",
+      "io.flow" %% "lib-log" % "0.1.10",
+      "io.flow" %% "lib-usage-play28" % "0.1.27",
+      "io.flow" %% "lib-test-utils-play28" % "0.0.94" % Test,
+      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.12",
       "org.apache.commons" % "commons-text" % "1.8",
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.6.0" cross CrossVersion.full),
@@ -96,7 +96,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.13.0",
       "org.webjars" % "jquery" % "2.1.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.0.92" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.0.94" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.6.0" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full
     ),
