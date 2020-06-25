@@ -1,13 +1,13 @@
 package db.generated
 
-import anorm._
 import anorm.JodaParameterMetaData._
-import db.DbHelpers
+import anorm._
 import io.flow.common.v0.models.UserReference
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.util.IdGenerator
 import java.sql.Connection
 import javax.inject.{Inject, Singleton}
+import org.joda.time.DateTime
 import play.api.db.Database
 import play.api.libs.json.{JsObject, JsValue, Json}
 
@@ -19,7 +19,9 @@ case class Item(
   label: String,
   description: Option[String],
   summary: Option[JsObject],
-  contents: String
+  contents: String,
+  createdAt: DateTime,
+  updatedAt: DateTime
 ) {
 
   lazy val form: ItemForm = ItemForm(
@@ -78,8 +80,6 @@ class ItemsDao @Inject() (
   private[this] val idGenerator = IdGenerator("itm")
 
   def randomId(): String = idGenerator.randomId()
-
-  private[this] val dbHelpers = DbHelpers(db, "items")
 
   private[this] val BaseQuery = Query("""
       | select items.id,
@@ -145,16 +145,16 @@ class ItemsDao @Inject() (
 
   private[this] def toNamedParameter(updatedBy: UserReference, form: ItemForm): Seq[NamedParameter] = {
     Seq(
-      Symbol("id") -> randomId(),
-      Symbol("organization_id") -> form.organizationId,
-      Symbol("visibility") -> form.visibility,
-      Symbol("object_id") -> form.objectId,
-      Symbol("label") -> form.label,
-      Symbol("description") -> form.description,
-      Symbol("summary") -> form.summary.map { _.toString },
-      Symbol("contents") -> form.contents,
-      Symbol("updated_by_user_id") -> updatedBy.id,
-      Symbol("hash_code") -> form.hashCode()
+      scala.Symbol("id") -> randomId(),
+      scala.Symbol("organization_id") -> form.organizationId,
+      scala.Symbol("visibility") -> form.visibility,
+      scala.Symbol("object_id") -> form.objectId,
+      scala.Symbol("label") -> form.label,
+      scala.Symbol("description") -> form.description,
+      scala.Symbol("summary") -> form.summary.map { _.toString },
+      scala.Symbol("contents") -> form.contents,
+      scala.Symbol("updated_by_user_id") -> updatedBy.id,
+      scala.Symbol("hash_code") -> form.hashCode()
     )
   }
 
@@ -165,29 +165,30 @@ class ItemsDao @Inject() (
   }
 
   def upsertByObjectId(updatedBy: UserReference, form: ItemForm): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       upsertByObjectId(c, updatedBy, form)
     }
   }
 
-  def upsertByObjectId(implicit c: Connection, updatedBy: UserReference, form: ItemForm): Unit = {
+  def upsertByObjectId(c: Connection, updatedBy: UserReference, form: ItemForm): Unit = {
     bindQuery(UpsertQuery, form).
       bind("id", randomId()).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()
+      anormSql.execute()(c)
     ()
   }
 
   def upsertBatchByObjectId(updatedBy: UserReference, forms: Seq[ItemForm]): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       upsertBatchByObjectId(c, updatedBy, forms)
     }
   }
 
-  def upsertBatchByObjectId(implicit c: Connection, updatedBy: UserReference, forms: Seq[ItemForm]): Unit = {
+  def upsertBatchByObjectId(c: Connection, updatedBy: UserReference, forms: Seq[ItemForm]): Unit = {
     if (forms.nonEmpty) {
       val params = forms.map(toNamedParameter(updatedBy, _))
-      BatchSql(UpsertQuery.sql(), params.head, params.tail: _*).execute()
+      BatchSql(UpsertQuery.sql(), params.head, params.tail: _*).execute()(c)
+      ()
     }
   }
 
@@ -198,51 +199,31 @@ class ItemsDao @Inject() (
   }
 
   def updateById(updatedBy: UserReference, id: String, form: ItemForm): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       updateById(c, updatedBy, id, form)
     }
   }
 
-  def updateById(implicit c: Connection, updatedBy: UserReference, id: String, form: ItemForm): Unit = {
+  def updateById(c: Connection, updatedBy: UserReference, id: String, form: ItemForm): Unit = {
     bindQuery(UpdateQuery, form).
       bind("id", id).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()
+      anormSql.execute()(c)
     ()
   }
 
   def update(updatedBy: UserReference, existing: Item, form: ItemForm): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       update(c, updatedBy, existing, form)
     }
   }
 
-  def update(implicit c: Connection, updatedBy: UserReference, existing: Item, form: ItemForm): Unit = {
+  def update(c: Connection, updatedBy: UserReference, existing: Item, form: ItemForm): Unit = {
     updateById(c, updatedBy, existing.id, form)
   }
 
-  def delete(deletedBy: UserReference, item: Item): Unit = {
-    dbHelpers.delete(deletedBy, item.id)
-  }
-
-  def deleteById(deletedBy: UserReference, id: String): Unit = {
-    db.withConnection { implicit c =>
-      deleteById(c, deletedBy, id)
-    }
-  }
-
-  def deleteById(c: java.sql.Connection, deletedBy: UserReference, id: String): Unit = {
-    dbHelpers.delete(c, deletedBy, id)
-  }
-
-  def deleteByObjectId(deletedBy: UserReference, objectId: String): Unit = {
-    findByObjectId(objectId).foreach { r =>
-      delete(deletedBy, r)
-    }
-  }
-
   def findById(id: String): Option[Item] = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       findByIdWithConnection(c, id)
     }
   }
@@ -252,7 +233,7 @@ class ItemsDao @Inject() (
   }
 
   def findByObjectId(objectId: String): Option[Item] = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       findByObjectIdWithConnection(c, objectId)
     }
   }
@@ -267,12 +248,11 @@ class ItemsDao @Inject() (
     objectIds: Option[Seq[String]] = None,
     organizationId: Option[String] = None,
     organizationIds: Option[Seq[String]] = None,
-    pageSize: Long = 25L,
-    orderBy: OrderBy = OrderBy("items.id")
+    pageSize: Long = 2000L,
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Iterator[Item] = {
-    def iterate(offset: Long): Iterator[Item] = {
+    def iterate(lastValue: Option[Item]): Iterator[Item] = {
       val page = findAll(
         ids = ids,
         objectId = objectId,
@@ -280,17 +260,16 @@ class ItemsDao @Inject() (
         organizationId = organizationId,
         organizationIds = organizationIds,
         limit = Some(pageSize),
-        offset = offset,
-        orderBy = orderBy
-      )(customQueryModifier)
+        orderBy = OrderBy("items.id"),
+      ) { q => customQueryModifier(q).greaterThan("items.id", lastValue.map(_.id)) }
 
-      page.toIterator ++ {
-          if (page.length == pageSize) iterate(offset + pageSize)
-          else Iterator.empty
-        }
+      page.lastOption match {
+        case None => Iterator.empty
+        case lastValue => page.iterator ++ iterate(lastValue)
+      }
     }
 
-    iterate(0)
+    iterate(None)
   }
 
   def findAll(
@@ -305,7 +284,7 @@ class ItemsDao @Inject() (
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Seq[Item] = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       findAllWithConnection(
         c,
         ids = ids,
@@ -345,10 +324,113 @@ class ItemsDao @Inject() (
       as(ItemsDao.parser.*)(c)
   }
 
+  def delete(deletedBy: UserReference, item: Item): Unit = {
+    db.withConnection { c =>
+      delete(c, deletedBy, item)
+    }
+  }
+
+  def delete(c: Connection, deletedBy: UserReference, item: Item): Unit = {
+    deleteById(c, deletedBy, item.id)
+  }
+
+  def deleteById(deletedBy: UserReference, id: String): Unit = {
+    db.withConnection { c =>
+      deleteById(c, deletedBy, id)
+    }
+  }
+
+  def deleteById(c: Connection, deletedBy: UserReference, id: String): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .equals("id", id)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByIds(deletedBy: UserReference, ids: Seq[String]): Unit = {
+    db.withConnection { c =>
+      deleteAllByIds(c, deletedBy, ids)
+    }
+  }
+
+  def deleteAllByIds(c: Connection, deletedBy: UserReference, ids: Seq[String]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .in("id", ids)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteByObjectId(deletedBy: UserReference, objectId: String): Unit = {
+    db.withConnection { c =>
+      deleteByObjectId(c, deletedBy, objectId)
+    }
+  }
+
+  def deleteByObjectId(c: Connection, deletedBy: UserReference, objectId: String): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .equals("object_id", objectId)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByObjectIds(deletedBy: UserReference, objectIds: Seq[String]): Unit = {
+    db.withConnection { c =>
+      deleteAllByObjectIds(c, deletedBy, objectIds)
+    }
+  }
+
+  def deleteAllByObjectIds(c: Connection, deletedBy: UserReference, objectIds: Seq[String]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .in("object_id", objectIds)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByOrganizationId(deletedBy: UserReference, organizationId: String): Unit = {
+    db.withConnection { c =>
+      deleteAllByOrganizationId(c, deletedBy, organizationId)
+    }
+  }
+
+  def deleteAllByOrganizationId(c: Connection, deletedBy: UserReference, organizationId: String): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .equals("organization_id", organizationId)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByOrganizationIds(deletedBy: UserReference, organizationIds: Seq[String]): Unit = {
+    db.withConnection { c =>
+      deleteAllByOrganizationIds(c, deletedBy, organizationIds)
+    }
+  }
+
+  def deleteAllByOrganizationIds(c: Connection, deletedBy: UserReference, organizationIds: Seq[String]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from items")
+      .in("organization_id", organizationIds)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  private[this] val ValidCharacters: Set[String] = "_-,.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("").toSet
+  private[this] def isSafe(value: String): Boolean = value.trim.split("").forall(ValidCharacters.contains)
+  def setJournalDeletedByUserId(c: Connection, deletedBy: UserReference): Unit = {
+    assert(isSafe(deletedBy.id), s"Value '${deletedBy.id}' contains unsafe characters")
+    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'").executeUpdate()(c)
+    ()
+  }
+
   def deleteAll(
     deletedBy: UserReference,
     ids: Option[Seq[String]],
     objectId: Option[String],
+    objectIds: Option[Seq[String]],
     organizationId: Option[String]
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
@@ -359,6 +441,7 @@ class ItemsDao @Inject() (
         deletedBy = deletedBy,
         ids = ids,
         objectId = objectId,
+        objectIds = objectIds,
         organizationId = organizationId
       )(customQueryModifier)
     }
@@ -369,17 +452,18 @@ class ItemsDao @Inject() (
     deletedBy: UserReference,
     ids: Option[Seq[String]],
     objectId: Option[String],
+    objectIds: Option[Seq[String]],
     organizationId: Option[String]
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Int = {
-    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'")
-      .executeUpdate()(c)
+    setJournalDeletedByUserId(c, deletedBy)
 
     val query = Query("delete from items")
     customQueryModifier(query)
       .optionalIn("items.id", ids)
       .equals("items.object_id", objectId)
+      .optionalIn("items.object_id", objectIds)
       .equals("items.organization_id", organizationId)
       .anormSql()
       .executeUpdate()(c)
@@ -397,8 +481,10 @@ object ItemsDao {
     SqlParser.str("label") ~
     SqlParser.str("description").? ~
     SqlParser.str("summary_text").? ~
-    SqlParser.str("contents") map {
-      case id ~ organizationId ~ visibility ~ objectId ~ label ~ description ~ summary ~ contents => Item(
+    SqlParser.str("contents") ~
+    SqlParser.get[DateTime]("created_at") ~
+    SqlParser.get[DateTime]("updated_at") map {
+      case id ~ organizationId ~ visibility ~ objectId ~ label ~ description ~ summary ~ contents ~ createdAt ~ updatedAt => Item(
         id = id,
         organizationId = organizationId,
         visibility = visibility,
@@ -406,7 +492,9 @@ object ItemsDao {
         label = label,
         description = description,
         summary = summary.map { text => Json.parse(text).as[JsObject] },
-        contents = contents
+        contents = contents,
+        createdAt = createdAt,
+        updatedAt = updatedAt
       )
     }
   }

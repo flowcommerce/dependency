@@ -1,8 +1,7 @@
 package db.generated
 
-import anorm._
 import akka.actor.ActorRef
-import db.DbHelpers
+import anorm._
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.ReactiveActor
 import io.flow.postgresql.{OrderBy, Query}
@@ -65,8 +64,6 @@ class TasksDao @Inject() (
 
   def randomId(): String = idGenerator.randomId()
 
-  private[this] val dbHelpers = DbHelpers(db, "tasks")
-
   private[this] val BaseQuery = Query("""
       | select tasks.id,
       |        tasks.data,
@@ -109,19 +106,19 @@ class TasksDao @Inject() (
   }
 
   def insert(updatedBy: UserReference, form: TaskForm): String = {
-    val result = db.withConnection { implicit c =>
+    val result = db.withConnection { c =>
       insert(c, updatedBy, form)
     }
     taskActor ! ReactiveActor.Messages.Changed
     result
   }
 
-  def insert(implicit c: Connection, updatedBy: UserReference, form: TaskForm): String = {
+  def insert(c: Connection, updatedBy: UserReference, form: TaskForm): String = {
     val id = randomId()
     bindQuery(InsertQuery, form).
       bind("id", id).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()
+      anormSql.execute()(c)
     id
   }
 
@@ -132,50 +129,33 @@ class TasksDao @Inject() (
   }
 
   def updateById(updatedBy: UserReference, id: String, form: TaskForm): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       updateById(c, updatedBy, id, form)
     }
     taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def updateById(implicit c: Connection, updatedBy: UserReference, id: String, form: TaskForm): Unit = {
+  def updateById(c: Connection, updatedBy: UserReference, id: String, form: TaskForm): Unit = {
     bindQuery(UpdateQuery, form).
       bind("id", id).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()
+      anormSql.execute()(c)
     ()
   }
 
   def update(updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       update(c, updatedBy, existing, form)
     }
     taskActor ! ReactiveActor.Messages.Changed
   }
 
-  def update(implicit c: Connection, updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
+  def update(c: Connection, updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
     updateById(c, updatedBy, existing.id, form)
   }
 
-  def delete(deletedBy: UserReference, task: Task): Unit = {
-    dbHelpers.delete(deletedBy, task.id)
-    taskActor ! ReactiveActor.Messages.Changed
-  }
-
-  def deleteById(deletedBy: UserReference, id: String): Unit = {
-    db.withConnection { implicit c =>
-      deleteById(c, deletedBy, id)
-    }
-    taskActor ! ReactiveActor.Messages.Changed
-  }
-
-  def deleteById(c: java.sql.Connection, deletedBy: UserReference, id: String): Unit = {
-    dbHelpers.delete(c, deletedBy, id)
-    taskActor ! ReactiveActor.Messages.Changed
-  }
-
   def findById(id: String): Option[Task] = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       findByIdWithConnection(c, id)
     }
   }
@@ -197,12 +177,11 @@ class TasksDao @Inject() (
     processedAtGreaterThan: Option[DateTime] = None,
     processedAtLessThanOrEquals: Option[DateTime] = None,
     processedAtLessThan: Option[DateTime] = None,
-    pageSize: Long = 25L,
-    orderBy: OrderBy = OrderBy("tasks.id")
+    pageSize: Long = 2000L,
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Iterator[Task] = {
-    def iterate(offset: Long): Iterator[Task] = {
+    def iterate(lastValue: Option[Task]): Iterator[Task] = {
       val page = findAll(
         ids = ids,
         numAttempts = numAttempts,
@@ -217,17 +196,16 @@ class TasksDao @Inject() (
         processedAtLessThanOrEquals = processedAtLessThanOrEquals,
         processedAtLessThan = processedAtLessThan,
         limit = Some(pageSize),
-        offset = offset,
-        orderBy = orderBy
-      )(customQueryModifier)
+        orderBy = OrderBy("tasks.id"),
+      ) { q => customQueryModifier(q).greaterThan("tasks.id", lastValue.map(_.id)) }
 
-      page.toIterator ++ {
-          if (page.length == pageSize) iterate(offset + pageSize)
-          else Iterator.empty
-        }
+      page.lastOption match {
+        case None => Iterator.empty
+        case lastValue => page.iterator ++ iterate(lastValue)
+      }
     }
 
-    iterate(0)
+    iterate(None)
   }
 
   def findAll(
@@ -249,7 +227,7 @@ class TasksDao @Inject() (
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Seq[Task] = {
-    db.withConnection { implicit c =>
+    db.withConnection { c =>
       findAllWithConnection(
         c,
         ids = ids,
@@ -310,6 +288,117 @@ class TasksDao @Inject() (
       as(TasksDao.parser.*)(c)
   }
 
+  def delete(deletedBy: UserReference, task: Task): Unit = {
+    db.withConnection { c =>
+      delete(c, deletedBy, task)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def delete(c: Connection, deletedBy: UserReference, task: Task): Unit = {
+    deleteById(c, deletedBy, task.id)
+  }
+
+  def deleteById(deletedBy: UserReference, id: String): Unit = {
+    db.withConnection { c =>
+      deleteById(c, deletedBy, id)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteById(c: Connection, deletedBy: UserReference, id: String): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .equals("id", id)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByIds(deletedBy: UserReference, ids: Seq[String]): Unit = {
+    db.withConnection { c =>
+      deleteAllByIds(c, deletedBy, ids)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteAllByIds(c: Connection, deletedBy: UserReference, ids: Seq[String]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .in("id", ids)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByNumAttempts(deletedBy: UserReference, numAttempts: Int): Unit = {
+    db.withConnection { c =>
+      deleteAllByNumAttempts(c, deletedBy, numAttempts)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteAllByNumAttempts(c: Connection, deletedBy: UserReference, numAttempts: Int): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .equals("num_attempts", numAttempts)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByNumAttemptses(deletedBy: UserReference, numAttemptses: Seq[Int]): Unit = {
+    db.withConnection { c =>
+      deleteAllByNumAttemptses(c, deletedBy, numAttemptses)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteAllByNumAttemptses(c: Connection, deletedBy: UserReference, numAttemptses: Seq[Int]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .in("num_attempts", numAttemptses)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByNumAttemptsAndProcessedAt(deletedBy: UserReference, numAttempts: Int, processedAt: DateTime): Unit = {
+    db.withConnection { c =>
+      deleteAllByNumAttemptsAndProcessedAt(c, deletedBy, numAttempts, processedAt)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteAllByNumAttemptsAndProcessedAt(c: Connection, deletedBy: UserReference, numAttempts: Int, processedAt: DateTime): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .equals("num_attempts", numAttempts)
+      .equals("processed_at", processedAt)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  def deleteAllByNumAttemptsAndProcessedAts(deletedBy: UserReference, numAttempts: Int, processedAts: Seq[DateTime]): Unit = {
+    db.withConnection { c =>
+      deleteAllByNumAttemptsAndProcessedAts(c, deletedBy, numAttempts, processedAts)
+    }
+    taskActor ! ReactiveActor.Messages.Changed
+  }
+
+  def deleteAllByNumAttemptsAndProcessedAts(c: Connection, deletedBy: UserReference, numAttempts: Int, processedAts: Seq[DateTime]): Unit = {
+    setJournalDeletedByUserId(c, deletedBy)
+    Query("delete from tasks")
+      .equals("num_attempts", numAttempts)
+      .in("processed_at", processedAts)
+      .anormSql.executeUpdate()(c)
+      ()
+  }
+
+  private[this] val ValidCharacters: Set[String] = "_-,.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("").toSet
+  private[this] def isSafe(value: String): Boolean = value.trim.split("").forall(ValidCharacters.contains)
+  def setJournalDeletedByUserId(c: Connection, deletedBy: UserReference): Unit = {
+    assert(isSafe(deletedBy.id), s"Value '${deletedBy.id}' contains unsafe characters")
+    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'").executeUpdate()(c)
+    ()
+  }
+
   def deleteAll(
     deletedBy: UserReference,
     ids: Option[Seq[String]],
@@ -341,8 +430,7 @@ class TasksDao @Inject() (
   ) (
     implicit customQueryModifier: Query => Query = { q => q }
   ): Int = {
-    anorm.SQL(s"SET journal.deleted_by_user_id = '${deletedBy.id}'")
-      .executeUpdate()(c)
+    setJournalDeletedByUserId(c, deletedBy)
 
     val query = Query("delete from tasks")
     customQueryModifier(query)
