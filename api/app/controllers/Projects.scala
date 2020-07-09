@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.helpers.ProjectHelper
-import db.{Authorization, ProjectsDao}
+import db.{Authorization, MembershipsDao, ProjectsDao}
 import io.flow.dependency.v0.models.json._
 import io.flow.dependency.v0.models.{ProjectForm, ProjectPatchForm}
 import io.flow.error.v0.models.json._
@@ -17,7 +17,8 @@ class Projects @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
   projectHelper: ProjectHelper,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  membershipsDao: MembershipsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -117,8 +118,15 @@ class Projects @javax.inject.Inject() (
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
-      projectsDao.delete(request.user, project)
-      NoContent
+      // The user must belong to the organization which owns the project.
+      // This prevent everyone from being able to delete public projects.
+      membershipsDao.findByOrganizationIdAndUserId(Authorization.User(request.user.id), project.organization.id, request.user.id) match {
+        case None =>
+          Unauthorized
+        case Some(_) =>
+          projectsDao.delete(request.user, project)
+          NoContent
+      }
     }
   }
 
