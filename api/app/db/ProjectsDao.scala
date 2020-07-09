@@ -184,19 +184,21 @@ class ProjectsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, project: Project): Unit = {
-    projectLibrariesDao.deleteAllByProjectId(deletedBy, project.id)
+  def delete(deletedBy: UserReference, project: Project): Either[Seq[String], Unit] = {
+    membershipsDaoProvider.get.authorizeOrg(project.organization, deletedBy) {
+      projectLibrariesDao.deleteAllByProjectId(deletedBy, project.id)
 
-    Pager.create { offset =>
-      projectBinariesDaoProvider.get().findAll(Authorization.All, projectId = Some(project.id), offset = offset)
-    }.foreach { projectBinariesDaoProvider.get.delete(deletedBy, _) }
+      Pager.create { offset =>
+        projectBinariesDaoProvider.get().findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+      }.foreach { projectBinariesDaoProvider.get.delete(deletedBy, _) }
 
-    Pager.create { offset =>
-      recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
-    }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
+      Pager.create { offset =>
+        recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+      }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
 
-    dbHelpers.delete(deletedBy.id, project.id)
-    projectActor ! ProjectActor.Messages.Delete(project.id) // TODO: create task
+      dbHelpers.delete(deletedBy.id, project.id)
+      projectActor ! ProjectActor.Messages.Delete(project.id) // TODO: create task
+    }
   }
 
   def findByOrganizationKeyAndName(auth: Authorization, organizationKey: String, name: String): Option[Project] = {

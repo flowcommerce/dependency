@@ -136,20 +136,22 @@ class OrganizationsDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, organization: Organization): Unit = {
-    Pager.create { offset =>
-      projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), limit = None, offset = offset)
-    }.foreach { project =>
-      projectsDaoProvider.get.delete(deletedBy, project)
-    }
+  def delete(deletedBy: UserReference, organization: Organization): Either[Seq[String], Unit] = {
+    membershipsDaoProvider.get.authorizeOrgId(organization.id, deletedBy) {
+      Pager.create { offset =>
+        projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), limit = None, offset = offset)
+      }.foreach { project =>
+        projectsDaoProvider.get.delete(deletedBy, project)
+      }
 
-    Pager.create { offset =>
-      membershipsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
-    }.foreach { membership =>
-      membershipsDaoProvider.get.delete(deletedBy, membership)
-    }
+      Pager.create { offset =>
+        membershipsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
+      }.foreach { membership =>
+        membershipsDaoProvider.get.delete(deletedBy, membership)
+      }
 
-    dbHelpers.delete(deletedBy.id, organization.id)
+      dbHelpers.delete(deletedBy.id, organization.id)
+    }
   }
 
   def upsertForUser(user: User): Organization = {

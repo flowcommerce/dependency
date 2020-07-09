@@ -117,8 +117,10 @@ class Projects @javax.inject.Inject() (
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
     projectHelper.withProject(request.user, id) { project =>
-      projectsDao.delete(request.user, project)
-      NoContent
+      projectsDao.delete(request.user, project) match {
+        case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+        case Right(_) => NoContent
+      }
     }
   }
 
