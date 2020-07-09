@@ -4,6 +4,7 @@ import java.util.UUID
 
 import io.flow.common.v0.models.UserReference
 import _root_.util.{DependencySpec, MockDependencyClient}
+import io.flow.dependency.v0.models.Visibility
 
 class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
