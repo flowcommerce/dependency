@@ -42,7 +42,7 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
       val project = createProject(org)(createProjectForm(org).copy(visibility = Visibility.Public))
 
       val user2 = createUser()
-      expectNotAuthorized(
+      expectErrors(
         identifiedClient(UserReference(user2.id)).projects.deleteById(project.id)
       )
 
