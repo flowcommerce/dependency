@@ -48,7 +48,7 @@ class MembershipsDao @Inject()(
     if (isMemberByOrgId(orgId, user)) {
       Right(f)
     } else {
-      Left(Seq("User is not authorized to delete this organization"))
+      Left(Seq("User is not authorized to delete this resource"))
     }
   }
 
