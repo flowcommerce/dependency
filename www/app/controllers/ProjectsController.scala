@@ -1,7 +1,7 @@
 package controllers
 
 import com.github.ghik.silencer.silent
-import io.flow.dependency.v0.errors.UnitResponse
+import io.flow.dependency.v0.errors.{GenericErrorsResponse, UnitResponse}
 import io.flow.dependency.v0.models._
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
@@ -261,6 +261,9 @@ class ProjectsController @javax.inject.Inject()(
     }.recover {
       case UnitResponse(404) => {
         Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
+      }
+      case GenericErrorsResponse(_, msg) => {
+        Redirect(routes.ProjectsController.index()).flashing("error" -> msg.getOrElse("Error deleting project"))
       }
     }
   }
