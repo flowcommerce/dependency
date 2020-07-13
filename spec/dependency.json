@@ -677,7 +677,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -802,7 +803,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -855,7 +857,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -908,7 +911,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -963,7 +967,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -1048,7 +1053,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
         }
       ]
@@ -1164,7 +1170,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
 
         }
@@ -1318,7 +1325,8 @@
           "responses": {
             "204": { "type": "unit" },
             "401": { "type": "unit" },
-            "404": { "type": "unit" }
+            "404": { "type": "unit" },
+            "422": { "type": "[io.flow.error.v0.models.generic_error]" }
           }
 
         }

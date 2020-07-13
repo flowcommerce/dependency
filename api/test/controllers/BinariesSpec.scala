@@ -64,7 +64,7 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
   "DELETE /binaries" in  {
     val binary = createBinary(org)()
     await(
-      identifiedClient().binaries.deleteById(binary.id)
+      identifiedClient(org.user).binaries.deleteById(binary.id)
     ) must be(())
 
     expectNotFound(

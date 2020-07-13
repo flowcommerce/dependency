@@ -1,7 +1,7 @@
 package db
 
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.v0.models.{Membership, MembershipForm, Role}
+import io.flow.dependency.v0.models.{Membership, MembershipForm, OrganizationSummary, Role}
 import io.flow.postgresql.{OrderBy, Query}
 import io.flow.common.v0.models.UserReference
 import anorm._
@@ -39,6 +39,18 @@ class MembershipsDao @Inject()(
     values
     ({id}, {role}, {user_id}, {organization_id}, {updated_by_user_id})
   """
+
+  def authorizeOrg[T](org: OrganizationSummary, user: UserReference)(f: => T): Either[Seq[String], T] = {
+    authorizeOrgId(org.id, user)(f)
+  }
+
+  def authorizeOrgId[T](orgId: String, user: UserReference)(f: => T): Either[Seq[String], T] = {
+    if (isMemberByOrgId(orgId, user)) {
+      Right(f)
+    } else {
+      Left(Seq("User is not authorized to delete this resource"))
+    }
+  }
 
   def isMemberByOrgId(orgId: String, user: UserReference): Boolean = {
     findByOrganizationIdAndUserId(Authorization.All, orgId, user.id) match {

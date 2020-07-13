@@ -69,8 +69,10 @@ class Libraries @javax.inject.Inject() (
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
     librariesHelper.withLibrary(request.user, id) { library =>
-      librariesDao.delete(request.user, library)
-      NoContent
+      librariesDao.delete(request.user, library) match {
+        case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+        case Right(_) => NoContent
+      }
     }
   }
 

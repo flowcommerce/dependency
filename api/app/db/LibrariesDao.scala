@@ -13,7 +13,8 @@ import play.api.db._
 class LibrariesDao @Inject()(
   db: Database,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  internalTasksDao: InternalTasksDao
+  membershipsDaoProvider: Provider[MembershipsDao],
+  internalTasksDao: InternalTasksDao,
 ){
   private[this] val dbHelpers = DbHelpers(db, "libraries")
 
@@ -122,17 +123,19 @@ class LibrariesDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, library: Library): Unit = {
-    libraryVersionsDaoProvider.get.findAll(
-      Authorization.All,
-      libraryId = Some(library.id),
-      limit = None
-    ).foreach { lv =>
-      libraryVersionsDaoProvider.get.delete(deletedBy, lv)
-    }
+  def delete(deletedBy: UserReference, library: Library): Either[Seq[String], Unit] = {
+    membershipsDaoProvider.get.authorizeOrg(library.organization, deletedBy) {
+      libraryVersionsDaoProvider.get.findAll(
+        Authorization.All,
+        libraryId = Some(library.id),
+        limit = None
+      ).foreach { lv =>
+        libraryVersionsDaoProvider.get.delete(deletedBy, lv)
+      }
 
-    dbHelpers.delete(deletedBy.id, library.id)
-    sync(library.id)
+      dbHelpers.delete(deletedBy.id, library.id)
+      sync(library.id)
+    }
   }
 
   private[this] def sync(libraryId: String): Unit = {

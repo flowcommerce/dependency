@@ -88,8 +88,10 @@ class Organizations @javax.inject.Inject()(
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
     organizationsHelper.withOrganization(request.user, id) { organization =>
-      organizationsDao.delete(request.user, organization)
-      NoContent
+      organizationsDao.delete(request.user, organization) match {
+        case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+        case Right(_) => NoContent
+      }
     }
   }
 }

@@ -66,8 +66,10 @@ class Binaries @javax.inject.Inject()(
 
   def deleteById(id: String) = IdentifiedWithFallback { request =>
     binaryHelper.withBinary(id) { binary =>
-      binariesDao.delete(request.user, binary)
-      NoContent
+      binariesDao.delete(request.user, binary) match {
+        case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
+        case Right(_) => NoContent
+      }
     }
   }
 

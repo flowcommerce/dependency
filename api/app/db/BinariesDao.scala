@@ -14,8 +14,9 @@ import play.api.db._
 class BinariesDao @Inject()(
   db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
+  membershipsDaoProvider: Provider[MembershipsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef
+  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef,
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "binaries")
@@ -82,12 +83,16 @@ class BinariesDao @Inject()(
     }
   }
 
-  def delete(deletedBy: UserReference, binary: Binary): Unit = {
-    Pager.create { offset =>
-      binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
-    }.foreach { binaryVersionsDaoProvider.get().delete(deletedBy, _) }
-    dbHelpers.delete(deletedBy.id, binary.id)
-    binaryActor ! BinaryActor.Messages.Delete(binary.id)
+  def delete(deletedBy: UserReference, binary: Binary): Either[Seq[String], Unit] = {
+    membershipsDaoProvider.get.authorizeOrg(binary.organization, deletedBy) {
+      Pager.create { offset =>
+        binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
+      }.foreach {
+        binaryVersionsDaoProvider.get().delete(deletedBy, _)
+      }
+      dbHelpers.delete(deletedBy.id, binary.id)
+      binaryActor ! BinaryActor.Messages.Delete(binary.id)
+    }
   }
 
   def findByName(name: String): Option[Binary] = {
