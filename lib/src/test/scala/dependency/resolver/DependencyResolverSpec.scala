@@ -1,8 +1,10 @@
 package dependency.resolver
 
-import org.scalatest.{Assertion, MustMatchers, WordSpec}
+import org.scalatest.Assertion
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class DependencyResolverSpec extends WordSpec with MustMatchers with ResolverHelpers {
+class DependencyResolverSpec extends AnyWordSpec with Matchers with ResolverHelpers {
 
   private[this] def makeFlowLibRef(artifactId: String): LibraryReference = makeLibraryReference(
     groupId = "io.flow",
