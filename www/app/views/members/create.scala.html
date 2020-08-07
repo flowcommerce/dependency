@@ -11,6 +11,8 @@
 
     @helper.form(action = routes.MembersController.postCreate(org.key)) {
 
+      @error.map { msg => <li><span class="error">@msg</span> }
+
       <fieldset>
 
           @helper.inputText(
@@ -22,7 +24,6 @@
           @helper.select(
               form("role"),
               options = io.flow.dependency.v0.models.Role.all.map( r => (r.toString, r.toString) ),
-              Symbol("_default") -> io.flow.dependency.v0.models.Role.Member.toString,
               Symbol("_label") -> "Role",
               Symbol("_error") -> form.error("role")
           )
