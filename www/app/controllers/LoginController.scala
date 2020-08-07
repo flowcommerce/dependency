@@ -44,8 +44,8 @@ class LoginController @javax.inject.Inject()(
       }
       Redirect(url).withIdentifiedCookieUser(user = UserReference(user.id))
     }.recover {
-      case response: io.flow.dependency.v0.errors.GenericErrorsResponse =>
-        Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl, response.genericErrors.flatMap(_.messages)))
+      case response: io.flow.dependency.v0.errors.GenericErrorResponse =>
+        Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl, response.genericError.messages))
     }
   }
 

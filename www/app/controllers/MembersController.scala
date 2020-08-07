@@ -11,7 +11,6 @@ import play.api.data._
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 class MembersController @javax.inject.Inject()(
   val dependencyClientProvider: DependencyClientProvider,
@@ -85,14 +84,9 @@ class MembersController @javax.inject.Inject()(
                   ).map { membership =>
                     Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"User added as ${membership.role}")
                   }.recover {
-                    case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-                      val errors: Seq[String] = Try(
-                        response.genericErrors.flatMap(_.messages)
-                      ).getOrElse (Seq(
-                        response.response.body
-                      ))
+                    case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
                       Ok(views.html.members.create(
-                        uiData(request).copy(organization = Some(org.key)), org, boundForm, errors)
+                        uiData(request).copy(organization = Some(org.key)), org, boundForm, response.genericError.messages)
                       )
                     }
                   }
@@ -142,9 +136,9 @@ class MembersController @javax.inject.Inject()(
         ).map { membership =>
           Redirect(routes.MembersController.index(membership.organization.key)).flashing("success" -> s"User added as ${membership.role}")
         }.recover {
-          case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
+          case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
 
-            Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.genericErrors.flatMap(_.messages).mkString(", "))
+            Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.genericError.messages.mkString(", "))
           }
         }
       }

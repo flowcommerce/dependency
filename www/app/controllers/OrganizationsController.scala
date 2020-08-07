@@ -82,8 +82,8 @@ class OrganizationsController @javax.inject.Inject() (
         dependencyClient(request).organizations.post(uiForm.organizationForm).map { organization =>
           Redirect(routes.OrganizationsController.show(organization.key)).flashing("success" -> "Organization created")
         }.recover {
-          case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-            Ok(views.html.organizations.create(uiData(request), boundForm, response.genericErrors.flatMap(_.messages)))
+          case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+            Ok(views.html.organizations.create(uiData(request), boundForm, response.genericError.messages))
           }
         }
       }
@@ -121,8 +121,8 @@ class OrganizationsController @javax.inject.Inject() (
           dependencyClient(request).organizations.putById(organization.id, uiForm.organizationForm).map { updated =>
             Redirect(routes.OrganizationsController.show(updated.key)).flashing("success" -> "Organization updated")
           }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-              Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.genericErrors.flatMap(_.messages)))
+            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+              Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.genericError.messages))
             }
           }
         }

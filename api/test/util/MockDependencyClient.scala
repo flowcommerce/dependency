@@ -6,7 +6,7 @@ import io.flow.test.utils.{FlowMockClient, FlowPlaySpec}
 
 trait MockDependencyClient extends FlowMockClient[
   io.flow.dependency.v0.Client,
-  io.flow.dependency.v0.errors.GenericErrorsResponse,
+  io.flow.dependency.v0.errors.GenericErrorResponse,
   io.flow.dependency.v0.errors.UnitResponse
   ]{
   self: FlowPlaySpec =>

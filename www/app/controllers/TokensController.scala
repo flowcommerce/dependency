@@ -61,8 +61,8 @@ class TokensController @javax.inject.Inject()(
         ).map { token =>
           Redirect(routes.TokensController.show(token.id)).flashing("success" -> "Token created")
         }.recover {
-          case r: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-            Ok(views.html.tokens.create(uiData(request), form, r.genericErrors.flatMap(_.messages)))
+          case r: io.flow.dependency.v0.errors.GenericErrorResponse => {
+            Ok(views.html.tokens.create(uiData(request), form, r.genericError.messages))
           }
         }
       }

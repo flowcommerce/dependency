@@ -1,7 +1,7 @@
 package controllers
 
 import com.github.ghik.silencer.silent
-import io.flow.dependency.v0.errors.{GenericErrorsResponse, UnitResponse}
+import io.flow.dependency.v0.errors.{GenericErrorResponse, UnitResponse}
 import io.flow.dependency.v0.models._
 import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
@@ -190,8 +190,8 @@ class ProjectsController @javax.inject.Inject()(
           ).map { project =>
             Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
           }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-              Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.genericErrors.flatMap(_.messages)))
+            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+              Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.genericError.messages))
             }
           }
         }
@@ -245,8 +245,8 @@ class ProjectsController @javax.inject.Inject()(
             ).map { project =>
               Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")
             }.recover {
-              case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-                Ok(views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericErrors.flatMap(_.messages)))
+              case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                Ok(views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericError.messages))
               }
             }
           }
@@ -262,7 +262,7 @@ class ProjectsController @javax.inject.Inject()(
       case UnitResponse(404) => {
         Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
       }
-      case GenericErrorsResponse(_, msg) => {
+      case GenericErrorResponse(_, msg) => {
         Redirect(routes.ProjectsController.index()).flashing("error" -> msg.getOrElse("Error deleting project"))
       }
     }

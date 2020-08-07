@@ -78,7 +78,7 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
           artifactId = library1.artifactId
         )
       )
-    ).genericErrors.flatMap(_.messages) must contain theSameElementsAs Seq("Library with this group id and artifact id already exists")
+    ).genericError.messages must contain theSameElementsAs Seq("Library with this group id and artifact id already exists")
   }
 
   "DELETE /libraries" in  {

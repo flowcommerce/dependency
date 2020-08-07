@@ -11,8 +11,6 @@
 
     @helper.form(action = routes.MembersController.postCreate(org.key)) {
 
-      @error.map { msg => <li><span class="error">@msg</span> }
-
       <fieldset>
 
           @helper.inputText(

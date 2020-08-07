@@ -58,7 +58,7 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
   "POST /binaries validates duplicate name" in  {
     expectErrors(
       identifiedClient().binaries.post(createBinaryForm(org).copy(name = binary1.name))
-    ).genericErrors.flatMap(_.messages) must contain theSameElementsAs Seq("Binary with this name already exists")
+    ).genericError.messages must contain theSameElementsAs Seq("Binary with this name already exists")
   }
 
   "DELETE /binaries" in  {

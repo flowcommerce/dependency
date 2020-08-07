@@ -83,8 +83,8 @@ class ResolversController @javax.inject.Inject() (
           ).map { resolver =>
             Redirect(routes.ResolversController.show(resolver.id)).flashing("success" -> "Resolver created")
           }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorsResponse => {
-              Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericErrors.flatMap(_.messages)))
+            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+              Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericError.messages))
             }
           }
         }
