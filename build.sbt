@@ -54,11 +54,11 @@ lazy val api = project
       ws,
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.6.2",
-      "io.flow" %% "lib-event-sync-play28" % "0.4.90",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.54",
-      "io.flow" %% "lib-log" % "0.1.15",
-      "io.flow" %% "lib-usage-play28" % "0.1.29",
-      "io.flow" %% "lib-test-utils-play28" % "0.0.98" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.4.94",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.55",
+      "io.flow" %% "lib-log" % "0.1.16",
+      "io.flow" %% "lib-usage-play28" % "0.1.30",
+      "io.flow" %% "lib-test-utils-play28" % "0.0.99" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.14",
       "org.apache.commons" % "commons-text" % "1.8",
@@ -96,7 +96,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.13.0",
       "org.webjars" % "jquery" % "2.1.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.0.98" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.0.99" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.6.0" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full
     ),
@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.6",
+    "io.flow" %% "lib-play-play28" % "0.6.7",
     "com.typesafe.play" %% "play-json-joda" % "2.9.0",
     "com.typesafe.play" %% "play-json" % "2.9.0"
   ),
