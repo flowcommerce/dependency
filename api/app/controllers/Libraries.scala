@@ -60,7 +60,7 @@ class Libraries @javax.inject.Inject() (
       }
       case s: JsSuccess[LibraryForm] => {
         librariesDao.create(request.user, s.get) match {
-          case Left(errors) => UnprocessableEntity(Json.toJson(Seq(Validation.errors(errors))))
+          case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))
           case Right(library) => Created(Json.toJson(library))
         }
       }
