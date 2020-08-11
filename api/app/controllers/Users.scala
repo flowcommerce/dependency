@@ -29,7 +29,7 @@ class Users @javax.inject.Inject()(
     identifier: Option[String]
   ) = Anonymous { _ =>
     if (Seq(id, email, identifier).flatten.isEmpty) {
-      UnprocessableEntity(Json.toJson(Seq(Validation.error("Must specify id, email or identifier"))))
+      UnprocessableEntity(Json.toJson(Validation.error("Must specify id, email or identifier")))
     } else {
       Ok(
         Json.toJson(
@@ -68,7 +68,7 @@ class Users @javax.inject.Inject()(
         Future {
           usersDao.create(request.user, s.get) match {
             case Left(errors) => {
-              UnprocessableEntity(Json.toJson(Seq(Validation.errors(errors))))
+              UnprocessableEntity(Json.toJson(Validation.errors(errors)))
             }
             case Right(user) => {
               Created(Json.toJson(user))
