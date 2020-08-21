@@ -17,7 +17,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   private[this] val libInvoiceProject = {
-    println(s"Creating lib invoice")
+    println("Creating lib invoice")
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
@@ -28,8 +28,10 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
         artifactId = "lib-s3",
       )
     )
-    println(s"Creating lib invoice")
-    projectsDao.toSummary(p)
+    println("Creating lib invoice")
+    val summary = projectsDao.toSummary(p)
+    println(s"Created lib invoice summary $summary")
+    summary
   }
 
   "buildProjectInfo for no project" in {
@@ -47,22 +49,19 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
 
     val invoice = all.find(_.projectId == libInvoiceProject.id).get
-    eventuallyInNSeconds() {
-      invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
-      invoice.provides must be(Nil)
-    }
+    invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
+    invoice.provides must be(Nil)
   }
 
   "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
     resolution.resolved.toList match {
-      case a :: b :: Nil => {
+      case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))
         b.projects.map(_.name) must equal(Seq("lib-invoice"))
-      }
-      case other => {
-        sys.error(s"Expected two entries but found ${other.size}")
-      }
+
+      case other =>
+        sys.error(s"Expected two entries but found ${other.size} of $other")
     }
     resolution.unresolved must be(Nil)
   }
