@@ -1,9 +1,11 @@
 package db
 
 import io.flow.dependency.v0.models.{Organization, Recommendation}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class RecommendationsDaoSpec extends DependencySpec {
+class RecommendationsDaoSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   def createRecommendation(
     org: Organization
@@ -12,7 +14,7 @@ class RecommendationsDaoSpec extends DependencySpec {
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     recommendationsDao.sync(systemUser, project)
-    eventuallyInNSeconds() {
+    eventually {
       recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).headOption.getOrElse {
         sys.error("Failed to create recommendation")
       }

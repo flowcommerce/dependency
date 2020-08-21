@@ -1,9 +1,11 @@
 package db
 
 import io.flow.dependency.v0.models.{Binary, BinaryVersion, Organization, Project}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class BinaryRecommendationsDaoSpec extends DependencySpec {
+class BinaryRecommendationsDaoSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   def createBinaryWithMultipleVersions(
     org: Organization
@@ -78,17 +80,19 @@ class BinaryRecommendationsDaoSpec extends DependencySpec {
     )
     val project = createProject(org)
     addBinaryVersion(project, binaryVersions.find(_.version == "1.0.0").get)
-    verify(
-      binaryRecommendationsDao.forProject(project),
-      Seq(
-        BinaryRecommendation(
-          binary = binary,
-          from = "1.0.0",
-          to = binaryVersions.find(_.version == "1.0.1").get,
-          latest = binaryVersions.find(_.version == "1.0.2-RC1").get
+    eventually {
+      verify(
+        binaryRecommendationsDao.forProject(project),
+        Seq(
+          BinaryRecommendation(
+            binary = binary,
+            from = "1.0.0",
+            to = binaryVersions.find(_.version == "1.0.1").get,
+            latest = binaryVersions.find(_.version == "1.0.2-RC1").get
+          )
         )
       )
-    )
+    }
   }
 
 
