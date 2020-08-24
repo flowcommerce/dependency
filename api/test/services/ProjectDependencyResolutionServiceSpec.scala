@@ -1,8 +1,10 @@
 package services
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class ProjectDependencyResolutionServiceSpec extends DependencySpec {
+class ProjectDependencyResolutionServiceSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
@@ -29,9 +31,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
       )
     )
     println("Creating lib invoice")
-    val summary = projectsDao.toSummary(p)
-    println(s"Created lib invoice summary $summary")
-    summary
+    projectsDao.toSummary(p)
   }
 
   "buildProjectInfo for no project" in {
@@ -48,9 +48,11 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     s3.dependsOn must be(Nil)
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
 
-    val invoice = all.find(_.projectId == libInvoiceProject.id).get
-    invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
-    invoice.provides must be(Nil)
+    eventually {
+      val invoice = all.find(_.projectId == libInvoiceProject.id).get
+      invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
+      invoice.provides must be(Nil)
+    }
   }
 
   "getByOrganization" in {
