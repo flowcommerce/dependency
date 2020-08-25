@@ -2,10 +2,16 @@ package db
 
 import io.flow.dependency.v0.models.{Binary, BinaryVersion, Organization, Project}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
 class BinaryRecommendationsDaoSpec extends DependencySpec
   with Eventually with IntegrationPatience {
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(30, Seconds)),
+    interval = scaled(Span(250, Millis))
+  )
 
   def createBinaryWithMultipleVersions(
     org: Organization
