@@ -1,8 +1,16 @@
 package services
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
-class ProjectDependencyResolutionServiceSpec extends DependencySpec {
+class ProjectDependencyResolutionServiceSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(60, Seconds)),
+    interval = scaled(Span(250, Millis))
+  )
 
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
@@ -17,7 +25,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
   }
 
   private[this] val libInvoiceProject = {
-    println(s"Creating lib invoice")
+    println("Creating lib invoice")
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
@@ -28,7 +36,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
         artifactId = "lib-s3",
       )
     )
-    println(s"Creating lib invoice")
+    println("Creating lib invoice")
     projectsDao.toSummary(p)
   }
 
@@ -46,21 +54,22 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     s3.dependsOn must be(Nil)
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
 
-    val invoice = all.find(_.projectId == libInvoiceProject.id).get
-    invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
-    invoice.provides must be(Nil)
+    eventually {
+      val invoice = all.find(_.projectId == libInvoiceProject.id).get
+      invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
+      invoice.provides must be(Nil)
+    }
   }
 
   "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
     resolution.resolved.toList match {
-      case a :: b :: Nil => {
+      case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))
         b.projects.map(_.name) must equal(Seq("lib-invoice"))
-      }
-      case other => {
-        sys.error(s"Expected two entries but found ${other.size}")
-      }
+
+      case other =>
+        sys.error(s"Expected two entries but found ${other.size} of $other")
     }
     resolution.unresolved must be(Nil)
   }

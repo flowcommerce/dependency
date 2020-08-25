@@ -1,9 +1,17 @@
 package db
 
 import io.flow.dependency.v0.models.{Organization, Recommendation}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
-class RecommendationsDaoSpec extends DependencySpec {
+class RecommendationsDaoSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(60, Seconds)),
+    interval = scaled(Span(250, Millis))
+  )
 
   def createRecommendation(
     org: Organization
@@ -12,8 +20,10 @@ class RecommendationsDaoSpec extends DependencySpec {
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     recommendationsDao.sync(systemUser, project)
-    recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).headOption.getOrElse {
-      sys.error("Failed to create recommendation")
+    eventually {
+      recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).headOption.getOrElse {
+        sys.error("Failed to create recommendation")
+      }
     }
   }
 
