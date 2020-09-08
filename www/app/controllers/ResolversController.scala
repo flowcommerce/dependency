@@ -68,7 +68,7 @@ class ResolversController @javax.inject.Inject() (
   }
 
   def postCreate() = User.async { implicit request =>
-    val boundForm = ResolversController.uiForm.bindFromRequest
+    val boundForm = ResolversController.uiForm.bindFromRequest()
 
     organizations(request).flatMap { orgs =>
       boundForm.fold (

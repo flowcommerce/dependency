@@ -71,7 +71,7 @@ class OrganizationsController @javax.inject.Inject() (
   }
 
   def postCreate() = User.async { implicit request =>
-    val boundForm = OrganizationsController.uiForm.bindFromRequest
+    val boundForm = OrganizationsController.uiForm.bindFromRequest()
     boundForm.fold (
 
       formWithErrors => Future {
@@ -110,7 +110,7 @@ class OrganizationsController @javax.inject.Inject() (
 
   def postEdit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
-      val boundForm = OrganizationsController.uiForm.bindFromRequest
+      val boundForm = OrganizationsController.uiForm.bindFromRequest()
       boundForm.fold (
 
         formWithErrors => Future {

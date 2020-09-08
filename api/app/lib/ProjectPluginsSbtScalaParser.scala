@@ -14,7 +14,7 @@ case class ProjectPluginsSbtScalaParser(
   override val logger: RollbarLogger
 ) extends SimpleScalaParser {
 
-  val plugins: Seq[Artifact] = parseLibraries
+  val plugins: Seq[Artifact] = parseLibraries()
 
   val resolverUris: Seq[String] = {
     lines.
