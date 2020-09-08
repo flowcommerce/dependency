@@ -54,7 +54,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     s3.dependsOn must be(Nil)
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
 
-    eventuallyInNSeconds(3) {
+    eventuallyInNSeconds(5) {
       val invoice = all.find(_.projectId == libInvoiceProject.id).get
       invoice.dependsOn.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
       invoice.provides must be(Nil)
