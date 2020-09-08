@@ -86,7 +86,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
     )
     val project = createProject(org)
     addBinaryVersion(project, binaryVersions.find(_.version == "1.0.0").get)
-    eventually {
+    eventuallyInNSeconds(3) {
       verify(
         binaryRecommendationsDao.forProject(project),
         Seq(

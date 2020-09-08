@@ -75,7 +75,7 @@ class InternalTasksDaoSpec extends FlowPlaySpec
 
     internalTasksDao.createSyncIfNotQueued(project1)
     internalTasksDao.createSyncIfNotQueued(project2)
-    eventually {
+    eventuallyInNSeconds(3) {
       findTaskData(project1).size must be(1)
       findTaskData(project2).size must be(1)
     }
