@@ -19,7 +19,7 @@ case class BuildSbtScalaParser(
 
   val resolverUris = pluginParser.resolverUris
 
-  val libraries: Seq[Artifact] = parseLibraries
+  val libraries: Seq[Artifact] = parseLibraries()
 
   val binaries: Seq[ProjectBinaryForm] = {
     lines.

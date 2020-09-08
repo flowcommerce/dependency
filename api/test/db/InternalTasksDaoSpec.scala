@@ -21,6 +21,7 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     deleteAllNonProcessedTasks()
   }
 
+
   "findAll by processed" in {
     val task1 = createTask()
     val task2 = createTask()
