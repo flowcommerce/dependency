@@ -20,7 +20,7 @@ class RecommendationsDaoSpec extends DependencySpec
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
     recommendationsDao.sync(systemUser, project)
-    eventuallyInNSeconds(3) {
+    eventually {
       recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).headOption.getOrElse {
         sys.error("Failed to create recommendation")
       }

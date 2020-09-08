@@ -21,6 +21,7 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     deleteAllNonProcessedTasks()
   }
 
+
   "findAll by processed" in {
     val task1 = createTask()
     val task2 = createTask()
@@ -75,7 +76,7 @@ class InternalTasksDaoSpec extends FlowPlaySpec
 
     internalTasksDao.createSyncIfNotQueued(project1)
     internalTasksDao.createSyncIfNotQueued(project2)
-    eventuallyInNSeconds(3) {
+    eventually {
       findTaskData(project1).size must be(1)
       findTaskData(project2).size must be(1)
     }
