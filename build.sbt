@@ -44,7 +44,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "io.kamon" % "kanela-agent" % "1.0.6",
+    javaAgents += "io.kamon" % "kanela-agent" % "1.0.7",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -53,14 +53,14 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.6.5",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.2",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.60",
-      "io.flow" %% "lib-log" % "0.1.20",
-      "io.flow" %% "lib-usage-play28" % "0.1.35",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.4" % Test,
+      "com.sendgrid" % "sendgrid-java" % "4.6.6",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.4",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.67",
+      "io.flow" %% "lib-log" % "0.1.21",
+      "io.flow" %% "lib-usage-play28" % "0.1.37",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.6" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
-      "org.postgresql" % "postgresql" % "42.2.16",
+      "org.postgresql" % "postgresql" % "42.2.17",
       "org.apache.commons" % "commons-text" % "1.9",
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
@@ -93,10 +93,10 @@ lazy val www = project
       guice,
       "org.webjars" %% "webjars-play" % "2.8.0",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "5.14.0",
+      "org.webjars" % "font-awesome" % "5.15.0",
       "org.webjars" % "jquery" % "2.1.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.4" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.6" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
     ),
@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.12",
+    "io.flow" %% "lib-play-play28" % "0.6.15",
     "com.typesafe.play" %% "play-json-joda" % "2.9.1",
     "com.typesafe.play" %% "play-json" % "2.9.1"
   ),
