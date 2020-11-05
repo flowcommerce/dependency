@@ -28,10 +28,10 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-test" % "2.8.2",
-      "com.typesafe.play" %% "play-specs2" % "2.8.2",
+      "com.typesafe.play" %% "play-test" % "2.8.3",
+      "com.typesafe.play" %% "play-specs2" % "2.8.3",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
-      "org.specs2" %% "specs2-core" % "4.10.3",
+      "org.specs2" %% "specs2-core" % "4.10.5",
     )
   )
 
@@ -53,14 +53,14 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.6.6",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.4",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.67",
-      "io.flow" %% "lib-log" % "0.1.21",
-      "io.flow" %% "lib-usage-play28" % "0.1.37",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.6" % Test,
+      "com.sendgrid" % "sendgrid-java" % "4.6.7",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.6",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.70",
+      "io.flow" %% "lib-log" % "0.1.23",
+      "io.flow" %% "lib-usage-play28" % "0.1.40",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.9" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
-      "org.postgresql" % "postgresql" % "42.2.17",
+      "org.postgresql" % "postgresql" % "42.2.18",
       "org.apache.commons" % "commons-text" % "1.9",
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
@@ -93,10 +93,10 @@ lazy val www = project
       guice,
       "org.webjars" %% "webjars-play" % "2.8.0",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "5.15.0",
+      "org.webjars" % "font-awesome" % "5.15.1",
       "org.webjars" % "jquery" % "2.1.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.6" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.9" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
     ),
@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.15",
+    "io.flow" %% "lib-play-play28" % "0.6.18",
     "com.typesafe.play" %% "play-json-joda" % "2.9.1",
     "com.typesafe.play" %% "play-json" % "2.9.1"
   ),
