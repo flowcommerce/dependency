@@ -28,8 +28,8 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-test" % "2.8.5",
-      "com.typesafe.play" %% "play-specs2" % "2.8.5",
+      "com.typesafe.play" %% "play-test" % "2.8.7",
+      "com.typesafe.play" %% "play-specs2" % "2.8.7",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
       "org.specs2" %% "specs2-core" % "4.10.5",
     )
