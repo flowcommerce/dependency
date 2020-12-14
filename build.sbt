@@ -91,7 +91,7 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       guice,
-      "org.webjars" %% "webjars-play" % "2.8.0",
+      "org.webjars" %% "webjars-play" % "2.8.0-1",
       "org.webjars" % "bootstrap" % "3.4.1",
       "org.webjars" % "font-awesome" % "5.15.1",
       "org.webjars" % "jquery" % "2.1.4",
