@@ -94,7 +94,7 @@ lazy val www = project
       "org.webjars" %% "webjars-play" % "2.8.0",
       "org.webjars" % "bootstrap" % "3.4.1",
       "org.webjars" % "font-awesome" % "5.15.1",
-      "org.webjars" % "jquery" % "2.1.4",
+      "org.webjars" % "jquery" % "2.2.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "io.flow" %% "lib-test-utils-play28" % "0.1.12" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
