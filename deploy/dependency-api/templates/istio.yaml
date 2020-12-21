@@ -29,6 +29,7 @@ metadata:
     helm.sh/chart: {{ include "deploy.chart" $ }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app: {{ include "deploy.name" $ }}
 spec:
   hosts:
 {{ toYaml $service.hosts | indent 4 }}
@@ -39,6 +40,8 @@ spec:
 {{- range $stage := $service.stages }}
     - destination:
         host: {{ $fullName }}
+        port:
+          number: 80
         subset:  {{ $stage.deployment }}
 {{- end }}
 ---

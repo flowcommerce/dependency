@@ -3,6 +3,8 @@ fullnameOverride: ""
 
 service:
   port: 9000
+  metricsEndpoint:
+    enabled: false
 
 iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
@@ -25,25 +27,25 @@ tolerations: {}
 ingress:
   enabled: true
   gateways:
-    - key: dependency-api-flow-io
+    - key: dependency-flow-io
       tld: api.flow.io
       hosts:
         - dependency.api.flow.io
-    - key: dependency-api-flow-pub
+    - key: dependency-flow-pub
       tld: flo.pub
       hosts:
-        - dependency-api.flo.pub
+        - dependency.flo.pub
 
 services:
   live:
     hosts:
-      - dependency-api
+      - dependency
       - dependency.api.flow.io
-      - dependency-api.flo.pub
+      - dependency.flo.pub
     gateways:
       - mesh
-      - dependency-api-flow-io
-      - dependency-api-flow-pub
+      - dependency-flow-io
+      - dependency-flow-pub
     stages:
       - deployment: live
         weight: 100
@@ -56,3 +58,4 @@ deployments:
     disruptionBudgetEnabled: true
     targetCPUUtilizationPercentage: 80
     version: #from commandline
+    strategy: RollingUpdate
