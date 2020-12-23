@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.22",
+    "io.flow" %% "lib-play-play28" % "0.6.24",
     "com.typesafe.play" %% "play-json-joda" % "2.9.1",
     "com.typesafe.play" %% "play-json" % "2.9.1"
   ),
