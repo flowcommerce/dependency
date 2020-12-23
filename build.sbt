@@ -58,7 +58,7 @@ lazy val api = project
       "io.flow" %% "lib-play-graphite-play28" % "0.1.72",
       "io.flow" %% "lib-log" % "0.1.25",
       "io.flow" %% "lib-usage-play28" % "0.1.42",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.12" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.14" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.18",
       "org.apache.commons" % "commons-text" % "1.9",
@@ -96,7 +96,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.1",
       "org.webjars" % "jquery" % "2.1.4",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.12" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.14" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
     ),
