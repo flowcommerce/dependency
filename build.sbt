@@ -117,8 +117,8 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
     "io.flow" %% "lib-play-play28" % "0.6.26",
-    "com.typesafe.play" %% "play-json-joda" % "2.9.1",
-    "com.typesafe.play" %% "play-json" % "2.9.1"
+    "com.typesafe.play" %% "play-json-joda" % "2.9.2",
+    "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
   scalacOptions += "-feature",
   credentials += credsToUse,
