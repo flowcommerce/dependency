@@ -27,11 +27,11 @@ tolerations: {}
 ingress:
   enabled: true
   gateways:
-    - key: dependency-flow-io
+    - key: dependency-www-flow-io
       tld: flow.io
       hosts:
         - dependency.flow.io
-    - key: dependency-flow-pub
+    - key: dependency-www-flow-pub
       tld: flo.pub
       hosts:
         - dependency.flo.pub
@@ -39,13 +39,13 @@ ingress:
 services:
   live:
     hosts:
-      - dependency
+      - dependency-www
       - dependency.flow.io
       - dependency.flo.pub
     gateways:
       - mesh
-      - dependency-flow-io
-      - dependency-flow-pub
+      - dependency-www-flow-io
+      - dependency-www-flow-pub
     stages:
       - deployment: live
         weight: 100
