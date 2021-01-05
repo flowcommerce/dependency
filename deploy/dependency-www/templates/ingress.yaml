@@ -10,6 +10,7 @@ metadata:
     helm.sh/chart: {{ include "deploy.chart" $ }}
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
+    app: {{ include "deploy.name" $ }}
   annotations:
     kubernetes.io/ingress.class: "ingressgateway"
     kubernetes.io/ingress.tld: {{ $gateway.tld | quote }}

@@ -9,6 +9,7 @@ metadata:
     app.kubernetes.io/instance: {{ $.Release.Name }}
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     app.kubernetes.io/name: {{ include "deploy.name" $ }}
+    app: {{ include "deploy.name" $ }}
     app.kubernetes.io/stage: {{ $stage }}
     flow.io/version: {{ $deployment.version }}
 spec:
@@ -24,6 +25,7 @@ spec:
         app.kubernetes.io/name: {{ include "deploy.name" $ }}
         app.kubernetes.io/instance: {{ $.Release.Name }}
         app.kubernetes.io/stage: {{ $stage }}
+        app: {{ include "deploy.name" $ }}
         flow.io/version: {{ $deployment.version }}
       annotations:
         iam.amazonaws.com/role: {{ $.Values.iamRole }}
@@ -96,5 +98,7 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+  strategy:
+    type: {{ $deployment.strategy | default "RollingUpdate" }}
 ---
 {{- end -}}

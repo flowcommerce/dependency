@@ -67,16 +67,28 @@ pipeline {
 
     stage('Deploy Helm chart') {
       when { branch 'master' }
-      steps {
-        container('helm') {
-          script {
-          
-            new helmDeploy().deploy('dependency-api', VERSION.printable())
-          
-            new helmDeploy().deploy('dependency-www', VERSION.printable())
-          
+      parallel {
+        
+        stage('deploy dependency-api') {
+          steps {
+            script {
+              container('helm') {
+                new helmDeploy().deploy('dependency-api', VERSION.printable())
+              }
+            }
           }
         }
+        
+        stage('deploy dependency-www') {
+          steps {
+            script {
+              container('helm') {
+                new helmDeploy().deploy('dependency-www', VERSION.printable())
+              }
+            }
+          }
+        }
+        
       }
     }
   }

@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/managed-by: {{ $.Release.Service }}
     app.kubernetes.io/name: {{ include "deploy.name" $ }}
     app.kubernetes.io/stage: {{ $stage }}
+    app: {{ include "deploy.name" $ }}
 spec:
   minReplicas: {{ $deployment.minReplicas }}
   maxReplicas: {{ $deployment.maxReplicas }}
