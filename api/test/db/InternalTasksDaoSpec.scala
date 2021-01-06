@@ -4,7 +4,6 @@ import io.flow.dependency.v0.models.{TaskDataSync, TaskDataSyncOne}
 import io.flow.test.utils.FlowPlaySpec
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.time.{Millis, Seconds, Span}
 
 class InternalTasksDaoSpec extends FlowPlaySpec
     with helpers.TaskHelpers
@@ -12,15 +11,9 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     with Eventually with IntegrationPatience
 {
 
-  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(60, Seconds)),
-    interval = scaled(Span(250, Millis))
-  )
-
   override def beforeAll(): Unit = {
     deleteAllNonProcessedTasks()
   }
-
 
   "findAll by processed" in {
     val task1 = createTask()
@@ -66,7 +59,6 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     def findTaskData(data: TaskDataSyncOne) = {
       internalTasksDao.findAll(
         data = Some(data),
-        hasProcessedAt = Some(false),
         limit = None
       )
     }

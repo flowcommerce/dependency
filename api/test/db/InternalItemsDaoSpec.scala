@@ -1,14 +1,15 @@
 package db
 
 import java.util.UUID
-
 import io.flow.dependency.v0.models._
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
 class InternalItemsDaoSpec extends DependencySpec
   with helpers.TaskHelpers
   with BeforeAndAfterAll
+  with Eventually with IntegrationPatience
 {
 
   override def beforeAll(): Unit = {
@@ -19,7 +20,7 @@ class InternalItemsDaoSpec extends DependencySpec
 
   "replace" in {
     val project = createProjectSummary(org)
-    eventuallyInNSeconds(3) {
+    eventually {
       itemsDao.findByObjectId(Authorization.All, project.id).get
     }
     val form = createItemForm(org)(project)
@@ -40,7 +41,7 @@ class InternalItemsDaoSpec extends DependencySpec
   "findById - binary" in {
     val binary = createBinary(org)
 
-    val item = eventuallyInNSeconds(3) {
+    val item = eventually {
       itemsDao.findByObjectId(Authorization.All, binary.id).get
     }
 
@@ -50,7 +51,7 @@ class InternalItemsDaoSpec extends DependencySpec
   "findById - library" in {
     val library = createLibrary(org)
 
-    val item = eventuallyInNSeconds(3) {
+    val item = eventually {
       itemsDao.findByObjectId(Authorization.All, library.id).get
     }
 
@@ -60,7 +61,7 @@ class InternalItemsDaoSpec extends DependencySpec
   "findById - project" in {
     val project = createProject(org)
 
-    val item = eventuallyInNSeconds(3) {
+    val item = eventually {
       itemsDao.findByObjectId(Authorization.All, project.id).get
     }
 
@@ -69,7 +70,7 @@ class InternalItemsDaoSpec extends DependencySpec
 
   "findByObjectId" in {
     val binary = createBinary(org)
-    eventuallyInNSeconds(3) {
+    eventually {
       itemsDao.findByObjectId(Authorization.All, binary.id).get
     }
   }
@@ -78,10 +79,10 @@ class InternalItemsDaoSpec extends DependencySpec
     val binary1 = createBinary(org)
     val binary2 = createBinary(org)
 
-    val item1 = eventuallyInNSeconds(3) {
+    val item1 = eventually {
       itemsDao.findByObjectId(Authorization.All, binary1.id).get
     }
-    val item2 = eventuallyInNSeconds(3) {
+    val item2 = eventually {
       itemsDao.findByObjectId(Authorization.All, binary2.id).get
     }
 
