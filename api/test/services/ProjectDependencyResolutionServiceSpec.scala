@@ -43,7 +43,8 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
     )
-    all.size must equal(2)
+    all.size must be (2)
+
     val s3 = all.find(_.projectId == libS3Project.id).get
     s3.dependsOn must be(Nil)
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
@@ -54,9 +55,10 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
   }
 
   "getByOrganization" in {
-    val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
-    eventually {
-      resolution.resolved.size must be (2)
+    val resolution = eventually {
+      val res = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
+      res.resolved.size must be (2)
+      res
     }
     resolution.resolved.toList match {
       case a :: b :: Nil =>
