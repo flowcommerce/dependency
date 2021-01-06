@@ -63,17 +63,19 @@ class LibraryRecommendationsDaoSpec extends DependencySpec
     )
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
-    verify(
-      libraryRecommendationsDao.forProject(project),
-      Seq(
-        LibraryRecommendation(
-          library = library,
-          from = "1.0.0",
-          to = libraryVersions.find(_.version == "1.0.1").get,
-          latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+    eventually {
+      verify(
+        libraryRecommendationsDao.forProject(project),
+        Seq(
+          LibraryRecommendation(
+            library = library,
+            from = "1.0.0",
+            to = libraryVersions.find(_.version == "1.0.1").get,
+            latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+          )
         )
       )
-    )
+    }
   }
 
   // TODO: Add tests specific to cross build versions

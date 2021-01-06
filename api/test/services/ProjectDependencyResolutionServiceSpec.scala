@@ -1,8 +1,10 @@
 package services
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class ProjectDependencyResolutionServiceSpec extends DependencySpec {
+class ProjectDependencyResolutionServiceSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
@@ -53,6 +55,9 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
 
   "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
+    eventually {
+      resolution.resolved.size must be (2)
+    }
     resolution.resolved.toList match {
       case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))
