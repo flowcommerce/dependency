@@ -1,11 +1,12 @@
 package db
 
 import java.util.UUID
-
 import io.flow.dependency.v0.models.{Organization, Project, Scms, Visibility}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class ProjectsDaoSpec extends DependencySpec {
+class ProjectsDaoSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   private[this] lazy val org: Organization = createOrganization()
   private[this] lazy val project1: Project = createProject(org)
@@ -201,20 +202,19 @@ class ProjectsDaoSpec extends DependencySpec {
         findAll(id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
           Seq(project.id)
         )
-
         findAll(id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
       }
 
       "binary id" in {
         val (project, version) = createProjectWithBinary(org)
 
-        findAll(id = Some(project.id), binaryId = Some(version.binary.id)).map(_.id) must be(
-          Seq(project.id)
-        )
-
-        findAll(id = Some(project.id), binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
+        eventually {
+          findAll(id = Some(project.id), binaryId = Some(version.binary.id)).map(_.id) must be(
+            Seq(project.id)
+          )
+          findAll(id = Some(project.id), binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
+        }
       }
-
     }
 
     "authorization for public projects" in {
