@@ -379,7 +379,8 @@ object ProjectsController {
     name: String,
     scms: String,
     visibility: String,
-    uri: String
+    uri: String,
+    branch: String
   )
 
   private val uiForm = Form(
@@ -388,7 +389,8 @@ object ProjectsController {
       "name" -> nonEmptyText,
       "scms" -> nonEmptyText,
       "visibility" -> nonEmptyText,
-      "uri" -> nonEmptyText
+      "uri" -> nonEmptyText,
+      "branch" -> nonEmptyText
     )(UiForm.apply)(UiForm.unapply)
   )
 
