@@ -32,6 +32,7 @@ class ProjectsDao @Inject()(
            projects.scms,
            projects.name,
            projects.uri,
+           projects.branch,
            organizations.id as organization_id,
            organizations.key as organization_key
       from projects
@@ -48,9 +49,9 @@ class ProjectsDao @Inject()(
 
   private[this] val InsertQuery = """
     insert into projects
-    (id, user_id, organization_id, visibility, scms, name, uri, updated_by_user_id)
+    (id, user_id, organization_id, visibility, scms, name, uri, branch, updated_by_user_id)
     values
-    ({id}, {user_id}, {organization_id}, {visibility}, {scms}, {name}, {uri}, {updated_by_user_id})
+    ({id}, {user_id}, {organization_id}, {visibility}, {scms}, {name}, {uri}, {branch}, {updated_by_user_id})
   """
 
   private[this] val UpdateQuery = """
@@ -59,6 +60,7 @@ class ProjectsDao @Inject()(
            scms = {scms},
            name = {name},
            uri = {uri},
+           branch = {branch},
            updated_by_user_id = {updated_by_user_id}
      where id = {id}
   """
@@ -137,6 +139,7 @@ class ProjectsDao @Inject()(
             Symbol("scms") -> form.scms.toString,
             Symbol("name") -> form.name.trim,
             Symbol("uri") -> form.uri.trim,
+            Symbol("branch") -> form.branch.map(_.trim),
             Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
@@ -169,6 +172,7 @@ class ProjectsDao @Inject()(
             Symbol("scms") -> form.scms.toString,
             Symbol("name") -> form.name.trim,
             Symbol("uri") -> form.uri.trim,
+            Symbol("branch") -> form.branch.map(_.trim),
             Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }

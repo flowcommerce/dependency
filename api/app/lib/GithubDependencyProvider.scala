@@ -85,9 +85,9 @@ private[lib] case class GithubDependencyProvider(
 
   override def dependencies(project: Project)(implicit ec: ExecutionContext): Future[Dependencies] = {
     for {
-      build <- getBuildDependencies(project.uri, DefaultBranch)
-      plugins <- getPluginsDependencies(project.uri, DefaultBranch)
-      properties <- parseProperties(project.uri, DefaultBranch)
+      build <- getBuildDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
+      plugins <- getPluginsDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
+      properties <- parseProperties(project.uri, project.branch.getOrElse(DefaultBranch))
     } yield {
       Seq(build, plugins, properties).flatten.foldLeft(Dependencies()) { case (all, dep) =>
         all.copy(
