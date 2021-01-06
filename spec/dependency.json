@@ -278,7 +278,8 @@
         { "name": "visibility", "type": "visibility" },
         { "name": "scms", "type": "scms" },
         { "name": "name", "type": "string" },
-        { "name": "uri", "type": "string" }
+        { "name": "uri", "type": "string" },
+        { "name": "branch", "type": "string", "required": false }
       ]
     },
 
@@ -328,7 +329,8 @@
         { "name": "name", "type": "string" },
         { "name": "visibility", "type": "visibility" },
         { "name": "scms", "type": "scms" },
-        { "name": "uri", "type": "string" }
+        { "name": "uri", "type": "string" },
+        { "name": "branch", "type": "string", "required": false }
       ]
     },
 
@@ -345,7 +347,8 @@
         { "name": "name", "type": "string", "required": false },
         { "name": "visibility", "type": "visibility", "required": false },
         { "name": "scms", "type": "scms", "required": false },
-        { "name": "uri", "type": "string", "required": false }
+        { "name": "uri", "type": "string", "required": false },
+        { "name": "branch", "type": "string", "required": false }
       ]
     },
 
