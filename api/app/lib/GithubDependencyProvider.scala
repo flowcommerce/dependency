@@ -78,15 +78,16 @@ private[lib] case class GithubDependencyProvider(
   logger: RollbarLogger
 ) extends DependencyProvider {
 
+  private val DefaultBranch = "master"
   private val BuildSbtFilename = "build.sbt"
   private val ProjectPluginsSbtFilename = "project/plugins.sbt"
   private val BuildPropertiesFilename = "project/build.properties"
 
   override def dependencies(project: Project)(implicit ec: ExecutionContext): Future[Dependencies] = {
     for {
-      build <- getBuildDependencies(project.uri)
-      plugins <- getPluginsDependencies(project.uri)
-      properties <- parseProperties(project.uri)
+      build <- getBuildDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
+      plugins <- getPluginsDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
+      properties <- parseProperties(project.uri, project.branch.getOrElse(DefaultBranch))
     } yield {
       Seq(build, plugins, properties).flatten.foldLeft(Dependencies()) { case (all, dep) =>
         all.copy(
@@ -100,11 +101,12 @@ private[lib] case class GithubDependencyProvider(
   }
 
   private[this] def getBuildDependencies(
-    projectUri: String
+    projectUri: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
-    github.file(user, projectUri, BuildSbtFilename).map { result =>
+    github.file(user, projectUri, BuildSbtFilename, branch).map { result =>
       result.flatMap { text =>
         val result = BuildSbtScalaParser(
           project = project,
@@ -124,11 +126,12 @@ private[lib] case class GithubDependencyProvider(
   }
 
   private[this] def parseProperties(
-    projectUri: String
+    projectUri: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
-    github.file(user, projectUri, BuildPropertiesFilename).map { result =>
+    github.file(user, projectUri, BuildPropertiesFilename, branch).map { result =>
       result.flatMap { text =>
         val properties = PropertiesParser(
           project = project,
@@ -155,11 +158,12 @@ private[lib] case class GithubDependencyProvider(
   }
 
   private[this] def getPluginsDependencies(
-    projectUri: String
+    projectUri: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
-    github.file(user, projectUri, ProjectPluginsSbtFilename).map { result =>
+    github.file(user, projectUri, ProjectPluginsSbtFilename, branch).map { result =>
       result.flatMap { text =>
         val result = ProjectPluginsSbtScalaParser(
           project = project,

@@ -64,7 +64,8 @@ abstract class Github {
   def file(
     user: UserReference,
     projectUri: String,
-    path: String
+    path: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[String]]
@@ -252,7 +253,8 @@ class DefaultGithub @Inject() (
   override def file(
     user: UserReference,
     projectUri: String,
-    path: String
+    path: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[String]] = {
@@ -269,7 +271,8 @@ class DefaultGithub @Inject() (
             GithubHelper.apiClient(wsClient, token).contents.getContentsByPath(
               owner = repo.owner,
               repo = repo.project,
-              path = path
+              path = path,
+              ref = branch
             ).map { contents =>
               Some(GithubUtil.toText(contents))
             }.recover {
@@ -309,7 +312,8 @@ class MockGithub() extends Github {
   override def file(
     user: UserReference,
     projectUri: String,
-    path: String
+    path: String,
+    branch: String
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[String]] = {

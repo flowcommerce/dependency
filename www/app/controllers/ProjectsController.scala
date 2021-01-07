@@ -212,7 +212,8 @@ class ProjectsController @javax.inject.Inject()(
                 name = project.name,
                 scms = project.scms.toString,
                 visibility = project.visibility.toString,
-                uri = project.uri
+                uri = project.uri,
+                branch = project.branch.getOrElse("master")
               )
             ),
             orgs
@@ -379,7 +380,8 @@ object ProjectsController {
     name: String,
     scms: String,
     visibility: String,
-    uri: String
+    uri: String,
+    branch: String
   )
 
   private val uiForm = Form(
@@ -388,7 +390,8 @@ object ProjectsController {
       "name" -> nonEmptyText,
       "scms" -> nonEmptyText,
       "visibility" -> nonEmptyText,
-      "uri" -> nonEmptyText
+      "uri" -> nonEmptyText,
+      "branch" -> nonEmptyText
     )(UiForm.apply)(UiForm.unapply)
   )
 
