@@ -212,7 +212,8 @@ class ProjectsController @javax.inject.Inject()(
                 name = project.name,
                 scms = project.scms.toString,
                 visibility = project.visibility.toString,
-                uri = project.uri
+                uri = project.uri,
+                branch = project.branch.getOrElse("master")
               )
             ),
             orgs
