@@ -268,7 +268,7 @@ package io.flow.dependency.v0.models {
     visibility: io.flow.dependency.v0.models.Visibility,
     scms: io.flow.dependency.v0.models.Scms,
     uri: String,
-    branch: _root_.scala.Option[String] = None
+    branch: String
   )
 
   final case class ProjectLibrary(
@@ -1667,7 +1667,7 @@ package io.flow.dependency.v0.models {
         visibility <- (__ \ "visibility").read[io.flow.dependency.v0.models.Visibility]
         scms <- (__ \ "scms").read[io.flow.dependency.v0.models.Scms]
         uri <- (__ \ "uri").read[String]
-        branch <- (__ \ "branch").readNullable[String]
+        branch <- (__ \ "branch").read[String]
       } yield ProjectForm(organization, name, visibility, scms, uri, branch)
     }
 
@@ -1677,11 +1677,9 @@ package io.flow.dependency.v0.models {
         "name" -> play.api.libs.json.JsString(obj.name),
         "visibility" -> play.api.libs.json.JsString(obj.visibility.toString),
         "scms" -> play.api.libs.json.JsString(obj.scms.toString),
-        "uri" -> play.api.libs.json.JsString(obj.uri)
-      ) ++ (obj.branch match {
-        case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("branch" -> play.api.libs.json.JsString(x))
-      })
+        "uri" -> play.api.libs.json.JsString(obj.uri),
+        "branch" -> play.api.libs.json.JsString(obj.branch)
+      )
     }
 
     implicit def jsonWritesDependencyProjectForm: play.api.libs.json.Writes[ProjectForm] = {

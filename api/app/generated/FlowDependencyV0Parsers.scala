@@ -728,7 +728,7 @@ package io.flow.dependency.v0.anorm.parsers {
       io.flow.dependency.v0.anorm.parsers.Visibility.parser(prefixOpt.getOrElse("") + visibility) ~
       io.flow.dependency.v0.anorm.parsers.Scms.parser(prefixOpt.getOrElse("") + scms) ~
       SqlParser.str(prefixOpt.getOrElse("") + uri) ~
-      SqlParser.str(prefixOpt.getOrElse("") + branch).? map {
+      SqlParser.str(prefixOpt.getOrElse("") + branch) map {
         case organization ~ name ~ visibility ~ scms ~ uri ~ branch => {
           io.flow.dependency.v0.models.ProjectForm(
             organization = organization,

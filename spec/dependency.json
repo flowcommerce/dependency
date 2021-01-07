@@ -330,7 +330,7 @@
         { "name": "visibility", "type": "visibility" },
         { "name": "scms", "type": "scms" },
         { "name": "uri", "type": "string" },
-        { "name": "branch", "type": "string", "required": false }
+        { "name": "branch", "type": "string" }
       ]
     },
 
