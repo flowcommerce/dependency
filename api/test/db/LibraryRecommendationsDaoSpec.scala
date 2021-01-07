@@ -1,8 +1,10 @@
 package db
 
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class LibraryRecommendationsDaoSpec extends  DependencySpec {
+class LibraryRecommendationsDaoSpec extends DependencySpec
+  with Eventually with IntegrationPatience {
 
   private[this] lazy val org = createOrganization()
 
@@ -40,17 +42,19 @@ class LibraryRecommendationsDaoSpec extends  DependencySpec {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
-    verify(
-      libraryRecommendationsDao.forProject(project),
-      Seq(
-        LibraryRecommendation(
-          library = library,
-          from =  "1.0.0",
-          to = libraryVersions.last,
-          latest = libraryVersions.last
+    eventually {
+      verify(
+        libraryRecommendationsDao.forProject(project),
+        Seq(
+          LibraryRecommendation(
+            library = library,
+            from =  "1.0.0",
+            to = libraryVersions.last,
+            latest = libraryVersions.last
+          )
         )
       )
-    )
+    }
   }
 
   "Prefers latest production release even when more recent beta release is available" in {
