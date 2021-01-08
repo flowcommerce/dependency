@@ -19,8 +19,6 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
 
   override def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     val allProjects = projects(organizationKey)
-    println(s" all pojects: ${allProjects.keys}")
-
     val r = DependencyResolver(
       buildProjectInfo(allProjects.values.toSeq, groupId = groupId)
     ).resolution

@@ -82,16 +82,18 @@ class RecommendationsDaoSpec extends DependencySpec
     )
     val project = createProject(org)()
     addLibraryVersion(project, libraryVersions.head)
-    libraryRecommendationsDao.forProject(project) must be(
-      Seq(
-        LibraryRecommendation(
-          library = library,
-          from = "1.0.0",
-          to = libraryVersions.find(_.version == "1.0.1").get,
-          latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+    eventually {
+      libraryRecommendationsDao.forProject(project) must be(
+        Seq(
+          LibraryRecommendation(
+            library = library,
+            from = "1.0.0",
+            to = libraryVersions.find(_.version == "1.0.1").get,
+            latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+          )
         )
       )
-    )
+    }
   }
 
 }
