@@ -145,7 +145,8 @@ class ProjectsController @javax.inject.Inject()(
                 } else {
                   Visibility.Public
                 },
-                uri = repo.htmlUrl
+                uri = repo.htmlUrl,
+                branch = repo.defaultBranch
               )
             ).map { project =>
               Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project added")
@@ -185,7 +186,8 @@ class ProjectsController @javax.inject.Inject()(
               name = uiForm.name,
               scms = Scms(uiForm.scms),
               visibility = Visibility(uiForm.visibility),
-              uri = uiForm.uri
+              uri = uiForm.uri,
+              branch = uiForm.branch
             )
           ).map { project =>
             Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
@@ -213,7 +215,7 @@ class ProjectsController @javax.inject.Inject()(
                 scms = project.scms.toString,
                 visibility = project.visibility.toString,
                 uri = project.uri,
-                branch = project.branch.getOrElse("master")
+                branch = project.branch
               )
             ),
             orgs
@@ -241,7 +243,8 @@ class ProjectsController @javax.inject.Inject()(
                 name = uiForm.name,
                 scms = Scms(uiForm.scms),
                 visibility = Visibility(uiForm.visibility),
-                uri = uiForm.uri
+                uri = uiForm.uri,
+                branch = uiForm.branch
               )
             ).map { project =>
               Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")

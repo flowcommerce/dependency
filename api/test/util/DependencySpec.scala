@@ -188,7 +188,8 @@ trait DependencySpec extends FlowPlaySpec with Factories {
       name = name,
       visibility = Visibility.Private,
       scms = Scms.Github,
-      uri = s"http://github.com/test/${UUID.randomUUID.toString}"
+      uri = s"http://github.com/test/${UUID.randomUUID.toString}",
+      branch = createTestId()
     )
   }
 

@@ -88,7 +88,8 @@ class Projects @javax.inject.Inject() (
             name = patch.name.getOrElse(project.name),
             visibility = patch.visibility.getOrElse(project.visibility),
             scms = patch.scms.getOrElse(project.scms),
-            uri = patch.uri.getOrElse(project.uri)
+            uri = patch.uri.getOrElse(project.uri),
+            branch = patch.branch.getOrElse(project.branch)
           )
           projectsDao.update(request.user, project, form) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))

@@ -113,17 +113,11 @@ class ProjectsDaoSpec extends DependencySpec
       projectsDao.create(systemUser, form) must be(Left(Seq("Uri cannot be empty")))
     }
 
-    "create with no specified branch" in {
-      val form = createProjectForm(org)
-      val project = rightOrErrors(projectsDao.create(systemUser, form))
-      project.branch must be (empty)
-    }
-
     "create with specified branch name" in {
       val branch = createTestId()
-      val form = createProjectForm(org).copy(branch = Some(branch))
+      val form = createProjectForm(org).copy(branch = branch)
       val project = rightOrErrors(projectsDao.create(systemUser, form))
-      project.branch must be (Some(branch))
+      project.branch must be (branch)
     }
   }
 

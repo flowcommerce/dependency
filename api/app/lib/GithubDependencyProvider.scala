@@ -78,16 +78,15 @@ private[lib] case class GithubDependencyProvider(
   logger: RollbarLogger
 ) extends DependencyProvider {
 
-  private val DefaultBranch = "master"
   private val BuildSbtFilename = "build.sbt"
   private val ProjectPluginsSbtFilename = "project/plugins.sbt"
   private val BuildPropertiesFilename = "project/build.properties"
 
   override def dependencies(project: Project)(implicit ec: ExecutionContext): Future[Dependencies] = {
     for {
-      build <- getBuildDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
-      plugins <- getPluginsDependencies(project.uri, project.branch.getOrElse(DefaultBranch))
-      properties <- parseProperties(project.uri, project.branch.getOrElse(DefaultBranch))
+      build <- getBuildDependencies(project.uri, project.branch)
+      plugins <- getPluginsDependencies(project.uri, project.branch)
+      properties <- parseProperties(project.uri, project.branch)
     } yield {
       Seq(build, plugins, properties).flatten.foldLeft(Dependencies()) { case (all, dep) =>
         all.copy(
