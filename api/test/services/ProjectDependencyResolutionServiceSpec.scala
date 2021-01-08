@@ -1,16 +1,16 @@
 package services
 
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.BeforeAndAfterAll
 import util.DependencySpec
 
 class ProjectDependencyResolutionServiceSpec extends DependencySpec
-  with Eventually with IntegrationPatience {
+  with BeforeAndAfterAll {
 
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
   private[this] val defaultOrg = createOrganization()
   private[this] val defaultGroupId = createTestId()
-  private[this] val libS3Project = {
+  private[this] lazy val libS3Project = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-s3")
     )
@@ -18,8 +18,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     projectsDao.toSummary(p)
   }
 
-  private[this] val libInvoiceProject = {
-    println("Creating lib invoice")
+  private[this] lazy val libInvoiceProject = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
@@ -30,15 +29,19 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
         artifactId = "lib-s3",
       )
     )
-    println("Creating lib invoice")
     projectsDao.toSummary(p)
   }
+
+//  override beforeAll() = {
+//    projectsDao.delete()
+//    librariesDao.delete()
+//  }
 
   "buildProjectInfo for no project" in {
     projectDependencyResolutionService.buildProjectInfo(Nil, groupId = createTestId()) must be(Nil)
   }
 
-  "buildProjectInfo 'depends' and 'provides'" in eventually {
+  "buildProjectInfo 'depends' and 'provides'" in {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
@@ -54,7 +57,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     invoice.provides must be(Nil)
   }
 
-  "getByOrganization" in eventually {
+  "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
     resolution.resolved.size must be (2)
     resolution.resolved.toList match {
