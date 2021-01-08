@@ -1,13 +1,13 @@
 package services
 
 import db.Authorization
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.BeforeAndAfter
 import util.DependencySpec
 
 class ProjectDependencyResolutionServiceSpec extends DependencySpec
-  with BeforeAndAfterAll {
+  with BeforeAndAfter {
 
-  def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
+  private[this] lazy val projectDependencyResolutionService = init[ProjectDependencyResolutionServiceImpl]
 
   private[this] val defaultOrg = createOrganization()
   private[this] val defaultGroupId = createTestId()
@@ -33,7 +33,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     projectsDao.toSummary(p)
   }
 
-  override def beforeAll(): Unit = {
+  before {
     projectsDao.findAll(Authorization.All, limit = None).foreach(_ => projectsDao.delete(testUser, _))
     projectLibrariesDao.findAll(Authorization.All, orderBy = None, limit = None).foreach(_ => projectLibrariesDao.delete(testUser, _))
     librariesDao.findAll(Authorization.All, limit = None).foreach(_ => librariesDao.delete(testUser, _))
