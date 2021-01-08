@@ -139,7 +139,7 @@ class ProjectsDao @Inject()(
             Symbol("scms") -> form.scms.toString,
             Symbol("name") -> form.name.trim,
             Symbol("uri") -> form.uri.trim,
-            Symbol("branch") -> form.branch.map(_.trim),
+            Symbol("branch") -> form.branch.trim,
             Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
@@ -172,7 +172,7 @@ class ProjectsDao @Inject()(
             Symbol("scms") -> form.scms.toString,
             Symbol("name") -> form.name.trim,
             Symbol("uri") -> form.uri.trim,
-            Symbol("branch") -> form.branch.map(_.trim),
+            Symbol("branch") -> form.branch.trim,
             Symbol("updated_by_user_id") -> createdBy.id
           ).execute()
         }
