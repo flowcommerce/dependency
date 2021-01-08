@@ -1,16 +1,10 @@
 package services
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
 class ProjectDependencyResolutionServiceSpec extends DependencySpec
   with Eventually with IntegrationPatience {
-
-  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(30, Seconds)),
-    interval = scaled(Span(250, Millis))
-  )
 
   def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
 
@@ -44,7 +38,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     projectDependencyResolutionService.buildProjectInfo(Nil, groupId = createTestId()) must be(Nil)
   }
 
-  "buildProjectInfo 'depends' and 'provides'" in {
+  "buildProjectInfo 'depends' and 'provides'" in eventually {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
@@ -60,12 +54,9 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     invoice.provides must be(Nil)
   }
 
-  "getByOrganization" in {
-    val resolution = eventually {
-      val res = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
-      res.resolved.size must be (2)
-      res
-    }
+  "getByOrganization" in eventually {
+    val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
+    resolution.resolved.size must be (2)
     resolution.resolved.toList match {
       case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))
