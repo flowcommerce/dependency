@@ -1,10 +1,16 @@
 package db
 
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
 class LibraryRecommendationsDaoSpec extends DependencySpec
   with Eventually with IntegrationPatience {
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(
+    timeout = scaled(Span(30, Seconds)),
+    interval = scaled(Span(250, Millis))
+  )
 
   private[this] lazy val org = createOrganization()
 
@@ -63,17 +69,19 @@ class LibraryRecommendationsDaoSpec extends DependencySpec
     )
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
-    verify(
-      libraryRecommendationsDao.forProject(project),
-      Seq(
-        LibraryRecommendation(
-          library = library,
-          from = "1.0.0",
-          to = libraryVersions.find(_.version == "1.0.1").get,
-          latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+    eventually {
+      verify(
+        libraryRecommendationsDao.forProject(project),
+        Seq(
+          LibraryRecommendation(
+            library = library,
+            from = "1.0.0",
+            to = libraryVersions.find(_.version == "1.0.1").get,
+            latest = libraryVersions.find(_.version == "1.0.2-RC1").get
+          )
         )
       )
-    )
+    }
   }
 
   // TODO: Add tests specific to cross build versions

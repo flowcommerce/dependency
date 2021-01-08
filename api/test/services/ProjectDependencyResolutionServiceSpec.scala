@@ -1,14 +1,17 @@
 package services
 
+import db.Authorization
+import org.scalatest.BeforeAndAfter
 import util.DependencySpec
 
-class ProjectDependencyResolutionServiceSpec extends DependencySpec {
+class ProjectDependencyResolutionServiceSpec extends DependencySpec
+  with BeforeAndAfter {
 
-  def projectDependencyResolutionService: ProjectDependencyResolutionServiceImpl = init[ProjectDependencyResolutionService].asInstanceOf[ProjectDependencyResolutionServiceImpl]
+  private[this] lazy val projectDependencyResolutionService = init[ProjectDependencyResolutionServiceImpl]
 
   private[this] val defaultOrg = createOrganization()
   private[this] val defaultGroupId = createTestId()
-  private[this] val libS3Project = {
+  private[this] lazy val libS3Project = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-s3")
     )
@@ -16,8 +19,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
     projectsDao.toSummary(p)
   }
 
-  private[this] val libInvoiceProject = {
-    println("Creating lib invoice")
+  private[this] lazy val libInvoiceProject = {
     val p = createProject(defaultOrg)(
       createProjectForm(defaultOrg, name = "lib-invoice")
     )
@@ -28,8 +30,13 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
         artifactId = "lib-s3",
       )
     )
-    println("Creating lib invoice")
     projectsDao.toSummary(p)
+  }
+
+  before {
+    projectsDao.findAll(Authorization.All, limit = None).foreach(_ => projectsDao.delete(testUser, _))
+    projectLibrariesDao.findAll(Authorization.All, orderBy = None, limit = None).foreach(_ => projectLibrariesDao.delete(testUser, _))
+    librariesDao.findAll(Authorization.All, limit = None).foreach(_ => librariesDao.delete(testUser, _))
   }
 
   "buildProjectInfo for no project" in {
@@ -41,7 +48,8 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
       Seq(libS3Project, libInvoiceProject),
       groupId = defaultGroupId,
     )
-    all.size must equal(2)
+    all.size must be (2)
+
     val s3 = all.find(_.projectId == libS3Project.id).get
     s3.dependsOn must be(Nil)
     s3.provides.map(_.identifier) must equal(Seq(s"$defaultGroupId.lib-s3"))
@@ -53,6 +61,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec {
 
   "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
+    resolution.resolved.size must be (2)
     resolution.resolved.toList match {
       case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))
