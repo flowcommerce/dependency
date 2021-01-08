@@ -1,5 +1,6 @@
 package services
 
+import db.Authorization
 import org.scalatest.BeforeAndAfterAll
 import util.DependencySpec
 
@@ -32,10 +33,11 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     projectsDao.toSummary(p)
   }
 
-//  override beforeAll() = {
-//    projectsDao.delete()
-//    librariesDao.delete()
-//  }
+  override def beforeAll(): Unit = {
+    projectsDao.findAll(Authorization.All, limit = None).foreach(_ => projectsDao.delete(testUser, _))
+    projectLibrariesDao.findAll(Authorization.All, orderBy = None, limit = None).foreach(_ => projectLibrariesDao.delete(testUser, _))
+    librariesDao.findAll(Authorization.All, limit = None).foreach(_ => librariesDao.delete(testUser, _))
+  }
 
   "buildProjectInfo for no project" in {
     projectDependencyResolutionService.buildProjectInfo(Nil, groupId = createTestId()) must be(Nil)
