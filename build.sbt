@@ -31,7 +31,7 @@ lazy val lib = project
       "com.typesafe.play" %% "play-test" % "2.8.7",
       "com.typesafe.play" %% "play-specs2" % "2.8.7",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
-      "org.specs2" %% "specs2-core" % "4.10.5",
+      "org.specs2" %% "specs2-core" % "4.10.6",
     )
   )
 
@@ -54,11 +54,11 @@ lazy val api = project
       ws,
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.16",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.80",
-      "io.flow" %% "lib-log" % "0.1.30",
-      "io.flow" %% "lib-usage-play28" % "0.1.49",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.20" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.5.17",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.81",
+      "io.flow" %% "lib-log" % "0.1.31",
+      "io.flow" %% "lib-usage-play28" % "0.1.50",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.21" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.18",
       "org.apache.commons" % "commons-text" % "1.9",
@@ -92,11 +92,11 @@ lazy val www = project
       ws,
       guice,
       "org.webjars" %% "webjars-play" % "2.8.0",
-      "org.webjars" % "bootstrap" % "4.6.0",
-      "org.webjars" % "font-awesome" % "5.15.1",
+      "org.webjars" % "bootstrap" % "3.4.1",
+      "org.webjars" % "font-awesome" % "5.15.2",
       "org.webjars" % "jquery" % "3.5.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.20" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.21" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
     ),
@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.27",
+    "io.flow" %% "lib-play-play28" % "0.6.28",
     "com.typesafe.play" %% "play-json-joda" % "2.9.2",
     "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
