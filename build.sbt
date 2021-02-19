@@ -60,7 +60,7 @@ lazy val api = project
       "io.flow" %% "lib-usage-play28" % "0.1.54",
       "io.flow" %% "lib-test-utils-play28" % "0.1.25" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
-      "org.postgresql" % "postgresql" % "42.2.18",
+      "org.postgresql" % "postgresql" % "42.2.19",
       "org.apache.commons" % "commons-text" % "1.9",
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.2" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.2" % Provided cross CrossVersion.full
