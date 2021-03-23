@@ -52,7 +52,7 @@ object Config {
 
     scms match {
       case Scms.Github =>
-        s"$uri/blob/primary$pathSep"
+        s"$uri/blob/main$pathSep"
 
       case Scms.UNDEFINED(_) =>
         uri + pathSep
