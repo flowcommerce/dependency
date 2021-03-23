@@ -2017,7 +2017,7 @@ package io.flow.github.v0 {
       override def getReadme(
         owner: String,
         repo: String,
-        ref: String = "master",
+        ref: String = "primary",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents] = {
         val queryParameters = Seq(
@@ -2036,7 +2036,7 @@ package io.flow.github.v0 {
         owner: String,
         repo: String,
         path: String,
-        ref: String = "master",
+        ref: String = "primary",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents] = {
         val queryParameters = Seq(
@@ -2536,7 +2536,7 @@ package io.flow.github.v0 {
     def getReadme(
       owner: String,
       repo: String,
-      ref: String = "master",
+      ref: String = "primary",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents]
 
@@ -2544,7 +2544,7 @@ package io.flow.github.v0 {
       owner: String,
       repo: String,
       path: String,
-      ref: String = "master",
+      ref: String = "primary",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents]
   }
