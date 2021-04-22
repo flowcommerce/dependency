@@ -28,8 +28,8 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-test" % "2.8.7",
-      "com.typesafe.play" %% "play-specs2" % "2.8.7",
+      "com.typesafe.play" %% "play-test" % "2.8.8",
+      "com.typesafe.play" %% "play-specs2" % "2.8.8",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
       "org.specs2" %% "specs2-core" % "4.10.6",
     )
@@ -44,7 +44,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "io.kamon" % "kanela-agent" % "1.0.8",
+    javaAgents += "io.kamon" % "kanela-agent" % "1.0.9",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -53,12 +53,12 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.7.2",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.25",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.90",
-      "io.flow" %% "lib-log" % "0.1.36",
-      "io.flow" %% "lib-usage-play28" % "0.1.57",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.27" % Test,
+      "com.sendgrid" % "sendgrid-java" % "4.7.1",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.27",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.92",
+      "io.flow" %% "lib-log" % "0.1.38",
+      "io.flow" %% "lib-usage-play28" % "0.1.59",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.29" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.19",
       "org.apache.commons" % "commons-text" % "1.9",
@@ -96,7 +96,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.2",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.27" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.29" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.3" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.3" % Provided cross CrossVersion.full
     ),
@@ -116,7 +116,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.33",
+    "io.flow" %% "lib-play-play28" % "0.6.35",
     "com.typesafe.play" %% "play-json-joda" % "2.9.2",
     "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
