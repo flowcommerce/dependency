@@ -75,6 +75,7 @@ lazy val www = project
   .dependsOn(generated, lib)
   .aggregate(generated, lib)
   .enablePlugins(PlayScala)
+  .enablePlugins(SbtTwirl)
   .enablePlugins(NewRelic)
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
