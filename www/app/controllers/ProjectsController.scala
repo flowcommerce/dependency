@@ -1,6 +1,6 @@
 package controllers
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 import io.flow.dependency.v0.errors.{GenericErrorResponse, UnitResponse}
 import io.flow.dependency.v0.models._
 import io.flow.dependency.www.lib.DependencyClientProvider
@@ -117,7 +117,7 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  @silent
+  @nowarn
   def postGithubOrg(
     orgKey: String,
     owner: String, // github owner, ex. flowcommerce    
@@ -275,7 +275,7 @@ class ProjectsController @javax.inject.Inject()(
   /**
     * Waits for the latest sync to complete for this project.
     */
-  @silent
+  @nowarn
   def sync(id: String, n: Int, librariesPage: Int = 0) = User.async { implicit request =>
     withProject(request, id) { _ =>
       for {
