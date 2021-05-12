@@ -139,7 +139,7 @@ class ProjectLibrariesDao @Inject() (
     bindQuery(InsertQuery, form).
       bind("id", id).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()(c)
+      anormSql().execute()(c)
     id
   }
 
@@ -159,7 +159,7 @@ class ProjectLibrariesDao @Inject() (
     bindQuery(UpdateQuery, form).
       bind("id", id).
       bind("updated_by_user_id", updatedBy.id).
-      anormSql.execute()(c)
+      anormSql().execute()(c)
     ()
   }
 
@@ -339,7 +339,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("artifact_id", artifactId)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -353,7 +353,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("artifact_id", artifactIds)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -367,7 +367,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("group_id", groupId)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -381,7 +381,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("group_id", groupIds)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -395,7 +395,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("id", id)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -409,7 +409,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("id", ids)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -423,7 +423,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("library_id", libraryId)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -437,7 +437,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("library_id", libraryIds)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -451,7 +451,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("organization_id", organizationId)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -465,7 +465,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("organization_id", organizationIds)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -479,7 +479,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("project_id", projectId)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -493,7 +493,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("project_id", projectIds)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -507,7 +507,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .equals("version", version)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 
@@ -521,7 +521,7 @@ class ProjectLibrariesDao @Inject() (
     setJournalDeletedByUserId(c, deletedBy)
     Query("delete from project_libraries")
       .in("version", versions)
-      .anormSql.executeUpdate()(c)
+      .anormSql().executeUpdate()(c)
       ()
   }
 

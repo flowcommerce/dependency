@@ -120,9 +120,11 @@ class RecommendationsDao @Inject()(
       case None => {
         create(createdBy, form)
       }
-      case Some(rec) if rec.to != form.to => {
-        dbHelpers.delete(c, createdBy.id, rec.id)
-        create(createdBy, form)
+      case Some(rec) => {
+        if (rec.to != form.to) {
+          dbHelpers.delete(c, createdBy.id, rec.id)
+          create(createdBy, form)
+        }
       }
     }
   }
