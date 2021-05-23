@@ -35,7 +35,7 @@ lazy val lib = project
       "com.typesafe.play" %% "play-test" % "2.8.8",
       "com.typesafe.play" %% "play-specs2" % "2.8.8",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
-      "org.specs2" %% "specs2-core" % "4.11.0",
+      "org.specs2" %% "specs2-core" % "4.12.0",
     )
   )
 
