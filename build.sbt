@@ -48,7 +48,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "io.kamon" % "kanela-agent" % "1.0.10",
+    javaAgents += "io.kamon" % "kanela-agent" % "1.0.11",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
