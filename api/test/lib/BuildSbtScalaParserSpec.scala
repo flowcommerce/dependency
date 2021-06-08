@@ -32,7 +32,7 @@ import play.PlayImport.PlayKeys._
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.11.7"
+ThisBuild / scalaVersion := "2.11.7"
 
 crossScalaVersions := Seq("2.11.7")
 

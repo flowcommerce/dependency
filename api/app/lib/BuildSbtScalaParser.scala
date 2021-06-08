@@ -23,7 +23,7 @@ case class BuildSbtScalaParser(
 
   val binaries: Seq[ProjectBinaryForm] = {
     lines.
-      filter(_.startsWith("scalaVersion")).
+      filter(_.contains("scalaVersion")).
       flatMap { line =>
       line.split(":=").map(_.trim).toList match {
         case _ :: version :: Nil => {
