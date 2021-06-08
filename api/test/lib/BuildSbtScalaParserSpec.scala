@@ -25,6 +25,22 @@ lazy val root = project
 
   }
 
+  "parse scalaVersion" in {
+    val contents =
+      """
+name := "lib-play"
+
+ThisBuild / scalaVersion := "2.13.5"
+
+lazy val root = project
+  .in(file("."))
+"""
+
+    val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
+    result.binaries must contain theSameElementsAs Seq(ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.13.5", "test.sbt"))
+    result.libraries mustBe empty
+  }
+
   "single project w/ dependencies" should {
 
     val contents = """
