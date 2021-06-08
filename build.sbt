@@ -48,7 +48,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "io.kamon" % "kanela-agent" % "1.0.10",
+    javaAgents += "io.kamon" % "kanela-agent" % "1.0.11",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -59,10 +59,10 @@ lazy val api = project
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
       "io.flow" %% "lib-event-sync-play28" % "0.5.28",
-      "io.flow" %% "lib-play-graphite-play28" % "0.1.94",
+      "io.flow" %% "lib-play-graphite-play28" % "0.1.96",
       "io.flow" %% "lib-log" % "0.1.38",
       "io.flow" %% "lib-usage-play28" % "0.1.62",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.30" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.33" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.20",
       "org.apache.commons" % "commons-text" % "1.9",
@@ -92,7 +92,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.2",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.30" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.33" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
