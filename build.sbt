@@ -106,6 +106,9 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "com.typesafe.play" %% "play-json-joda" % "2.9.2",
     "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
+  dependencyOverrides ++= Seq(
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
+  ),
   scalacOptions ++= allScalacOptions,
   credentials += credsToUse,
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/"
