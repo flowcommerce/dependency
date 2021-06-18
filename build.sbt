@@ -59,7 +59,7 @@ lazy val api = project
       "io.flow" %% "lib-play-graphite-play28" % "0.1.96",
       "io.flow" %% "lib-log" % "0.1.38",
       "io.flow" %% "lib-usage-play28" % "0.1.61",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.33" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.34" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
       "org.postgresql" % "postgresql" % "42.2.22",
       "org.apache.commons" % "commons-text" % "1.9",
@@ -89,7 +89,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.3",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.33" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.1.34" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
