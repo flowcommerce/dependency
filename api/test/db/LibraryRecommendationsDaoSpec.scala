@@ -8,7 +8,7 @@ class LibraryRecommendationsDaoSpec extends DependencySpec
   with Eventually with IntegrationPatience {
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(30, Seconds)),
+    timeout = scaled(Span(60, Seconds)),
     interval = scaled(Span(250, Millis))
   )
 
