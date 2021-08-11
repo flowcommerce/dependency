@@ -774,7 +774,6 @@ package io.flow.github.v0.anorm.parsers {
       description: String = "description",
       url: String = "url",
       htmlUrl: String = "html_url",
-      defaultBranch: String = "default_branch",
       prefixOpt: Option[String] = None
     ): RowParser[io.flow.github.v0.models.Repository] = {
       SqlParser.long(prefixOpt.getOrElse("") + id) ~
@@ -784,9 +783,8 @@ package io.flow.github.v0.anorm.parsers {
       SqlParser.bool(prefixOpt.getOrElse("") + `private`) ~
       SqlParser.str(prefixOpt.getOrElse("") + description).? ~
       SqlParser.str(prefixOpt.getOrElse("") + url) ~
-      SqlParser.str(prefixOpt.getOrElse("") + htmlUrl) ~
-      SqlParser.str(prefixOpt.getOrElse("") + defaultBranch) map {
-        case id ~ owner ~ name ~ fullName ~ privateInstance ~ description ~ url ~ htmlUrl ~ defaultBranch => {
+      SqlParser.str(prefixOpt.getOrElse("") + htmlUrl) map {
+        case id ~ owner ~ name ~ fullName ~ privateInstance ~ description ~ url ~ htmlUrl => {
           io.flow.github.v0.models.Repository(
             id = id,
             owner = owner,
@@ -795,8 +793,7 @@ package io.flow.github.v0.anorm.parsers {
             `private` = privateInstance,
             description = description,
             url = url,
-            htmlUrl = htmlUrl,
-            defaultBranch = defaultBranch
+            htmlUrl = htmlUrl
           )
         }
       }
