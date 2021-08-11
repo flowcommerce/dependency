@@ -197,8 +197,7 @@ package io.flow.github.v0.models {
     `private`: Boolean,
     description: _root_.scala.Option[String] = None,
     url: String,
-    htmlUrl: String,
-    defaultBranch: String
+    htmlUrl: String
   )
 
   final case class Tag(
@@ -1388,8 +1387,7 @@ package io.flow.github.v0.models {
         description <- (__ \ "description").readNullable[String]
         url <- (__ \ "url").read[String]
         htmlUrl <- (__ \ "html_url").read[String]
-        defaultBranch <- (__ \ "default_branch").read[String]
-      } yield Repository(id, owner, name, fullName, `private`, description, url, htmlUrl, defaultBranch)
+      } yield Repository(id, owner, name, fullName, `private`, description, url, htmlUrl)
     }
 
     def jsObjectRepository(obj: io.flow.github.v0.models.Repository): play.api.libs.json.JsObject = {
@@ -1400,8 +1398,7 @@ package io.flow.github.v0.models {
         "full_name" -> play.api.libs.json.JsString(obj.fullName),
         "private" -> play.api.libs.json.JsBoolean(obj.`private`),
         "url" -> play.api.libs.json.JsString(obj.url),
-        "html_url" -> play.api.libs.json.JsString(obj.htmlUrl),
-        "default_branch" -> play.api.libs.json.JsString(obj.defaultBranch)
+        "html_url" -> play.api.libs.json.JsString(obj.htmlUrl)
       ) ++ (obj.description match {
         case None => play.api.libs.json.Json.obj()
         case Some(x) => play.api.libs.json.Json.obj("description" -> play.api.libs.json.JsString(x))
@@ -2017,7 +2014,7 @@ package io.flow.github.v0 {
       override def getReadme(
         owner: String,
         repo: String,
-        ref: String = "main",
+        ref: String = "master",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents] = {
         val queryParameters = Seq(
@@ -2036,7 +2033,7 @@ package io.flow.github.v0 {
         owner: String,
         repo: String,
         path: String,
-        ref: String = "main",
+        ref: String = "master",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents] = {
         val queryParameters = Seq(
@@ -2536,7 +2533,7 @@ package io.flow.github.v0 {
     def getReadme(
       owner: String,
       repo: String,
-      ref: String = "main",
+      ref: String = "master",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents]
 
@@ -2544,7 +2541,7 @@ package io.flow.github.v0 {
       owner: String,
       repo: String,
       path: String,
-      ref: String = "main",
+      ref: String = "master",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.github.v0.models.Contents]
   }
