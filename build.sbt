@@ -74,9 +74,11 @@ lazy val www = project
   .enablePlugins(PlayScala)
   .enablePlugins(SbtTwirl)
   .enablePlugins(NewRelic)
+  .enablePlugins(JavaAppPackaging, JavaAgent)
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "0.83.2",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
