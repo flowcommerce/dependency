@@ -72,6 +72,8 @@ spec:
               value: {{ $stage }}
             - name: DD_VERSION
               value: {{ $deployment.version }}
+            - name: DD_SERVICE_MAPPING
+              value: postgresql:{{ $.Chart.Name }}-postgresql,java-aws-sdk:{{ $.Chart.Name }}-aws-sdk"
           args: ["production"]
           ports:
             - name: http
