@@ -62,6 +62,16 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_SERVICE
+              value: {{ $.Chart.Name }}
+            - name: DD_ENV
+              value: {{ $stage }}
+            - name: DD_VERSION
+              value: {{ $deployment.version }}
           args: ["production"]
           ports:
             - name: http
