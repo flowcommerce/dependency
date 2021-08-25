@@ -3,9 +3,11 @@ package db
 import java.util.UUID
 
 import io.flow.dependency.v0.models.{BinaryType, Organization, SyncEvent}
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class BinariesDaoSpec extends DependencySpec {
+class BinariesDaoSpec extends DependencySpec 
+  with Eventually with IntegrationPatience {
 
   private[this] lazy val org: Organization = createOrganization()
 
@@ -51,8 +53,10 @@ class BinariesDaoSpec extends DependencySpec {
   "findAll by projectId" in {
     val (project, binaryVersion) = createProjectWithBinary(org)
 
-    binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(project.id)).map(_.id) must be(Seq(binaryVersion.binary.id))
-    binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(createProject().id)) must be(Nil)
+    eventually {
+      binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(project.id)).map(_.id) must be(Seq(binaryVersion.binary.id))
+      binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(createProject().id)) must be(Nil)
+    }
   }
 
   "create" must {
