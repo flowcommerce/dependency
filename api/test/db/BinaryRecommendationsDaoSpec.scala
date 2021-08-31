@@ -67,17 +67,19 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
     val (binary, binaryVersions) = createBinaryWithMultipleVersions(org)
     val project = createProject(org)
     addBinaryVersion(project, binaryVersions.find(_.version == "1.0.0").get)
-    verify(
-      binaryRecommendationsDao.forProject(project),
-      Seq(
-        BinaryRecommendation(
-          binary = binary,
-          from = "1.0.0",
-          to = binaryVersions.find(_.version == "1.0.2").get,
-          latest = binaryVersions.find(_.version == "1.0.2").get
+    eventually {
+      verify(
+        binaryRecommendationsDao.forProject(project),
+        Seq(
+          BinaryRecommendation(
+            binary = binary,
+            from = "1.0.0",
+            to = binaryVersions.find(_.version == "1.0.2").get,
+            latest = binaryVersions.find(_.version == "1.0.2").get
+          )
         )
       )
-    )
+    }
   }
 
   "Prefers latest production release even when more recent beta release is available" in {

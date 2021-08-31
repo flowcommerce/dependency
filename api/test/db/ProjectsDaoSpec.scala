@@ -205,10 +205,12 @@ class ProjectsDaoSpec extends DependencySpec
       "binary name" in {
         val (project, version) = createProjectWithBinary(org)
 
-        findAll(id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
-          Seq(project.id)
-        )
-        findAll(id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
+        eventually {
+          findAll(id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
+            Seq(project.id)
+          )
+          findAll(id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
+        }
       }
 
       "binary id" in {
