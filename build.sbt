@@ -54,14 +54,14 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.7.5",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.41",
-      "io.flow" %% "lib-metrics-play28" % "1.0.5",
-      "io.flow" %% "lib-log" % "0.1.48",
-      "io.flow" %% "lib-usage-play28" % "0.1.74",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.47" % Test,
-      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.24",
-      "org.postgresql" % "postgresql" % "42.2.23",
+      "com.sendgrid" % "sendgrid-java" % "4.7.1",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.42",
+      "io.flow" %% "lib-metrics-play28" % "1.0.6",
+      "io.flow" %% "lib-log" % "0.1.49",
+      "io.flow" %% "lib-usage-play28" % "0.1.75",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.48" % Test,
+      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.25",
+      "org.postgresql" % "postgresql" % "42.2.24",
       "org.apache.commons" % "commons-text" % "1.9"
     ),
     scalacOptions ++= allScalacOptions
@@ -91,7 +91,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.4",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.47" % Test
+      "io.flow" %% "lib-test-utils-play28" % "0.1.48" % Test
     ),
     scalacOptions ++= allScalacOptions
   )
@@ -104,7 +104,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.6.52",
+    "io.flow" %% "lib-play-play28" % "0.6.53",
     "com.typesafe.play" %% "play-json-joda" % "2.9.2",
     "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
