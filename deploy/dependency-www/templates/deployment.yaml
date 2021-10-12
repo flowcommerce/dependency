@@ -28,7 +28,9 @@ spec:
         app: {{ include "deploy.name" $ }}
         flow.io/version: {{ $deployment.version }}
       annotations:
+        {{- if not $deployment.serviceAccountName }}
         iam.amazonaws.com/role: {{ $.Values.iamRole }}
+        {{- end }}
         sumologic.com/sourceCategory: {{ $fullName }}
     spec:
       containers:
@@ -72,6 +74,8 @@ spec:
               value: {{ $stage }}
             - name: DD_VERSION
               value: {{ $deployment.version }}
+            - name: DD_JMXFETCH_STATSD_HOST
+              value: 'unix:///var/run/datadog/dsd.socket'
             - name: DD_SERVICE_MAPPING
               value: postgresql:{{ $.Chart.Name }}-postgresql,java-aws-sdk:{{ $.Chart.Name }}-aws-sdk"
           args: ["production"]
@@ -79,19 +83,23 @@ spec:
             - name: http
               containerPort: {{ $.Values.service.port }}
               protocol: TCP
+          volumeMounts:
+            - name: dsdsocket
+              mountPath: /var/run/datadog
           livenessProbe:
             httpGet:
               path: /_internal_/healthcheck
               port: http
             initialDelaySeconds: 130
-            periodSeconds: 5
+            failureThreshold: 6
+            periodSeconds: 10
             timeoutSeconds: 5
           readinessProbe:
             httpGet:
               path: /_internal_/healthcheck
               port: http
             initialDelaySeconds: 120
-            failureThreshold: 10
+            failureThreshold: 3
             periodSeconds: 5
             timeoutSeconds: 5
           resources:
@@ -110,6 +118,14 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      volumes:
+        - name: dsdsocket
+          hostPath:
+            path: /var/run/datadog/
+            type: DirectoryOrCreate
+      {{- if $deployment.serviceAccountName }}
+      serviceAccountName: {{ $deployment.serviceAccountName }}
+      {{- end }}
   strategy:
     type: {{ $deployment.strategy | default "RollingUpdate" }}
 ---
