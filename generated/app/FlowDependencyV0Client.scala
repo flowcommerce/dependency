@@ -5,7 +5,10 @@
  */
 package io.flow.dependency.v0.models {
 
-  sealed trait Credentials extends _root_.scala.Product with _root_.scala.Serializable
+  sealed trait Credentials extends _root_.scala.Product with _root_.scala.Serializable {
+    def credentialsDiscriminator: CredentialsDiscriminator
+
+  }
 
   /**
    * Defines the valid discriminator values for the type Credentials
@@ -28,7 +31,10 @@ package io.flow.dependency.v0.models {
 
   }
 
-  sealed trait ItemSummary extends _root_.scala.Product with _root_.scala.Serializable
+  sealed trait ItemSummary extends _root_.scala.Product with _root_.scala.Serializable {
+    def itemSummaryDiscriminator: ItemSummaryDiscriminator
+
+  }
 
   /**
    * Defines the valid discriminator values for the type ItemSummary
@@ -53,7 +59,10 @@ package io.flow.dependency.v0.models {
 
   }
 
-  sealed trait TaskData extends _root_.scala.Product with _root_.scala.Serializable
+  sealed trait TaskData extends _root_.scala.Product with _root_.scala.Serializable {
+    def taskDataDiscriminator: TaskDataDiscriminator
+
+  }
 
   /**
    * Defines the valid discriminator values for the type TaskData
@@ -79,7 +88,6 @@ package io.flow.dependency.v0.models {
     def fromString(value: String): _root_.scala.Option[TaskDataDiscriminator] = byName.get(value.toLowerCase)
 
   }
-
   final case class Binary(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
@@ -95,7 +103,9 @@ package io.flow.dependency.v0.models {
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: io.flow.dependency.v0.models.BinaryType
-  ) extends ItemSummary
+  ) extends ItemSummary {
+    override val itemSummaryDiscriminator: ItemSummaryDiscriminator = ItemSummaryDiscriminator.BinarySummary
+  }
 
   final case class BinaryVersion(
     id: String,
@@ -106,6 +116,7 @@ package io.flow.dependency.v0.models {
   /**
    * Used to authenticate user based on the oauth code we receive from github
    */
+
   final case class GithubAuthenticationForm(
     code: String
   )
@@ -126,6 +137,7 @@ package io.flow.dependency.v0.models {
   /**
    * Defines a github hook
    */
+
   final case class GithubWebhook(
     id: Long
   )
@@ -135,6 +147,7 @@ package io.flow.dependency.v0.models {
    *
    * @param id Unique identifier for this item.
    */
+
   final case class Item(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
@@ -147,6 +160,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param resolver The resolver where we found this library
    */
+
   final case class Library(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
@@ -158,6 +172,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param version If provided, we automatically record this version of this library.
    */
+
   final case class LibraryForm(
     organizationId: String,
     groupId: String,
@@ -171,7 +186,9 @@ package io.flow.dependency.v0.models {
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     groupId: String,
     artifactId: String
-  ) extends ItemSummary
+  ) extends ItemSummary {
+    override val itemSummaryDiscriminator: ItemSummaryDiscriminator = ItemSummaryDiscriminator.LibrarySummary
+  }
 
   final case class LibraryVersion(
     id: String,
@@ -185,6 +202,7 @@ package io.flow.dependency.v0.models {
    *
    * @param id Unique identifier for this membership
    */
+
   final case class Membership(
     id: String,
     user: io.flow.dependency.v0.models.UserSummary,
@@ -201,6 +219,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this organization
    */
+
   final case class Organization(
     id: String,
     user: io.flow.common.v0.models.UserReference,
@@ -219,6 +238,7 @@ package io.flow.dependency.v0.models {
   /**
    * @param user The user that created this project
    */
+
   final case class Project(
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
@@ -246,6 +266,7 @@ package io.flow.dependency.v0.models {
    *
    * @param unresolved A list of projects that could not be resolved due to circular dependencies
    */
+
   final case class ProjectDependencyResolution(
     resolved: Seq[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved],
     unresolved: Seq[io.flow.dependency.v0.models.ProjectUnresolvedSummary],
@@ -294,7 +315,9 @@ package io.flow.dependency.v0.models {
     id: String,
     organization: io.flow.dependency.v0.models.OrganizationSummary,
     name: String
-  ) extends ItemSummary
+  ) extends ItemSummary {
+    override val itemSummaryDiscriminator: ItemSummaryDiscriminator = ItemSummaryDiscriminator.ProjectSummary
+  }
 
   final case class ProjectUnresolvedSummary(
     project: io.flow.dependency.v0.models.ProjectSummary,
@@ -310,6 +333,7 @@ package io.flow.dependency.v0.models {
    * @param from The current version
    * @param to The version to which we recommend upgrading
    */
+
   final case class Recommendation(
     id: String,
     project: io.flow.dependency.v0.models.ProjectDetail,
@@ -335,6 +359,7 @@ package io.flow.dependency.v0.models {
    * @param organization The organization that created the resolver. If empty, indicates a globally
    *        public resolver
    */
+
   final case class Resolver(
     id: String,
     visibility: io.flow.dependency.v0.models.Visibility,
@@ -362,6 +387,7 @@ package io.flow.dependency.v0.models {
    *
    * @param id Internal unique identifier for this subscription record
    */
+
   final case class Subscription(
     id: String,
     user: io.flow.common.v0.models.UserReference,
@@ -378,6 +404,7 @@ package io.flow.dependency.v0.models {
    *
    * @param id Unique identifier for this item.
    */
+
   final case class Sync(
     id: String,
     objectId: String,
@@ -388,35 +415,48 @@ package io.flow.dependency.v0.models {
   /**
    * @param `type` If not specified, we sync all types
    */
+
   final case class TaskDataSync(
     `type`: _root_.scala.Option[io.flow.dependency.v0.models.SyncType] = None
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.TaskDataSync
+  }
 
   final case class TaskDataSyncLibrariesByPrefix(
     userId: String,
     prefix: String
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.TaskDataSyncLibrariesByPrefix
+  }
 
   final case class TaskDataSyncOne(
     id: String,
     `type`: io.flow.dependency.v0.models.SyncType
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.TaskDataSyncOne
+  }
 
   final case class TaskDataSyncOrganizationLibraries(
     organizationId: String
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.TaskDataSyncOrganizationLibraries
+  }
 
   /**
    * Represents that a new, for example, project was created or updated
    */
+
   final case class TaskDataUpserted(
     id: String,
     `type`: io.flow.dependency.v0.models.SyncType
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.TaskDataUpserted
+  }
 
   /**
    * @param cleartext The cleartext token. Only available when the token is initially created
    */
+
   final case class Token(
     id: String,
     user: io.flow.common.v0.models.UserReference,
@@ -450,7 +490,9 @@ package io.flow.dependency.v0.models {
   final case class UsernamePassword(
     username: String,
     password: _root_.scala.Option[String] = None
-  ) extends Credentials
+  ) extends Credentials {
+    override val credentialsDiscriminator: CredentialsDiscriminator = CredentialsDiscriminator.UsernamePassword
+  }
 
   final case class VersionForm(
     version: String,
@@ -465,9 +507,12 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
+
   final case class CredentialsUndefinedType(
     description: String
-  ) extends Credentials
+  ) extends Credentials {
+    override val credentialsDiscriminator: CredentialsDiscriminator = CredentialsDiscriminator.UNDEFINED(description)
+  }
 
   /**
    * Provides future compatibility in clients - in the future, when a type is added
@@ -477,9 +522,12 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
+
   final case class ItemSummaryUndefinedType(
     description: String
-  ) extends ItemSummary
+  ) extends ItemSummary {
+    override val itemSummaryDiscriminator: ItemSummaryDiscriminator = ItemSummaryDiscriminator.UNDEFINED(description)
+  }
 
   /**
    * Provides future compatibility in clients - in the future, when a type is added
@@ -489,9 +537,12 @@ package io.flow.dependency.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
+
   final case class TaskDataUndefinedType(
     description: String
-  ) extends TaskData
+  ) extends TaskData {
+    override val taskDataDiscriminator: TaskDataDiscriminator = TaskDataDiscriminator.UNDEFINED(description)
+  }
   sealed trait BinaryType extends _root_.scala.Product with _root_.scala.Serializable
 
   object BinaryType {
@@ -504,7 +555,6 @@ package io.flow.dependency.v0.models {
      * See http://www.scala-sbt.org/
      */
     case object Sbt extends BinaryType { override def toString = "sbt" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -542,8 +592,9 @@ package io.flow.dependency.v0.models {
     /**
      * A daily summary of dependencies that can be upgraded
      */
-    case object DailySummary extends Publication { override def toString = "daily_summary" }
-
+    case object DailySummary extends Publication {
+      override def toString = "daily_summary"
+    }
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -577,7 +628,6 @@ package io.flow.dependency.v0.models {
 
     case object Library extends RecommendationType { override def toString = "library" }
     case object Binary extends RecommendationType { override def toString = "binary" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -611,7 +661,6 @@ package io.flow.dependency.v0.models {
 
     case object Member extends Role { override def toString = "member" }
     case object Admin extends Role { override def toString = "admin" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -644,7 +693,6 @@ package io.flow.dependency.v0.models {
   object Scms {
 
     case object Github extends Scms { override def toString = "github" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -678,7 +726,6 @@ package io.flow.dependency.v0.models {
 
     case object Started extends SyncEvent { override def toString = "started" }
     case object Completed extends SyncEvent { override def toString = "completed" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -713,7 +760,6 @@ package io.flow.dependency.v0.models {
     case object Project extends SyncType { override def toString = "project" }
     case object Library extends SyncType { override def toString = "library" }
     case object Binary extends SyncType { override def toString = "binary" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -747,7 +793,6 @@ package io.flow.dependency.v0.models {
 
     case object Public extends Visibility { override def toString = "public" }
     case object Private extends Visibility { override def toString = "private" }
-
     /**
      * UNDEFINED captures values that are sent either in error or
      * that were added by the server after this library was
@@ -790,35 +835,29 @@ package io.flow.dependency.v0.models {
     import io.flow.github.v0.models.json._
     import io.flow.healthcheck.v0.models.json._
 
-    private[v0] implicit val jsonReadsUUID = __.read[String].map { str =>
+    private[v0] implicit val jsonReadsUUID: play.api.libs.json.Reads[_root_.java.util.UUID] = __.read[String].map { str =>
       _root_.java.util.UUID.fromString(str)
     }
 
-    private[v0] implicit val jsonWritesUUID = new Writes[_root_.java.util.UUID] {
-      def writes(x: _root_.java.util.UUID) = JsString(x.toString)
-    }
+    private[v0] implicit val jsonWritesUUID: play.api.libs.json.Writes[_root_.java.util.UUID] = (x: _root_.java.util.UUID) => play.api.libs.json.JsString(x.toString)
 
-    private[v0] implicit val jsonReadsJodaDateTime = __.read[String].map { str =>
+    private[v0] implicit val jsonReadsJodaDateTime: play.api.libs.json.Reads[_root_.org.joda.time.DateTime] = __.read[String].map { str =>
       _root_.org.joda.time.format.ISODateTimeFormat.dateTimeParser.parseDateTime(str)
     }
 
-    private[v0] implicit val jsonWritesJodaDateTime = new Writes[_root_.org.joda.time.DateTime] {
-      def writes(x: _root_.org.joda.time.DateTime) = {
-        JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(x))
-      }
+    private[v0] implicit val jsonWritesJodaDateTime: play.api.libs.json.Writes[_root_.org.joda.time.DateTime] = (x: _root_.org.joda.time.DateTime) => {
+      play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(x))
     }
 
-    private[v0] implicit val jsonReadsJodaLocalDate = __.read[String].map { str =>
+    private[v0] implicit val jsonReadsJodaLocalDate: play.api.libs.json.Reads[_root_.org.joda.time.LocalDate] = __.read[String].map { str =>
       _root_.org.joda.time.format.ISODateTimeFormat.dateTimeParser.parseLocalDate(str)
     }
 
-    private[v0] implicit val jsonWritesJodaLocalDate = new Writes[_root_.org.joda.time.LocalDate] {
-      def writes(x: _root_.org.joda.time.LocalDate) = {
-        JsString(_root_.org.joda.time.format.ISODateTimeFormat.date.print(x))
-      }
+    private[v0] implicit val jsonWritesJodaLocalDate: play.api.libs.json.Writes[_root_.org.joda.time.LocalDate] = (x: _root_.org.joda.time.LocalDate) => {
+      play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.date.print(x))
     }
 
-    implicit val jsonReadsDependencyBinaryType = new play.api.libs.json.Reads[io.flow.dependency.v0.models.BinaryType] {
+    implicit val jsonReadsDependencyBinaryType: play.api.libs.json.Reads[io.flow.dependency.v0.models.BinaryType] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.BinaryType] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.BinaryType] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.BinaryType(v.value))
@@ -845,14 +884,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyBinaryType: play.api.libs.json.Writes[BinaryType] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.BinaryType] {
-        def writes(obj: io.flow.dependency.v0.models.BinaryType) = {
-          jsonWritesDependencyBinaryType(obj)
-        }
+      (obj: io.flow.dependency.v0.models.BinaryType) => {
+        jsonWritesDependencyBinaryType(obj)
       }
     }
 
-    implicit val jsonReadsDependencyPublication = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Publication] {
+    implicit val jsonReadsDependencyPublication: play.api.libs.json.Reads[io.flow.dependency.v0.models.Publication] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Publication] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.Publication] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.Publication(v.value))
@@ -879,14 +916,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyPublication: play.api.libs.json.Writes[Publication] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Publication] {
-        def writes(obj: io.flow.dependency.v0.models.Publication) = {
-          jsonWritesDependencyPublication(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Publication) => {
+        jsonWritesDependencyPublication(obj)
       }
     }
 
-    implicit val jsonReadsDependencyRecommendationType = new play.api.libs.json.Reads[io.flow.dependency.v0.models.RecommendationType] {
+    implicit val jsonReadsDependencyRecommendationType: play.api.libs.json.Reads[io.flow.dependency.v0.models.RecommendationType] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.RecommendationType] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.RecommendationType] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.RecommendationType(v.value))
@@ -913,14 +948,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyRecommendationType: play.api.libs.json.Writes[RecommendationType] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.RecommendationType] {
-        def writes(obj: io.flow.dependency.v0.models.RecommendationType) = {
-          jsonWritesDependencyRecommendationType(obj)
-        }
+      (obj: io.flow.dependency.v0.models.RecommendationType) => {
+        jsonWritesDependencyRecommendationType(obj)
       }
     }
 
-    implicit val jsonReadsDependencyRole = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Role] {
+    implicit val jsonReadsDependencyRole: play.api.libs.json.Reads[io.flow.dependency.v0.models.Role] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Role] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.Role] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.Role(v.value))
@@ -947,14 +980,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyRole: play.api.libs.json.Writes[Role] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Role] {
-        def writes(obj: io.flow.dependency.v0.models.Role) = {
-          jsonWritesDependencyRole(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Role) => {
+        jsonWritesDependencyRole(obj)
       }
     }
 
-    implicit val jsonReadsDependencyScms = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Scms] {
+    implicit val jsonReadsDependencyScms: play.api.libs.json.Reads[io.flow.dependency.v0.models.Scms] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Scms] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.Scms] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.Scms(v.value))
@@ -981,14 +1012,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyScms: play.api.libs.json.Writes[Scms] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Scms] {
-        def writes(obj: io.flow.dependency.v0.models.Scms) = {
-          jsonWritesDependencyScms(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Scms) => {
+        jsonWritesDependencyScms(obj)
       }
     }
 
-    implicit val jsonReadsDependencySyncEvent = new play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncEvent] {
+    implicit val jsonReadsDependencySyncEvent: play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncEvent] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncEvent] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.SyncEvent] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.SyncEvent(v.value))
@@ -1015,14 +1044,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencySyncEvent: play.api.libs.json.Writes[SyncEvent] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.SyncEvent] {
-        def writes(obj: io.flow.dependency.v0.models.SyncEvent) = {
-          jsonWritesDependencySyncEvent(obj)
-        }
+      (obj: io.flow.dependency.v0.models.SyncEvent) => {
+        jsonWritesDependencySyncEvent(obj)
       }
     }
 
-    implicit val jsonReadsDependencySyncType = new play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncType] {
+    implicit val jsonReadsDependencySyncType: play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncType] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.SyncType] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.SyncType] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.SyncType(v.value))
@@ -1049,14 +1076,12 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencySyncType: play.api.libs.json.Writes[SyncType] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.SyncType] {
-        def writes(obj: io.flow.dependency.v0.models.SyncType) = {
-          jsonWritesDependencySyncType(obj)
-        }
+      (obj: io.flow.dependency.v0.models.SyncType) => {
+        jsonWritesDependencySyncType(obj)
       }
     }
 
-    implicit val jsonReadsDependencyVisibility = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Visibility] {
+    implicit val jsonReadsDependencyVisibility: play.api.libs.json.Reads[io.flow.dependency.v0.models.Visibility] = new play.api.libs.json.Reads[io.flow.dependency.v0.models.Visibility] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.dependency.v0.models.Visibility] = {
         js match {
           case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.Visibility(v.value))
@@ -1083,10 +1108,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyVisibility: play.api.libs.json.Writes[Visibility] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Visibility] {
-        def writes(obj: io.flow.dependency.v0.models.Visibility) = {
-          jsonWritesDependencyVisibility(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Visibility) => {
+        jsonWritesDependencyVisibility(obj)
       }
     }
 
@@ -1107,10 +1130,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyBinary: play.api.libs.json.Writes[Binary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Binary] {
-        def writes(obj: io.flow.dependency.v0.models.Binary) = {
-          jsObjectBinary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Binary) => {
+        jsObjectBinary(obj)
       }
     }
 
@@ -1129,10 +1150,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyBinaryForm: play.api.libs.json.Writes[BinaryForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.BinaryForm] {
-        def writes(obj: io.flow.dependency.v0.models.BinaryForm) = {
-          jsObjectBinaryForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.BinaryForm) => {
+        jsObjectBinaryForm(obj)
       }
     }
 
@@ -1153,10 +1172,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyBinarySummary: play.api.libs.json.Writes[BinarySummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.BinarySummary] {
-        def writes(obj: io.flow.dependency.v0.models.BinarySummary) = {
-          jsObjectBinarySummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.BinarySummary) => {
+        jsObjectBinarySummary(obj)
       }
     }
 
@@ -1177,10 +1194,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyBinaryVersion: play.api.libs.json.Writes[BinaryVersion] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.BinaryVersion] {
-        def writes(obj: io.flow.dependency.v0.models.BinaryVersion) = {
-          jsObjectBinaryVersion(obj)
-        }
+      (obj: io.flow.dependency.v0.models.BinaryVersion) => {
+        jsObjectBinaryVersion(obj)
       }
     }
 
@@ -1195,10 +1210,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyGithubAuthenticationForm: play.api.libs.json.Writes[GithubAuthenticationForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.GithubAuthenticationForm] {
-        def writes(obj: io.flow.dependency.v0.models.GithubAuthenticationForm) = {
-          jsObjectGithubAuthenticationForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.GithubAuthenticationForm) => {
+        jsObjectGithubAuthenticationForm(obj)
       }
     }
 
@@ -1221,10 +1234,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyGithubUser: play.api.libs.json.Writes[GithubUser] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.GithubUser] {
-        def writes(obj: io.flow.dependency.v0.models.GithubUser) = {
-          jsObjectGithubUser(obj)
-        }
+      (obj: io.flow.dependency.v0.models.GithubUser) => {
+        jsObjectGithubUser(obj)
       }
     }
 
@@ -1245,10 +1256,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyGithubUserForm: play.api.libs.json.Writes[GithubUserForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.GithubUserForm] {
-        def writes(obj: io.flow.dependency.v0.models.GithubUserForm) = {
-          jsObjectGithubUserForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.GithubUserForm) => {
+        jsObjectGithubUserForm(obj)
       }
     }
 
@@ -1263,10 +1272,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyGithubWebhook: play.api.libs.json.Writes[GithubWebhook] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.GithubWebhook] {
-        def writes(obj: io.flow.dependency.v0.models.GithubWebhook) = {
-          jsObjectGithubWebhook(obj)
-        }
+      (obj: io.flow.dependency.v0.models.GithubWebhook) => {
+        jsObjectGithubWebhook(obj)
       }
     }
 
@@ -1295,10 +1302,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyItem: play.api.libs.json.Writes[Item] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Item] {
-        def writes(obj: io.flow.dependency.v0.models.Item) = {
-          jsObjectItem(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Item) => {
+        jsObjectItem(obj)
       }
     }
 
@@ -1323,10 +1328,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyLibrary: play.api.libs.json.Writes[Library] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Library] {
-        def writes(obj: io.flow.dependency.v0.models.Library) = {
-          jsObjectLibrary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Library) => {
+        jsObjectLibrary(obj)
       }
     }
 
@@ -1353,10 +1356,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyLibraryForm: play.api.libs.json.Writes[LibraryForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.LibraryForm] {
-        def writes(obj: io.flow.dependency.v0.models.LibraryForm) = {
-          jsObjectLibraryForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.LibraryForm) => {
+        jsObjectLibraryForm(obj)
       }
     }
 
@@ -1379,10 +1380,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyLibrarySummary: play.api.libs.json.Writes[LibrarySummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.LibrarySummary] {
-        def writes(obj: io.flow.dependency.v0.models.LibrarySummary) = {
-          jsObjectLibrarySummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.LibrarySummary) => {
+        jsObjectLibrarySummary(obj)
       }
     }
 
@@ -1407,10 +1406,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyLibraryVersion: play.api.libs.json.Writes[LibraryVersion] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.LibraryVersion] {
-        def writes(obj: io.flow.dependency.v0.models.LibraryVersion) = {
-          jsObjectLibraryVersion(obj)
-        }
+      (obj: io.flow.dependency.v0.models.LibraryVersion) => {
+        jsObjectLibraryVersion(obj)
       }
     }
 
@@ -1433,10 +1430,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyMembership: play.api.libs.json.Writes[Membership] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Membership] {
-        def writes(obj: io.flow.dependency.v0.models.Membership) = {
-          jsObjectMembership(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Membership) => {
+        jsObjectMembership(obj)
       }
     }
 
@@ -1457,10 +1452,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyMembershipForm: play.api.libs.json.Writes[MembershipForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.MembershipForm] {
-        def writes(obj: io.flow.dependency.v0.models.MembershipForm) = {
-          jsObjectMembershipForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.MembershipForm) => {
+        jsObjectMembershipForm(obj)
       }
     }
 
@@ -1481,10 +1474,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyOrganization: play.api.libs.json.Writes[Organization] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Organization] {
-        def writes(obj: io.flow.dependency.v0.models.Organization) = {
-          jsObjectOrganization(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Organization) => {
+        jsObjectOrganization(obj)
       }
     }
 
@@ -1499,10 +1490,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyOrganizationForm: play.api.libs.json.Writes[OrganizationForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.OrganizationForm] {
-        def writes(obj: io.flow.dependency.v0.models.OrganizationForm) = {
-          jsObjectOrganizationForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.OrganizationForm) => {
+        jsObjectOrganizationForm(obj)
       }
     }
 
@@ -1521,10 +1510,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyOrganizationSummary: play.api.libs.json.Writes[OrganizationSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.OrganizationSummary] {
-        def writes(obj: io.flow.dependency.v0.models.OrganizationSummary) = {
-          jsObjectOrganizationSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.OrganizationSummary) => {
+        jsObjectOrganizationSummary(obj)
       }
     }
 
@@ -1555,10 +1542,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProject: play.api.libs.json.Writes[Project] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Project] {
-        def writes(obj: io.flow.dependency.v0.models.Project) = {
-          jsObjectProject(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Project) => {
+        jsObjectProject(obj)
       }
     }
 
@@ -1587,10 +1572,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectBinary: play.api.libs.json.Writes[ProjectBinary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectBinary] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectBinary) = {
-          jsObjectProjectBinary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectBinary) => {
+        jsObjectProjectBinary(obj)
       }
     }
 
@@ -1611,10 +1594,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectDependencyResolution: play.api.libs.json.Writes[ProjectDependencyResolution] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectDependencyResolution] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectDependencyResolution) = {
-          jsObjectProjectDependencyResolution(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectDependencyResolution) => {
+        jsObjectProjectDependencyResolution(obj)
       }
     }
 
@@ -1629,10 +1610,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectDependencyResolutionResolved: play.api.libs.json.Writes[ProjectDependencyResolutionResolved] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectDependencyResolutionResolved] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectDependencyResolutionResolved) = {
-          jsObjectProjectDependencyResolutionResolved(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectDependencyResolutionResolved) => {
+        jsObjectProjectDependencyResolutionResolved(obj)
       }
     }
 
@@ -1653,10 +1632,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectDetail: play.api.libs.json.Writes[ProjectDetail] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectDetail] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectDetail) = {
-          jsObjectProjectDetail(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectDetail) => {
+        jsObjectProjectDetail(obj)
       }
     }
 
@@ -1683,10 +1660,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectForm: play.api.libs.json.Writes[ProjectForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectForm] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectForm) = {
-          jsObjectProjectForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectForm) => {
+        jsObjectProjectForm(obj)
       }
     }
 
@@ -1722,10 +1697,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectLibrary: play.api.libs.json.Writes[ProjectLibrary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectLibrary] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectLibrary) = {
-          jsObjectProjectLibrary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectLibrary) => {
+        jsObjectProjectLibrary(obj)
       }
     }
 
@@ -1763,10 +1736,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectPatchForm: play.api.libs.json.Writes[ProjectPatchForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectPatchForm] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectPatchForm) = {
-          jsObjectProjectPatchForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectPatchForm) => {
+        jsObjectProjectPatchForm(obj)
       }
     }
 
@@ -1787,10 +1758,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectSummary: play.api.libs.json.Writes[ProjectSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectSummary] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectSummary) = {
-          jsObjectProjectSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectSummary) => {
+        jsObjectProjectSummary(obj)
       }
     }
 
@@ -1811,10 +1780,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyProjectUnresolvedSummary: play.api.libs.json.Writes[ProjectUnresolvedSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ProjectUnresolvedSummary] {
-        def writes(obj: io.flow.dependency.v0.models.ProjectUnresolvedSummary) = {
-          jsObjectProjectUnresolvedSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ProjectUnresolvedSummary) => {
+        jsObjectProjectUnresolvedSummary(obj)
       }
     }
 
@@ -1845,10 +1812,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyRecommendation: play.api.libs.json.Writes[Recommendation] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Recommendation] {
-        def writes(obj: io.flow.dependency.v0.models.Recommendation) = {
-          jsObjectRecommendation(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Recommendation) => {
+        jsObjectRecommendation(obj)
       }
     }
 
@@ -1863,10 +1828,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyReference: play.api.libs.json.Writes[Reference] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Reference] {
-        def writes(obj: io.flow.dependency.v0.models.Reference) = {
-          jsObjectReference(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Reference) => {
+        jsObjectReference(obj)
       }
     }
 
@@ -1887,10 +1850,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyRepository: play.api.libs.json.Writes[Repository] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Repository] {
-        def writes(obj: io.flow.dependency.v0.models.Repository) = {
-          jsObjectRepository(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Repository) => {
+        jsObjectRepository(obj)
       }
     }
 
@@ -1920,10 +1881,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyResolver: play.api.libs.json.Writes[Resolver] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Resolver] {
-        def writes(obj: io.flow.dependency.v0.models.Resolver) = {
-          jsObjectResolver(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Resolver) => {
+        jsObjectResolver(obj)
       }
     }
 
@@ -1948,10 +1907,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyResolverForm: play.api.libs.json.Writes[ResolverForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ResolverForm] {
-        def writes(obj: io.flow.dependency.v0.models.ResolverForm) = {
-          jsObjectResolverForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ResolverForm) => {
+        jsObjectResolverForm(obj)
       }
     }
 
@@ -1976,10 +1933,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyResolverSummary: play.api.libs.json.Writes[ResolverSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ResolverSummary] {
-        def writes(obj: io.flow.dependency.v0.models.ResolverSummary) = {
-          jsObjectResolverSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ResolverSummary) => {
+        jsObjectResolverSummary(obj)
       }
     }
 
@@ -2000,10 +1955,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencySubscription: play.api.libs.json.Writes[Subscription] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Subscription] {
-        def writes(obj: io.flow.dependency.v0.models.Subscription) = {
-          jsObjectSubscription(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Subscription) => {
+        jsObjectSubscription(obj)
       }
     }
 
@@ -2022,10 +1975,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencySubscriptionForm: play.api.libs.json.Writes[SubscriptionForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.SubscriptionForm] {
-        def writes(obj: io.flow.dependency.v0.models.SubscriptionForm) = {
-          jsObjectSubscriptionForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.SubscriptionForm) => {
+        jsObjectSubscriptionForm(obj)
       }
     }
 
@@ -2048,10 +1999,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencySync: play.api.libs.json.Writes[Sync] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Sync] {
-        def writes(obj: io.flow.dependency.v0.models.Sync) = {
-          jsObjectSync(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Sync) => {
+        jsObjectSync(obj)
       }
     }
 
@@ -2067,10 +2016,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskDataSync: play.api.libs.json.Writes[TaskDataSync] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskDataSync] {
-        def writes(obj: io.flow.dependency.v0.models.TaskDataSync) = {
-          jsObjectTaskDataSync(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskDataSync) => {
+        jsObjectTaskDataSync(obj)
       }
     }
 
@@ -2089,10 +2036,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskDataSyncLibrariesByPrefix: play.api.libs.json.Writes[TaskDataSyncLibrariesByPrefix] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskDataSyncLibrariesByPrefix] {
-        def writes(obj: io.flow.dependency.v0.models.TaskDataSyncLibrariesByPrefix) = {
-          jsObjectTaskDataSyncLibrariesByPrefix(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskDataSyncLibrariesByPrefix) => {
+        jsObjectTaskDataSyncLibrariesByPrefix(obj)
       }
     }
 
@@ -2111,10 +2056,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskDataSyncOne: play.api.libs.json.Writes[TaskDataSyncOne] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskDataSyncOne] {
-        def writes(obj: io.flow.dependency.v0.models.TaskDataSyncOne) = {
-          jsObjectTaskDataSyncOne(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskDataSyncOne) => {
+        jsObjectTaskDataSyncOne(obj)
       }
     }
 
@@ -2129,10 +2072,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskDataSyncOrganizationLibraries: play.api.libs.json.Writes[TaskDataSyncOrganizationLibraries] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskDataSyncOrganizationLibraries] {
-        def writes(obj: io.flow.dependency.v0.models.TaskDataSyncOrganizationLibraries) = {
-          jsObjectTaskDataSyncOrganizationLibraries(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskDataSyncOrganizationLibraries) => {
+        jsObjectTaskDataSyncOrganizationLibraries(obj)
       }
     }
 
@@ -2151,10 +2092,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskDataUpserted: play.api.libs.json.Writes[TaskDataUpserted] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskDataUpserted] {
-        def writes(obj: io.flow.dependency.v0.models.TaskDataUpserted) = {
-          jsObjectTaskDataUpserted(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskDataUpserted) => {
+        jsObjectTaskDataUpserted(obj)
       }
     }
 
@@ -2184,10 +2123,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyToken: play.api.libs.json.Writes[Token] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Token] {
-        def writes(obj: io.flow.dependency.v0.models.Token) = {
-          jsObjectToken(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Token) => {
+        jsObjectToken(obj)
       }
     }
 
@@ -2208,10 +2145,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTokenForm: play.api.libs.json.Writes[TokenForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TokenForm] {
-        def writes(obj: io.flow.dependency.v0.models.TokenForm) = {
-          jsObjectTokenForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TokenForm) => {
+        jsObjectTokenForm(obj)
       }
     }
 
@@ -2234,10 +2169,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyUserForm: play.api.libs.json.Writes[UserForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.UserForm] {
-        def writes(obj: io.flow.dependency.v0.models.UserForm) = {
-          jsObjectUserForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.UserForm) => {
+        jsObjectUserForm(obj)
       }
     }
 
@@ -2258,10 +2191,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyUserIdentifier: play.api.libs.json.Writes[UserIdentifier] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.UserIdentifier] {
-        def writes(obj: io.flow.dependency.v0.models.UserIdentifier) = {
-          jsObjectUserIdentifier(obj)
-        }
+      (obj: io.flow.dependency.v0.models.UserIdentifier) => {
+        jsObjectUserIdentifier(obj)
       }
     }
 
@@ -2284,10 +2215,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyUserSummary: play.api.libs.json.Writes[UserSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.UserSummary] {
-        def writes(obj: io.flow.dependency.v0.models.UserSummary) = {
-          jsObjectUserSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.UserSummary) => {
+        jsObjectUserSummary(obj)
       }
     }
 
@@ -2308,10 +2237,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyUsernamePassword: play.api.libs.json.Writes[UsernamePassword] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.UsernamePassword] {
-        def writes(obj: io.flow.dependency.v0.models.UsernamePassword) = {
-          jsObjectUsernamePassword(obj)
-        }
+      (obj: io.flow.dependency.v0.models.UsernamePassword) => {
+        jsObjectUsernamePassword(obj)
       }
     }
 
@@ -2332,19 +2259,21 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyVersionForm: play.api.libs.json.Writes[VersionForm] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.VersionForm] {
-        def writes(obj: io.flow.dependency.v0.models.VersionForm) = {
-          jsObjectVersionForm(obj)
-        }
+      (obj: io.flow.dependency.v0.models.VersionForm) => {
+        jsObjectVersionForm(obj)
       }
     }
 
-    implicit def jsonReadsDependencyCredentials: play.api.libs.json.Reads[Credentials] = new play.api.libs.json.Reads[Credentials] {
-      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[Credentials] = {
-        (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[Credentials] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
+    implicit def jsonReadsDependencyCredentials: play.api.libs.json.Reads[Credentials] = (js: play.api.libs.json.JsValue) => {
+      def readDiscriminator(discriminator: String) = {
+        discriminator match {
           case "username_password" => js.validate[io.flow.dependency.v0.models.UsernamePassword]
           case other => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.CredentialsUndefinedType(other))
         }
+      }
+      (js \ "discriminator").validate[String] match {
+        case e: play.api.libs.json.JsError => e
+        case s: play.api.libs.json.JsSuccess[String] => readDiscriminator(s.value)
       }
     }
 
@@ -2358,21 +2287,23 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyCredentials: play.api.libs.json.Writes[Credentials] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.Credentials] {
-        def writes(obj: io.flow.dependency.v0.models.Credentials) = {
-          jsObjectCredentials(obj)
-        }
+      (obj: io.flow.dependency.v0.models.Credentials) => {
+        jsObjectCredentials(obj)
       }
     }
 
-    implicit def jsonReadsDependencyItemSummary: play.api.libs.json.Reads[ItemSummary] = new play.api.libs.json.Reads[ItemSummary] {
-      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[ItemSummary] = {
-        (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[ItemSummary] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
+    implicit def jsonReadsDependencyItemSummary: play.api.libs.json.Reads[ItemSummary] = (js: play.api.libs.json.JsValue) => {
+      def readDiscriminator(discriminator: String) = {
+        discriminator match {
           case "binary_summary" => js.validate[io.flow.dependency.v0.models.BinarySummary]
           case "library_summary" => js.validate[io.flow.dependency.v0.models.LibrarySummary]
           case "project_summary" => js.validate[io.flow.dependency.v0.models.ProjectSummary]
           case other => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.ItemSummaryUndefinedType(other))
         }
+      }
+      (js \ "discriminator").validate[String] match {
+        case e: play.api.libs.json.JsError => e
+        case s: play.api.libs.json.JsSuccess[String] => readDiscriminator(s.value)
       }
     }
 
@@ -2388,16 +2319,14 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyItemSummary: play.api.libs.json.Writes[ItemSummary] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.ItemSummary] {
-        def writes(obj: io.flow.dependency.v0.models.ItemSummary) = {
-          jsObjectItemSummary(obj)
-        }
+      (obj: io.flow.dependency.v0.models.ItemSummary) => {
+        jsObjectItemSummary(obj)
       }
     }
 
-    implicit def jsonReadsDependencyTaskData: play.api.libs.json.Reads[TaskData] = new play.api.libs.json.Reads[TaskData] {
-      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[TaskData] = {
-        (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[TaskData] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
+    implicit def jsonReadsDependencyTaskData: play.api.libs.json.Reads[TaskData] = (js: play.api.libs.json.JsValue) => {
+      def readDiscriminator(discriminator: String) = {
+        discriminator match {
           case "task_data_upserted" => js.validate[io.flow.dependency.v0.models.TaskDataUpserted]
           case "task_data_sync" => js.validate[io.flow.dependency.v0.models.TaskDataSync]
           case "task_data_sync_one" => js.validate[io.flow.dependency.v0.models.TaskDataSyncOne]
@@ -2405,6 +2334,10 @@ package io.flow.dependency.v0.models {
           case "task_data_sync_organization_libraries" => js.validate[io.flow.dependency.v0.models.TaskDataSyncOrganizationLibraries]
           case other => play.api.libs.json.JsSuccess(io.flow.dependency.v0.models.TaskDataUndefinedType(other))
         }
+      }
+      (js \ "discriminator").validate[String] match {
+        case e: play.api.libs.json.JsError => e
+        case s: play.api.libs.json.JsSuccess[String] => readDiscriminator(s.value)
       }
     }
 
@@ -2422,10 +2355,8 @@ package io.flow.dependency.v0.models {
     }
 
     implicit def jsonWritesDependencyTaskData: play.api.libs.json.Writes[TaskData] = {
-      new play.api.libs.json.Writes[io.flow.dependency.v0.models.TaskData] {
-        def writes(obj: io.flow.dependency.v0.models.TaskData) = {
-          jsObjectTaskData(obj)
-        }
+      (obj: io.flow.dependency.v0.models.TaskData) => {
+        jsObjectTaskData(obj)
       }
     }
   }
@@ -3756,7 +3687,7 @@ package io.flow.dependency.v0 {
      */
     def _withJsonContentType(headers: Seq[(String, String)]): Seq[(String, String)] = {
       headers.find { _._1.toUpperCase == "CONTENT-TYPE" } match {
-        case None => headers ++ Seq(("Content-Type" -> "application/json; charset=UTF-8"))
+        case None => headers ++ Seq("Content-Type" -> "application/json; charset=UTF-8")
         case Some(_) => headers
       }
     }
