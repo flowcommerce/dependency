@@ -55,7 +55,7 @@ lazy val api = project
       ws,
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.45",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.47",
       "io.flow" %% "lib-metrics-play28" % "1.0.10",
       "io.flow" %% "lib-log" % "0.1.52",
       "io.flow" %% "lib-usage-play28" % "0.1.79",
