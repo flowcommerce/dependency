@@ -57,7 +57,7 @@ lazy val api = project
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
       "io.flow" %% "lib-event-sync-play28" % "0.5.48",
       "io.flow" %% "lib-metrics-play28" % "1.0.11",
-      "io.flow" %% "lib-log" % "0.1.53",
+      "io.flow" %% "lib-log" % "0.1.54",
       "io.flow" %% "lib-usage-play28" % "0.1.80",
       "io.flow" %% "lib-test-utils-play28" % "0.1.53" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.25",
