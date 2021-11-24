@@ -39,7 +39,7 @@ spec:
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           env:
             - name: JAVA_OPTS
-              value: "-Xms{{ $.Values.jvmMemory}}m -Xmx{{ $.Values.jvmMemory}}m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt"
+              value: "-Xms{{ $.Values.jvmMemory}}m -Xmx{{ $.Values.jvmMemory}}m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/opt -XX:+UseG1GC -XX:+UseStringDeduplication"
             - name: FLOW_KUBERNETES_NODE_NAME
               valueFrom:
                 fieldRef:
@@ -110,10 +110,18 @@ spec:
     {{- end }}
       imagePullSecrets:
         - name: flow-docker-hub
-    {{- with $.Values.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ include "deploy.name" $ }}
+              topologyKey: topology.kubernetes.io/zone
     {{- with $.Values.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
