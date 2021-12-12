@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/flowcommerce/dependency.svg?branch=main)](https://travis-ci.com/flowcommerce/dependency)
+[![Build Status](https://app.travis-ci.com/flowcommerce/dependency.svg?branch=main)](https://app.travis-ci.com/flowcommerce/dependency)
 
 dependency
 ==========
