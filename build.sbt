@@ -58,7 +58,7 @@ lazy val api = project
       "io.flow" %% "lib-event-sync-play28" % "0.5.49",
       "io.flow" %% "lib-metrics-play28" % "1.0.12",
       "io.flow" %% "lib-log" % "0.1.54",
-      "io.flow" %% "lib-usage-play28" % "0.1.82",
+      "io.flow" %% "lib-usage-play28" % "0.1.83",
       "io.flow" %% "lib-test-utils-play28" % "0.1.60" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.25",
       "org.postgresql" % "postgresql" % "42.3.1",
