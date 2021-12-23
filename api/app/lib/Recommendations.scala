@@ -11,7 +11,7 @@ object Recommendations {
     * found)
     */
   def version(current: VersionForm, others: Seq[VersionForm]): Option[String] = {
-    val currentTag = Version(current.version)
+    val currentTag = Version(current.version) // TODO: are we missing crossBuildVersion here?
 
     others.
       filter(_ != current).
