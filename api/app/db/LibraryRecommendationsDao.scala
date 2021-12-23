@@ -71,6 +71,7 @@ class LibraryRecommendationsDao @Inject()(
     libraryVersionsDaoProvider.get.findAll(
       auth,
       libraryId = Some(library.id),
+      // we don't use greaterThanVersion because it assumes the current version is present in the DB
       greaterThanSortKey = Some(projectLibrary.sortKey),
       limit = None
     )
