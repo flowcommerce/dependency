@@ -170,6 +170,7 @@ class LibraryVersionsDao @Inject()(
     version: Option[String] = None,
     crossBuildVersion: Option[Option[String]] = None,
     greaterThanVersion: Option[String] = None,
+    greaterThanSortKey: Option[String] = None,
     limit: Option[Long],
     offset: Long = 0
   ): Seq[LibraryVersion] = {
@@ -182,6 +183,7 @@ class LibraryVersionsDao @Inject()(
         version = version,
         crossBuildVersion = crossBuildVersion,
         greaterThanVersion = greaterThanVersion,
+        greaterThanSortKey = greaterThanSortKey,
         limit = limit,
         offset = offset
       )
@@ -196,6 +198,7 @@ class LibraryVersionsDao @Inject()(
     version: Option[String] = None,
     crossBuildVersion: Option[Option[String]] = None,
     greaterThanVersion: Option[String] = None,
+    greaterThanSortKey: Option[String] = None,
     orderBy: OrderBy = OrderBy("-library_versions.sort_key, library_versions.created_at"),
     limit: Option[Long],
     offset: Long = 0
@@ -241,6 +244,7 @@ class LibraryVersionsDao @Inject()(
         }
       ).
       bind("greater_than_version", greaterThanVersion).
+      greaterThan("library_versions.sort_key", greaterThanSortKey).
       as(
         io.flow.dependency.v0.anorm.parsers.LibraryVersion.parser().*
       )

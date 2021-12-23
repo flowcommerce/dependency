@@ -32,7 +32,7 @@ class LibraryRecommendationsDao @Inject()(
       orderBy = None,
     ).foreach { projectLibrary =>
       projectLibrary.db.libraryId.flatMap { libraryId => librariesDaoProvider.get.findById(auth, libraryId) }.map { library =>
-        val recentVersions = versionsGreaterThan(auth, library, projectLibrary.db.version)
+        val recentVersions = versionsGreaterThan(auth, library, projectLibrary)
         recommend(projectLibrary, recentVersions).map { v =>
           recommendations ++= Seq(
             LibraryRecommendation(
@@ -66,12 +66,12 @@ class LibraryRecommendationsDao @Inject()(
   private[this] def versionsGreaterThan(
     auth: Authorization,
     library: Library,
-    version: String
+    projectLibrary: InternalProjectLibrary,
   ): Seq[LibraryVersion] = {
     libraryVersionsDaoProvider.get.findAll(
       auth,
       libraryId = Some(library.id),
-      greaterThanVersion = Some(version),
+      greaterThanSortKey = Some(projectLibrary.sortKey),
       limit = None
     )
   }

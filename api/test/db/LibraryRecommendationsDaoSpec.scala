@@ -1,5 +1,6 @@
 package db
 
+import io.flow.util.Constants
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
@@ -62,6 +63,19 @@ class LibraryRecommendationsDaoSpec extends DependencySpec
       )
     }
   }
+
+  "suggests upgrade even if current version is missing" in {
+    val (_, libraryVersions) = createLibraryWithMultipleVersions(org)
+    val project = createProject(org)
+    val oldest = libraryVersions.head
+
+    addLibraryVersion(project, oldest)
+    libraryVersionsDao.delete(Constants.SystemUser, oldest)
+    eventually {
+      libraryRecommendationsDao.forProject(project) must not be (Nil)
+    }
+  }
+
 
   "Prefers latest production release even when more recent beta release is available" in {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
