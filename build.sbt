@@ -55,11 +55,11 @@ lazy val api = project
       ws,
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.49",
-      "io.flow" %% "lib-metrics-play28" % "1.0.13",
-      "io.flow" %% "lib-log" % "0.1.54",
-      "io.flow" %% "lib-usage-play28" % "0.1.83",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.60" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.5.51",
+      "io.flow" %% "lib-metrics-play28" % "1.0.16",
+      "io.flow" %% "lib-log" % "0.1.59",
+      "io.flow" %% "lib-usage-play28" % "0.1.84",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.62" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.25",
       "org.postgresql" % "postgresql" % "42.3.1",
       "org.apache.commons" % "commons-text" % "1.9"
@@ -91,7 +91,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.4",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.60" % Test
+      "io.flow" %% "lib-test-utils-play28" % "0.1.62" % Test
     ),
     scalacOptions ++= allScalacOptions
   )
@@ -104,7 +104,7 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.7.7",
+    "io.flow" %% "lib-play-play28" % "0.7.13",
     "com.typesafe.play" %% "play-json-joda" % "2.9.2",
     "com.typesafe.play" %% "play-json" % "2.9.2"
   ),
