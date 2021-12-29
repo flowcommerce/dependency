@@ -7,6 +7,7 @@ import io.flow.common.v0.models.UserReference
 import com.google.inject.Provider
 import db.generated.ProjectLibraryForm
 import io.flow.dependency.actors.ProjectActor
+import io.flow.util.Version
 
 case class InternalProjectLibrary(db: generated.ProjectLibrary) {
   val id: String = db.id
@@ -14,6 +15,12 @@ case class InternalProjectLibrary(db: generated.ProjectLibrary) {
   val projectId: String = db.projectId
   val groupId: String = db.groupId
   val artifactId: String = db.artifactId
+
+  def sortKey =
+    db.crossBuildVersion match {
+      case None => Version(db.version).sortKey
+      case Some(crossBuildVersion) => Version(s"${db.version}-$crossBuildVersion").sortKey
+    }
 }
 
 @Singleton
