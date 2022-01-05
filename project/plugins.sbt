@@ -7,7 +7,7 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.11")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.12")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.5.1")
 
