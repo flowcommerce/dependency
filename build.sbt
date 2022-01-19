@@ -60,7 +60,7 @@ lazy val api = project
       "io.flow" %% "lib-log" % "0.1.61",
       "io.flow" %% "lib-usage-play28" % "0.1.85",
       "io.flow" %% "lib-test-utils-play28" % "0.1.64" % Test,
-      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.25",
+      "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.26",
       "org.postgresql" % "postgresql" % "42.3.1",
       "org.apache.commons" % "commons-text" % "1.9"
     ),
