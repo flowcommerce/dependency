@@ -54,14 +54,14 @@ lazy val api = project
       jdbc,
       ws,
       guice,
-      "com.sendgrid" % "sendgrid-java" % "4.7.6",
-      "io.flow" %% "lib-event-sync-play28" % "0.5.55",
-      "io.flow" %% "lib-metrics-play28" % "1.0.20",
+      "com.sendgrid" % "sendgrid-java" % "4.7.1",
+      "io.flow" %% "lib-event-sync-play28" % "0.5.56",
+      "io.flow" %% "lib-metrics-play28" % "1.0.21",
       "io.flow" %% "lib-log" % "0.1.63",
-      "io.flow" %% "lib-usage-play28" % "0.1.86",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.65" % Test,
+      "io.flow" %% "lib-usage-play28" % "0.1.87",
+      "io.flow" %% "lib-test-utils-play28" % "0.1.66" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.26",
-      "org.postgresql" % "postgresql" % "42.3.1",
+      "org.postgresql" % "postgresql" % "42.3.2",
       "org.apache.commons" % "commons-text" % "1.9"
     ),
     scalacOptions ++= allScalacOptions
@@ -91,7 +91,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "5.15.4",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.1.65" % Test
+      "io.flow" %% "lib-test-utils-play28" % "0.1.66" % Test
     ),
     scalacOptions ++= allScalacOptions
   )
