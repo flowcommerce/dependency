@@ -88,7 +88,7 @@ lazy val www = project
       guice,
       "org.webjars" %% "webjars-play" % "2.8.8-1",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "5.15.4",
+      "org.webjars" % "font-awesome" % "6.0.0",
       "org.webjars" % "jquery" % "3.6.0",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "io.flow" %% "lib-test-utils-play28" % "0.1.66" % Test
