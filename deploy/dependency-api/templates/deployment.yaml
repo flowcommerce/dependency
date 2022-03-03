@@ -86,11 +86,16 @@ spec:
           volumeMounts:
             - name: dsdsocket
               mountPath: /var/run/datadog
+          startupProbe:
+            httpGet:
+              path: /_internal_/healthcheck
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /_internal_/healthcheck
               port: http
-            initialDelaySeconds: 130
             failureThreshold: 6
             periodSeconds: 10
             timeoutSeconds: 5
@@ -98,9 +103,8 @@ spec:
             httpGet:
               path: /_internal_/healthcheck
               port: http
-            initialDelaySeconds: 120
             failureThreshold: 3
-            periodSeconds: 5
+            periodSeconds: 10
             timeoutSeconds: 5
           resources:
 {{ toYaml $.Values.resources | indent 12 }}
@@ -126,6 +130,10 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
       volumes:
         - name: dsdsocket
           hostPath:
