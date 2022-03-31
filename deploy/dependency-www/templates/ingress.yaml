@@ -14,6 +14,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "ingressgateway"
     kubernetes.io/ingress.tld: {{ $gateway.tld | quote }}
+    external-dns.alpha.kubernetes.io/ttl: "120"
 spec:
   selector:
     istio: ingressgateway
