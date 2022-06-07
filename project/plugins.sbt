@@ -7,7 +7,7 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.15")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-twirl" % "1.5.1")
 
@@ -15,7 +15,7 @@ addSbtPlugin("com.gilt.sbt" % "sbt-newrelic" % "0.3.3")
 
 addSbtPlugin("com.lightbend.sbt" % "sbt-javaagent" % "0.1.5")
 
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.2.3")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.3.3")
 
 
 resolvers += "Flow Plugins" at "https://flow.jfrog.io/flow/plugins-release/"
