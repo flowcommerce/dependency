@@ -2,9 +2,12 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
+  nameOverride: "dependency"
   port: 9000
   metricsEndpoint:
     enabled: false
+
+team: foundation
 
 iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
