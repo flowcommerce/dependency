@@ -12,6 +12,7 @@ metadata:
     app: {{ include "deploy.name" $ }}
     app.kubernetes.io/stage: {{ $stage }}
     flow.io/version: {{ $deployment.version }}
+    flow.io/team: {{ $.Values.team }}
 spec:
   replicas: {{ $deployment.minReplicas }}
   selector:
@@ -27,6 +28,7 @@ spec:
         app.kubernetes.io/stage: {{ $stage }}
         app: {{ include "deploy.name" $ }}
         flow.io/version: {{ $deployment.version }}
+        flow.io/team: {{ $.Values.team }}
       annotations:
         {{- if not $deployment.serviceAccountName }}
         iam.amazonaws.com/role: {{ $.Values.iamRole }}
@@ -64,10 +66,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.uid
-            - name: DD_AGENT_HOST
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.hostIP
             - name: DD_SERVICE
               value: {{ $.Chart.Name }}
             - name: DD_ENV

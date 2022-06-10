@@ -5,7 +5,7 @@ kind: DestinationRule
 metadata:
   name: {{ $fullName }}-{{ $key }}
 spec:
-  host: {{ $fullName }}
+  host: {{ default $fullName $.Values.service.nameOverride }}
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
@@ -39,7 +39,7 @@ spec:
   - route:
 {{- range $stage := $service.stages }}
     - destination:
-        host: {{ $fullName }}
+        host: {{ default $fullName $.Values.service.nameOverride }}
         port:
           number: 80
         subset:  {{ $stage.deployment }}

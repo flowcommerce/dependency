@@ -6,6 +6,8 @@ service:
   metricsEndpoint:
     enabled: false
 
+team: foundation
+
 iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
   repository: flowcommerce/dependency-api
@@ -36,6 +38,7 @@ ingress:
         - dependency.flo.pub
 
 services:
+  nameOverride: "dependency"
   live:
     hosts:
       - dependency
