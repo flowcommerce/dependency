@@ -2,6 +2,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
+  nameOverride: "dependency"
   port: 9000
   metricsEndpoint:
     enabled: false
@@ -38,7 +39,6 @@ ingress:
         - dependency.flo.pub
 
 services:
-  nameOverride: "dependency"
   live:
     hosts:
       - dependency
