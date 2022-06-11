@@ -76,6 +76,28 @@ class LibraryRecommendationsDaoSpec extends DependencySpec
     }
   }
 
+  "suggests upgrade of libraries from a different org" in {
+    val org1 = org
+    val org2 = createOrganization()
+
+    val (library, libraryVersions) = createLibraryWithMultipleVersions(org1)
+    val project = createProject(org2)
+    addLibraryVersion(project, libraryVersions.head)
+
+    eventually {
+      verify(
+        libraryRecommendationsDao.forProject(project),
+        Seq(
+          LibraryRecommendation(
+            library = library,
+            from = "1.0.0",
+            to = libraryVersions.last,
+            latest = libraryVersions.last
+          )
+        )
+      )
+    }
+  }
 
   "Prefers latest production release even when more recent beta release is available" in {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
