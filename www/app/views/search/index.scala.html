@@ -8,7 +8,7 @@
 
   @if(items.isEmpty) {
 
-    <em>No results found</e,>
+    <em>No results found</em>
 
   } else {
     <div class="table-responsive">
@@ -22,7 +22,7 @@
                 case s: io.flow.dependency.v0.models.ProjectSummary => "Project"
                 case io.flow.dependency.v0.models.ItemSummaryUndefinedType(other) => other
               }}
-              <a href="@data.urls.itemSummary(item.summary)">@item.label</a>
+              <a href="@data.urls.organization(item.organization)">@item.organization.key</a> » <a href="@data.urls.itemSummary(item.summary)">@item.label</a>
             </td>
           </tr>
         }
