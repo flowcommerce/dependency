@@ -1,7 +1,6 @@
 package io.flow.dependency.lib
 
-import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, ProjectSummary}
-import io.flow.dependency.v0.models.{Recommendation, RecommendationType}
+import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, OrganizationSummary, ProjectSummary, Recommendation, RecommendationType}
 import io.flow.util.Config
 
 /**
@@ -58,5 +57,8 @@ case class Urls(
       case ItemSummaryUndefinedType(_) => "#"
     }
   }
+
+  def organization(organization: OrganizationSummary): String =
+    s"/organizations/${organization.key}"
 
 }
