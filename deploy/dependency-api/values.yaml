@@ -1,5 +1,5 @@
-nameOverride: "dependency"
-fullnameOverride: "dependency"
+nameOverride: "dependency-api"
+fullnameOverride: "dependency-api"
 
 service:
   nameOverride: "dependency"
