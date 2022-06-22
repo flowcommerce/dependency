@@ -1,17 +1,15 @@
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: "dependency-www"
+fullnameOverride: "dependency-www"
 
 service:
   port: 9000
-  metricsEndpoint:
-    enabled: false
 
 team: foundation
 
 iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
   repository: flowcommerce/dependency-www
-  pullPolicy: IfNotPresent
+
 resources:
   limits:
     memory: "3400Mi"
@@ -20,24 +18,24 @@ resources:
     memory: "3400Mi"
     cpu: .05
 
-jvmMemory: 3000
+jvmOpts:
+  memory: 3000m
 
-nodeSelector: {}
-tolerations: {}
-
-ingress:
+istioIngress:
   enabled: true
   gateways:
     - key: dependency-www-flow-io
       tld: flow.io
+      dns: true
       hosts:
         - dependency.flow.io
     - key: dependency-www-flow-pub
       tld: flo.pub
+      dns: true
       hosts:
         - dependency-www.flo.pub
 
-services:
+istioService:
   live:
     hosts:
       - dependency-www
@@ -56,7 +54,9 @@ deployments:
     minReplicas: 2
     maxReplicas: 2
     maxUnavailable: 1
-    disruptionBudgetEnabled: true
-    targetCPUUtilizationPercentage: 80
-    version: #from commandline
-    strategy: RollingUpdate
+
+rolloutResource:
+  enabled: false
+
+canary:
+  enabled: false
