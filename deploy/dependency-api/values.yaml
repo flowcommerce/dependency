@@ -33,4 +33,3 @@ rolloutResource:
 canary:
   # Disable this to follow the default RollingUpdate Strategy
   enabled: false
-  
