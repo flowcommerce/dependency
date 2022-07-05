@@ -65,21 +65,21 @@ pipeline {
       }
     }
 
-    stage ('Display Helm Diff') {
+    stage('Display Helm Diff') {
       when {
         allOf {
-        changeRequest()
-        changeset "deploy/**" 
+         changeRequest()
+         changeset "deploy/**" 
         }
       }
-        steps {
-          script {
-            container('helm') {
-              new helmDiff().diff('dependency-api')
-              new helmDiff().diff('dependency-www')
-            }
-          }  
-        }
+      steps {
+        script {
+          container('helm') {
+            new helmDiff().diff('dependency-api')
+            new helmDiff().diff('dependency-www')  
+          }
+        }  
+      }
     }
 
     stage('Deploy Helm chart') {
