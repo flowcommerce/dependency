@@ -68,17 +68,24 @@ pipeline {
     stage('Display Helm Diff') {
       when {
         allOf {
-         changeRequest()
-         changeset "deploy/**" 
+          not {branch 'main'}
+          changeRequest()
+          expression {
+            return changesCheck.hasChangesInDir('deploy')
+          }          
         }
       }
       steps {
         script {
           container('helm') {
-            new helmDiff().diff('dependency-api')
-            new helmDiff().diff('dependency-www')  
+            if(changesCheck.hasChangesInDir('deploy/dependency-api')){
+              new helmDiff().diff('dependency-api')
+            }
+            if(changesCheck.hasChangesInDir('deploy/dependency-www')){
+              new helmDiff().diff('dependency-www')
+            }
           }
-        }  
+        }
       }
     }
 
