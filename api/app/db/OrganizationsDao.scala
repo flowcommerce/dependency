@@ -98,10 +98,10 @@ class OrganizationsDao @Inject()(
     val id = IdGenerator("org").randomId()
 
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("user_id") -> createdBy.id,
-      Symbol("key") -> form.key.trim,
-      Symbol("updated_by_user_id") -> createdBy.id
+      "id" -> id,
+      "user_id" -> createdBy.id,
+      "key" -> form.key.trim,
+      "updated_by_user_id" -> createdBy.id
     ).execute()
 
     membershipsDaoProvider.get.create(
@@ -120,9 +120,9 @@ class OrganizationsDao @Inject()(
       case Nil => {
         db.withConnection { implicit c =>
           SQL(UpdateQuery).on(
-            Symbol("id") -> organization.id,
-            Symbol("key") -> form.key.trim,
-            Symbol("updated_by_user_id") -> createdBy.id
+            "id" -> organization.id,
+            "key" -> form.key.trim,
+            "updated_by_user_id" -> createdBy.id
           ).execute()
         }
 
@@ -164,10 +164,10 @@ class OrganizationsDao @Inject()(
         ))
 
         SQL(InsertUserOrganizationQuery).on(
-          Symbol("id") -> IdGenerator("uso").randomId(),
-          Symbol("user_id") -> user.id,
-          Symbol("organization_id") -> orgId,
-          Symbol("updated_by_user_id") -> user.id
+          "id" -> IdGenerator("uso").randomId(),
+          "user_id" -> user.id,
+          "organization_id" -> orgId,
+          "updated_by_user_id" -> user.id
         ).execute()
 
         orgId

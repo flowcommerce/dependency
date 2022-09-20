@@ -50,11 +50,11 @@ class GithubUsersDao @Inject()(
   private[db] def createWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit c: java.sql.Connection): GithubUser = {
     val id = IdGenerator("ghu").randomId()
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("user_id") -> form.userId,
-      Symbol("github_user_id") -> form.githubUserId,
-      Symbol("login") -> form.login.trim,
-      Symbol("updated_by_user_id") -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id
+      "id" -> id,
+      "user_id" -> form.userId,
+      "github_user_id" -> form.githubUserId,
+      "login" -> form.login.trim,
+      "updated_by_user_id" -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id
     ).execute()
 
     findById(id).getOrElse {

@@ -103,12 +103,12 @@ class LibraryVersionsDao @Inject()(
     }
 
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("library_id") -> libraryId,
-      Symbol("version") -> form.version.trim,
-      Symbol("cross_build_version") -> form.crossBuildVersion.map(_.trim),
-      Symbol("sort_key") -> sortKey,
-      Symbol("updated_by_user_id") -> createdBy.id
+      "id" -> id,
+      "library_id" -> libraryId,
+      "version" -> form.version.trim,
+      "cross_build_version" -> form.crossBuildVersion.map(_.trim),
+      "sort_key" -> sortKey,
+      "updated_by_user_id" -> createdBy.id
     ).execute()
 
     sync(libraryId)

@@ -81,11 +81,11 @@ class BinaryVersionsDao @Inject()(
     val id = IdGenerator("biv").randomId()
 
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("binary_id") -> binaryId,
-      Symbol("version") -> version.trim,
-      Symbol("sort_key") -> Version(version.trim).sortKey,
-      Symbol("updated_by_user_id") -> createdBy.id
+      "id" -> id,
+      "binary_id" -> binaryId,
+      "version" -> version.trim,
+      "sort_key" -> Version(version.trim).sortKey,
+      "updated_by_user_id" -> createdBy.id
     ).execute()
 
     sync(binaryId)
