@@ -125,12 +125,12 @@ class ProjectBinariesDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            Symbol("id") -> id,
-            Symbol("project_id") -> form.projectId,
-            Symbol("name") -> form.name.toString.trim,
-            Symbol("version") -> form.version.trim,
-            Symbol("path") -> form.path.trim,
-            Symbol("updated_by_user_id") -> createdBy.id
+            "id" -> id,
+            "project_id" -> form.projectId,
+            "name" -> form.name.toString.trim,
+            "version" -> form.version.trim,
+            "path" -> form.path.trim,
+            "updated_by_user_id" -> createdBy.id
           ).execute()
           projectActor ! ProjectActor.Messages.ProjectBinaryCreated(form.projectId, id)
         }
@@ -148,8 +148,8 @@ class ProjectBinariesDao @Inject()(
   def removeBinary(user: UserReference, projectBinary: ProjectBinary): Unit = {
     db.withConnection { implicit c =>
       SQL(RemoveBinaryQuery).on(
-        Symbol("id") -> projectBinary.id,
-        Symbol("updated_by_user_id") -> user.id
+        "id" -> projectBinary.id,
+        "updated_by_user_id" -> user.id
       ).execute()
     }
     ()
@@ -173,9 +173,9 @@ class ProjectBinariesDao @Inject()(
   def setBinary(user: UserReference, projectBinary: ProjectBinary, binary: Binary): Unit = {
     db.withConnection { implicit c =>
       SQL(SetBinaryQuery).on(
-        Symbol("id") -> projectBinary.id,
-        Symbol("binary_id") -> binary.id,
-        Symbol("updated_by_user_id") -> user.id
+        "id" -> projectBinary.id,
+        "binary_id" -> binary.id,
+        "updated_by_user_id" -> user.id
       ).execute()
     }
     ()

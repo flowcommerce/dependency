@@ -137,14 +137,14 @@ class RecommendationsDao @Inject()(
   ): Unit = {
     val id = IdGenerator("rec").randomId()
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("project_id") -> form.projectId,
-      Symbol("type") -> form.`type`.toString,
-      Symbol("object_id") -> form.objectId,
-      Symbol("name") -> form.name,
-      Symbol("from_version") -> form.from,
-      Symbol("to_version") -> form.to,
-      Symbol("updated_by_user_id") -> createdBy.id
+      "id" -> id,
+      "project_id" -> form.projectId,
+      "type" -> form.`type`.toString,
+      "object_id" -> form.objectId,
+      "name" -> form.name,
+      "from_version" -> form.from,
+      "to_version" -> form.to,
+      "updated_by_user_id" -> createdBy.id
     ).execute()
     ()
   }

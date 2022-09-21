@@ -100,7 +100,7 @@ class OrganizationsDaoSpec extends DependencySpec {
 
     "keep key url friendly" in {
       organizationsDao.validate(createOrganizationForm().copy(key = "flow commerce")) must be(
-        Seq("Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: flow-commerce")
+        Seq("Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: flowcommerce")
       )
     }
 

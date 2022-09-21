@@ -32,8 +32,8 @@ case class DbHelpers(db: Database, tableName: String) {
     deletedBy: UserReference, id: String
   ): Unit = {
     SQL(Query.format(tableName)).on(
-      Symbol("id") -> id,
-      Symbol("updated_by_user_id") -> deletedBy.id
+      "id" -> id,
+      "updated_by_user_id" -> deletedBy.id
     ).execute()
     ()
   }

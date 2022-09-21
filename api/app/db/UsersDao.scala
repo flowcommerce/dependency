@@ -87,12 +87,12 @@ class UsersDao @Inject()(
 
         db.withConnection { implicit c =>
           SQL(InsertQuery).on(
-            Symbol("id") -> id,
-            Symbol("email") -> form.email.map(_.trim),
-            Symbol("first_name") -> Util.trimmedString(form.name.flatMap(_.first)),
-            Symbol("last_name") -> Util.trimmedString(form.name.flatMap(_.last)),
-            Symbol("updated_by_user_id") -> createdBy.getOrElse(anonymousUser).id,
-            Symbol("status") -> Option("inactive")
+            "id" -> id,
+            "email" -> form.email.map(_.trim),
+            "first_name" -> Util.trimmedString(form.name.flatMap(_.first)),
+            "last_name" -> Util.trimmedString(form.name.flatMap(_.last)),
+            "updated_by_user_id" -> createdBy.getOrElse(anonymousUser).id,
+            "status" -> Option("inactive")
           ).execute()
         }
 

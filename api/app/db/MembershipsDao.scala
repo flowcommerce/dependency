@@ -129,11 +129,11 @@ class MembershipsDao @Inject()(
     val id = IdGenerator("mem").randomId()
 
     SQL(InsertQuery).on(
-      Symbol("id") -> id,
-      Symbol("user_id") -> userId,
-      Symbol("organization_id") -> orgId,
-      Symbol("role") -> role.toString,
-      Symbol("updated_by_user_id") -> createdBy.id
+      "id" -> id,
+      "user_id" -> userId,
+      "organization_id" -> orgId,
+      "role" -> role.toString,
+      "updated_by_user_id" -> createdBy.id
     ).execute()
     id
   }
