@@ -32,6 +32,7 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
+      playTest,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0"
     )
   )
@@ -86,7 +87,7 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       guice,
-      "org.webjars" %% "webjars-play" % "2.8.13",
+      "org.webjars" %% "webjars-play" % "2.8.18",
       "org.webjars" % "bootstrap" % "3.4.1",
       "org.webjars" % "font-awesome" % "6.1.2",
       "org.webjars" % "jquery" % "3.6.1",
