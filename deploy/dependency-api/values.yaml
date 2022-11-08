@@ -21,6 +21,15 @@ resources:
 jvmOpts:
   memory: 3000m
 
+nodeSelector:
+   role: workers-lg
+
+ tolerations:
+   - key: "role"
+     operator: "Equal"
+     value: "workers-lg"
+     effect: "NoSchedule"
+     
 deployments:
   live:
     minReplicas: 1
