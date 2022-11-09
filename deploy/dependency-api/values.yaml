@@ -24,11 +24,11 @@ jvmOpts:
 nodeSelector:
    role: workers-lg
 
- tolerations:
-   - key: "role"
-     operator: "Equal"
-     value: "workers-lg"
-     effect: "NoSchedule"
+tolerations:
+  - key: "role"
+    operator: "Equal"
+    value: "workers-lg"
+    effect: "NoSchedule"
      
 deployments:
   live:
