@@ -1,6 +1,6 @@
 language: scala
 scala:
-  - 2.13.8
+  - 2.13.10
 jdk:
   - openjdk13
 cache:
