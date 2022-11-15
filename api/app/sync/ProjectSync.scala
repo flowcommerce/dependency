@@ -39,7 +39,10 @@ class ProjectSync @Inject()(
   def upserted(projectId: String)(implicit ec: ExecutionContext): Unit = {
     projectsDao.findById(Authorization.All, projectId) match {
       case Some(project) => {
-        await(createHooks(project))
+        await(
+          createHooks(project),
+          "createHooks",
+          project)
         ()
       }
       case None => {
@@ -51,9 +54,11 @@ class ProjectSync @Inject()(
   def sync(projectId: String)(implicit ec: ExecutionContext): Unit = {
     projectsDao.findById(Authorization.All, projectId).foreach { project =>
       syncsDao.withStartedAndCompleted("project", project.id) {
-        await {
-          doSync(project)
-        }
+        await(
+          doSync(project),
+          "doSync",
+          project,
+        )
       }
     }
     searchActor ! SearchActor.Messages.SyncProject(projectId)
@@ -178,12 +183,12 @@ class ProjectSync @Inject()(
     }
   }
 
-  private[this] def await[T](f: => Future[T])(implicit ec: ExecutionContext): Either[Unit, T] = {
+  private[this] def await[T](f: => Future[T], message: String, project: Project)(implicit ec: ExecutionContext): Either[Unit, T] = {
     Await.result(
       f.map { r => Right(r) }
         .recover {
         case e => {
-          logger.error("Error waiting for future", e)
+          logger.withKeyValue("message", message).withKeyValue("project", project).error("Error waiting for future", e)
           Left(())
         }
       },
