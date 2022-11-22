@@ -1,5 +1,9 @@
 nameOverride: "dependency-www"
 fullnameOverride: "dependency-www"
+service:
+  startupHealthcheckEndpoint: /_internal_/startup
+  livenessHealthcheckEndpoint: /_internal_/live
+  readinessHealthcheckEndpoint: /_internal_/ready
 
 team: foundation
 
