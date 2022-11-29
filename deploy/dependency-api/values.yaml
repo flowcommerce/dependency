@@ -2,6 +2,9 @@ nameOverride: "dependency-api"
 fullnameOverride: "dependency-api"
 
 service:
+  startupHealthcheckEndpoint: /_internal_/startup
+  livenessHealthcheckEndpoint: /_internal_/live
+  readinessHealthcheckEndpoint: /_internal_/ready
   nameOverride: "dependency"
 
 team: foundation

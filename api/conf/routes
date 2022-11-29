@@ -1,2 +1,4 @@
 -> / dependency.Routes
 -> / usage.Routes
+
+-> / kubehealthchecks.Routes
