@@ -42,3 +42,16 @@ rolloutResource:
 canary:
   # Disable this to follow the default RollingUpdate Strategy
   enabled: false
+
+datadogMonitors:
+  slackChannel: "stewardship-foundation"
+  type:
+  - name: errorrate
+    interval: last_10m
+    threshold: "2"
+  - name: p95ResponseTime
+    interval: last_5m
+    threshold: "1"
+  - name: httpAverageLatency
+    interval: last_10m
+    threshold: "20"
