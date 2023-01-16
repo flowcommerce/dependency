@@ -57,3 +57,13 @@ rolloutResource:
 
 canary:
   enabled: false
+
+datadogMonitors:
+  slackChannel: "stewardship-foundation"
+  type:
+  - name: errorrate
+    interval: last_10m
+    threshold: "1"
+  - name: httpAverageLatency
+    interval: last_10m
+    threshold: "20"
