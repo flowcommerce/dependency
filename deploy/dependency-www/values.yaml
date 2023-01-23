@@ -59,11 +59,15 @@ canary:
   enabled: false
 
 datadogMonitors:
-  slackChannel: "stewardship-foundation"
-  type:
-  - name: errorrate
-    interval: last_10m
-    threshold: "1"
-  - name: httpAverageLatency
-    interval: last_10m
-    threshold: "20"
+  - type: "trace.akka_http.request.errors-sum"
+    alert:
+      threshold: "1"
+    warning:
+      threshold: "0.8"
+      notificationTarget: "@slack-team-foundation-notifications"
+  - type: "trace.akka_http.request-avg"
+    alert:
+      threshold: "20"
+    warning:
+      threshold: "16"
+      notificationTarget: "@slack-team-foundation-notifications"
