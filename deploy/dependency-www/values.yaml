@@ -23,25 +23,19 @@ istioIngress:
   gateways:
     - key: dependency-www-flow-io
       tld: flow.io
+      selector: ingressgateway-flow-io
       dns: true
       hosts:
         - dependency.flow.io
-    - key: dependency-www-flow-pub
-      tld: flo.pub
-      dns: true
-      hosts:
-        - dependency-www.flo.pub
 
 istioService:
   live:
     hosts:
       - dependency-www
       - dependency.flow.io
-      - dependency-www.flo.pub
     gateways:
       - mesh
       - dependency-www-flow-io
-      - dependency-www-flow-pub
     stages:
       - deployment: live
         weight: 100
