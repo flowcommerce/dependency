@@ -51,3 +51,6 @@ rolloutResource:
 
 canary:
   enabled: false
+
+datadogMonitors:
+- type: trace.akka_http.request.errors-sum
