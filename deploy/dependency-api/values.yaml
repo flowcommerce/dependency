@@ -42,3 +42,7 @@ rolloutResource:
 canary:
   # Disable this to follow the default RollingUpdate Strategy
   enabled: false
+
+datadogMonitors:
+- type: trace.akka_http.request.errors-sum
+- type: trace.akka_http.request-p95

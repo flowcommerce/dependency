@@ -51,3 +51,11 @@ rolloutResource:
 
 canary:
   enabled: false
+
+datadogMonitors:
+- type: trace.akka_http.request.errors-sum
+- type: trace.akka_http.request-avg
+  alert:
+    threshold: '20'
+  warning:
+    threshold: '10'
