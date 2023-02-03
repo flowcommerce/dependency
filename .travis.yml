@@ -15,9 +15,7 @@ before_script:
   - docker run -d -p 127.0.0.1:6119:5432 flowcommerce/dependency-postgresql:latest
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean flowLint test doc
-branches:
-  only:
-    - main
+if: type != pull_request AND branch = main
 before_cache:
   - rm -fv $HOME/.ivy2/.sbt.ivy.lock
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
