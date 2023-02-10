@@ -46,3 +46,6 @@ canary:
 datadogMonitors:
 - type: trace.akka_http.request.errors-sum
 - type: trace.akka_http.request-p95
+- type: trace.akka_http.request-avg
+  alert:
+    threshold: '20'
