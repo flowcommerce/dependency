@@ -70,6 +70,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
       case other =>
         sys.error(s"Expected two entries but found ${other.size} of $other")
     }
+
     resolution.unresolved must be(Nil)
   }
 }
