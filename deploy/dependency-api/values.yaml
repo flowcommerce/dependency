@@ -45,4 +45,8 @@ canary:
 
 datadogMonitors:
 - type: trace.akka_http.request.errors-sum
+  alert:
+    notificationTarget: '@slack-team-foundation-notifications'
 - type: trace.akka_http.request-p95
+  alert:
+    notificationTarget: '@slack-team-foundation-notifications'

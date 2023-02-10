@@ -54,8 +54,11 @@ canary:
 
 datadogMonitors:
 - type: trace.akka_http.request.errors-sum
+  alert:
+    notificationTarget: '@slack-team-foundation-notifications'
 - type: trace.akka_http.request-avg
   alert:
+    notificationTarget: '@slack-team-foundation-notifications'
     threshold: '20'
   warning:
     threshold: '10'
