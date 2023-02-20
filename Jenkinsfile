@@ -10,11 +10,11 @@ pipeline {
   agent {
     kubernetes {
       label 'worker-dependency'
-      inheritFrom 'default'
+      inheritFrom 'generic'
 
       containerTemplates([
-        containerTemplate(name: 'helm', image: "flowcommerce/k8s-build-helm2:0.0.50", command: 'cat', ttyEnabled: true),
-        containerTemplate(name: 'docker', image: 'docker:18', resourceRequestCpu: '1', resourceRequestMemory: '2Gi', command: 'cat', ttyEnabled: true)
+        containerTemplate(name: 'postgres', image: "flowcommerce/dependency-postgresql:latest", alwaysPullImage: true, resourceRequestMemory: '1Gi'),
+        containerTemplate(name: 'play', image: "flowdocker/play_builder:latest-java13", alwaysPullImage: true, resourceRequestMemory: '2Gi', command: 'cat', ttyEnabled: true)
       ])
     }
   }
@@ -70,19 +70,19 @@ pipeline {
       parallel {
         stage('SBT Test') {
           steps {
-            container('docker') {
+            container('play') {
               script {
-                docker.withRegistry('https://index.docker.io/v1/', 'jenkins-dockerhub') {
-                  docker.image('flowcommerce/dependency-postgresql:latest').withRun("--network=host") { c ->
-                    docker.image('flowdocker/play_builder:latest-java13').inside("--network=host") {
-                      sh 'until pg_isready -h localhost -U postgres; do sleep 5; done;'
-                      sh 'sbt clean flowLint test doc'
-                      junit allowEmptyResults: true, testResults: '**/target/test-reports/*.xml'
-                    }
-                  }
-                }
+                sh '''
+                  echo "$(date) - waiting for database to start"
+                  until pg_isready -h localhost
+                  do
+                    sleep 10
+                  done
+                  sbt clean flowLint test doc
+                '''
+                junit allowEmptyResults: true, testResults: '**/target/test-reports/*.xml'
               }
-            }
+            }   
           }
         }
         stage('Build and Deploy dependency-api') {
