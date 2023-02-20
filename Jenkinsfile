@@ -66,7 +66,7 @@ pipeline {
         }
       }
     }
-    stage("All in parallel") {  
+    stage("All in parallel") {
       parallel {
         stage('SBT Test') {
           steps {
@@ -82,7 +82,7 @@ pipeline {
                 '''
                 junit allowEmptyResults: true, testResults: '**/target/test-reports/*.xml'
               }
-            }   
+            }
           }
         }
         stage('Build and Deploy dependency-api') {
