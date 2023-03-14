@@ -72,15 +72,19 @@ pipeline {
           steps {
             container('play') {
               script {
-                sh '''
-                  echo "$(date) - waiting for database to start"
-                  until pg_isready -h localhost
-                  do
-                    sleep 10
-                  done
-                  sbt clean flowLint test doc
-                '''
-                junit allowEmptyResults: true, testResults: '**/target/test-reports/*.xml'
+                try {
+                  sh '''
+                    echo "$(date) - waiting for database to start"
+                    until pg_isready -h localhost
+                    do
+                      sleep 10
+                    done
+                    sbt clean flowLint test doc
+                  '''
+                }
+                finally {
+                  junit allowEmptyResults: true, testResults: '**/target/test-reports/*.xml'
+                }
               }
             }
           }
