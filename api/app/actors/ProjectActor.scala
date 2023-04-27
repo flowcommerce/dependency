@@ -1,14 +1,14 @@
 package io.flow.dependency.actors
 
+import cache.ProjectsCache
+import db._
+import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
 import io.flow.dependency.api.lib._
 import io.flow.dependency.v0.models._
 import io.flow.dependency.v0.models.json._
-import io.flow.postgresql.{OrderBy, Pager}
-import db._
-import akka.actor.Actor
-import cache.ProjectsCache
-import io.flow.akka.SafeReceive
 import io.flow.log.RollbarLogger
+import io.flow.postgresql.{OrderBy, Pager}
 import play.api.libs.json.Json
 
 object ProjectActor {
@@ -44,7 +44,7 @@ class ProjectActor @javax.inject.Inject() (
   binariesDao: BinariesDao,
   staticUserProvider: StaticUserProvider,
   defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider,
-) extends Actor {
+) extends ReapedActor {
 
   private[this] lazy val SystemUser = staticUserProvider.systemUser
 

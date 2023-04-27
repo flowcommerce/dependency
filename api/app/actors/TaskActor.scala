@@ -1,18 +1,18 @@
 package io.flow.dependency.actors
 
-import java.sql.SQLException
-
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem}
+import akka.actor.{ActorLogging, ActorRef, ActorSystem}
 import db.InternalTask
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
-import io.flow.dependency.v0.models.{SyncType, TaskDataSync, TaskDataSyncLibrariesByPrefix, TaskDataSyncOne, TaskDataUpserted}
+import io.flow.dependency.v0.models._
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
-import javax.inject.Inject
 import lib.TasksUtil
 import play.api.{Environment, Mode}
 
+import java.sql.SQLException
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
@@ -38,7 +38,7 @@ class TaskActor @Inject()(
   @javax.inject.Named("task-actor-sync-one-project") taskActorSyncOneProject: ActorRef,
   @javax.inject.Named("task-actor-sync-organization-libraries") taskActorSyncOrganizationLibraries: ActorRef,
   @javax.inject.Named("task-actor-sync-libraries-by-prefix") taskActorSyncLibrariesByPrefix: ActorRef,
-) extends Actor {
+) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val allActors = Seq(
@@ -59,7 +59,7 @@ class TaskActor @Inject()(
 abstract class BaseTaskActor @Inject()(
   params: TaskActorParameters,
   dispatcherName: String
-) extends Actor with ActorLogging with Scheduler {
+) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
 
   def accepts(task: InternalTask): Boolean
 
@@ -68,10 +68,18 @@ abstract class BaseTaskActor @Inject()(
 
   private[this] val MaxTasksPerIteration = 100L
 
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task.changed"),
-    ReactiveActor.Messages.Changed
+  registerScheduledTask(
+    scheduleRecurring(
+      ScheduleConfig.fromConfig(params.config.underlying.underlying, "io.flow.dependency.api.task.changed"),
+      ReactiveActor.Messages.Changed
+    )
   )
+
+  override def postStop(): Unit = try {
+    cancelScheduledTasks()
+  } finally {
+    super.postStop()
+  }
 
   def receive: Receive = SafeReceive.withLogUnhandled {
     case ReactiveActor.Messages.Changed => processChanged()

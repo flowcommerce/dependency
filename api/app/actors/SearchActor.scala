@@ -1,11 +1,12 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
 import db._
-import akka.actor.Actor
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
 import io.flow.common.v0.models.UserReference
 import io.flow.log.RollbarLogger
+
+import javax.inject.Inject
 
 object SearchActor {
 
@@ -26,7 +27,7 @@ class SearchActor @Inject()(
   internalItemsDao: InternalItemsDao,
   staticUserProvider: StaticUserProvider,
   logger: RollbarLogger
-) extends Actor {
+) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 

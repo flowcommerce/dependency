@@ -1,13 +1,14 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
-import io.flow.dependency.v0.models.Visibility
-import io.flow.postgresql.Pager
-import db._
-import akka.actor.Actor
 import cache.ResolversCache
+import db._
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
+import io.flow.dependency.v0.models.Visibility
 import io.flow.log.RollbarLogger
+import io.flow.postgresql.Pager
+
+import javax.inject.Inject
 
 object ResolverActor {
 
@@ -28,7 +29,7 @@ class ResolverActor @Inject()(
   staticUserProvider: StaticUserProvider,
   rollbar: RollbarLogger,
   @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
-) extends Actor {
+) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] lazy val SystemUser = staticUserProvider.systemUser
