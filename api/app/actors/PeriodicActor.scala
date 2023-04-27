@@ -1,14 +1,15 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
+import akka.actor.{ActorLogging, ActorSystem}
 import db.{InternalTasksDao, SyncsDao}
-import akka.actor.{Actor, ActorLogging, ActorSystem}
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
 import org.joda.time.DateTime
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 object PeriodicActor {
@@ -30,7 +31,7 @@ class PeriodicActor @Inject()(
   syncsDao: SyncsDao,
   internalTasksDao: InternalTasksDao,
   logger: RollbarLogger
-) extends Actor with ActorLogging with Scheduler  {
+) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
 
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("periodic-actor-context")
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -38,15 +39,25 @@ class PeriodicActor @Inject()(
   private[this] case object SyncAll
   private[this] case object Purge
 
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.sync_all"),
-    SyncAll
+  registerScheduledTask(
+    scheduleRecurring(
+      ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.sync_all"),
+      SyncAll
+    )
   )
 
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.purge"),
-    Purge
+  registerScheduledTask(
+    scheduleRecurring(
+      ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.purge"),
+      Purge
+    )
   )
+
+  override def postStop(): Unit = try {
+    cancelScheduledTasks()
+  } finally {
+    super.postStop()
+  }
 
   def receive: Receive = SafeReceive.withLogUnhandled {
     case Purge => {

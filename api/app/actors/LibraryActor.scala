@@ -1,10 +1,11 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
 import db.{Authorization, InternalItemsDao, InternalProjectLibrariesDao, StaticUserProvider}
-import akka.actor.Actor
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
 import io.flow.log.RollbarLogger
+
+import javax.inject.Inject
 
 object LibraryActor {
 
@@ -20,7 +21,7 @@ class LibraryActor @Inject()(
   staticUserProvider: StaticUserProvider,
   logger: RollbarLogger,
   @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
-) extends Actor {
+) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 

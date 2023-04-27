@@ -1,19 +1,20 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
-import io.flow.postgresql.Pager
+import akka.actor.{ActorLogging, ActorSystem}
 import db._
-import io.flow.dependency.v0.models.{Publication, Subscription}
-import io.flow.dependency.lib.Urls
+import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
+import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.dependency.api.lib.{Email, Recipient}
+import io.flow.dependency.lib.Urls
+import io.flow.dependency.v0.models.{Publication, Subscription}
 import io.flow.log.RollbarLogger
+import io.flow.play.util.ApplicationConfig
+import io.flow.postgresql.Pager
 import io.flow.util.Config
 import org.joda.time.{DateTime, DateTimeZone}
-import akka.actor.{Actor, ActorLogging, ActorSystem}
-import io.flow.akka.SafeReceive
-import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
-import io.flow.play.util.ApplicationConfig
 
+import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
 class EmailActor @Inject()(
@@ -22,16 +23,19 @@ class EmailActor @Inject()(
   config: ApplicationConfig,
   subscriptionsDao: SubscriptionsDao,
   batchEmailProcessor: BatchEmailProcessor,
-) extends Actor with ActorLogging with Scheduler {
+) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
 
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("email-actor-context")
 
   private[this] case object ProcessDailySummary
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
-  scheduleRecurring(
-    ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
-    ProcessDailySummary
+
+  registerScheduledTask(
+    scheduleRecurring(
+      ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
+      ProcessDailySummary
+    )
   )
 
   val PreferredHourToSendEst: Int = {
@@ -42,6 +46,12 @@ class EmailActor @Inject()(
 
   private[this] def currentHourEst(): Int = {
     (new DateTime()).toDateTime(DateTimeZone.forID("America/New_York")).getHourOfDay
+  }
+
+  override def postStop(): Unit = try {
+    cancelScheduledTasks()
+  } finally {
+    super.postStop()
   }
 
   def receive: Receive = SafeReceive.withLogUnhandled {

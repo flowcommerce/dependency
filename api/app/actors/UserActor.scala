@@ -1,11 +1,12 @@
 package io.flow.dependency.actors
 
-import javax.inject.Inject
-import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import db.{OrganizationsDao, SubscriptionsDao, UserIdentifiersDao, UsersDao}
-import akka.actor.Actor
 import io.flow.akka.SafeReceive
+import io.flow.akka.actor.ReapedActor
+import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.log.RollbarLogger
+
+import javax.inject.Inject
 
 object UserActor {
 
@@ -23,7 +24,7 @@ class UserActor @Inject()(
   subscriptionsDao: SubscriptionsDao,
   usersDao: UsersDao,
   rollbar: RollbarLogger
-) extends Actor {
+) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
