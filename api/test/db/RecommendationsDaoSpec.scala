@@ -1,6 +1,6 @@
 package db
 
-import io.flow.dependency.v0.models.{Organization, Recommendation}
+import io.flow.dependency.v0.models.{Organization, Recommendation, RecommendationType}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
@@ -30,9 +30,26 @@ class RecommendationsDaoSpec extends DependencySpec
   private[this] lazy val org = createOrganization()
 
   "delete" in {
-    val rec = createRecommendation(org)
+    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(Seq("1.0.9","1.1.0"))
+    val project = createProject(org)
+    addLibraryVersion(project, libraryVersions.head)
+
+    db.withConnection { c =>
+      recommendationsDao.create(
+        testUser,
+        RecommendationForm(
+          projectId = project.id,
+          `type` = RecommendationType.Library,
+          objectId = library.id,
+          name = Seq(library.groupId, library.artifactId).mkString("."),
+          from = "1.0.9",
+          to = "1.1.0"
+        )
+      )(c)
+    }
+    val rec = recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).head
     recommendationsDao.delete(systemUser, rec)
-    recommendationsDao.findAll(Authorization.All, projectId = Some(rec.project.id)) must be(Nil)
+    recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)) must be(Nil)
   }
 
   "no-op if nothing to upgrade" in {
