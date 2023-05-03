@@ -9,6 +9,15 @@ import com.google.inject.Provider
 import io.flow.util.IdGenerator
 import play.api.db._
 
+private[db] case class RecommendationForm(
+  projectId: String,
+  `type`: RecommendationType,
+  objectId: String,
+  name: String,
+  from: String,
+  to: String
+)
+
 @Singleton
 class RecommendationsDao @Inject()(
   db: Database,
@@ -18,15 +27,6 @@ class RecommendationsDao @Inject()(
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "recommendations")
-
-  private[this] case class RecommendationForm(
-    projectId: String,
-    `type`: RecommendationType,
-    objectId: String,
-    name: String,
-    from: String,
-    to: String
-  )
 
   private[this] val BaseQuery = Query(s"""
     select recommendations.id,
@@ -103,7 +103,7 @@ class RecommendationsDao @Inject()(
     dbHelpers.delete(deletedBy.id, rec.id)
   }
 
-  private[this] def upsert(
+  private[db] def upsert(
     createdBy: UserReference,
     form: RecommendationForm
   ) (
@@ -129,7 +129,7 @@ class RecommendationsDao @Inject()(
     }
   }
 
-  private[this] def create(
+  private[db] def create(
     createdBy: UserReference,
     form: RecommendationForm
   ) (
