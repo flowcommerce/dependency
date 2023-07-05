@@ -9,8 +9,7 @@ pipeline {
 
   agent {
     kubernetes {
-      label 'worker-dependency'
-      inheritFrom 'generic'
+      inheritFrom 'kaniko-slim'
 
       containerTemplates([
         containerTemplate(name: 'postgres', image: "flowcommerce/dependency-postgresql:latest", alwaysPullImage: true, resourceRequestMemory: '1Gi'),
@@ -94,15 +93,15 @@ pipeline {
           stages {
             stage('Build and push docker image release') {
               steps {
-                container('docker') {
+                container('kaniko') {
                   script {
                     semver = VERSION.printable()
                     
-                    docker.withRegistry('https://index.docker.io/v1/', 'jenkins-dockerhub') {
-                      db = docker.build("$ORG/dependency-api:$semver", '--network=host -f api/Dockerfile .')
-                      db.push()
-                    }
-
+                    sh """
+                      /kaniko/executor -f `pwd`/api/Dockerfile -c `pwd` \
+                      --snapshot-mode=redo --use-new-run  \
+                      --destination ${env.ORG}/dependency-api:$semver
+                    """
                   }
                 }
               }
@@ -122,20 +121,25 @@ pipeline {
           when { branch 'main'}
           stages {
             stage('Build and push docker image release') {
+              agent {
+                label 'builder-1'
+              }
               steps {
-                container('docker') {
+                container('kaniko') {
                   script {
                     semver = VERSION.printable()
                     
-                    docker.withRegistry('https://index.docker.io/v1/', 'jenkins-dockerhub') {
-                      db = docker.build("$ORG/dependency-www:$semver", '--network=host -f www/Dockerfile .')
-                      db.push()
-                    }
-                
+                    sh """
+                      /kaniko/executor -f `pwd`/www/Dockerfile -c `pwd` \
+                      --snapshot-mode=redo --use-new-run  \
+                      --destination ${env.ORG}/dependency-www:$semver
+                    """
                   }
+                
                 }
               }
             }
+            
             stage('deploy dependency-www') {
               steps {
                 script {
