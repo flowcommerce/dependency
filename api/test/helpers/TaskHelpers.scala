@@ -1,13 +1,14 @@
 package helpers
 
 import db.{InternalTask, InternalTasksDao}
+import db.generated.TasksDao
 import io.flow.dependency.v0.models.{SyncType, TaskData, TaskDataSync, TaskDataSyncOne}
 import io.flow.test.utils.FlowPlaySpec
 import org.joda.time.DateTime
 
 trait TaskHelpers {
   self: FlowPlaySpec =>
-  def generatedTasksDao: db.generated.TasksDao = init[db.generated.TasksDao]
+  def generatedTasksDao: TasksDao = init[TasksDao]
   def internalTasksDao: InternalTasksDao = init[InternalTasksDao]
 
   def deleteAllNonProcessedTasks(): Unit = {
