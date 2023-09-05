@@ -9,7 +9,6 @@ import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
 import io.flow.test.utils.FlowPlaySpec
 import io.flow.util.{Config, IdGenerator, Random}
-import play.api.db.Database
 
 trait DependencySpec extends FlowPlaySpec with Factories {
 
@@ -36,7 +35,6 @@ trait DependencySpec extends FlowPlaySpec with Factories {
   implicit val recommendationsDao = init[RecommendationsDao]
   implicit val userIdentifiersDao = init[UserIdentifiersDao]
   implicit val config = init[Config]
-  implicit val db = init[Database]
 
   val random = Random()
 
