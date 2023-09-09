@@ -54,7 +54,9 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      guice,
+      "com.google.inject" % "guice" % "5.1.0",
+      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
+      "org.projectlombok" % "lombok" % "1.18.28" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
       "io.flow" %% "lib-event-sync-play28" % "0.6.25",
       "io.flow" %% "lib-metrics-play28" % "1.0.62",
@@ -86,7 +88,9 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      guice,
+      "com.google.inject" % "guice" % "5.1.0",
+      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
+      "org.projectlombok" % "lombok" % "1.18.28" % "provided",
       "org.webjars" %% "webjars-play" % "2.8.18",
       "org.webjars" % "bootstrap" % "3.4.1",
       "org.webjars" % "font-awesome" % "6.4.2",
@@ -108,6 +112,10 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "io.flow" %% "lib-play-play28" % "0.7.75",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
     "com.typesafe.play" %% "play-json" % "2.9.4"
+  ),
+  Test / javaOptions ++= Seq(
+     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
+     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED"
   ),
   scalacOptions ++= allScalacOptions,
   credentials += credsToUse,
