@@ -4,8 +4,6 @@ organization := "io.flow"
 
 ThisBuild / scalaVersion := "2.13.8"
 
-ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
-
 lazy val allScalacOptions = Seq(
   "-feature",
   "-Xfatal-warnings",
