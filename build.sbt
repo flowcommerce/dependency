@@ -46,7 +46,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -56,11 +56,11 @@ lazy val api = project
       ws,
       guice,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.25",
-      "io.flow" %% "lib-metrics-play28" % "1.0.62",
-      "io.flow" %% "lib-log" % "0.1.99",
-      "io.flow" %% "lib-usage-play28" % "0.2.27",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.7" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.6.27",
+      "io.flow" %% "lib-metrics-play28" % "1.0.65",
+      "io.flow" %% "lib-log" % "0.2.2",
+      "io.flow" %% "lib-usage-play28" % "0.2.29",
+      "io.flow" %% "lib-test-utils-play28" % "0.2.11" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.6.0",
       "org.apache.commons" % "commons-text" % "1.10.0"
@@ -79,7 +79,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -92,7 +92,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "6.4.2",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.7" % Test
+      "io.flow" %% "lib-test-utils-play28" % "0.2.11" % Test
     ),
     scalacOptions ++= allScalacOptions
   )
@@ -105,9 +105,8 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.7.75",
+    "io.flow" %% "lib-play-play28" % "0.7.77",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
-    "com.typesafe.play" %% "play-json" % "2.9.4"
   ),
   scalacOptions ++= allScalacOptions,
   credentials += credsToUse,
