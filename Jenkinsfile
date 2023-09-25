@@ -13,7 +13,7 @@ pipeline {
 
       containerTemplates([
         containerTemplate(name: 'postgres', image: "flowcommerce/dependency-postgresql:latest", alwaysPullImage: true, resourceRequestMemory: '1Gi'),
-        containerTemplate(name: 'play', image: "flowdocker/play_builder:latest-java13", alwaysPullImage: true, resourceRequestMemory: '2Gi', command: 'cat', ttyEnabled: true)
+        containerTemplate(name: 'play', image: "flowdocker/play_builder:latest-java17", alwaysPullImage: true, resourceRequestMemory: '2Gi', command: 'cat', ttyEnabled: true)
       ])
     }
   }
