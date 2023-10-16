@@ -21,6 +21,9 @@ resources:
 jvmOpts:
   memory: 3000m
 
+istio:
+  alb: true
+
 nodeSelector:
    role: workers-lg
 
