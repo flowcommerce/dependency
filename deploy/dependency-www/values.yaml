@@ -18,6 +18,10 @@ resources:
 jvmOpts:
   memory: 3000m
 
+istio:
+  alb: true
+  albFlowioTarget: "alb-prod.flow.io"
+
 istioIngress:
   enabled: true
   gateways:
