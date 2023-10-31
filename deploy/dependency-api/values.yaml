@@ -12,14 +12,14 @@ image:
 
 resources:
   limits:
-    memory: "3800Mi"
+    memory: "3000Mi"
     cpu: 1
   requests:
-    memory: "3800Mi"
+    memory: "3000Mi"
     cpu: 0.2
 
 jvmOpts:
-  memory: 3000m
+  memory: 2100m
 
 istio:
   alb: true
