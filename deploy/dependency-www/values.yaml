@@ -13,10 +13,10 @@ resources:
     cpu: 1
   requests:
     memory: "3400Mi"
-    cpu: .05
+    cpu: .2
 
 jvmOpts:
-  memory: 3000m
+  memory: 2500m
 
 istio:
   alb: true
