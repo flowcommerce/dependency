@@ -9,14 +9,14 @@ image:
 
 resources:
   limits:
-    memory: "3400Mi"
+    memory: "3000Mi"
     cpu: 1
   requests:
-    memory: "3400Mi"
-    cpu: .05
+    memory: "3000Mi"
+    cpu: .2
 
 jvmOpts:
-  memory: 3000m
+  memory: 2100m
 
 istio:
   alb: true
@@ -46,9 +46,9 @@ istioService:
 
 deployments:
   live:
-    minReplicas: 2
-    maxReplicas: 2
-    maxUnavailable: 1
+    minReplicas: 1
+    maxReplicas: 1
+    maxUnavailable: 0
 
 rolloutResource:
   enabled: false

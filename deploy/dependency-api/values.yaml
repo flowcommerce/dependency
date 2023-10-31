@@ -12,31 +12,23 @@ image:
 
 resources:
   limits:
-    memory: "4000Mi"
-  requests:
-    memory: "4000Mi"
+    memory: "3000Mi"
     cpu: 1
+  requests:
+    memory: "3000Mi"
+    cpu: 0.2
 
 jvmOpts:
-  memory: 3000m
+  memory: 2100m
 
 istio:
   alb: true
 
-nodeSelector:
-   role: workers-lg
-
-tolerations:
-  - key: "role"
-    operator: "Equal"
-    value: "workers-lg"
-    effect: "NoSchedule"
-     
 deployments:
   live:
     minReplicas: 1
     maxReplicas: 1
-    maxUnavailable: 1
+    maxUnavailable: 0
 
 rolloutResource:
   enabled: false
