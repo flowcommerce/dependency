@@ -8,7 +8,7 @@ import io.flow.dependency.v0.models.Organization
 import play.api.mvc.{Result, Results}
 
 @Singleton
-class OrganizationsHelper @Inject()(
+class OrganizationsHelper @Inject() (
   organizationsDao: OrganizationsDao
 ) {
 

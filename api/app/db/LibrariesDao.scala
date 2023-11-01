@@ -10,12 +10,12 @@ import io.flow.util.IdGenerator
 import play.api.db._
 
 @Singleton
-class LibrariesDao @Inject()(
+class LibrariesDao @Inject() (
   db: Database,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
-  internalTasksDao: InternalTasksDao,
-){
+  internalTasksDao: InternalTasksDao
+) {
   private[this] val dbHelpers = DbHelpers(db, "libraries")
 
   private[this] val BaseQuery = Query(s"""
@@ -98,14 +98,16 @@ class LibrariesDao @Inject()(
         val id = IdGenerator("lib").randomId()
 
         db.withTransaction { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "organization_id" -> form.organizationId,
-            "group_id" -> form.groupId.trim,
-            "artifact_id" -> form.artifactId.trim,
-            "resolver_id" -> form.resolverId,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "organization_id" -> form.organizationId,
+              "group_id" -> form.groupId.trim,
+              "artifact_id" -> form.artifactId.trim,
+              "resolver_id" -> form.resolverId,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
           form.version.foreach { version =>
             libraryVersionsDaoProvider.get.upsertWithConnection(createdBy, id, version)
           }
@@ -125,13 +127,15 @@ class LibrariesDao @Inject()(
 
   def delete(deletedBy: UserReference, library: Library): Either[Seq[String], Unit] = {
     membershipsDaoProvider.get.authorizeOrg(library.organization, deletedBy) {
-      libraryVersionsDaoProvider.get.findAll(
-        Authorization.All,
-        libraryId = Some(library.id),
-        limit = None
-      ).foreach { lv =>
-        libraryVersionsDaoProvider.get.delete(deletedBy, lv)
-      }
+      libraryVersionsDaoProvider.get
+        .findAll(
+          Authorization.All,
+          libraryId = Some(library.id),
+          limit = None
+        )
+        .foreach { lv =>
+          libraryVersionsDaoProvider.get.delete(deletedBy, lv)
+        }
 
       dbHelpers.delete(deletedBy.id, library.id)
       sync(library.id)
@@ -176,41 +180,44 @@ class LibrariesDao @Inject()(
     offset: Long = 0
   ): Seq[Library] = {
     db.withConnection { implicit c =>
-      Standards.queryWithOptionalLimit(
-        BaseQuery,
-        tableName = "libraries",
-        auth = auth.organizations("organizations.id", Some("resolvers.visibility")),
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        equals("libraries.organization_id", organizationId).
-        and(
+      Standards
+        .queryWithOptionalLimit(
+          BaseQuery,
+          tableName = "libraries",
+          auth = auth.organizations("organizations.id", Some("resolvers.visibility")),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .equals("libraries.organization_id", organizationId)
+        .and(
           projectId.map { _ =>
             "libraries.id in (select library_id from project_libraries where project_id = {project_id})"
           }
-        ).bind("project_id", projectId).
-        optionalText(
+        )
+        .bind("project_id", projectId)
+        .optionalText(
           "libraries.group_id",
           groupId,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        optionalText(
+        )
+        .optionalText(
           "libraries.artifact_id",
           artifactId,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        equals("libraries.resolver_id", resolverId).
-        and(
+        )
+        .equals("libraries.resolver_id", resolverId)
+        .and(
           prefix.map { _ =>
             "lower(artifact_id) like lower(trim({prefix})) || '%'"
           }
-        ).bind("prefix", prefix).
-        as(
+        )
+        .bind("prefix", prefix)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Library.parser().*
         )
     }

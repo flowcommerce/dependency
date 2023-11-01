@@ -24,9 +24,10 @@ class GithubUsers @javax.inject.Inject() (
 
   def postGithub() = Action.async(parse.json) { request =>
     request.body.validate[GithubAuthenticationForm] match {
-      case e: JsError => Future {
-        UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
-      }
+      case e: JsError =>
+        Future {
+          UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
+        }
       case s: JsSuccess[GithubAuthenticationForm] => {
         val form = s.get
         github.getUserFromCode(usersDao, githubUsersDao, tokensDao, form.code).map {
@@ -38,4 +39,3 @@ class GithubUsers @javax.inject.Inject() (
   }
 
 }
-

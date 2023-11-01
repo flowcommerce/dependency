@@ -4,8 +4,7 @@ import db.Authorization
 import org.scalatest.BeforeAndAfter
 import util.DependencySpec
 
-class ProjectDependencyResolutionServiceSpec extends DependencySpec
-  with BeforeAndAfter {
+class ProjectDependencyResolutionServiceSpec extends DependencySpec with BeforeAndAfter {
 
   private[this] lazy val projectDependencyResolutionService = init[ProjectDependencyResolutionServiceImpl]
 
@@ -27,7 +26,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
     createProjectLibrary(p)(
       createProjectLibraryForm(p).copy(
         groupId = defaultGroupId,
-        artifactId = "lib-s3",
+        artifactId = "lib-s3"
       )
     )
     projectsDao.toSummary(p)
@@ -35,7 +34,9 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
 
   before {
     projectsDao.findAll(Authorization.All, limit = None).foreach(_ => projectsDao.delete(testUser, _))
-    projectLibrariesDao.findAll(Authorization.All, orderBy = None, limit = None).foreach(_ => projectLibrariesDao.delete(testUser, _))
+    projectLibrariesDao
+      .findAll(Authorization.All, orderBy = None, limit = None)
+      .foreach(_ => projectLibrariesDao.delete(testUser, _))
     librariesDao.findAll(Authorization.All, limit = None).foreach(_ => librariesDao.delete(testUser, _))
   }
 
@@ -46,9 +47,9 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
   "buildProjectInfo 'depends' and 'provides'" in {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
-      groupId = defaultGroupId,
+      groupId = defaultGroupId
     )
-    all.size must be (2)
+    all.size must be(2)
 
     val s3 = all.find(_.projectId == libS3Project.id).get
     s3.dependsOn must be(Nil)
@@ -61,7 +62,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec
 
   "getByOrganization" in {
     val resolution = projectDependencyResolutionService.getByOrganizationKey(defaultOrg.key, defaultGroupId)
-    resolution.resolved.size must be (2)
+    resolution.resolved.size must be(2)
     resolution.resolved.toList match {
       case a :: b :: Nil =>
         a.projects.map(_.name) must equal(Seq("lib-s3"))

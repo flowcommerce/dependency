@@ -17,7 +17,7 @@ trait StaticUserProvider {
 }
 
 @Singleton
-class UsersDao @Inject()(
+class UsersDao @Inject() (
   db: Database,
   @javax.inject.Named("user-actor") userActor: akka.actor.ActorRef
 ) extends StaticUserProvider {
@@ -86,14 +86,16 @@ class UsersDao @Inject()(
         val id = IdGenerator("usr").randomId()
 
         db.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "email" -> form.email.map(_.trim),
-            "first_name" -> Util.trimmedString(form.name.flatMap(_.first)),
-            "last_name" -> Util.trimmedString(form.name.flatMap(_.last)),
-            "updated_by_user_id" -> createdBy.getOrElse(anonymousUser).id,
-            "status" -> Option("inactive")
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "email" -> form.email.map(_.trim),
+              "first_name" -> Util.trimmedString(form.name.flatMap(_.first)),
+              "last_name" -> Util.trimmedString(form.name.flatMap(_.last)),
+              "updated_by_user_id" -> createdBy.getOrElse(anonymousUser).id,
+              "status" -> Option("inactive")
+            )
+            .execute()
         }
 
         userActor ! UserActor.Messages.Created(id.toString)
@@ -140,42 +142,45 @@ class UsersDao @Inject()(
     offset: Long = 0
   ): Seq[User] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "users",
-        auth = Clause.True, // TODO
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        optionalText(
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "users",
+          auth = Clause.True, // TODO
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .optionalText(
           "users.email",
           email,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        and(
+        )
+        .and(
           identifier.map { _ =>
             "users.id in (select user_id from user_identifiers where value = trim({identifier}))"
           }
-        ).bind("identifier", identifier).
-        and(
+        )
+        .bind("identifier", identifier)
+        .and(
           token.map { _ =>
             "users.id in (select user_id from tokens where token = trim({token}))"
           }
-        ).bind("token", token).
-        and(
+        )
+        .bind("token", token)
+        .and(
           githubUserId.map { _ =>
             "users.id in (select user_id from github_users where github_user_id = {github_user_id}::numeric)"
           }
-        ).bind("github_user_id", githubUserId).
-        as(
+        )
+        .bind("github_user_id", githubUserId)
+        .as(
           io.flow.common.v0.anorm.parsers.User.parser().*
         )
     }
   }
 
 }
-

@@ -52,36 +52,32 @@ object GithubHelper {
 
 }
 
-
 abstract class Github {
 
-  /**
-    * Fetches the contents of the file at the specified path from the
-    * given repository. Returns None if the file is not found.
-    * 
-    * @param path e.g. "build.sbt",  "project/plugins.sbt", etc.
+  /** Fetches the contents of the file at the specified path from the given repository. Returns None if the file is not
+    * found.
+    *
+    * @param path
+    *   e.g. "build.sbt", "project/plugins.sbt", etc.
     */
   def file(
     user: UserReference,
     projectUri: String,
     path: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[String]]
 
-  /**
-    * Given an auth validation code, pings the github UI to access the
-    * user data, upserts that user with the dependency database, and
-    * returns the user (or a list of errors).
-    * 
-    * @param code The oauth authorization code from github
+  /** Given an auth validation code, pings the github UI to access the user data, upserts that user with the dependency
+    * database, and returns the user (or a list of errors).
+    *
+    * @param code
+    *   The oauth authorization code from github
     */
-  def getUserFromCode(
-    usersDao: UsersDao,
-    githubUsersDao: GithubUsersDao,
-    tokensDao: TokensDao,
-    code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], User]] = {
+  def getUserFromCode(usersDao: UsersDao, githubUsersDao: GithubUsersDao, tokensDao: TokensDao, code: String)(implicit
+    ec: ExecutionContext
+  ): Future[Either[Seq[String], User]] = {
     getGithubUserFromCode(code).map {
       case Left(errors) => Left(errors)
       case Right(githubUserWithToken) => {
@@ -138,28 +134,26 @@ abstract class Github {
     }
   }
 
-  /**
-    * Fetches github user from an oauth code
+  /** Fetches github user from an oauth code
     */
   def getGithubUserFromCode(code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]]
 
   def githubRepos(user: UserReference, page: Long = 1)(implicit ec: ExecutionContext): Future[Seq[GithubRepository]]
 
-  /**
-    * Recursively calls the github API until we either:
-    *  - consume all records
-    *  - meet the specified limit/offset
+  /** Recursively calls the github API until we either:
+    *   - consume all records
+    *   - meet the specified limit/offset
     */
   def repositories(
     user: UserReference,
     offset: Long,
     limit: Long,
     resultsSoFar: Seq[GithubRepository] = Nil,
-    page: Long = 1  // internal parameter
-  ) (
+    page: Long = 1 // internal parameter
+  )(
     acceptsFilter: GithubRepository => Boolean = { _ => true }
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Seq[GithubRepository]] = {
     githubRepos(user, page).flatMap { thisPage =>
       if (thisPage.isEmpty) {
@@ -179,18 +173,13 @@ abstract class Github {
     }
   }
 
-  /**
-    * For this user, returns the oauth token if available
+  /** For this user, returns the oauth token if available
     */
   def oauthToken(user: UserReference): Option[String]
 
 }
 
-
-class DefaultGithub @Inject() (
-  wsClient: WSClient,
-  config: Config,
-  tokensDao: TokensDao) extends Github {
+class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: TokensDao) extends Github {
 
   private[this] lazy val clientId = config.requiredString("github.dependency.client.id")
   private[this] lazy val clientSecret = config.requiredString("github.dependency.client.secret")
@@ -203,41 +192,46 @@ class DefaultGithub @Inject() (
     )
   )
 
-  override def getGithubUserFromCode(code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
+  override def getGithubUserFromCode(
+    code: String
+  )(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
     val form = AccessTokenForm(
       clientId = clientId,
       clientSecret = clientSecret,
       code = code
     )
-    oauthClient.accessTokens.postAccessToken(
-      form
-    ).flatMap { response =>
-      val client = GithubHelper.apiClient(wsClient, response.accessToken)
-      for {
-        githubUser <- client.users.getUser()
-        emails <- client.userEmails.get()
-      } yield {
-        // put primary first
-        val sortedEmailAddresses = (emails.filter(_.primary) ++ emails.filter(!_.primary)).map(_.email)
+    oauthClient.accessTokens
+      .postAccessToken(
+        form
+      )
+      .flatMap { response =>
+        val client = GithubHelper.apiClient(wsClient, response.accessToken)
+        for {
+          githubUser <- client.users.getUser()
+          emails <- client.userEmails.get()
+        } yield {
+          // put primary first
+          val sortedEmailAddresses = (emails.filter(_.primary) ++ emails.filter(!_.primary)).map(_.email)
 
-        Right(
-          GithubUserData(
-            githubId = githubUser.id,
-            login = githubUser.login,
-            token = response.accessToken,
-            emails = sortedEmailAddresses,
-            name = githubUser.name,
-            avatarUrl = githubUser.avatarUrl
+          Right(
+            GithubUserData(
+              githubId = githubUser.id,
+              login = githubUser.login,
+              token = response.accessToken,
+              emails = sortedEmailAddresses,
+              name = githubUser.name,
+              avatarUrl = githubUser.avatarUrl
+            )
           )
-        )
+        }
       }
-    }
   }
 
-  /**
-    * Fetches one page of repositories from the Github API
+  /** Fetches one page of repositories from the Github API
     */
- override def githubRepos(user: UserReference, page: Long = 1)(implicit ec: ExecutionContext): Future[Seq[GithubRepository]] = {
+  override def githubRepos(user: UserReference, page: Long = 1)(implicit
+    ec: ExecutionContext
+  ): Future[Seq[GithubRepository]] = {
     oauthToken(user) match {
       case None => Future { Nil }
       case Some(token) => {
@@ -255,8 +249,8 @@ class DefaultGithub @Inject() (
     projectUri: String,
     path: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[String]] = {
     GithubUtil.parseUri(projectUri) match {
       case Left(error) => {
@@ -264,22 +258,28 @@ class DefaultGithub @Inject() (
       }
       case Right(repo) => {
         oauthToken(user) match {
-          case None => Future {
-            None
-          }
-          case Some(token) => {
-            GithubHelper.apiClient(wsClient, token).contents.getContentsByPath(
-              owner = repo.owner,
-              repo = repo.project,
-              path = path,
-              ref = branch
-            ).map { contents =>
-              Some(GithubUtil.toText(contents))
-            }.recover {
-              case UnitResponse(404) => {
-                None
-              }
+          case None =>
+            Future {
+              None
             }
+          case Some(token) => {
+            GithubHelper
+              .apiClient(wsClient, token)
+              .contents
+              .getContentsByPath(
+                owner = repo.owner,
+                repo = repo.project,
+                path = path,
+                ref = branch
+              )
+              .map { contents =>
+                Some(GithubUtil.toText(contents))
+              }
+              .recover {
+                case UnitResponse(404) => {
+                  None
+                }
+              }
           }
         }
       }
@@ -290,7 +290,9 @@ class DefaultGithub @Inject() (
 
 class MockGithub() extends Github {
 
-  override def getGithubUserFromCode(code: String)(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
+  override def getGithubUserFromCode(
+    code: String
+  )(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
     Future {
       MockGithubData.getUserByCode(code) match {
         case None => Left(Seq("Invalid access code"))
@@ -299,7 +301,9 @@ class MockGithub() extends Github {
     }
   }
 
-  override def githubRepos(user: UserReference, page: Long = 1)(implicit ec: ExecutionContext): Future[Seq[GithubRepository]] = {
+  override def githubRepos(user: UserReference, page: Long = 1)(implicit
+    ec: ExecutionContext
+  ): Future[Seq[GithubRepository]] = {
     Future {
       MockGithubData.repositories(user)
     }
@@ -314,8 +318,8 @@ class MockGithub() extends Github {
     projectUri: String,
     path: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[String]] = {
     Future {
       MockGithubData.getFile(projectUri, path)

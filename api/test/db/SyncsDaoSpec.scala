@@ -64,15 +64,19 @@ class SyncsDaoSpec extends DependencySpec {
     val start = createSync(createSyncForm(event = SyncEvent.Started))
     val completed = createSync(createSyncForm(event = SyncEvent.Completed))
 
-    syncsDao.findAll(
-      ids = Some(Seq(start.id, completed.id)),
-      event = Some(SyncEvent.Started)
-    ).map(_.id) must be(Seq(start.id))
+    syncsDao
+      .findAll(
+        ids = Some(Seq(start.id, completed.id)),
+        event = Some(SyncEvent.Started)
+      )
+      .map(_.id) must be(Seq(start.id))
 
-    syncsDao.findAll(
-      ids = Some(Seq(start.id, completed.id)),
-      event = Some(SyncEvent.Completed)
-    ).map(_.id) must be(Seq(completed.id))
+    syncsDao
+      .findAll(
+        ids = Some(Seq(start.id, completed.id)),
+        event = Some(SyncEvent.Completed)
+      )
+      .map(_.id) must be(Seq(completed.id))
 
     syncsDao.findAll(
       ids = Some(Seq(start.id, completed.id)),
@@ -84,10 +88,12 @@ class SyncsDaoSpec extends DependencySpec {
     val form = createSyncForm()
     val sync = createSync(form)
 
-    syncsDao.findAll(
-      ids = Some(Seq(sync.id)),
-      objectId = Some(form.objectId)
-    ).map(_.id) must be(Seq(sync.id))
+    syncsDao
+      .findAll(
+        ids = Some(Seq(sync.id)),
+        objectId = Some(form.objectId)
+      )
+      .map(_.id) must be(Seq(sync.id))
 
     syncsDao.findAll(
       objectId = Some(UUID.randomUUID.toString)

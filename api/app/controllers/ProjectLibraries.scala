@@ -16,8 +16,8 @@ class ProjectLibraries @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   projectLibrariesDao: InternalProjectLibrariesDao,
-  conversions: Conversions,
-) extends BaseIdentifiedControllerWithFallback  {
+  conversions: Conversions
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],

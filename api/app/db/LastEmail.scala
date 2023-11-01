@@ -23,9 +23,9 @@ case class LastEmail(
 )
 
 @Singleton
-class LastEmailsDao @Inject()(
+class LastEmailsDao @Inject() (
   db: Database
-){
+) {
   private[this] val dbHelpers = DbHelpers(db, "last_emails")
 
   private[this] val BaseQuery = Query(s"""
@@ -62,16 +62,18 @@ class LastEmailsDao @Inject()(
   private[this] def create(
     createdBy: UserReference,
     form: LastEmailForm
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): String = {
     val id = IdGenerator("lse").randomId()
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "user_id" -> form.userId,
-      "publication" -> form.publication.toString,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "user_id" -> form.userId,
+        "publication" -> form.publication.toString,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
     id
   }
 
@@ -94,32 +96,32 @@ class LastEmailsDao @Inject()(
   ): Seq[LastEmail] = {
 
     db.withConnection { implicit c =>
-      BaseQuery.
-        equals("last_emails.id", id).
-        optionalIn("last_emails.id", ids).
-        equals("last_emails.user_id", userId).
-        optionalText("last_emails.publication", publication).
-        orderBy(orderBy.sql).
-        limit(limit).
-        offset(offset).
-        as(parser.*)
+      BaseQuery
+        .equals("last_emails.id", id)
+        .optionalIn("last_emails.id", ids)
+        .equals("last_emails.user_id", userId)
+        .optionalText("last_emails.publication", publication)
+        .orderBy(orderBy.sql)
+        .limit(limit)
+        .offset(offset)
+        .as(parser.*)
     }
   }
 
   private[this] val parser: RowParser[LastEmail] = {
     SqlParser.str("id") ~
-    io.flow.dependency.v0.anorm.parsers.Reference.parser("user_id") ~
-    io.flow.dependency.v0.anorm.parsers.Publication.parser() ~
-    SqlParser.get[DateTime]("created_at") map {
-      case id ~ user ~ publication ~ createdAt => {
-        LastEmail(
-          id = id,
-          user = user,
-          publication = publication,
-          createdAt = createdAt
-        )
+      io.flow.dependency.v0.anorm.parsers.Reference.parser("user_id") ~
+      io.flow.dependency.v0.anorm.parsers.Publication.parser() ~
+      SqlParser.get[DateTime]("created_at") map {
+        case id ~ user ~ publication ~ createdAt => {
+          LastEmail(
+            id = id,
+            user = user,
+            publication = publication,
+            createdAt = createdAt
+          )
+        }
       }
-    }
   }
 
 }

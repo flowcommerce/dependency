@@ -11,7 +11,7 @@ import io.flow.util.Config
 import play.api.libs.json._
 import play.api.mvc._
 
-class Organizations @javax.inject.Inject()(
+class Organizations @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
@@ -19,7 +19,8 @@ class Organizations @javax.inject.Inject()(
   organizationsHelper: OrganizationsHelper,
   usersHelper: UsersHelper,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
+) extends BaseIdentifiedControllerWithFallback
+  with BaseIdentifiedController {
 
   def get(
     id: Option[String],

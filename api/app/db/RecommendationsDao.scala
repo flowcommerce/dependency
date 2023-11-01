@@ -19,7 +19,7 @@ private[db] case class RecommendationForm(
 )
 
 @Singleton
-class RecommendationsDao @Inject()(
+class RecommendationsDao @Inject() (
   db: Database,
   libraryRecommendationsDaoProvider: Provider[LibraryRecommendationsDao],
   binaryRecommendationsDaorovider: Provider[BinaryRecommendationsDao],
@@ -80,7 +80,12 @@ class RecommendationsDao @Inject()(
     val newRecords = libraries ++ binaries
 
     val existing = Pager.create { offset =>
-      recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), limit = 1000, offset = offset)
+      recommendationsDaoProvider.get.findAll(
+        Authorization.All,
+        projectId = Some(project.id),
+        limit = 1000,
+        offset = offset
+      )
     }.toSeq
 
     val toAdd = newRecords.filter { rec => !existing.map(toForm).contains(rec) }
@@ -106,8 +111,8 @@ class RecommendationsDao @Inject()(
   private[db] def upsert(
     createdBy: UserReference,
     form: RecommendationForm
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Unit = {
     findByProjectIdAndTypeAndObjectIdAndNameAndFromVersion(
       Authorization.All,
@@ -132,20 +137,22 @@ class RecommendationsDao @Inject()(
   private[db] def create(
     createdBy: UserReference,
     form: RecommendationForm
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Unit = {
     val id = IdGenerator("rec").randomId()
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "project_id" -> form.projectId,
-      "type" -> form.`type`.toString,
-      "object_id" -> form.objectId,
-      "name" -> form.name,
-      "from_version" -> form.from,
-      "to_version" -> form.to,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "project_id" -> form.projectId,
+        "type" -> form.`type`.toString,
+        "object_id" -> form.objectId,
+        "name" -> form.name,
+        "from_version" -> form.from,
+        "to_version" -> form.to,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
     ()
   }
 
@@ -186,31 +193,33 @@ class RecommendationsDao @Inject()(
     offset: Long = 0
   ): Seq[Recommendation] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "recommendations",
-        auth = auth.organizations("projects.organization_id", Some("projects.visibility")),
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        and(
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "recommendations",
+          auth = auth.organizations("projects.organization_id", Some("projects.visibility")),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .and(
           organization.map { _ =>
             "organizations.id in (select id from organizations where key = lower(trim({org})))"
           }
-        ).bind("org", organization).
-        equals("recommendations.project_id", projectId).
-        optionalText(
+        )
+        .bind("org", organization)
+        .equals("recommendations.project_id", projectId)
+        .optionalText(
           "recommendations.type",
           `type`,
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        optionalText("recommendations.name", name).
-        optionalText("recommendations.from_version", fromVersion).
-        equals("recommendations.object_id", objectId).
-        as(
+        )
+        .optionalText("recommendations.name", name)
+        .optionalText("recommendations.from_version", fromVersion)
+        .equals("recommendations.object_id", objectId)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Recommendation.parser().*
         )
     }

@@ -20,12 +20,13 @@ object Subscriptions {
 
 }
 
-class SubscriptionsController @javax.inject.Inject()(
+class SubscriptionsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   private[this] lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 
@@ -33,9 +34,13 @@ class SubscriptionsController @javax.inject.Inject()(
   override def section = None
 
   def index() = User.async { implicit request =>
-    dependencyClientProvider.newClient(user = Some(request.user), requestId = None).users.getIdentifierById(request.user.id).map { id =>
-      Redirect(routes.SubscriptionsController.identifier(id.value))
-    }
+    dependencyClientProvider
+      .newClient(user = Some(request.user), requestId = None)
+      .users
+      .getIdentifierById(request.user.id)
+      .map { id =>
+        Redirect(routes.SubscriptionsController.identifier(id.value))
+      }
   }
 
   def identifier(identifier: String) = Action.async { implicit request =>
@@ -43,10 +48,13 @@ class SubscriptionsController @javax.inject.Inject()(
       users <- client.users.get(
         identifier = Some(identifier)
       )
-      subscriptions <- dependencyClientProvider.newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None).subscriptions.get(
-        identifier = Some(identifier),
-        limit = Publication.all.size.toLong + 1L
-      )
+      subscriptions <- dependencyClientProvider
+        .newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None)
+        .subscriptions
+        .get(
+          identifier = Some(identifier),
+          limit = Publication.all.size.toLong + 1L
+        )
     } yield {
       val userPublications = Publication.all.map { p =>
         Subscriptions.UserPublication(
@@ -61,37 +69,47 @@ class SubscriptionsController @javax.inject.Inject()(
   def postToggle(identifier: String, publication: Publication) = Action.async {
     client.users.get(identifier = Some(identifier)).flatMap { users =>
       users.headOption match {
-        case None => Future {
-          Redirect(routes.SubscriptionsController.index()).flashing("warning" -> "User could not be found")
-        }
+        case None =>
+          Future {
+            Redirect(routes.SubscriptionsController.index()).flashing("warning" -> "User could not be found")
+          }
         case Some(user) => {
-          val identifiedClient = dependencyClientProvider.newClient(user = Some(UserReference(user.id)), requestId = None)
-          identifiedClient.subscriptions.get(
-            identifier = Some(identifier),
-            publication = Some(publication)
-          ).flatMap { subscriptions =>
-            subscriptions.headOption match {
-              case None => {
-                identifiedClient.subscriptions.post(
-                  SubscriptionForm(
-                    userId = user.id,
-                    publication = publication
-                  ),
-                  identifier = Some(identifier)
-                ).map { _ =>
-                  Redirect(routes.SubscriptionsController.identifier(identifier)).flashing("success" -> "Subscription added")
+          val identifiedClient =
+            dependencyClientProvider.newClient(user = Some(UserReference(user.id)), requestId = None)
+          identifiedClient.subscriptions
+            .get(
+              identifier = Some(identifier),
+              publication = Some(publication)
+            )
+            .flatMap { subscriptions =>
+              subscriptions.headOption match {
+                case None => {
+                  identifiedClient.subscriptions
+                    .post(
+                      SubscriptionForm(
+                        userId = user.id,
+                        publication = publication
+                      ),
+                      identifier = Some(identifier)
+                    )
+                    .map { _ =>
+                      Redirect(routes.SubscriptionsController.identifier(identifier))
+                        .flashing("success" -> "Subscription added")
+                    }
                 }
-              }
-              case Some(subscription) => {
-                identifiedClient.subscriptions.deleteById(
-                  subscription.id,
-                  identifier = Some(identifier)
-                ).map { _ =>
-                  Redirect(routes.SubscriptionsController.identifier(identifier)).flashing("success" -> "Subscription removed")
+                case Some(subscription) => {
+                  identifiedClient.subscriptions
+                    .deleteById(
+                      subscription.id,
+                      identifier = Some(identifier)
+                    )
+                    .map { _ =>
+                      Redirect(routes.SubscriptionsController.identifier(identifier))
+                        .flashing("success" -> "Subscription removed")
+                    }
                 }
               }
             }
-          }
         }
       }
     }

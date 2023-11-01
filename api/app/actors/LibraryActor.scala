@@ -15,12 +15,12 @@ object LibraryActor {
 
 }
 
-class LibraryActor @Inject()(
+class LibraryActor @Inject() (
   itemsDao: InternalItemsDao,
   projectLibrariesDao: InternalProjectLibrariesDao,
   staticUserProvider: StaticUserProvider,
   logger: RollbarLogger,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
@@ -30,10 +30,12 @@ class LibraryActor @Inject()(
     case LibraryActor.Messages.Delete(libraryId: String) => {
       itemsDao.deleteByObjectId(staticUserProvider.systemUser, libraryId)
 
-      projectLibrariesDao.findAll(Authorization.All, libraryId = Some(libraryId), limit = None, orderBy = None).foreach { projectLibrary =>
-        projectLibrariesDao.removeLibrary(staticUserProvider.systemUser, projectLibrary)
-        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.projectId, projectLibrary.id)
-      }
+      projectLibrariesDao
+        .findAll(Authorization.All, libraryId = Some(libraryId), limit = None, orderBy = None)
+        .foreach { projectLibrary =>
+          projectLibrariesDao.removeLibrary(staticUserProvider.systemUser, projectLibrary)
+          projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.projectId, projectLibrary.id)
+        }
     }
   }
 

@@ -14,14 +14,15 @@ import play.api.libs.json._
 import scala.concurrent.{ExecutionContext, Future}
 import io.flow.error.v0.models.json._
 
-class Users @javax.inject.Inject()(
+class Users @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   usersDao: UsersDao,
   userIdentifiersDao: UserIdentifiersDao
-)(implicit val ec: ExecutionContext) extends BaseIdentifiedControllerWithFallback {
+)(implicit val ec: ExecutionContext)
+  extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
@@ -57,12 +58,12 @@ class Users @javax.inject.Inject()(
     }
   }
 
-
   def post() = Anonymous.async(parse.json) { request =>
     request.body.validate[UserForm] match {
-      case e: JsError => Future {
-        UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
-      }
+      case e: JsError =>
+        Future {
+          UnprocessableEntity(Json.toJson(Validation.invalidJson(e)))
+        }
       case s: JsSuccess[UserForm] => {
 
         Future {
@@ -78,7 +79,6 @@ class Users @javax.inject.Inject()(
       }
     }
   }
-
 
   def withUser(id: String)(
     f: User => Result

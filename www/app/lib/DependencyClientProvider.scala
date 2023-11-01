@@ -48,5 +48,4 @@ class DefaultDependencyClientProvider @javax.inject.Inject() (
     }
   }
 
-
 }

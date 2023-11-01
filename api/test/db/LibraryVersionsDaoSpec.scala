@@ -61,13 +61,18 @@ class LibraryVersionsDaoSpec extends DependencySpec {
     val version1 = createLibraryVersion(org)
     val version2 = createLibraryVersion(org)
 
-    libraryVersionsDao.findAll(Authorization.All, limit = None, ids = Some(Seq(version1.id, version2.id))).map(_.id).sorted must be(
+    libraryVersionsDao
+      .findAll(Authorization.All, limit = None, ids = Some(Seq(version1.id, version2.id)))
+      .map(_.id)
+      .sorted must be(
       Seq(version1.id, version2.id).sorted
     )
 
     libraryVersionsDao.findAll(Authorization.All, limit = None, ids = Some(Nil)) must be(Nil)
     libraryVersionsDao.findAll(Authorization.All, limit = None, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    libraryVersionsDao.findAll(Authorization.All, limit = None, ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(version1.id))
+    libraryVersionsDao
+      .findAll(Authorization.All, limit = None, ids = Some(Seq(version1.id, UUID.randomUUID.toString)))
+      .map(_.id) must be(Seq(version1.id))
   }
 
   "delete" in {
@@ -95,11 +100,21 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       val libraryVersion = createLibraryVersion(org, user = user)(library = library)
       libraryVersion.library.resolver.visibility must be(Visibility.Public)
 
-      libraryVersionsDao.findAll(Authorization.PublicOnly, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.Organization(createOrganization().id), limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.User(user.id), limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao
+        .findAll(Authorization.PublicOnly, limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(
+        Seq(libraryVersion.id)
+      )
+      libraryVersionsDao
+        .findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao
+        .findAll(Authorization.Organization(createOrganization().id), limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao
+        .findAll(Authorization.User(user.id), limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
     }
 
     "allow only org users to access private libraries" in {
@@ -114,13 +129,27 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       val libraryVersion = createLibraryVersion(org, user = user)(library = library)
       libraryVersion.library.resolver.visibility must be(Visibility.Private)
 
-      libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
-      libraryVersionsDao.findAll(Authorization.User(user.id), limit = None, id = Some(libraryVersion.id)).map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(
+        Seq(libraryVersion.id)
+      )
+      libraryVersionsDao
+        .findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
+      libraryVersionsDao
+        .findAll(Authorization.User(user.id), limit = None, id = Some(libraryVersion.id))
+        .map(_.id) must be(Seq(libraryVersion.id))
 
       libraryVersionsDao.findAll(Authorization.PublicOnly, limit = None, id = Some(libraryVersion.id)) must be(Nil)
-      libraryVersionsDao.findAll(Authorization.Organization(createOrganization().id), limit = None, id = Some(libraryVersion.id)) must be(Nil)
-      libraryVersionsDao.findAll(Authorization.User(createUser().id), limit = None, id = Some(libraryVersion.id)) must be(Nil)
+      libraryVersionsDao.findAll(
+        Authorization.Organization(createOrganization().id),
+        limit = None,
+        id = Some(libraryVersion.id)
+      ) must be(Nil)
+      libraryVersionsDao.findAll(
+        Authorization.User(createUser().id),
+        limit = None,
+        id = Some(libraryVersion.id)
+      ) must be(Nil)
     }
 
   }

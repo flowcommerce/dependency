@@ -8,7 +8,8 @@ import play.api.mvc.ControllerComponents
 class LogoutController @javax.inject.Inject() (
   config: Config,
   val controllerComponents: ControllerComponents
-) extends play.api.mvc.BaseController with I18nSupport {
+) extends play.api.mvc.BaseController
+  with I18nSupport {
 
   def logged_out = Action { implicit request =>
     Ok(

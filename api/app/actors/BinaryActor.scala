@@ -21,19 +21,19 @@ class BinaryActor @Inject() (
   itemsDao: InternalItemsDao,
   projectBinariesDao: ProjectBinariesDao,
   logger: RollbarLogger,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)
 
-  def receive: Receive = SafeReceive.withLogUnhandled {
+  def receive: Receive = SafeReceive.withLogUnhandled { case BinaryActor.Messages.Delete(binaryId: String) =>
+    itemsDao.deleteByObjectId(staticUserProvider.systemUser, binaryId)
 
-    case BinaryActor.Messages.Delete(binaryId: String) =>
-      itemsDao.deleteByObjectId(staticUserProvider.systemUser, binaryId)
-
-      Pager.create { offset =>
+    Pager
+      .create { offset =>
         projectBinariesDao.findAll(Authorization.All, binaryId = Some(binaryId), offset = offset)
-      }.foreach { projectBinary =>
+      }
+      .foreach { projectBinary =>
         projectBinariesDao.removeBinary(staticUserProvider.systemUser, projectBinary)
         projectActor ! ProjectActor.Messages.ProjectBinarySync(projectBinary.project.id, projectBinary.id)
       }

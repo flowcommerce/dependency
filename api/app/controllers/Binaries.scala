@@ -12,7 +12,7 @@ import io.flow.error.v0.models.json._
 import play.api.mvc._
 
 @javax.inject.Singleton
-class Binaries @javax.inject.Inject()(
+class Binaries @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,

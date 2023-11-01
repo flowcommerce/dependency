@@ -17,7 +17,7 @@ class ProjectDependencyResolutions @Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   membershipsDao: MembershipsDao,
-  service: ProjectDependencyResolutionServiceCache,
+  service: ProjectDependencyResolutionServiceCache
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(organization: String, groupId: String): Action[AnyContent] = IdentifiedWithFallback { request =>

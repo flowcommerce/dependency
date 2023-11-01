@@ -8,7 +8,7 @@ import io.flow.dependency.v0.models.Project
 import play.api.mvc.{Result, Results}
 
 @Singleton
-class ProjectHelper @Inject()(
+class ProjectHelper @Inject() (
   projectsDao: ProjectsDao
 ) {
 
@@ -24,6 +24,5 @@ class ProjectHelper @Inject()(
       }
     }
   }
-
 
 }

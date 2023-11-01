@@ -9,12 +9,13 @@ import play.api.mvc._
 
 @javax.inject.Singleton
 class Items @javax.inject.Inject() (
-                                     val config: Config,
-                                     val controllerComponents: ControllerComponents,
-                                     val flowControllerComponents: FlowControllerComponents,
-                                     itemsDao: InternalItemsDao,
-                                     val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
+  val config: Config,
+  val controllerComponents: ControllerComponents,
+  val flowControllerComponents: FlowControllerComponents,
+  itemsDao: InternalItemsDao,
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+) extends BaseIdentifiedControllerWithFallback
+  with BaseIdentifiedController {
 
   def get(
     q: Option[String],

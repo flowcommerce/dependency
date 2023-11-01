@@ -14,7 +14,7 @@ class ProjectBinaries @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   projectBinariesDao: ProjectBinariesDao,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback  {
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],

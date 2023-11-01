@@ -15,7 +15,8 @@ class LibrariesController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Libraries)
 
@@ -77,13 +78,16 @@ class LibrariesController @javax.inject.Inject() (
   )(
     f: Library => Future[Result]
   ) = {
-    dependencyClient(request).libraries.getById(id).flatMap { library =>
-      f(library)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.LibrariesController.index()).flashing("warning" -> s"Library not found")
+    dependencyClient(request).libraries
+      .getById(id)
+      .flatMap { library =>
+        f(library)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.LibrariesController.index()).flashing("warning" -> s"Library not found")
+        }
+      }
   }
 
 }

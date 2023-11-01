@@ -2,16 +2,12 @@ package db
 
 import io.flow.postgresql.Query
 
-/**
- * Provides docuemntation and implementation for the key attributes we
- * want on all of our findAll methods - implementing a common
- * interface to the API when searching resources.
- */
+/** Provides docuemntation and implementation for the key attributes we want on all of our findAll methods -
+  * implementing a common interface to the API when searching resources.
+  */
 private[db] case object Standards {
 
-  /**
-    * Returns query object decorated with standard attributes in this
-    * project.
+  /** Returns query object decorated with standard attributes in this project.
     */
   def queryWithOptionalLimit(
     query: Query,
@@ -23,13 +19,13 @@ private[db] case object Standards {
     limit: Option[Long],
     offset: Long = 0
   ): Query = {
-    query.
-      equals(s"$tableName.id", id).
-      optionalIn(s"$tableName.id", ids).
-      and(auth.sql).
-      orderBy(orderBy).
-      optionalLimit(limit).
-      offset(offset)
+    query
+      .equals(s"$tableName.id", id)
+      .optionalIn(s"$tableName.id", ids)
+      .and(auth.sql)
+      .orderBy(orderBy)
+      .optionalLimit(limit)
+      .offset(offset)
   }
 
   def query(
@@ -42,14 +38,13 @@ private[db] case object Standards {
     limit: Long,
     offset: Long = 0
   ): Query = {
-    query.
-      equals(s"$tableName.id", id).
-      optionalIn(s"$tableName.id", ids).
-      and(auth.sql).
-      orderBy(orderBy).
-      limit(limit).
-      offset(offset)
+    query
+      .equals(s"$tableName.id", id)
+      .optionalIn(s"$tableName.id", ids)
+      .and(auth.sql)
+      .orderBy(orderBy)
+      .limit(limit)
+      .offset(offset)
   }
 
 }
-

@@ -8,7 +8,7 @@ import play.api.libs.json._
 class GithubWebhooks @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   projectsDao: ProjectsDao,
-  internalTasksDao: InternalTasksDao,
+  internalTasksDao: InternalTasksDao
 ) extends BaseController {
 
   def postByProjectId(projectId: String): Action[AnyContent] = Action {

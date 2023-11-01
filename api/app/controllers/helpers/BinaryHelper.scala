@@ -7,7 +7,7 @@ import io.flow.dependency.v0.models.Binary
 import play.api.mvc.{Result, Results}
 
 @Singleton
-class BinaryHelper @Inject()(
+class BinaryHelper @Inject() (
   binariesDao: BinariesDao
 ) {
 
@@ -23,6 +23,5 @@ class BinaryHelper @Inject()(
       }
     }
   }
-
 
 }

@@ -12,10 +12,10 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
   lazy val binary1 = createBinary(org)()
   lazy val binary2 = createBinary(org)()
 
-  "GET /binaries by id" in  {
+  "GET /binaries by id" in {
     await(
       identifiedClient().binaries.get(id = Some(binary1.id))
-    ).map(_.id) must contain theSameElementsAs  Seq(binary1.id)
+    ).map(_.id) must contain theSameElementsAs Seq(binary1.id)
 
     await(
       identifiedClient().binaries.get(id = Some(UUID.randomUUID.toString))
@@ -24,7 +24,7 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "GET /binaries by name" in  {
+  "GET /binaries by name" in {
     await(
       identifiedClient().binaries.get(name = Some(binary1.name.toString))
     ).map(_.name) must contain theSameElementsAs Seq(binary1.name)
@@ -40,7 +40,7 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "GET /binaries/:id" in  {
+  "GET /binaries/:id" in {
     await(identifiedClient().binaries.getById(binary1.id)).id must be(binary1.id)
     await(identifiedClient().binaries.getById(binary2.id)).id must be(binary2.id)
 
@@ -49,19 +49,19 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
     }
   }
 
-  "POST /binaries" in  {
+  "POST /binaries" in {
     val form = createBinaryForm(org)
     val binary = await(identifiedClient().binaries.post(form))
     binary.name must be(form.name)
   }
 
-  "POST /binaries validates duplicate name" in  {
+  "POST /binaries validates duplicate name" in {
     expectErrors(
       identifiedClient().binaries.post(createBinaryForm(org).copy(name = binary1.name))
     ).genericError.messages must contain theSameElementsAs Seq("Binary with this name already exists")
   }
 
-  "DELETE /binaries" in  {
+  "DELETE /binaries" in {
     val binary = createBinary(org)()
     await(
       identifiedClient(org.user).binaries.deleteById(binary.id)

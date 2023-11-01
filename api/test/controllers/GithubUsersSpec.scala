@@ -24,7 +24,7 @@ class GithubUsersSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "POST /authentications/github with valid token" in  {
+  "POST /authentications/github with valid token" in {
     val githubUser = createLocalGithubUser()
     val code = "test"
 
@@ -40,7 +40,7 @@ class GithubUsersSpec extends DependencySpec with MockDependencyClient {
     user2.email must be(githubUser.email)
   }
 
-  "POST /authentications/github accepts account w/out email" in  {
+  "POST /authentications/github accepts account w/out email" in {
     val githubUser = createLocalGithubUser().copy(email = None)
     val code = "test"
 

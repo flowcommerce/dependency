@@ -20,7 +20,7 @@ object SearchActor {
 
 }
 
-class SearchActor @Inject()(
+class SearchActor @Inject() (
   binariesDao: BinariesDao,
   librariesDao: LibrariesDao,
   projectsDao: ProjectsDao,

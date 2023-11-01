@@ -11,12 +11,12 @@ import io.flow.util.IdGenerator
 import play.api.db._
 
 @Singleton
-class BinariesDao @Inject()(
+class BinariesDao @Inject() (
   db: Database,
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef,
+  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "binaries")
@@ -64,12 +64,14 @@ class BinariesDao @Inject()(
         val id = IdGenerator("bin").randomId()
 
         db.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "organization_id" -> form.organizationId,
-            "name" -> form.name.toString.toLowerCase,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "organization_id" -> form.organizationId,
+              "name" -> form.name.toString.toLowerCase,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
 
         val binary = findById(id).getOrElse {
@@ -85,11 +87,13 @@ class BinariesDao @Inject()(
 
   def delete(deletedBy: UserReference, binary: Binary): Either[Seq[String], Unit] = {
     membershipsDaoProvider.get.authorizeOrg(binary.organization, deletedBy) {
-      Pager.create { offset =>
-        binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
-      }.foreach {
-        binaryVersionsDaoProvider.get().delete(deletedBy, _)
-      }
+      Pager
+        .create { offset =>
+          binaryVersionsDaoProvider.get().findAll(binaryId = Some(binary.id), offset = offset)
+        }
+        .foreach {
+          binaryVersionsDaoProvider.get().delete(deletedBy, _)
+        }
       dbHelpers.delete(deletedBy.id, binary.id)
       binaryActor ! BinaryActor.Messages.Delete(binary.id)
     }
@@ -115,22 +119,23 @@ class BinariesDao @Inject()(
     offset: Long = 0
   ): Seq[Binary] = {
     db.withConnection { implicit c =>
-      BaseQuery.
-        equals("binaries.id", id).
-        optionalIn("binaries.id", ids).
-        and (
+      BaseQuery
+        .equals("binaries.id", id)
+        .optionalIn("binaries.id", ids)
+        .and(
           projectId.map { _ =>
             s"binaries.id in (select binary_id from project_binaries where binary_id is not null and project_id = {project_id})"
           }
-        ).bind("project_id", projectId).
-        equals("binaries.organization_id", organizationId).
-        optionalText(
+        )
+        .bind("project_id", projectId)
+        .equals("binaries.organization_id", organizationId)
+        .optionalText(
           "binaries.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        and(
+        )
+        .and(
           isSynced.map { value =>
             val clause = "select 1 from syncs where object_id = binaries.id and event = {sync_event_completed}"
             if (value) {
@@ -139,12 +144,12 @@ class BinariesDao @Inject()(
               s"not exists ($clause)"
             }
           }
-        ).
-        bind("sync_event_completed", SyncEvent.Completed.toString).
-        orderBy(orderBy.sql).
-        limit(limit).
-        offset(offset).
-        as(
+        )
+        .bind("sync_event_completed", SyncEvent.Completed.toString)
+        .orderBy(orderBy.sql)
+        .limit(limit)
+        .offset(offset)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Binary.parser().*
         )
     }

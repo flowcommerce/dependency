@@ -25,13 +25,16 @@ object PeriodicActor {
 
 }
 
-class PeriodicActor @Inject()(
+class PeriodicActor @Inject() (
   config: ApplicationConfig,
   system: ActorSystem,
   syncsDao: SyncsDao,
   internalTasksDao: InternalTasksDao,
   logger: RollbarLogger
-) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
+) extends ReapedActor
+  with ActorLogging
+  with Scheduler
+  with SchedulerCleanup {
 
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("periodic-actor-context")
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)

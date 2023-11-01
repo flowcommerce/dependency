@@ -10,10 +10,10 @@ import com.google.inject.Provider
 import play.api.db._
 
 @Singleton
-class SubscriptionsDao @Inject()(
+class SubscriptionsDao @Inject() (
   db: Database,
   usersDaoProvider: Provider[UsersDao]
-){
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "subscriptions")
 
@@ -55,12 +55,14 @@ class SubscriptionsDao @Inject()(
     validate(form) match {
       case Nil => {
         db.withConnection { implicit c =>
-          SQL(UpsertQuery).on(
-            "id" -> idGenerator.randomId(),
-            "user_id" -> form.userId,
-            "publication" -> form.publication.toString,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(UpsertQuery)
+            .on(
+              "id" -> idGenerator.randomId(),
+              "user_id" -> form.userId,
+              "publication" -> form.publication.toString,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
         Right(())
       }
@@ -100,41 +102,49 @@ class SubscriptionsDao @Inject()(
     offset: Long = 0
   ): Seq[Subscription] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "subscriptions",
-        auth = Clause.True, // TODO
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        equals("subscriptions.user_id", userId).
-        optionalText("subscriptions.publication", publication).
-        and(
-          minHoursSinceLastEmail.map { _ => """
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "subscriptions",
+          auth = Clause.True, // TODO
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .equals("subscriptions.user_id", userId)
+        .optionalText("subscriptions.publication", publication)
+        .and(
+          minHoursSinceLastEmail.map { _ =>
+            """
             not exists (select 1
                           from last_emails
                          where last_emails.user_id = subscriptions.user_id
                            and last_emails.publication = subscriptions.publication
                            and last_emails.created_at > now() - interval '1 hour' * {min_hours}::int)
-          """.trim }
-        ).bind("min_hours", minHoursSinceLastEmail).
-        and(
-          minHoursSinceRegistration.map { _ => """
+          """.trim
+          }
+        )
+        .bind("min_hours", minHoursSinceLastEmail)
+        .and(
+          minHoursSinceRegistration.map { _ =>
+            """
             exists (select 1
                       from users
                      where users.id = subscriptions.user_id
                        and users.created_at <= now() - interval '1 hour' * {min_hours_since_registration}::int)
-          """.trim }
-        ).bind("min_hours_since_registration", minHoursSinceRegistration).
-        and(
+          """.trim
+          }
+        )
+        .bind("min_hours_since_registration", minHoursSinceRegistration)
+        .and(
           identifier.map { _ =>
             "subscriptions.user_id in (select user_id from user_identifiers where value = trim({identifier}))"
           }
-        ).bind("identifier", identifier).
-        as(
+        )
+        .bind("identifier", identifier)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Subscription.parser().*
         )
     }

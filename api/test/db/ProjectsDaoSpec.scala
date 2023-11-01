@@ -5,8 +5,7 @@ import io.flow.dependency.v0.models.{Organization, Project, Scms, Visibility}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class ProjectsDaoSpec extends DependencySpec
-  with Eventually with IntegrationPatience {
+class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPatience {
 
   private[this] lazy val org: Organization = createOrganization()
   private[this] lazy val project1: Project = createProject(org)
@@ -26,7 +25,7 @@ class ProjectsDaoSpec extends DependencySpec
     version: Option[String] = None,
     libraryId: Option[String] = None,
     limit: Option[Long] = None,
-    offset: Long = 0,
+    offset: Long = 0
   ): Seq[Project] = {
     projectsDao.findAll(
       auth,
@@ -42,7 +41,7 @@ class ProjectsDaoSpec extends DependencySpec
       version = version,
       libraryId = libraryId,
       limit = limit,
-      offset = offset,
+      offset = offset
     )
   }
 
@@ -117,7 +116,7 @@ class ProjectsDaoSpec extends DependencySpec
       val branch = createTestId()
       val form = createProjectForm(org).copy(branch = branch)
       val project = rightOrErrors(projectsDao.create(systemUser, form))
-      project.branch must be (branch)
+      project.branch must be(branch)
     }
   }
 
@@ -233,7 +232,9 @@ class ProjectsDaoSpec extends DependencySpec
       findAll(Authorization.PublicOnly, id = Some(project.id)).map(_.id) must be(Seq(project.id))
       findAll(id = Some(project.id)).map(_.id) must be(Seq(project.id))
       findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
-      findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
+      findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)).map(_.id) must be(
+        Seq(project.id)
+      )
       findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
     }
 
@@ -252,5 +253,3 @@ class ProjectsDaoSpec extends DependencySpec
 
   }
 }
-
-

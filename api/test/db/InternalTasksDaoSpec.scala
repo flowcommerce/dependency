@@ -5,11 +5,12 @@ import io.flow.test.utils.FlowPlaySpec
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-class InternalTasksDaoSpec extends FlowPlaySpec
-    with helpers.TaskHelpers
-    with BeforeAndAfterAll
-    with Eventually with IntegrationPatience
-{
+class InternalTasksDaoSpec
+  extends FlowPlaySpec
+  with helpers.TaskHelpers
+  with BeforeAndAfterAll
+  with Eventually
+  with IntegrationPatience {
 
   override def beforeAll(): Unit = {
     deleteAllNonProcessedTasks()
@@ -23,11 +24,14 @@ class InternalTasksDaoSpec extends FlowPlaySpec
     internalTasksDao.setProcessed(task2.id)
 
     def findIds(hasProcessed: Boolean) = {
-      internalTasksDao.findAll(
-        ids = Some(ids),
-        hasProcessedAt = Some(hasProcessed),
-        limit = None
-      ).map(_.id).sorted
+      internalTasksDao
+        .findAll(
+          ids = Some(ids),
+          hasProcessedAt = Some(hasProcessed),
+          limit = None
+        )
+        .map(_.id)
+        .sorted
     }
 
     findIds(false) must equal(Nil)

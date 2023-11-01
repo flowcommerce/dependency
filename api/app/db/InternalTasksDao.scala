@@ -26,7 +26,7 @@ case class InternalTask(db: generated.Task) {
   val data: TaskData = Json.parse(db.data).as[TaskData]
 }
 
-class InternalTasksDao @Inject()(
+class InternalTasksDao @Inject() (
   dao: generated.TasksDao,
   staticUserProvider: StaticUserProvider
 ) {
@@ -43,21 +43,21 @@ class InternalTasksDao @Inject()(
     offset: Long = 0,
     orderBy: OrderBy = OrderBy("tasks.id")
   ): Seq[InternalTask] = {
-    dao.findAll(
-      ids = ids,
-      hasProcessedAt = hasProcessedAt,
-      limit = limit,
-      offset = offset,
-      orderBy = orderBy
-    ) { q =>
-      q.equals("data", data.map(Json.toJson(_).toString))
-    }.map(InternalTask.apply)
+    dao
+      .findAll(
+        ids = ids,
+        hasProcessedAt = hasProcessedAt,
+        limit = limit,
+        offset = offset,
+        orderBy = orderBy
+      ) { q =>
+        q.equals("data", data.map(Json.toJson(_).toString))
+      }
+      .map(InternalTask.apply)
   }
 
-  /**
-   * Create a new task for the specified data,
-   * returning the task id
-   */
+  /** Create a new task for the specified data, returning the task id
+    */
   def create(data: TaskData, priority: Int): String = {
     InternalTask.assertPriorityValid(priority)
     dao.insert(
@@ -71,11 +71,8 @@ class InternalTasksDao @Inject()(
     )
   }
 
-  /**
-   * Create a new sync all task IFF there isn't one
-   * that is pending processing as this is an expensive
-   * task.
-   */
+  /** Create a new sync all task IFF there isn't one that is pending processing as this is an expensive task.
+    */
   def queueAll(): Unit = {
     createSyncIfNotQueued(TaskDataSync(), priority = InternalTask.LowestPriority)
   }
@@ -89,10 +86,13 @@ class InternalTasksDao @Inject()(
   }
 
   def queueLibrariesByPrefix(user: UserReference, prefix: String, priority: Int = InternalTask.LowestPriority): Unit = {
-    createSyncIfNotQueued(TaskDataSyncLibrariesByPrefix(
-      userId = user.id,
-      prefix = prefix,
-    ), priority = priority)
+    createSyncIfNotQueued(
+      TaskDataSyncLibrariesByPrefix(
+        userId = user.id,
+        prefix = prefix
+      ),
+      priority = priority
+    )
   }
 
   def queueOrganizationLibraries(organization: String, priority: Int = InternalTask.LowestPriority): Unit = {
@@ -134,17 +134,25 @@ class InternalTasksDao @Inject()(
 
   private[this] def setPriority(task: InternalTask, priority: Int): Unit = {
     InternalTask.assertPriorityValid(priority)
-    dao.update(staticUserProvider.systemUser, task.db, task.db.form.copy(
-      priority = priority
-    ))
+    dao.update(
+      staticUserProvider.systemUser,
+      task.db,
+      task.db.form.copy(
+        priority = priority
+      )
+    )
   }
 
   def setProcessed(taskId: String): Unit = {
     dao.findById(taskId).foreach { t =>
-      dao.update(staticUserProvider.systemUser, t, t.form.copy(
-        numAttempts = t.numAttempts + 1,
-        processedAt = Some(DateTime.now)
-      ))
+      dao.update(
+        staticUserProvider.systemUser,
+        t,
+        t.form.copy(
+          numAttempts = t.numAttempts + 1,
+          processedAt = Some(DateTime.now)
+        )
+      )
     }
   }
 

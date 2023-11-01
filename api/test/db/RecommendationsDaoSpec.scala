@@ -5,8 +5,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
-class RecommendationsDaoSpec extends DependencySpec
-  with Eventually with IntegrationPatience {
+class RecommendationsDaoSpec extends DependencySpec with Eventually with IntegrationPatience {
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(60, Seconds)),
@@ -30,7 +29,7 @@ class RecommendationsDaoSpec extends DependencySpec
   private[this] lazy val org = createOrganization()
 
   "delete" in {
-    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(Seq("1.0.9","1.1.0"))
+    val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(Seq("1.0.9", "1.1.0"))
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
 
@@ -58,7 +57,6 @@ class RecommendationsDaoSpec extends DependencySpec
     recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)) must be(Nil)
   }
 
-
   "ignores earlier versions of library" in {
     val (_, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)()
@@ -70,17 +68,21 @@ class RecommendationsDaoSpec extends DependencySpec
   "with library to upgrade" in {
     val rec = createRecommendation(org)
 
-    recommendationsDao.findAll(Authorization.All, projectId = Some(rec.project.id)).map(rec => (rec.from, rec.to)) must be(
+    recommendationsDao
+      .findAll(Authorization.All, projectId = Some(rec.project.id))
+      .map(rec => (rec.from, rec.to)) must be(
       Seq(
         ("1.0.0", "1.0.2")
       )
     )
 
-    recommendationsDao.findAll(
-      Authorization.All,
-      organization = Some(rec.project.organization.key),
-      projectId = Some(rec.project.id)
-    ).map(rec => (rec.from, rec.to)) must be(
+    recommendationsDao
+      .findAll(
+        Authorization.All,
+        organization = Some(rec.project.organization.key),
+        projectId = Some(rec.project.id)
+      )
+      .map(rec => (rec.from, rec.to)) must be(
       Seq(
         ("1.0.0", "1.0.2")
       )

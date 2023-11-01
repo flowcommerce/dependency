@@ -6,8 +6,7 @@ import io.flow.dependency.v0.models.{BinaryType, Organization, SyncEvent}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class BinariesDaoSpec extends DependencySpec 
-  with Eventually with IntegrationPatience {
+class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPatience {
 
   private[this] lazy val org: Organization = createOrganization()
 
@@ -54,7 +53,9 @@ class BinariesDaoSpec extends DependencySpec
     val (project, binaryVersion) = createProjectWithBinary(org)
 
     eventually {
-      binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(project.id)).map(_.id) must be(Seq(binaryVersion.binary.id))
+      binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(project.id)).map(_.id) must be(
+        Seq(binaryVersion.binary.id)
+      )
       binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(createProject().id)) must be(Nil)
     }
   }

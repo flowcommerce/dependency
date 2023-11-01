@@ -17,8 +17,7 @@ case class PropertiesParser(
         case key :: value :: Nil => {
           internal += (key -> value)
         }
-        case _ => {
-        }
+        case _ => {}
       }
     }
     internal.toMap

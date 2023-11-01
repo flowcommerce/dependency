@@ -32,40 +32,40 @@ class RecommendationsSpec extends DependencySpec {
     simpleRecs(
       "9.4-1201-jdbc41",
       Seq("9.4-1205-jdbc4", "9.4-1205-jdbc41", "9.4-1205-jdbc42")
-    ) must be (Some("9.4-1205-jdbc42"))
+    ) must be(Some("9.4-1205-jdbc42"))
   }
 
   "scalatest example" in {
     simpleRecs(
       "1.4.0-M3",
       Seq("1.4.0-M3", "1.4.0-M4", "1.4.0-SNAP1")
-    ) must be (Some("1.4.0-M4"))
+    ) must be(Some("1.4.0-M4"))
   }
 
   "flow play upgrade example" in {
     simpleRecs(
       "0.4.21",
       Seq("0.4.20", "0.4.21", "0.4.22", "0.4.20-play26", "0.4.21-play26", "0.4.22-play26")
-    ) must be (Some("0.4.22"))
+    ) must be(Some("0.4.22"))
   }
 
   "webjars-play example" in {
     simpleRecs(
       "2.4.0",
       Seq("2.4.0", "2.4.0-1", "2.4.0-2")
-    ) must be (None)
+    ) must be(None)
 
     simpleRecs(
       "2.4.0-1",
       Seq("2.4.0", "2.4.0-1", "2.4.0-2")
-    ) must be (Some("2.4.0-2"))
+    ) must be(Some("2.4.0-2"))
   }
 
   "slick example - respects major version when textual" in {
     simpleRecs(
       "2.1.0-M3",
       Seq("2.1.0-M3", "3.1.0-M4", "3.1")
-    ) must be (Some("3.1"))
+    ) must be(Some("3.1"))
   }
 
   "matches on cross build version 1" in {
@@ -89,7 +89,7 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.1", Some("2.11.6")),
         VersionForm("1.1", Some("2.11.7"))
       )
-    ) must be (Some("1.1"))
+    ) must be(Some("1.1"))
   }
 
   "matches on partial cross build version 1" in {
@@ -102,7 +102,7 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10"))
       )
-    ) must be (Some("1.2.2"))
+    ) must be(Some("1.2.2"))
   }
 
   "matches on partial cross build version 2" in {
@@ -115,6 +115,6 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10"))
       )
-    ) must be (None)
+    ) must be(None)
   }
 }

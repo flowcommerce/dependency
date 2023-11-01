@@ -17,19 +17,19 @@ import play.api.libs.ws.WSClient
 import scala.concurrent.duration.{FiniteDuration, SECONDS}
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class ProjectSync @Inject()(
-                             env: Environment,
-                             config: Config,
-                             rollbar: RollbarLogger,
-                             projectsDao: ProjectsDao,
-                             projectBinariesDao:ProjectBinariesDao,
-                             projectLibrariesDao: InternalProjectLibrariesDao,
-                             recommendationsDao: RecommendationsDao,
-                             syncsDao: SyncsDao,
-                             tokensDao: TokensDao,
-                             staticUserProvider: StaticUserProvider,
-                             wsClient: WSClient,
-                             @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
+class ProjectSync @Inject() (
+  env: Environment,
+  config: Config,
+  rollbar: RollbarLogger,
+  projectsDao: ProjectsDao,
+  projectBinariesDao: ProjectBinariesDao,
+  projectLibrariesDao: InternalProjectLibrariesDao,
+  recommendationsDao: RecommendationsDao,
+  syncsDao: SyncsDao,
+  tokensDao: TokensDao,
+  staticUserProvider: StaticUserProvider,
+  wsClient: WSClient,
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef
 ) {
   private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"
@@ -39,10 +39,7 @@ class ProjectSync @Inject()(
   def upserted(projectId: String)(implicit ec: ExecutionContext): Unit = {
     projectsDao.findById(Authorization.All, projectId) match {
       case Some(project) => {
-        await(
-          createHooks(project),
-          "createHooks",
-          project)
+        await(createHooks(project), "createHooks", project)
         ()
       }
       case None => {
@@ -57,7 +54,7 @@ class ProjectSync @Inject()(
         await(
           doSync(project),
           "doSync",
-          project,
+          project
         )
       }
     }
@@ -65,11 +62,13 @@ class ProjectSync @Inject()(
   }
 
   def iterateAll()(f: Project => Any): Unit = {
-    Pager.create { offset =>
-      projectsDao.findAll(Authorization.All, offset = offset, limit = Some(1000))
-    }.foreach { rec =>
-      f(rec)
-    }
+    Pager
+      .create { offset =>
+        projectsDao.findAll(Authorization.All, offset = offset, limit = Some(1000))
+      }
+      .foreach { rec =>
+        f(rec)
+      }
   }
 
   private[this] def doSync(project: Project)(implicit ec: ExecutionContext): Future[Unit] = {
@@ -77,11 +76,14 @@ class ProjectSync @Inject()(
 
     val summary = projectsDao.toSummary(project)
 
-    GithubDependencyProviderClient.instance(wsClient, config, tokensDao, summary, project.user, logger).dependencies(project).map { dependencies =>
-      syncBinaries(project, dependencies.binaries.getOrElse(Nil))
-      syncArtifacts(project, dependencies)
-      recommendationsDao.sync(staticUserProvider.systemUser, project)
-    }
+    GithubDependencyProviderClient
+      .instance(wsClient, config, tokensDao, summary, project.user, logger)
+      .dependencies(project)
+      .map { dependencies =>
+        syncBinaries(project, dependencies.binaries.getOrElse(Nil))
+        syncArtifacts(project, dependencies)
+        recommendationsDao.sync(staticUserProvider.systemUser, project)
+      }
   }
 
   private[this] def syncBinaries(project: Project, binaries: Seq[ProjectBinaryForm]): Unit = {
@@ -137,7 +139,10 @@ class ProjectSync @Inject()(
   private[this] def createHooks(project: Project)(implicit ec: ExecutionContext): Future[Either[Unit, Unit]] = {
     GithubUtil.parseUri(project.uri) match {
       case Left(error) => {
-        logger.withKeyValue("project", Json.toJson(project)).withKeyValue("error", error).warn("error creating github hooks")
+        logger
+          .withKeyValue("project", Json.toJson(project))
+          .withKeyValue("error", error)
+          .warn("error creating github hooks")
         Future.successful(Left(()))
       }
       case Right(repo) => {
@@ -160,21 +165,23 @@ class ProjectSync @Inject()(
               if (hooks.exists(_.config.url.contains(targetUrl))) {
                 Future.successful(Right(()))
               } else {
-                client.hooks.post(
-                  owner = repo.owner,
-                  repo = repo.project,
-                  hookForm = HookForm(
-                    name = HookName,
-                    config = io.flow.github.v0.models.HookConfig(
-                      url = Some(targetUrl),
-                      contentType = Some("json")
-                    ),
-                    events = HookEvents,
-                    active = true
+                client.hooks
+                  .post(
+                    owner = repo.owner,
+                    repo = repo.project,
+                    hookForm = HookForm(
+                      name = HookName,
+                      config = io.flow.github.v0.models.HookConfig(
+                        url = Some(targetUrl),
+                        contentType = Some("json")
+                      ),
+                      events = HookEvents,
+                      active = true
+                    )
                   )
-                ).map { _ =>
-                  Right(())
-                }
+                  .map { _ =>
+                    Right(())
+                  }
               }
             }
           }
@@ -183,15 +190,20 @@ class ProjectSync @Inject()(
     }
   }
 
-  private[this] def await[T](f: => Future[T], message: String, project: Project)(implicit ec: ExecutionContext): Either[Unit, T] = {
+  private[this] def await[T](f: => Future[T], message: String, project: Project)(implicit
+    ec: ExecutionContext
+  ): Either[Unit, T] = {
     Await.result(
       f.map { r => Right(r) }
         .recover {
-        case e => {
-          logger.withKeyValue("message", message).withKeyValue("project", project).error("Error waiting for future", e)
-          Left(())
-        }
-      },
+          case e => {
+            logger
+              .withKeyValue("message", message)
+              .withKeyValue("project", project)
+              .error("Error waiting for future", e)
+            Left(())
+          }
+        },
       FiniteDuration(30, SECONDS)
     )
   }

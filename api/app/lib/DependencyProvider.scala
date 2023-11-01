@@ -25,9 +25,12 @@ case class Dependencies(
     binaries match {
       case None => Map()
       case Some(bins) => {
-        bins.sortBy { b => Version(b.version) }.map { bin =>
-          bin.name -> DependencyHelper.crossBuildVersion(bin.name, bin.version)
-        }.toMap
+        bins
+          .sortBy { b => Version(b.version) }
+          .map { bin =>
+            bin.name -> DependencyHelper.crossBuildVersion(bin.name, bin.version)
+          }
+          .toMap
       }
     }
   }
@@ -51,10 +54,12 @@ private[lib] object DependencyHelper {
       }
       case BinaryType.Sbt => {
         // Get the binary-compatible version of sbt. Can be found by running `sbt sbtBinaryVersion`
-        versionObject.tags.collectFirst {
-          case Tag.Semver(1, _, _, _) => Version("1.0")
-          case Tag.Semver(0, 13, _, _) => Version("0.13")
-        }.getOrElse(versionObject)
+        versionObject.tags
+          .collectFirst {
+            case Tag.Semver(1, _, _, _) => Version("1.0")
+            case Tag.Semver(0, 13, _, _) => Version("0.13")
+          }
+          .getOrElse(versionObject)
       }
       case BinaryType.UNDEFINED(_) => {
         versionObject
@@ -63,11 +68,9 @@ private[lib] object DependencyHelper {
   }
 }
 
-
 trait DependencyProvider {
 
-  /**
-    * Returns the dependencies for this project.
+  /** Returns the dependencies for this project.
     */
   def dependencies(project: Project)(implicit ec: ExecutionContext): Future[Dependencies]
 

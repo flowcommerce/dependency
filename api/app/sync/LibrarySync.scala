@@ -1,6 +1,15 @@
 package sync
 
-import db.{Authorization, InternalTask, InternalTasksDao, LibrariesDao, LibraryVersionsDao, InternalProjectLibrariesDao, ResolversDao, SyncsDao}
+import db.{
+  Authorization,
+  InternalTask,
+  InternalTasksDao,
+  LibrariesDao,
+  LibraryVersionsDao,
+  InternalProjectLibrariesDao,
+  ResolversDao,
+  SyncsDao
+}
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
 import io.flow.dependency.api.lib.{ArtifactVersion, DefaultLibraryArtifactProvider}
@@ -8,7 +17,7 @@ import io.flow.dependency.v0.models.{Library, LibraryVersion, Resolver, VersionF
 import io.flow.postgresql.Pager
 import javax.inject.Inject
 
-class LibrarySync @Inject()(
+class LibrarySync @Inject() (
   librariesDao: LibrariesDao,
   resolversDao: ResolversDao,
   libraryVersionsDao: LibraryVersionsDao,
@@ -16,26 +25,28 @@ class LibrarySync @Inject()(
   internalTasksDao: InternalTasksDao,
   artifactProvider: DefaultLibraryArtifactProvider,
   syncsDao: SyncsDao,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef
 ) {
 
-  private[this] def toVersionForm(version: ArtifactVersion): VersionForm = VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
+  private[this] def toVersionForm(version: ArtifactVersion): VersionForm =
+    VersionForm(version.tag.value, version.crossBuildVersion.map(_.value))
   private[this] def toVersionForm(lv: LibraryVersion): VersionForm = VersionForm(lv.version, lv.crossBuildVersion)
 
-  /**
-   * Return the list of existing versions that we know about for this library
-   */
+  /** Return the list of existing versions that we know about for this library
+    */
   private[this] def existingVersions(libraryId: String): Set[VersionForm] = {
-    libraryVersionsDao.findAll(
-      Authorization.All,
-      libraryId = Some(libraryId),
-      limit = None,
-    ).map(toVersionForm).toSet
+    libraryVersionsDao
+      .findAll(
+        Authorization.All,
+        libraryId = Some(libraryId),
+        limit = None
+      )
+      .map(toVersionForm)
+      .toSet
   }
 
-  /**
-   * Return the list of all versions found on the resolver
-   */
+  /** Return the list of all versions found on the resolver
+    */
   private[this] def versionsOnResolver(lib: Library, resolver: Resolver): Seq[VersionForm] = {
     artifactProvider.resolve(
       resolver = resolver,
@@ -52,14 +63,15 @@ class LibrarySync @Inject()(
       lazy val existing = existingVersions(lib.id)
 
       syncsDao.withStartedAndCompleted("library", lib.id) {
-        val newVersions: Seq[VersionForm] = resolversDao.findById(Authorization.All, lib.resolver.id).toSeq.flatMap { resolver =>
-          versionsOnResolver(lib, resolver).filterNot(existing.contains)
-        }
+        val newVersions: Seq[VersionForm] =
+          resolversDao.findById(Authorization.All, lib.resolver.id).toSeq.flatMap { resolver =>
+            versionsOnResolver(lib, resolver).filterNot(existing.contains)
+          }
         newVersions.foreach { versionForm =>
           libraryVersionsDao.upsert(
             createdBy = user,
             libraryId = lib.id,
-            form = versionForm,
+            form = versionForm
           )
         }
         if (newVersions.nonEmpty) {
@@ -73,29 +85,33 @@ class LibrarySync @Inject()(
   def iterateAll(
     auth: Authorization,
     organizationId: Option[String] = None,
-    prefix: Option[String] = None,
+    prefix: Option[String] = None
   )(f: Library => Any): Unit = {
-    Pager.create { offset =>
-      librariesDao.findAll(
-        auth,
-        organizationId = organizationId,
-        prefix = prefix,
-        offset = offset,
-        limit = Some(1000),
-      )
-    }.foreach { rec =>
-      f(rec)
-    }
+    Pager
+      .create { offset =>
+        librariesDao.findAll(
+          auth,
+          organizationId = organizationId,
+          prefix = prefix,
+          offset = offset,
+          limit = Some(1000)
+        )
+      }
+      .foreach { rec =>
+        f(rec)
+      }
   }
 
   private[this] def createTaskToSyncProjectsDependentOnLibrary(libraryId: String): Unit = {
     internalTasksDao.queueProjects(
-      projectIds = projectLibrariesDao.findAll(
-        Authorization.All,
-        libraryId = Some(libraryId),
-        limit = None,
-        orderBy = None,
-      ).map(_.projectId),
+      projectIds = projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          libraryId = Some(libraryId),
+          limit = None,
+          orderBy = None
+        )
+        .map(_.projectId),
       priority = InternalTask.MediumPriority
     )
   }

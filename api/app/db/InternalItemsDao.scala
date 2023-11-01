@@ -2,7 +2,15 @@ package db
 
 import cache.OrganizationsCache
 import javax.inject.{Inject, Singleton}
-import io.flow.dependency.v0.models.{Binary, BinarySummary, Item, ItemSummary, ItemSummaryUndefinedType, Library, LibrarySummary}
+import io.flow.dependency.v0.models.{
+  Binary,
+  BinarySummary,
+  Item,
+  ItemSummary,
+  ItemSummaryUndefinedType,
+  Library,
+  LibrarySummary
+}
 import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, Visibility}
 import io.flow.dependency.v0.models.json._
 import io.flow.common.v0.models.UserReference
@@ -51,13 +59,13 @@ case class InternalItemForm(
 }
 
 @Singleton
-class InternalItemsDao @Inject()(
+class InternalItemsDao @Inject() (
   rollbar: RollbarLogger,
   dao: generated.ItemsDao,
   librariesDaoProvider: Provider[LibrariesDao],
   projectsDaoProvider: Provider[ProjectsDao],
   organizationsCache: OrganizationsCache
-){
+) {
   private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
   private[this] def visibility(summary: ItemSummary): Visibility = {
@@ -66,7 +74,10 @@ class InternalItemsDao @Inject()(
         Visibility.Public
       }
       case s: LibrarySummary => {
-        librariesDaoProvider.get.findById(Authorization.All, s.id).map(_.resolver.visibility).getOrElse(Visibility.Private)
+        librariesDaoProvider.get
+          .findById(Authorization.All, s.id)
+          .map(_.resolver.visibility)
+          .getOrElse(Visibility.Private)
       }
       case s: ProjectSummary => {
         projectsDaoProvider.get.findById(Authorization.All, s.id).map(_.visibility).getOrElse(Visibility.Private)
@@ -119,7 +130,7 @@ class InternalItemsDao @Inject()(
   def replaceProject(user: UserReference, project: Project): Item = {
     val label = project.name
     val description = project.uri
-    val summary =  ProjectSummary(
+    val summary = ProjectSummary(
       id = project.id,
       organization = project.organization,
       name = project.name
@@ -177,21 +188,24 @@ class InternalItemsDao @Inject()(
     limit: Option[Long],
     offset: Long = 0
   ): Seq[Item] = {
-    dao.findAll(
-      ids = ids,
-      organizationId = organizationId,
-      objectId = objectId,
-      limit = limit,
-      offset = offset,
-      orderBy = orderBy
-    ) { queryMod =>
-      queryMod.equals("id", id)
-        .and(auth.organizations("items.organization_id", Some("items.visibility")).sql)
-        .and(q.map { _ =>
-          "items.contents like '%' || lower(trim({q})) || '%' "
-        })
-        .bind("q", q)
-    }.map { toItem }
+    dao
+      .findAll(
+        ids = ids,
+        organizationId = organizationId,
+        objectId = objectId,
+        limit = limit,
+        offset = offset,
+        orderBy = orderBy
+      ) { queryMod =>
+        queryMod
+          .equals("id", id)
+          .and(auth.organizations("items.organization_id", Some("items.visibility")).sql)
+          .and(q.map { _ =>
+            "items.contents like '%' || lower(trim({q})) || '%' "
+          })
+          .bind("q", q)
+      }
+      .map { toItem }
   }
 
   private[this] def toItem(db: generated.Item) = {

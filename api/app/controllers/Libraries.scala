@@ -18,7 +18,8 @@ class Libraries @javax.inject.Inject() (
   librariesDao: LibrariesDao,
   librariesHelper: LibrariesHelper,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
+) extends BaseIdentifiedControllerWithFallback
+  with BaseIdentifiedController {
 
   def get(
     id: Option[String],

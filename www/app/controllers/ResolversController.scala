@@ -17,7 +17,8 @@ class ResolversController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Resolvers)
 
@@ -61,7 +62,9 @@ class ResolversController @javax.inject.Inject() (
     organizations(request).map { orgs =>
       Ok(
         views.html.resolvers.create(
-          uiData(request), ResolversController.uiForm, orgs
+          uiData(request),
+          ResolversController.uiForm,
+          orgs
         )
       )
     }
@@ -71,22 +74,24 @@ class ResolversController @javax.inject.Inject() (
     val boundForm = ResolversController.uiForm.bindFromRequest()
 
     organizations(request).flatMap { orgs =>
-      boundForm.fold (
-
-        formWithErrors => Future {
-          Ok(views.html.resolvers.create(uiData(request), formWithErrors, orgs))
-        },
-
+      boundForm.fold(
+        formWithErrors =>
+          Future {
+            Ok(views.html.resolvers.create(uiData(request), formWithErrors, orgs))
+          },
         uiForm => {
-          dependencyClient(request).resolvers.post(
-            resolverForm = uiForm.resolverForm()
-          ).map { resolver =>
-            Redirect(routes.ResolversController.show(resolver.id)).flashing("success" -> "Resolver created")
-          }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-              Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericError.messages))
+          dependencyClient(request).resolvers
+            .post(
+              resolverForm = uiForm.resolverForm()
+            )
+            .map { resolver =>
+              Redirect(routes.ResolversController.show(resolver.id)).flashing("success" -> "Resolver created")
             }
-          }
+            .recover {
+              case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericError.messages))
+              }
+            }
         }
       )
     }
@@ -98,23 +103,29 @@ class ResolversController @javax.inject.Inject() (
   )(
     f: Resolver => Future[Result]
   ) = {
-    dependencyClient(request).resolvers.getById(id).flatMap { resolver =>
-      f(resolver)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.ResolversController.index()).flashing("warning" -> s"Resolver not found")
+    dependencyClient(request).resolvers
+      .getById(id)
+      .flatMap { resolver =>
+        f(resolver)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.ResolversController.index()).flashing("warning" -> s"Resolver not found")
+        }
+      }
   }
 
   def postDelete(id: String) = User.async { implicit request =>
-    dependencyClient(request).resolvers.deleteById(id).map { _ =>
-      Redirect(routes.ResolversController.index()).flashing("success" -> s"Resolver deleted")
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.ResolversController.index()).flashing("warning" -> s"Resolver not found")
+    dependencyClient(request).resolvers
+      .deleteById(id)
+      .map { _ =>
+        Redirect(routes.ResolversController.index()).flashing("success" -> s"Resolver deleted")
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.ResolversController.index()).flashing("warning" -> s"Resolver not found")
+        }
+      }
   }
 
 }

@@ -12,12 +12,13 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MembersController @javax.inject.Inject()(
+class MembersController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Members)
 
@@ -61,35 +62,49 @@ class MembersController @javax.inject.Inject()(
 
       organizations(request).flatMap { _ =>
         boundForm.fold(
-
-          formWithErrors => Future {
-            Ok(views.html.members.create(uiData(request).copy(organization = Some(org.key)), org, formWithErrors))
-          },
-
+          formWithErrors =>
+            Future {
+              Ok(views.html.members.create(uiData(request).copy(organization = Some(org.key)), org, formWithErrors))
+            },
           uiForm => {
             dependencyClient(request).users.get(email = Some(uiForm.email)).flatMap { users =>
               users.headOption match {
-                case None => Future {
-                  Ok(views.html.members.create(uiData(request).copy(
-                    organization = Some(org.key)), org, boundForm, Seq("User with specified email not found"))
-                  )
-                }
-                case Some(user) => {
-                  dependencyClient(request).memberships.post(
-                    MembershipForm(
-                      organization = org.key,
-                      userId = user.id,
-                      role = Role(uiForm.role)
-                    )
-                  ).map { membership =>
-                    Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"User added as ${membership.role}")
-                  }.recover {
-                    case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-                      Ok(views.html.members.create(
-                        uiData(request).copy(organization = Some(org.key)), org, boundForm, response.genericError.messages)
+                case None =>
+                  Future {
+                    Ok(
+                      views.html.members.create(
+                        uiData(request).copy(organization = Some(org.key)),
+                        org,
+                        boundForm,
+                        Seq("User with specified email not found")
                       )
-                    }
+                    )
                   }
+                case Some(user) => {
+                  dependencyClient(request).memberships
+                    .post(
+                      MembershipForm(
+                        organization = org.key,
+                        userId = user.id,
+                        role = Role(uiForm.role)
+                      )
+                    )
+                    .map { membership =>
+                      Redirect(routes.MembersController.index(org.key))
+                        .flashing("success" -> s"User added as ${membership.role}")
+                    }
+                    .recover {
+                      case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                        Ok(
+                          views.html.members.create(
+                            uiData(request).copy(organization = Some(org.key)),
+                            org,
+                            boundForm,
+                            response.genericError.messages
+                          )
+                        )
+                      }
+                    }
                 }
               }
             }
@@ -101,13 +116,16 @@ class MembersController @javax.inject.Inject()(
 
   def postDelete(orgKey: String, id: String) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
-      dependencyClient(request).memberships.deleteById(id).map { _ =>
-        Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"Membership deleted")
-      }.recover {
-        case UnitResponse(404) => {
-          Redirect(routes.MembersController.index(org.key)).flashing("warning" -> s"Membership not found")
+      dependencyClient(request).memberships
+        .deleteById(id)
+        .map { _ =>
+          Redirect(routes.MembersController.index(org.key)).flashing("success" -> s"Membership deleted")
         }
-      }
+        .recover {
+          case UnitResponse(404) => {
+            Redirect(routes.MembersController.index(org.key)).flashing("warning" -> s"Membership not found")
+          }
+        }
     }
   }
 
@@ -127,20 +145,25 @@ class MembersController @javax.inject.Inject()(
   ): Future[Result] = {
     withOrganization(request, orgKey) { org =>
       withMembership(org.key, request, id) { membership =>
-        dependencyClient(request).memberships.post(
-          MembershipForm(
-            organization = membership.organization.key,
-            userId = membership.user.id,
-            role = role
+        dependencyClient(request).memberships
+          .post(
+            MembershipForm(
+              organization = membership.organization.key,
+              userId = membership.user.id,
+              role = role
+            )
           )
-        ).map { membership =>
-          Redirect(routes.MembersController.index(membership.organization.key)).flashing("success" -> s"User added as ${membership.role}")
-        }.recover {
-          case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-
-            Redirect(routes.MembersController.index(membership.organization.key)).flashing("warning" -> response.genericError.messages.mkString(", "))
+          .map { membership =>
+            Redirect(routes.MembersController.index(membership.organization.key))
+              .flashing("success" -> s"User added as ${membership.role}")
           }
-        }
+          .recover {
+            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+
+              Redirect(routes.MembersController.index(membership.organization.key))
+                .flashing("warning" -> response.genericError.messages.mkString(", "))
+            }
+          }
       }
     }
   }
@@ -152,13 +175,16 @@ class MembersController @javax.inject.Inject()(
   )(
     f: Membership => Future[Result]
   ) = {
-    dependencyClient(request).memberships.getById(id).flatMap { membership =>
-      f(membership)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.MembersController.index(org)).flashing("warning" -> s"Membership not found")
+    dependencyClient(request).memberships
+      .getById(id)
+      .flatMap { membership =>
+        f(membership)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.MembersController.index(org)).flashing("warning" -> s"Membership not found")
+        }
+      }
   }
 }
 

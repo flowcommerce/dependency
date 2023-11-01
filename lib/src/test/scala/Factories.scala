@@ -1,6 +1,13 @@
 package io.flow.dependency.lib
 
-import io.flow.dependency.v0.models.{BinarySummary, BinaryType, LibrarySummary, OrganizationSummary, ProjectSummary, Reference}
+import io.flow.dependency.v0.models.{
+  BinarySummary,
+  BinaryType,
+  LibrarySummary,
+  OrganizationSummary,
+  ProjectSummary,
+  Reference
+}
 import io.flow.dependency.v0.models.{ProjectDetail, Recommendation, RecommendationType}
 import io.flow.util.{IdGenerator, Random}
 import org.joda.time.DateTime

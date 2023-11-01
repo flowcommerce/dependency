@@ -14,12 +14,12 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
   lazy val library2 = createLibrary(org)()
   lazy val client = identifiedClient(UserReference(systemUser.id))
 
-  "GET /libraries by id" in  {
+  "GET /libraries by id" in {
     await(
       client.libraries.get(id = Some(library1.id))
     ).map(_.id) must contain theSameElementsAs (
       Seq(library1.id)
-      )
+    )
 
     await(
       client.libraries.get(id = Some(UUID.randomUUID.toString))
@@ -28,12 +28,12 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "GET /libraries by groupId" in  {
+  "GET /libraries by groupId" in {
     await(
       client.libraries.get(groupId = Some(library1.groupId))
     ).map(_.groupId) must contain theSameElementsAs (
       Seq(library1.groupId)
-      )
+    )
 
     await(
       client.libraries.get(groupId = Some(UUID.randomUUID.toString))
@@ -42,7 +42,7 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "GET /libraries by artifactId" in  {
+  "GET /libraries by artifactId" in {
     await(
       client.libraries.get(artifactId = Some(library1.artifactId))
     ).map(_.artifactId) must contain theSameElementsAs Seq(library1.artifactId)
@@ -54,7 +54,7 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
     )
   }
 
-  "GET /libraries/:id" in  {
+  "GET /libraries/:id" in {
     await(client.libraries.getById(library1.id)).id must be(library1.id)
     await(client.libraries.getById(library2.id)).id must be(library2.id)
 
@@ -63,14 +63,14 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
     }
   }
 
-  "POST /libraries" in  {
+  "POST /libraries" in {
     val form = createLibraryForm(org)()
     val library = await(client.libraries.post(form))
     library.groupId must be(form.groupId)
     library.artifactId must be(form.artifactId)
   }
 
-  "POST /libraries validates duplicate" in  {
+  "POST /libraries validates duplicate" in {
     expectErrors(
       client.libraries.post(
         createLibraryForm(org)().copy(
@@ -78,10 +78,12 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
           artifactId = library1.artifactId
         )
       )
-    ).genericError.messages must contain theSameElementsAs Seq("Library with this group id and artifact id already exists")
+    ).genericError.messages must contain theSameElementsAs Seq(
+      "Library with this group id and artifact id already exists"
+    )
   }
 
-  "DELETE /libraries" in  {
+  "DELETE /libraries" in {
     val library = createLibrary(org)()
     await(
       client.libraries.deleteById(library.id)

@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 
 @javax.inject.Singleton
-class Syncs @javax.inject.Inject()(
+class Syncs @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
@@ -20,7 +20,7 @@ class Syncs @javax.inject.Inject()(
   librariesHelper: LibrariesHelper,
   binaryHelper: BinaryHelper,
   projectHelper: ProjectHelper,
-  librariesDao: LibrariesDao,
+  librariesDao: LibrariesDao
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(

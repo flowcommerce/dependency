@@ -71,7 +71,8 @@ object RemoteVersions {
   ): Seq[String] = {
     Seq(
       joinUrl(
-        resolver, groupId.replaceAll("\\.", "/")
+        resolver,
+        groupId.replaceAll("\\.", "/")
       ),
       joinUrl(resolver, groupId)
     )
@@ -81,6 +82,6 @@ object RemoteVersions {
     a: String,
     b: String
   ): String = {
-    Seq(a, b).map ( StringUtils.stripEnd(_, "/") ).mkString("/")
+    Seq(a, b).map(StringUtils.stripEnd(_, "/")).mkString("/")
   }
 }
