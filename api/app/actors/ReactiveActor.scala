@@ -5,4 +5,3 @@ object ReactiveActor {
     case object Changed
   }
 }
-

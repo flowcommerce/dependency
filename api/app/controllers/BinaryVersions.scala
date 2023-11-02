@@ -9,7 +9,7 @@ import play.api.mvc._
 import play.api.libs.json._
 
 @javax.inject.Singleton
-class BinaryVersions @javax.inject.Inject()(
+class BinaryVersions @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
@@ -58,4 +58,3 @@ class BinaryVersions @javax.inject.Inject()(
     }
   }
 }
-

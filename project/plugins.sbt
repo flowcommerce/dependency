@@ -25,3 +25,5 @@ addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.41")
 ThisBuild / libraryDependencySchemes ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 )
+
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")

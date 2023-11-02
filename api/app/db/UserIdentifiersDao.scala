@@ -10,10 +10,10 @@ import anorm._
 import play.api.db._
 
 @Singleton
-class UserIdentifiersDao @Inject()(
+class UserIdentifiersDao @Inject() (
   db: Database,
   staticUserProvider: StaticUserProvider
-){
+) {
 
   val GithubOauthUserIdentifierValue = "github_oauth"
 
@@ -33,12 +33,10 @@ class UserIdentifiersDao @Inject()(
     ({id}, {user_id}, {value}, {updated_by_user_id})
   """
 
-  /**
-    * Returns the latest identifier, creating if necessary
+  /** Returns the latest identifier, creating if necessary
     */
   def latestForUser(createdBy: UserReference, user: User): UserIdentifier = {
-    findAll(userId = Some(user.id))
-      .headOption
+    findAll(userId = Some(user.id)).headOption
       .getOrElse(createForUser(createdBy, user))
   }
 
@@ -69,24 +67,26 @@ class UserIdentifiersDao @Inject()(
     List.fill(n)(random.nextInt(alphabet.length)).map(alphabet).mkString
   }
 
-  /**
-    * Generate a unique random string of length
-    * IdentifierLength. Guaranteed to start with a letter (to avoid
-    * any issues with leading zeroes)
+  /** Generate a unique random string of length IdentifierLength. Guaranteed to start with a letter (to avoid any issues
+    * with leading zeroes)
     */
   private[this] def generateIdentifier(): String = {
-    randomString(Characters)(1) +randomString(CharactersAndNumbers)(IdentifierLength - 1)
+    randomString(Characters)(1) + randomString(CharactersAndNumbers)(IdentifierLength - 1)
   }
 
-  private[this] def createWithConnection(createdBy: UserReference, user: User)(implicit c: java.sql.Connection): UserIdentifier = {
+  private[this] def createWithConnection(createdBy: UserReference, user: User)(implicit
+    c: java.sql.Connection
+  ): UserIdentifier = {
     val id = IdGenerator("usi").randomId()
 
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "user_id" -> user.id,
-      "value" -> generateIdentifier(),
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "user_id" -> user.id,
+        "value" -> generateIdentifier(),
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
 
     findAllWithConnection(id = Some(id), limit = 1).headOption.getOrElse {
       sys.error("Failed to create identifier")
@@ -130,19 +130,20 @@ class UserIdentifiersDao @Inject()(
     limit: Long,
     offset: Long = 0
   )(implicit c: java.sql.Connection): Seq[UserIdentifier] = {
-    Standards.query(
-      BaseQuery,
-      tableName = "user_identifiers",
-      auth = Clause.True, // TODO. Right now we ignore auth as there is no way to filter to users
-      id = id,
-      ids = ids,
-      orderBy = orderBy.sql,
-      limit = limit,
-      offset = offset
-    ).
-      equals("user_identifiers.user_id", userId).
-      optionalText("user_identifiers.value", value).
-      as(
+    Standards
+      .query(
+        BaseQuery,
+        tableName = "user_identifiers",
+        auth = Clause.True, // TODO. Right now we ignore auth as there is no way to filter to users
+        id = id,
+        ids = ids,
+        orderBy = orderBy.sql,
+        limit = limit,
+        offset = offset
+      )
+      .equals("user_identifiers.user_id", userId)
+      .optionalText("user_identifiers.value", value)
+      .as(
         io.flow.dependency.v0.anorm.parsers.UserIdentifier.parser().*
       )
   }

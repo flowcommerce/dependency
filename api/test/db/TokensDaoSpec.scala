@@ -54,7 +54,9 @@ class TokensDaoSpec extends DependencySpec {
 
     tokensDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
     tokensDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    tokensDao.findAll(Authorization.All, ids = Some(Seq(token1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(token1.id))
+    tokensDao.findAll(Authorization.All, ids = Some(Seq(token1.id, UUID.randomUUID.toString))).map(_.id) must be(
+      Seq(token1.id)
+    )
   }
 
   "can only see own tokens" in {

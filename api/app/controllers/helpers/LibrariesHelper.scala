@@ -8,7 +8,7 @@ import io.flow.dependency.v0.models.Library
 import play.api.mvc.{Result, Results}
 
 @Singleton
-class LibrariesHelper @Inject()(
+class LibrariesHelper @Inject() (
   librariesDao: LibrariesDao
 ) {
 
@@ -24,6 +24,5 @@ class LibrariesHelper @Inject()(
       }
     }
   }
-
 
 }

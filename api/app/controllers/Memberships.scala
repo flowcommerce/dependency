@@ -17,7 +17,7 @@ class Memberships @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   membershipsDao: MembershipsDao,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback  {
+) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],

@@ -17,13 +17,16 @@ import org.joda.time.{DateTime, DateTimeZone}
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 
-class EmailActor @Inject()(
+class EmailActor @Inject() (
   system: ActorSystem,
   rollbar: RollbarLogger,
   config: ApplicationConfig,
   subscriptionsDao: SubscriptionsDao,
-  batchEmailProcessor: BatchEmailProcessor,
-) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
+  batchEmailProcessor: BatchEmailProcessor
+) extends ReapedActor
+  with ActorLogging
+  with Scheduler
+  with SchedulerCleanup {
 
   private[this] implicit val ec: ExecutionContext = system.dispatchers.lookup("email-actor-context")
 
@@ -40,7 +43,7 @@ class EmailActor @Inject()(
 
   val PreferredHourToSendEst: Int = {
     val value = config.requiredString("io.flow.dependency.api.email.daily.summary.hour.est").toInt
-    assert( value >= 0 && value < 23 )
+    assert(value >= 0 && value < 23)
     value
   }
 
@@ -87,10 +90,10 @@ class EmailActor @Inject()(
           )
         }
       )
-    }
+  }
 }
 
-class BatchEmailProcessor @Inject()(
+class BatchEmailProcessor @Inject() (
   usersDao: UsersDao,
   lastEmailsDao: LastEmailsDao,
   recommendationsDao: RecommendationsDao,
@@ -103,7 +106,8 @@ class BatchEmailProcessor @Inject()(
     subscriptions: Iterator[Subscription]
   ): Unit = {
     subscriptions.foreach { subscription =>
-      usersDao.findById(subscription.user.id)
+      usersDao
+        .findById(subscription.user.id)
         .flatMap(userIdentifiersDao.recipientForUser)
         .foreach { recipient =>
           val generator = new DailySummaryEmailMessage(recipient)
@@ -134,17 +138,16 @@ trait EmailMessageGenerator {
   def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String
 }
 
-
-/**
-  * Class which generates email message
+/** Class which generates email message
   */
-class DailySummaryEmailMessage (
+class DailySummaryEmailMessage(
   val recipient: Recipient
 ) extends EmailMessageGenerator {
 
   private[this] val MaxRecommendations = 250L
 
-  private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] = lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
+  private[this] def lastEmail(lastEmailsDao: LastEmailsDao): Option[LastEmail] =
+    lastEmailsDao.findByUserIdAndPublication(recipient.userId, Publication.DailySummary)
 
   override def subject = "Daily Summary"
 
@@ -160,13 +163,15 @@ class DailySummaryEmailMessage (
         recommendations.partition(_.createdAt.isBefore(email.createdAt))
     }
 
-    views.html.emails.dailySummary(
-      recipient = recipient,
-      newRecommendations = newRecommendations,
-      oldRecommendations = oldRecommendations,
-      lastEmail = lastEmail(lastEmailsDao),
-      urls = Urls(config)
-    ).toString
+    views.html.emails
+      .dailySummary(
+        recipient = recipient,
+        newRecommendations = newRecommendations,
+        oldRecommendations = oldRecommendations,
+        lastEmail = lastEmail(lastEmailsDao),
+        urls = Urls(config)
+      )
+      .toString
   }
 
 }

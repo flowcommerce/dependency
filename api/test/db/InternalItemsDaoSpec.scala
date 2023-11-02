@@ -6,11 +6,12 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import util.DependencySpec
 
-class InternalItemsDaoSpec extends DependencySpec
+class InternalItemsDaoSpec
+  extends DependencySpec
   with helpers.TaskHelpers
   with BeforeAndAfterAll
-  with Eventually with IntegrationPatience
-{
+  with Eventually
+  with IntegrationPatience {
 
   override def beforeAll(): Unit = {
     deleteAllNonProcessedTasks()
@@ -31,9 +32,12 @@ class InternalItemsDaoSpec extends DependencySpec
     item1.label must be(item2.label)
 
     val newLabel = createTestId()
-    val item3 = itemsDao.replace(systemUser, form.copy(
-      label = newLabel
-    ))
+    val item3 = itemsDao.replace(
+      systemUser,
+      form.copy(
+        label = newLabel
+      )
+    )
     item3.id must be(item2.id)
     item3.label must be(newLabel)
   }
@@ -92,7 +96,9 @@ class InternalItemsDaoSpec extends DependencySpec
 
     itemsDao.findAll(Authorization.All, ids = Some(Nil), limit = None) must be(Nil)
     itemsDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString)), limit = None) must be(Nil)
-    itemsDao.findAll(Authorization.All, ids = Some(Seq(item1.id, UUID.randomUUID.toString)), limit = None).map(_.id) must be(Seq(item1.id))
+    itemsDao
+      .findAll(Authorization.All, ids = Some(Seq(item1.id, UUID.randomUUID.toString)), limit = None)
+      .map(_.id) must be(Seq(item1.id))
   }
 
   "supports binaries" in {
@@ -111,7 +117,9 @@ class InternalItemsDaoSpec extends DependencySpec
       )
     )
 
-    itemsDao.findAll(Authorization.All, q = Some(binary.id.toString), limit = None).headOption.map(_.id) must be(Some(actual.id))
+    itemsDao.findAll(Authorization.All, q = Some(binary.id.toString), limit = None).headOption.map(_.id) must be(
+      Some(actual.id)
+    )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
 
@@ -132,7 +140,9 @@ class InternalItemsDaoSpec extends DependencySpec
       )
     )
 
-    itemsDao.findAll(Authorization.All, q = Some(library.id.toString), limit = None).headOption.map(_.id) must be(Some(actual.id))
+    itemsDao.findAll(Authorization.All, q = Some(library.id.toString), limit = None).headOption.map(_.id) must be(
+      Some(actual.id)
+    )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
 
@@ -152,7 +162,9 @@ class InternalItemsDaoSpec extends DependencySpec
       )
     )
 
-    itemsDao.findAll(Authorization.All, q = Some(project.id.toString), limit = None).headOption.map(_.id) must be(Some(actual.id))
+    itemsDao.findAll(Authorization.All, q = Some(project.id.toString), limit = None).headOption.map(_.id) must be(
+      Some(actual.id)
+    )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
 
@@ -162,11 +174,19 @@ class InternalItemsDaoSpec extends DependencySpec
     val project = createProject(org)(createProjectForm(org).copy(visibility = Visibility.Public))
     val item = itemsDao.replaceProject(systemUser, project)
 
-    itemsDao.findAll(Authorization.PublicOnly, objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
+    itemsDao.findAll(Authorization.PublicOnly, objectId = Some(project.id), limit = None).map(_.id) must be(
+      Seq(item.id)
+    )
     itemsDao.findAll(Authorization.All, objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
-    itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
-    itemsDao.findAll(Authorization.Organization(createOrganization().id), objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
-    itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
+    itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(
+      Seq(item.id)
+    )
+    itemsDao
+      .findAll(Authorization.Organization(createOrganization().id), objectId = Some(project.id), limit = None)
+      .map(_.id) must be(Seq(item.id))
+    itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(
+      Seq(item.id)
+    )
   }
 
   "authorization for private projects" in {
@@ -177,11 +197,18 @@ class InternalItemsDaoSpec extends DependencySpec
 
     itemsDao.findAll(Authorization.PublicOnly, objectId = Some(project.id), limit = None) must be(Nil)
     itemsDao.findAll(Authorization.All, objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
-    itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
-    itemsDao.findAll(Authorization.Organization(createOrganization().id), objectId = Some(project.id), limit = None) must be(Nil)
-    itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
+    itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(
+      Seq(item.id)
+    )
+    itemsDao.findAll(
+      Authorization.Organization(createOrganization().id),
+      objectId = Some(project.id),
+      limit = None
+    ) must be(Nil)
+    itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(
+      Seq(item.id)
+    )
     itemsDao.findAll(Authorization.User(createUser().id), objectId = Some(project.id), limit = None) must be(Nil)
   }
 
 }
-

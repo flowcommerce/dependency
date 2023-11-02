@@ -24,12 +24,12 @@ case class InternalProjectLibrary(db: generated.ProjectLibrary) {
 }
 
 @Singleton
-class InternalProjectLibrariesDao @Inject()(
+class InternalProjectLibrariesDao @Inject() (
   dao: generated.ProjectLibrariesDao,
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
   @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
-){
+) {
 
   private[db] def validate(
     user: UserReference,
@@ -66,8 +66,13 @@ class InternalProjectLibrariesDao @Inject()(
 
     val existsErrors = if (Seq(groupIdErrors, artifactIdErrors, versionErrors, projectErrors).flatten.isEmpty) {
       findByProjectIdAndGroupIdAndArtifactIdAndVersion(
-        Authorization.All, form.projectId, form.groupId, form.artifactId, VersionForm(
-          form.version, form.crossBuildVersion
+        Authorization.All,
+        form.projectId,
+        form.groupId,
+        form.artifactId,
+        VersionForm(
+          form.version,
+          form.crossBuildVersion
         )
       ) match {
         case None => Nil
@@ -84,7 +89,11 @@ class InternalProjectLibrariesDao @Inject()(
 
   def upsert(createdBy: UserReference, form: ProjectLibraryForm): Either[Seq[String], InternalProjectLibrary] = {
     findByProjectIdAndGroupIdAndArtifactIdAndVersion(
-      Authorization.All, form.projectId, form.groupId, form.artifactId, VersionForm(
+      Authorization.All,
+      form.projectId,
+      form.groupId,
+      form.artifactId,
+      VersionForm(
         version = form.version,
         crossBuildVersion = form.crossBuildVersion
       )
@@ -116,14 +125,17 @@ class InternalProjectLibrariesDao @Inject()(
   }
 
   def removeLibrary(user: UserReference, projectLibrary: InternalProjectLibrary): Unit = {
-    dao.update(user, projectLibrary.db, projectLibrary.db.form.copy(
-      libraryId = None
-    ))
+    dao.update(
+      user,
+      projectLibrary.db,
+      projectLibrary.db.form.copy(
+        libraryId = None
+      )
+    )
     dao.deleteById(user, projectLibrary.id)
   }
 
-  /**
-    * Removes any project library ids for this project not specified in this list
+  /** Removes any project library ids for this project not specified in this list
     */
   def setIds(user: UserReference, projectId: String, projectBinaries: Seq[InternalProjectLibrary]): Unit = {
     val ids = projectBinaries.map(_.id).toSet
@@ -133,9 +145,13 @@ class InternalProjectLibrariesDao @Inject()(
   }
 
   def setLibrary(user: UserReference, projectLibrary: InternalProjectLibrary, library: Library): Unit = {
-    dao.update(user, projectLibrary.db, projectLibrary.db.form.copy(
-      libraryId = Some(library.id)
-    ))
+    dao.update(
+      user,
+      projectLibrary.db,
+      projectLibrary.db.form.copy(
+        libraryId = Some(library.id)
+      )
+    )
   }
 
   def delete(deletedBy: UserReference, library: InternalProjectLibrary): Unit = {
@@ -158,7 +174,7 @@ class InternalProjectLibrariesDao @Inject()(
       version = Some(version.version),
       crossBuildVersion = Some(version.crossBuildVersion),
       limit = Some(1),
-      orderBy = None,
+      orderBy = None
     ).headOption
   }
 
@@ -187,41 +203,44 @@ class InternalProjectLibrariesDao @Inject()(
     limit: Option[Long],
     offset: Long = 0
   ): Seq[InternalProjectLibrary] = {
-    dao.findAll(
-      ids = ids,
-      projectId = projectId,
-      libraryId = libraryId,
-      groupId = groupId,
-      artifactId = artifactId,
-      version = version,
-      orderBy = orderBy,
-      limit = limit,
-      offset = offset,
-    ) { q =>
-      q
-        .and(auth.organizationProjects("organization_id", "project_id").sql)
-        .equals("id", id)
-        .optionalIn("project_id", projectIds)
-        .and(
-          crossBuildVersion.map {
-            case None => "cross_build_version is null"
-            case Some(_) => "cross_build_version = {cross_build_version}"
-          }
-        )
-        .bind("cross_build_version", crossBuildVersion.flatten)
-        .and(
-          isSynced.map { value =>
-            val clause = "select 1 from syncs where object_id = project_libraries.id and event = {sync_event_completed}"
-            if (value) {
-              s"exists ($clause)"
-            } else {
-              s"not exists ($clause)"
+    dao
+      .findAll(
+        ids = ids,
+        projectId = projectId,
+        libraryId = libraryId,
+        groupId = groupId,
+        artifactId = artifactId,
+        version = version,
+        orderBy = orderBy,
+        limit = limit,
+        offset = offset
+      ) { q =>
+        q
+          .and(auth.organizationProjects("organization_id", "project_id").sql)
+          .equals("id", id)
+          .optionalIn("project_id", projectIds)
+          .and(
+            crossBuildVersion.map {
+              case None => "cross_build_version is null"
+              case Some(_) => "cross_build_version = {cross_build_version}"
             }
-          }
-        )
-        .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
-        .nullBoolean("library_id", hasLibrary)
-    }.map(InternalProjectLibrary.apply)
+          )
+          .bind("cross_build_version", crossBuildVersion.flatten)
+          .and(
+            isSynced.map { value =>
+              val clause =
+                "select 1 from syncs where object_id = project_libraries.id and event = {sync_event_completed}"
+              if (value) {
+                s"exists ($clause)"
+              } else {
+                s"not exists ($clause)"
+              }
+            }
+          )
+          .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
+          .nullBoolean("library_id", hasLibrary)
+      }
+      .map(InternalProjectLibrary.apply)
   }
 
 }

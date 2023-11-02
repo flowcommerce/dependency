@@ -1,15 +1,21 @@
 package io.flow.dependency.lib
 
-import io.flow.dependency.v0.models.{BinarySummary, ItemSummary, ItemSummaryUndefinedType, LibrarySummary, OrganizationSummary, ProjectSummary, Recommendation, RecommendationType}
+import io.flow.dependency.v0.models.{
+  BinarySummary,
+  ItemSummary,
+  ItemSummaryUndefinedType,
+  LibrarySummary,
+  OrganizationSummary,
+  ProjectSummary,
+  Recommendation,
+  RecommendationType
+}
 import io.flow.util.Config
 
-/**
- * All our URLs to the webapp go here. We tried to use the www routers
- * directly as a separate project in the build, but caused problems in
- * the compile step (every other compile step failed). Instead we
- * provide hard coded urls - but keep in one file for easier
- * maintenance.
- */
+/** All our URLs to the webapp go here. We tried to use the www routers directly as a separate project in the build, but
+  * caused problems in the compile step (every other compile step failed). Instead we provide hard coded urls - but keep
+  * in one file for easier maintenance.
+  */
 case class Urls(
   config: Config
 ) {

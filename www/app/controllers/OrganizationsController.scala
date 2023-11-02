@@ -17,7 +17,8 @@ class OrganizationsController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = None
 
@@ -72,20 +73,23 @@ class OrganizationsController @javax.inject.Inject() (
 
   def postCreate() = User.async { implicit request =>
     val boundForm = OrganizationsController.uiForm.bindFromRequest()
-    boundForm.fold (
-
-      formWithErrors => Future {
-        Ok(views.html.organizations.create(uiData(request), formWithErrors))
-      },
-
+    boundForm.fold(
+      formWithErrors =>
+        Future {
+          Ok(views.html.organizations.create(uiData(request), formWithErrors))
+        },
       uiForm => {
-        dependencyClient(request).organizations.post(uiForm.organizationForm).map { organization =>
-          Redirect(routes.OrganizationsController.show(organization.key)).flashing("success" -> "Organization created")
-        }.recover {
-          case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-            Ok(views.html.organizations.create(uiData(request), boundForm, response.genericError.messages))
+        dependencyClient(request).organizations
+          .post(uiForm.organizationForm)
+          .map { organization =>
+            Redirect(routes.OrganizationsController.show(organization.key))
+              .flashing("success" -> "Organization created")
           }
-        }
+          .recover {
+            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+              Ok(views.html.organizations.create(uiData(request), boundForm, response.genericError.messages))
+            }
+          }
       }
     )
   }
@@ -111,20 +115,25 @@ class OrganizationsController @javax.inject.Inject() (
   def postEdit(key: String) = User.async { implicit request =>
     withOrganization(request, key) { organization =>
       val boundForm = OrganizationsController.uiForm.bindFromRequest()
-      boundForm.fold (
-
-        formWithErrors => Future {
-          Ok(views.html.organizations.edit(uiData(request), organization, formWithErrors))
-        },
-
+      boundForm.fold(
+        formWithErrors =>
+          Future {
+            Ok(views.html.organizations.edit(uiData(request), organization, formWithErrors))
+          },
         uiForm => {
-          dependencyClient(request).organizations.putById(organization.id, uiForm.organizationForm).map { updated =>
-            Redirect(routes.OrganizationsController.show(updated.key)).flashing("success" -> "Organization updated")
-          }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-              Ok(views.html.organizations.edit(uiData(request), organization, boundForm, response.genericError.messages))
+          dependencyClient(request).organizations
+            .putById(organization.id, uiForm.organizationForm)
+            .map { updated =>
+              Redirect(routes.OrganizationsController.show(updated.key)).flashing("success" -> "Organization updated")
             }
-          }
+            .recover {
+              case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                Ok(
+                  views.html.organizations
+                    .edit(uiData(request), organization, boundForm, response.genericError.messages)
+                )
+              }
+            }
         }
       )
     }
@@ -132,13 +141,16 @@ class OrganizationsController @javax.inject.Inject() (
 
   def postDelete(key: String) = User.async { implicit request =>
     withOrganization(request, key) { org =>
-      dependencyClient(request).organizations.deleteById(org.id).map { _ =>
-        Redirect(routes.OrganizationsController.index()).flashing("success" -> s"Organization deleted")
-      }.recover {
-        case UnitResponse(404) => {
-          Redirect(routes.OrganizationsController.index()).flashing("warning" -> s"Organization not found")
+      dependencyClient(request).organizations
+        .deleteById(org.id)
+        .map { _ =>
+          Redirect(routes.OrganizationsController.index()).flashing("success" -> s"Organization deleted")
         }
-      }
+        .recover {
+          case UnitResponse(404) => {
+            Redirect(routes.OrganizationsController.index()).flashing("warning" -> s"Organization not found")
+          }
+        }
     }
   }
 

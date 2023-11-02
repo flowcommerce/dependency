@@ -13,11 +13,11 @@ import play.api.db._
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class LibraryVersionsDao @Inject()(
+class LibraryVersionsDao @Inject() (
   db: Database,
   logger: RollbarLogger,
   internalTasksDao: InternalTasksDao
-){
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "library_versions")
 
@@ -55,8 +55,8 @@ class LibraryVersionsDao @Inject()(
     }
   }
 
-  private[db] def upsertWithConnection(createdBy: UserReference, libraryId: String, form: VersionForm)(
-    implicit c: java.sql.Connection
+  private[db] def upsertWithConnection(createdBy: UserReference, libraryId: String, form: VersionForm)(implicit
+    c: java.sql.Connection
   ): LibraryVersion = {
     findAllWithConnection(
       Authorization.All,
@@ -94,7 +94,9 @@ class LibraryVersionsDao @Inject()(
     }
   }
 
-  def createWithConnection(createdBy: UserReference, libraryId: String, form: VersionForm)(implicit c: java.sql.Connection): LibraryVersion = {
+  def createWithConnection(createdBy: UserReference, libraryId: String, form: VersionForm)(implicit
+    c: java.sql.Connection
+  ): LibraryVersion = {
     val id = IdGenerator("liv").randomId()
 
     val sortKey = form.crossBuildVersion match {
@@ -102,14 +104,16 @@ class LibraryVersionsDao @Inject()(
       case Some(crossBuildVersion) => Version(s"${form.version}-$crossBuildVersion").sortKey
     }
 
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "library_id" -> libraryId,
-      "version" -> form.version.trim,
-      "cross_build_version" -> form.crossBuildVersion.map(_.trim),
-      "sort_key" -> sortKey,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "library_id" -> libraryId,
+        "version" -> form.version.trim,
+        "cross_build_version" -> form.crossBuildVersion.map(_.trim),
+        "sort_key" -> sortKey,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
 
     sync(libraryId)
 
@@ -156,8 +160,8 @@ class LibraryVersionsDao @Inject()(
   def findByIdWithConnection(
     auth: Authorization,
     id: String
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Option[LibraryVersion] = {
     findAllWithConnection(auth, id = Some(id), limit = Some(1)).headOption
   }
@@ -202,33 +206,35 @@ class LibraryVersionsDao @Inject()(
     orderBy: OrderBy = OrderBy("-library_versions.sort_key, library_versions.created_at"),
     limit: Option[Long],
     offset: Long = 0
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Seq[LibraryVersion] = {
-    Standards.queryWithOptionalLimit(
-      BaseQuery,
-      tableName = "library_versions",
-      auth = auth.organizations("organizations.id", Some("resolvers.visibility")),
-      id = id,
-      ids = ids,
-      orderBy = orderBy.sql,
-      limit = limit,
-      offset = offset
-    ).
-      equals("library_versions.library_id", libraryId).
-      optionalText(
+    Standards
+      .queryWithOptionalLimit(
+        BaseQuery,
+        tableName = "library_versions",
+        auth = auth.organizations("organizations.id", Some("resolvers.visibility")),
+        id = id,
+        ids = ids,
+        orderBy = orderBy.sql,
+        limit = limit,
+        offset = offset
+      )
+      .equals("library_versions.library_id", libraryId)
+      .optionalText(
         "library_versions.version",
         version,
         columnFunctions = Seq(Query.Function.Lower),
         valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-      ).
-      and(
+      )
+      .and(
         crossBuildVersion.map {
           case None => s"library_versions.cross_build_version is null"
           case Some(_) => s"lower(library_versions.cross_build_version) = lower(trim({cross_build_version}))"
         }
-      ).bind("cross_build_version", crossBuildVersion.flatten).
-      and(
+      )
+      .bind("cross_build_version", crossBuildVersion.flatten)
+      .and(
         greaterThanVersion.map { _ =>
           """
             library_versions.sort_key > (
@@ -242,10 +248,10 @@ class LibraryVersionsDao @Inject()(
             )
           """
         }
-      ).
-      bind("greater_than_version", greaterThanVersion).
-      greaterThan("library_versions.sort_key", greaterThanSortKey).
-      as(
+      )
+      .bind("greater_than_version", greaterThanVersion)
+      .greaterThan("library_versions.sort_key", greaterThanSortKey)
+      .as(
         io.flow.dependency.v0.anorm.parsers.LibraryVersion.parser().*
       )
   }

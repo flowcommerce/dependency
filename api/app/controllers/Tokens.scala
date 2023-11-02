@@ -11,13 +11,14 @@ import io.flow.play.controllers.FlowControllerComponents
 import play.api.mvc._
 import play.api.libs.json._
 
-class Tokens @javax.inject.Inject()(
+class Tokens @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   tokensDao: TokensDao,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
-) extends BaseIdentifiedControllerWithFallback with BaseIdentifiedController {
+) extends BaseIdentifiedControllerWithFallback
+  with BaseIdentifiedController {
 
   def get(
     ids: Option[Seq[String]],
@@ -68,7 +69,9 @@ class Tokens @javax.inject.Inject()(
   def withUserCreatedToken(user: UserReference, id: String)(
     f: Token => Result
   ) = {
-    tokensDao.findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1).headOption match {
+    tokensDao
+      .findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1)
+      .headOption match {
       case None => {
         Results.NotFound
       }

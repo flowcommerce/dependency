@@ -10,10 +10,10 @@ import io.flow.util.IdGenerator
 import play.api.db._
 
 @Singleton
-class MembershipsDao @Inject()(
+class MembershipsDao @Inject() (
   db: Database,
   organizationsDaoProvider: Provider[OrganizationsDao]
-){
+) {
 
   val DefaultUserNameLength = 8
 
@@ -125,16 +125,24 @@ class MembershipsDao @Inject()(
     create(c, createdBy, org.id, form.userId, form.role)
   }
 
-  private[db] def create(implicit c: java.sql.Connection, createdBy: UserReference, orgId: String, userId: String, role: Role): String = {
+  private[db] def create(implicit
+    c: java.sql.Connection,
+    createdBy: UserReference,
+    orgId: String,
+    userId: String,
+    role: Role
+  ): String = {
     val id = IdGenerator("mem").randomId()
 
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "user_id" -> userId,
-      "organization_id" -> orgId,
-      "role" -> role.toString,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "user_id" -> userId,
+        "organization_id" -> orgId,
+        "role" -> role.toString,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
     id
   }
 
@@ -185,23 +193,28 @@ class MembershipsDao @Inject()(
     offset: Long = 0
   ): Seq[Membership] = {
     db.withConnection { implicit c =>
-    Standards.query(
-      BaseQuery,
-      tableName = "memberships",
-      auth = auth.organizations("organizations.id"),
-      id = id,
-      ids = ids,
-      orderBy = orderBy.sql,
-      limit = limit,
-      offset = offset
-    ).
-      equals("memberships.organization_id", organizationId).
-      optionalText("organizations.key", organization, valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)).
-      equals("memberships.user_id", userId).
-      optionalText("memberships.role", role.map(_.toString.toLowerCase)).
-      as(
-        io.flow.dependency.v0.anorm.parsers.Membership.parser().*
-      )
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "memberships",
+          auth = auth.organizations("organizations.id"),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .equals("memberships.organization_id", organizationId)
+        .optionalText(
+          "organizations.key",
+          organization,
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+        )
+        .equals("memberships.user_id", userId)
+        .optionalText("memberships.role", role.map(_.toString.toLowerCase))
+        .as(
+          io.flow.dependency.v0.anorm.parsers.Membership.parser().*
+        )
     }
   }
 

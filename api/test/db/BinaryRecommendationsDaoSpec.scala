@@ -5,8 +5,7 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.time.{Millis, Seconds, Span}
 import util.DependencySpec
 
-class BinaryRecommendationsDaoSpec extends DependencySpec
-  with Eventually with IntegrationPatience {
+class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with IntegrationPatience {
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(30, Seconds)),
@@ -15,8 +14,8 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
 
   def createBinaryWithMultipleVersions(
     org: Organization
-  ) (
-    implicit versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2")
+  )(implicit
+    versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2")
   ): (Binary, Seq[BinaryVersion]) = {
     val binary = createBinary(org)(createBinaryForm(org))
     versions.map { version =>
@@ -27,10 +26,12 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
     }
     (
       binary,
-      binaryVersionsDao.findAll(
-        binaryId = Some(binary.id),
-        limit = versions.size.toLong
-      ).reverse
+      binaryVersionsDao
+        .findAll(
+          binaryId = Some(binary.id),
+          limit = versions.size.toLong
+        )
+        .reverse
     )
   }
 
@@ -103,7 +104,6 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
     }
   }
 
-
   def verify(actual: Seq[BinaryRecommendation], expected: Seq[BinaryRecommendation]): Unit = {
     (actual == expected) match {
       case true => {}
@@ -117,7 +117,9 @@ class BinaryRecommendationsDaoSpec extends DependencySpec
               (a == b) match {
                 case true => {}
                 case false => {
-                  sys.error(s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]")
+                  sys.error(
+                    s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]"
+                  )
                 }
               }
             }

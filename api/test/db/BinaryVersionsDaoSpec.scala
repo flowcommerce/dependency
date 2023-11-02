@@ -15,7 +15,7 @@ class BinaryVersionsDaoSpec extends DependencySpec {
     val version3 = binaryVersionsDao.upsert(systemUser, binary.id, "1.1")
 
     version1.id must be(version2.id)
-    version2.id must not be(version3.id)
+    version2.id must not be (version3.id)
   }
 
   "findById" in {
@@ -37,7 +37,9 @@ class BinaryVersionsDaoSpec extends DependencySpec {
 
     binaryVersionsDao.findAll(ids = Some(Nil)) must be(Nil)
     binaryVersionsDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    binaryVersionsDao.findAll(ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(version1.id))
+    binaryVersionsDao.findAll(ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(
+      Seq(version1.id)
+    )
   }
 
   "delete" in {
@@ -47,7 +49,7 @@ class BinaryVersionsDaoSpec extends DependencySpec {
     val version2 = binaryVersionsDao.upsert(systemUser, binary.id, "1.0")
     val version3 = binaryVersionsDao.upsert(systemUser, binary.id, "1.0")
 
-    version1.id must not be(version2.id)
+    version1.id must not be (version2.id)
     version2.id must be(version3.id)
   }
 

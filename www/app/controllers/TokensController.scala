@@ -12,12 +12,13 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TokensController @javax.inject.Inject()(
+class TokensController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = None
 
@@ -47,37 +48,41 @@ class TokensController @javax.inject.Inject()(
   def postCreate = User.async { implicit request =>
     val form = TokensController.tokenForm.bindFromRequest()
     form.fold(
-
-      errors => Future {
-        Ok(views.html.tokens.create(uiData(request), errors))
-      },
-
+      errors =>
+        Future {
+          Ok(views.html.tokens.create(uiData(request), errors))
+        },
       valid => {
-        dependencyClient(request).tokens.post(
-          TokenForm(
-            userId = request.user.id,
-            description = valid.description
+        dependencyClient(request).tokens
+          .post(
+            TokenForm(
+              userId = request.user.id,
+              description = valid.description
+            )
           )
-        ).map { token =>
-          Redirect(routes.TokensController.show(token.id)).flashing("success" -> "Token created")
-        }.recover {
-          case r: io.flow.dependency.v0.errors.GenericErrorResponse => {
-            Ok(views.html.tokens.create(uiData(request), form, r.genericError.messages))
+          .map { token =>
+            Redirect(routes.TokensController.show(token.id)).flashing("success" -> "Token created")
           }
-        }
+          .recover {
+            case r: io.flow.dependency.v0.errors.GenericErrorResponse => {
+              Ok(views.html.tokens.create(uiData(request), form, r.genericError.messages))
+            }
+          }
       }
-
     )
   }
 
   def postDelete(id: String) = User.async { implicit request =>
-    dependencyClient(request).tokens.deleteById(id).map { _ =>
-      Redirect(routes.TokensController.index()).flashing("success" -> s"Token deleted")
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.TokensController.index()).flashing("warning" -> s"Token not found")
+    dependencyClient(request).tokens
+      .deleteById(id)
+      .map { _ =>
+        Redirect(routes.TokensController.index()).flashing("success" -> s"Token deleted")
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.TokensController.index()).flashing("warning" -> s"Token not found")
+        }
+      }
   }
 
   def withToken[T](
@@ -86,13 +91,16 @@ class TokensController @javax.inject.Inject()(
   )(
     f: Token => Future[Result]
   ) = {
-    dependencyClient(request).tokens.getById(id).flatMap { token =>
-      f(token)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.TokensController.index()).flashing("warning" -> s"Token not found")
+    dependencyClient(request).tokens
+      .getById(id)
+      .flatMap { token =>
+        f(token)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.TokensController.index()).flashing("warning" -> s"Token not found")
+        }
+      }
   }
 
 }

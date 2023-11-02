@@ -12,7 +12,7 @@ import io.flow.util.IdGenerator
 import play.api.db._
 
 @Singleton
-class ProjectsDao @Inject()(
+class ProjectsDao @Inject() (
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
   projectLibrariesDao: generated.ProjectLibrariesDao,
@@ -20,8 +20,8 @@ class ProjectsDao @Inject()(
   recommendationsDaoProvider: Provider[RecommendationsDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
-){
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "projects")
 
@@ -112,7 +112,7 @@ class ProjectsDao @Inject()(
       }
     }
 
-    val organizationErrors = membershipsDaoProvider.get.isMemberByOrgKey(form.organization, user) match  {
+    val organizationErrors = membershipsDaoProvider.get.isMemberByOrgKey(form.organization, user) match {
       case false => Seq("You do not have access to this organization")
       case true => Nil
     }
@@ -131,17 +131,19 @@ class ProjectsDao @Inject()(
         val id = IdGenerator("prj").randomId()
 
         db.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "organization_id" -> org.id,
-            "user_id" -> createdBy.id,
-            "visibility" -> form.visibility.toString,
-            "scms" -> form.scms.toString,
-            "name" -> form.name.trim,
-            "uri" -> form.uri.trim,
-            "branch" -> form.branch.trim,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "organization_id" -> org.id,
+              "user_id" -> createdBy.id,
+              "visibility" -> form.visibility.toString,
+              "scms" -> form.scms.toString,
+              "name" -> form.name.trim,
+              "uri" -> form.uri.trim,
+              "branch" -> form.branch.trim,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
 
         val project = findById(Authorization.All, id).getOrElse {
@@ -166,15 +168,17 @@ class ProjectsDao @Inject()(
         )
 
         db.withConnection { implicit c =>
-          SQL(UpdateQuery).on(
-            "id" -> project.id,
-            "visibility" -> form.visibility.toString,
-            "scms" -> form.scms.toString,
-            "name" -> form.name.trim,
-            "uri" -> form.uri.trim,
-            "branch" -> form.branch.trim,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(UpdateQuery)
+            .on(
+              "id" -> project.id,
+              "visibility" -> form.visibility.toString,
+              "scms" -> form.scms.toString,
+              "name" -> form.name.trim,
+              "uri" -> form.uri.trim,
+              "branch" -> form.branch.trim,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
 
         val updated = findById(Authorization.All, project.id).getOrElse {
@@ -192,13 +196,17 @@ class ProjectsDao @Inject()(
     membershipsDaoProvider.get.authorizeOrg(project.organization, deletedBy) {
       projectLibrariesDao.deleteAllByProjectId(deletedBy, project.id)
 
-      Pager.create { offset =>
-        projectBinariesDaoProvider.get().findAll(Authorization.All, projectId = Some(project.id), offset = offset)
-      }.foreach { projectBinariesDaoProvider.get.delete(deletedBy, _) }
+      Pager
+        .create { offset =>
+          projectBinariesDaoProvider.get().findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+        }
+        .foreach { projectBinariesDaoProvider.get.delete(deletedBy, _) }
 
-      Pager.create { offset =>
-        recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
-      }.foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
+      Pager
+        .create { offset =>
+          recommendationsDaoProvider.get.findAll(Authorization.All, projectId = Some(project.id), offset = offset)
+        }
+        .foreach { recommendationsDaoProvider.get.delete(deletedBy, _) }
 
       dbHelpers.delete(deletedBy.id, project.id)
       projectActor ! ProjectActor.Messages.Delete(project.id) // TODO: create task
@@ -232,48 +240,55 @@ class ProjectsDao @Inject()(
   ): Seq[Project] = {
 
     db.withConnection { implicit c =>
-      Standards.queryWithOptionalLimit(
-        BaseQuery,
-        tableName = "projects",
-        auth = auth.organizations("projects.organization_id", Some("projects.visibility")),
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        optionalText(
+      Standards
+        .queryWithOptionalLimit(
+          BaseQuery,
+          tableName = "projects",
+          auth = auth.organizations("projects.organization_id", Some("projects.visibility")),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .optionalText(
           "organizations.key",
           organizationKey,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        equals("organizations.id", organizationId).
-        optionalText(
+        )
+        .equals("organizations.id", organizationId)
+        .optionalText(
           "projects.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        and(
+        )
+        .and(
           groupId.map { _ => FilterProjectLibraries.format("project_libraries.group_id = trim({group_id})") }
-        ).bind("group_id", groupId).
-        and(
+        )
+        .bind("group_id", groupId)
+        .and(
           artifactId.map { _ => FilterProjectLibraries.format("project_libraries.artifact_id = trim({artifact_id})") }
-        ).bind("artifact_id", artifactId).
-        and(
+        )
+        .bind("artifact_id", artifactId)
+        .and(
           version.map { _ => FilterProjectLibraries.format("project_libraries.version = trim({version})") }
-        ).bind("version", version).
-        and(
+        )
+        .bind("version", version)
+        .and(
           libraryId.map { _ => FilterProjectLibraries.format("project_libraries.library_id = {library_id}") }
-        ).bind("library_id", libraryId).
-        and(
+        )
+        .bind("library_id", libraryId)
+        .and(
           binary.map { _ => FilterProjectBinaries.format("project_binaries.name = trim({binary})") }
-        ).bind("binary", binary).
-        and(
+        )
+        .bind("binary", binary)
+        .and(
           binaryId.map { _ => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") }
-        ).bind("binary_id", binaryId).
-        as(
+        )
+        .bind("binary_id", binaryId)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Project.parser().*
         )
     }

@@ -119,20 +119,38 @@ class InternalProjectLibrariesDaoSpec extends DependencySpec {
   "findAll" must {
 
     "filter by id" in {
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), orderBy = None)
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, projectId = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        projectId = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by ids" in {
       val other = createProjectLibrary(project)
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, ids = Some(Seq(projectLibrary.id, other.id)), orderBy = None).map(_.id).sorted must be(
+      projectLibrariesDao
+        .findAll(Authorization.All, limit = None, ids = Some(Seq(projectLibrary.id, other.id)), orderBy = None)
+        .map(_.id)
+        .sorted must be(
         Seq(projectLibrary.id, other.id).sorted
       )
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, ids = Some(Seq(projectLibrary.id, UUID.randomUUID.toString)), orderBy = None).map(_.id).sorted must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          ids = Some(Seq(projectLibrary.id, UUID.randomUUID.toString)),
+          orderBy = None
+        )
+        .map(_.id)
+        .sorted must be(
         Seq(projectLibrary.id).sorted
       )
 
@@ -140,10 +158,23 @@ class InternalProjectLibrariesDaoSpec extends DependencySpec {
     }
 
     "filter by projectId" in {
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), projectId = Some(project.id), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          projectId = Some(project.id),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, projectId = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        projectId = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by libraryId" in {
@@ -151,69 +182,171 @@ class InternalProjectLibrariesDaoSpec extends DependencySpec {
       val projectLibrary = createProjectLibrary(project)
       projectLibrariesDao.setLibrary(systemUser, projectLibrary, library)
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), libraryId = Some(library.id), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          libraryId = Some(library.id),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, libraryId = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        libraryId = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by groupId" in {
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), groupId = Some(projectLibrary.groupId), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          groupId = Some(projectLibrary.groupId),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, groupId = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        groupId = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by artifactId" in {
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), artifactId = Some(projectLibrary.artifactId), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          artifactId = Some(projectLibrary.artifactId),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, artifactId = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        artifactId = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by version" in {
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), version = Some(projectLibrary.db.version), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          version = Some(projectLibrary.db.version),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, version = Some(UUID.randomUUID.toString), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        version = Some(UUID.randomUUID.toString),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by crossBuildVersion" in {
-      val projectLibrary = createProjectLibrary(project)(createProjectLibraryForm(project, crossBuildVersion = Some("2.11")))
+      val projectLibrary =
+        createProjectLibrary(project)(createProjectLibraryForm(project, crossBuildVersion = Some("2.11")))
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(Some("2.11")), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          crossBuildVersion = Some(Some("2.11")),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(Some(UUID.randomUUID.toString)), orderBy = None) must be(Nil)
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), crossBuildVersion = Some(None), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        id = Some(projectLibrary.id),
+        crossBuildVersion = Some(Some(UUID.randomUUID.toString)),
+        orderBy = None
+      ) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        id = Some(projectLibrary.id),
+        crossBuildVersion = Some(None),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by isSynced" in {
       createSync(createSyncForm(objectId = projectLibrary.id, event = SyncEvent.Completed))
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), isSynced = Some(true), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), isSynced = Some(true), orderBy = None)
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), isSynced = Some(false), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        id = Some(projectLibrary.id),
+        isSynced = Some(false),
+        orderBy = None
+      ) must be(Nil)
     }
 
     "filter by hasLibrary" in {
       val projectLibrary = createProjectLibrary(project)
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(true), orderBy = None) must be(Nil)
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(false), orderBy = None).map(_.id) must be(
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        id = Some(projectLibrary.id),
+        hasLibrary = Some(true),
+        orderBy = None
+      ) must be(Nil)
+      projectLibrariesDao
+        .findAll(
+          Authorization.All,
+          limit = None,
+          id = Some(projectLibrary.id),
+          hasLibrary = Some(false),
+          orderBy = None
+        )
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
 
       projectLibrariesDao.setLibrary(systemUser, projectLibrary, createLibrary(org))
 
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(true), orderBy = None).map(_.id) must be(
+      projectLibrariesDao
+        .findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(true), orderBy = None)
+        .map(_.id) must be(
         Seq(projectLibrary.id)
       )
-      projectLibrariesDao.findAll(Authorization.All, limit = None, id = Some(projectLibrary.id), hasLibrary = Some(false), orderBy = None) must be(Nil)
+      projectLibrariesDao.findAll(
+        Authorization.All,
+        limit = None,
+        id = Some(projectLibrary.id),
+        hasLibrary = Some(false),
+        orderBy = None
+      ) must be(Nil)
     }
   }
-
 
 }

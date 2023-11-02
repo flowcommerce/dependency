@@ -23,11 +23,11 @@ class UsersDaoSpec extends DependencySpec {
     "system and anonymous users are different" in {
       usersDao.AnonymousEmailAddress must not be (
         usersDao.SystemEmailAddress
-        )
+      )
 
       usersDao.anonymousUser.id must not be (
         usersDao.systemUser.id
-        )
+      )
     }
 
   }
@@ -69,7 +69,6 @@ class UsersDaoSpec extends DependencySpec {
 
     usersDao.findByGithubUserId(0) must be(None)
   }
-
 
   "findAll" must {
 

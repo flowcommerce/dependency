@@ -16,7 +16,7 @@ import javax.inject.Inject
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-class TaskActorParameters @Inject()(
+class TaskActorParameters @Inject() (
   env: Environment,
   val system: ActorSystem,
   val tasksUtil: TasksUtil,
@@ -26,10 +26,9 @@ class TaskActorParameters @Inject()(
   val isTest: Boolean = env.mode == Mode.Test
 }
 
-/**
- * Receives notification of change and forwards on to all task actors
- */
-class TaskActor @Inject()(
+/** Receives notification of change and forwards on to all task actors
+  */
+class TaskActor @Inject() (
   rollbar: RollbarLogger,
   @javax.inject.Named("task-actor-upserted") taskActorUpserted: ActorRef,
   @javax.inject.Named("task-actor-sync-all") taskActorSyncAll: ActorRef,
@@ -37,14 +36,18 @@ class TaskActor @Inject()(
   @javax.inject.Named("task-actor-sync-one-library") taskActorSyncOneLibrary: ActorRef,
   @javax.inject.Named("task-actor-sync-one-project") taskActorSyncOneProject: ActorRef,
   @javax.inject.Named("task-actor-sync-organization-libraries") taskActorSyncOrganizationLibraries: ActorRef,
-  @javax.inject.Named("task-actor-sync-libraries-by-prefix") taskActorSyncLibrariesByPrefix: ActorRef,
+  @javax.inject.Named("task-actor-sync-libraries-by-prefix") taskActorSyncLibrariesByPrefix: ActorRef
 ) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val allActors = Seq(
-    taskActorUpserted, taskActorSyncAll,
-    taskActorSyncOneBinary, taskActorSyncOneLibrary, taskActorSyncOneProject,
-    taskActorSyncOrganizationLibraries, taskActorSyncLibrariesByPrefix,
+    taskActorUpserted,
+    taskActorSyncAll,
+    taskActorSyncOneBinary,
+    taskActorSyncOneLibrary,
+    taskActorSyncOneProject,
+    taskActorSyncOrganizationLibraries,
+    taskActorSyncLibrariesByPrefix
   )
 
   def receive: Receive = SafeReceive.withLogUnhandled {
@@ -56,10 +59,13 @@ class TaskActor @Inject()(
   }
 }
 
-abstract class BaseTaskActor @Inject()(
+abstract class BaseTaskActor @Inject() (
   params: TaskActorParameters,
   dispatcherName: String
-) extends ReapedActor with ActorLogging with Scheduler with SchedulerCleanup {
+) extends ReapedActor
+  with ActorLogging
+  with Scheduler
+  with SchedulerCleanup {
 
   def accepts(task: InternalTask): Boolean
 
@@ -81,8 +87,8 @@ abstract class BaseTaskActor @Inject()(
     super.postStop()
   }
 
-  def receive: Receive = SafeReceive.withLogUnhandled {
-    case ReactiveActor.Messages.Changed => processChanged()
+  def receive: Receive = SafeReceive.withLogUnhandled { case ReactiveActor.Messages.Changed =>
+    processChanged()
   }
 
   private[this] def processChanged(): Unit = {
@@ -110,12 +116,12 @@ abstract class BaseTaskActor @Inject()(
   }
 }
 
-class TaskActorSyncAll @Inject()(
+class TaskActorSyncAll @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-all-actor-context"
-) {
+    params,
+    "tasks-sync-all-actor-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case _: TaskDataSync => true
@@ -124,12 +130,12 @@ class TaskActorSyncAll @Inject()(
   }
 }
 
-class TaskActorSyncOneProject @Inject()(
+class TaskActorSyncOneProject @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-one-project-actor-context"
-) {
+    params,
+    "tasks-sync-one-project-actor-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case s: TaskDataSyncOne => s.`type` == SyncType.Project
@@ -138,12 +144,12 @@ class TaskActorSyncOneProject @Inject()(
   }
 }
 
-class TaskActorSyncOneBinary @Inject()(
+class TaskActorSyncOneBinary @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-one-binary-actor-context"
-) {
+    params,
+    "tasks-sync-one-binary-actor-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case s: TaskDataSyncOne => s.`type` == SyncType.Binary
@@ -152,12 +158,12 @@ class TaskActorSyncOneBinary @Inject()(
   }
 }
 
-class TaskActorSyncOneLibrary @Inject()(
+class TaskActorSyncOneLibrary @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-one-library-actor-context"
-) {
+    params,
+    "tasks-sync-one-library-actor-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case s: TaskDataSyncOne => s.`type` == SyncType.Library
@@ -166,12 +172,12 @@ class TaskActorSyncOneLibrary @Inject()(
   }
 }
 
-class TaskActorSyncOrganizationLibraries @Inject()(
+class TaskActorSyncOrganizationLibraries @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-organization-libraries-context"
-) {
+    params,
+    "tasks-sync-organization-libraries-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case _: TaskDataSyncLibrariesByPrefix => true
@@ -180,12 +186,12 @@ class TaskActorSyncOrganizationLibraries @Inject()(
   }
 }
 
-class TaskActorSyncLibrariesByPrefix @Inject()(
+class TaskActorSyncLibrariesByPrefix @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-sync-libraries-by-prefix-context"
-) {
+    params,
+    "tasks-sync-libraries-by-prefix-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case _: TaskActorSyncLibrariesByPrefix => true
@@ -194,12 +200,12 @@ class TaskActorSyncLibrariesByPrefix @Inject()(
   }
 }
 
-class TaskActorUpserted @Inject()(
+class TaskActorUpserted @Inject() (
   params: TaskActorParameters
 ) extends BaseTaskActor(
-  params,
-  "tasks-upserted-actor-context"
-) {
+    params,
+    "tasks-upserted-actor-context"
+  ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
       case _: TaskDataUpserted => true

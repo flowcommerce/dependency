@@ -51,7 +51,7 @@ sealed trait Authorization {
 
   def organizationProjects(
     organizationIdColumn: String,
-    projectIdColumn: String,
+    projectIdColumn: String
   ): Clause
 
   def organizations(
@@ -64,7 +64,6 @@ sealed trait Authorization {
   ): Clause
 
 }
-
 
 object Authorization {
 
@@ -90,7 +89,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String,
+      projectIdColumn: String
     ): Clause = {
       Clause.single(publicProjectsClause(projectIdColumn))
     }
@@ -110,7 +109,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String,
+      projectIdColumn: String
     ): Clause = Clause.True
 
     override def users(
@@ -136,7 +135,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String,
+      projectIdColumn: String
     ): Clause = {
       // TODO: Bind
       val userClause = s"$organizationIdColumn in (select organization_id from memberships where user_id = '$id')"
@@ -165,7 +164,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String,
+      projectIdColumn: String
     ): Clause = {
       // TODO: Bind
       val orgClause = s"$organizationIdColumn = '$id'"

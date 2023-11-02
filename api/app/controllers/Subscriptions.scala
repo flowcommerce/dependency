@@ -22,7 +22,8 @@ class Subscriptions @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   subscriptionsDao: SubscriptionsDao,
   subscriptionIdentified: SubscriptionActionBuilder
-)(implicit val ec: ExecutionContext) extends FlowController {
+)(implicit val ec: ExecutionContext)
+  extends FlowController {
 
   def get(
     id: Option[String],
@@ -34,7 +35,8 @@ class Subscriptions @javax.inject.Inject() (
     offset: Long = 0
   ) = subscriptionIdentified { request =>
     assert(
-      userId.isEmpty, "user id parameter no longer supported"
+      userId.isEmpty,
+      "user id parameter no longer supported"
     )
     Ok(
       Json.toJson(

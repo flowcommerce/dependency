@@ -6,20 +6,19 @@ import services.ProjectDependencyResolutionService
 
 case class ProjectDependencyResolutionServiceCacheKey(
   organizationKey: String,
-  groupId: String,
+  groupId: String
 )
 
 @javax.inject.Singleton
-case class ProjectDependencyResolutionServiceCache @javax.inject.Inject()(
-  service: ProjectDependencyResolutionService,
+case class ProjectDependencyResolutionServiceCache @javax.inject.Inject() (
+  service: ProjectDependencyResolutionService
 ) extends CacheWithFallbackToStaleData[ProjectDependencyResolutionServiceCacheKey, ProjectDependencyResolution]
-  with ProjectDependencyResolutionService
-{
+  with ProjectDependencyResolutionService {
 
   override def refresh(key: ProjectDependencyResolutionServiceCacheKey): ProjectDependencyResolution = {
     service.getByOrganizationKey(
       organizationKey = key.organizationKey,
-      groupId = key.groupId,
+      groupId = key.groupId
     )
   }
 
@@ -27,7 +26,7 @@ case class ProjectDependencyResolutionServiceCache @javax.inject.Inject()(
     get(
       ProjectDependencyResolutionServiceCacheKey(
         organizationKey = organizationKey,
-        groupId = groupId,
+        groupId = groupId
       )
     )
   }

@@ -33,12 +33,16 @@ class SubscriptionsDaoSpec extends DependencySpec {
       Some(subscription.id)
     )
 
-    subscriptionsDao.findByUserIdAndPublication(UUID.randomUUID.toString, subscription.publication).map(_.id) must be(None)
-    subscriptionsDao.findByUserIdAndPublication(subscription.user.id, Publication.UNDEFINED("other")).map(_.id) must be(None)
+    subscriptionsDao.findByUserIdAndPublication(UUID.randomUUID.toString, subscription.publication).map(_.id) must be(
+      None
+    )
+    subscriptionsDao.findByUserIdAndPublication(subscription.user.id, Publication.UNDEFINED("other")).map(_.id) must be(
+      None
+    )
   }
 
   "findAll by ids" in {
-    // Create subscriptions for two different users so unique constraint on (user_id, publication) is not violated 
+    // Create subscriptions for two different users so unique constraint on (user_id, publication) is not violated
     val subscription1 = createSubscription(user = createUser())
     val subscription2 = createSubscription(user = createUser())
 
@@ -48,7 +52,9 @@ class SubscriptionsDaoSpec extends DependencySpec {
 
     subscriptionsDao.findAll(ids = Some(Nil)) must be(Nil)
     subscriptionsDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    subscriptionsDao.findAll(ids = Some(Seq(subscription1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(subscription1.id))
+    subscriptionsDao.findAll(ids = Some(Seq(subscription1.id, UUID.randomUUID.toString))).map(_.id) must be(
+      Seq(subscription1.id)
+    )
   }
 
   "findAll by identifier" in {
@@ -66,10 +72,12 @@ class SubscriptionsDaoSpec extends DependencySpec {
       createSubscriptionForm(user = user, publication = Publication.DailySummary)
     )
 
-    subscriptionsDao.findAll(
-      id = Some(subscription.id),
-      minHoursSinceLastEmail = Some(1)
-    ).map(_.id) must be(Seq(subscription.id))
+    subscriptionsDao
+      .findAll(
+        id = Some(subscription.id),
+        minHoursSinceLastEmail = Some(1)
+      )
+      .map(_.id) must be(Seq(subscription.id))
 
     createLastEmail(createLastEmailForm(user = user, publication = Publication.DailySummary))
 

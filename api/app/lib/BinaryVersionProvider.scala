@@ -5,20 +5,16 @@ import io.flow.log.RollbarLogger
 import io.flow.util.Version
 import org.apache.commons.lang3.StringUtils
 
-
-
 trait BinaryVersionProvider {
 
-  /**
-    * Returns the versions for this binary, fetching them from
-    * appropriate remote locations.
+  /** Returns the versions for this binary, fetching them from appropriate remote locations.
     */
   def versions(binary: BinaryType): Seq[Version]
 
 }
 
 @javax.inject.Singleton
-case class DefaultBinaryVersionProvider @javax.inject.Inject()(
+case class DefaultBinaryVersionProvider @javax.inject.Inject() (
   logger: RollbarLogger
 ) extends BinaryVersionProvider {
 
@@ -27,7 +23,7 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
 
   override def versions(
     binary: BinaryType
-  ) : Seq[Version] = {
+  ): Seq[Version] = {
     binary match {
       case BinaryType.Scala => {
         fetchScalaVersions()
@@ -45,9 +41,12 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
   }
 
   def fetchScalaVersions(): Seq[Version] = {
-    RemoteDirectory.fetch(ScalaUrl) { name =>
-      name.toLowerCase.startsWith("scala ")
-    }.files.flatMap { toVersion }
+    RemoteDirectory
+      .fetch(ScalaUrl) { name =>
+        name.toLowerCase.startsWith("scala ")
+      }
+      .files
+      .flatMap { toVersion }
   }
 
   def fetchSbtVersions(): Seq[Version] = {
@@ -58,10 +57,12 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject()(
 
   def toVersion(value: String): Option[Version] = {
     val tag = Version(
-      StringUtils.stripStart(
-        StringUtils.stripStart(value, "scala"),
-        "Scala"
-      ).trim
+      StringUtils
+        .stripStart(
+          StringUtils.stripStart(value, "scala"),
+          "Scala"
+        )
+        .trim
     )
     tag.major match {
       case None => None

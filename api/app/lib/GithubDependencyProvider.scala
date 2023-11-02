@@ -25,9 +25,10 @@ object GithubUtil {
       case Right(u) => {
         val path = if (u.getPath.startsWith("/")) {
           u.getPath.substring(1)
-        } else {
-          u.getPath
-        }.trim
+        } else
+          {
+            u.getPath
+          }.trim
         path.split("/").filter(!_.isEmpty).toList match {
           case Nil => Left(s"URI path cannot be empty for uri[$uri]")
           case _ :: Nil => Left(s"Invalid uri path[$uri] missing project name")
@@ -59,7 +60,8 @@ object GithubUtil {
 
 object GithubDependencyProviderClient {
 
-  def instance(wsClient: WSClient,
+  def instance(
+    wsClient: WSClient,
     config: Config,
     tokensDao: TokensDao,
     project: ProjectSummary,
@@ -102,8 +104,8 @@ private[lib] case class GithubDependencyProvider(
   private[this] def getBuildDependencies(
     projectUri: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, BuildSbtFilename, branch).map { result =>
       result.flatMap { text =>
@@ -127,8 +129,8 @@ private[lib] case class GithubDependencyProvider(
   private[this] def parseProperties(
     projectUri: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, BuildPropertiesFilename, branch).map { result =>
       result.flatMap { text =>
@@ -159,8 +161,8 @@ private[lib] case class GithubDependencyProvider(
   private[this] def getPluginsDependencies(
     projectUri: String,
     branch: String
-  ) (
-    implicit ec: ExecutionContext
+  )(implicit
+    ec: ExecutionContext
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, ProjectPluginsSbtFilename, branch).map { result =>
       result.flatMap { text =>

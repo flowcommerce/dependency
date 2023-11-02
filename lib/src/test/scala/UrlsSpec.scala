@@ -10,7 +10,7 @@ class UrlsSpec extends PlaySpec with Factories {
     new Config {
       override def optionalMap(name: String): Option[Map[String, Seq[String]]] = None
       override def optionalString(name: String): Option[String] = {
-        if (name == "dependency.www.host")  {
+        if (name == "dependency.www.host") {
           Some("http://localhost")
         } else {
           None
@@ -18,7 +18,7 @@ class UrlsSpec extends PlaySpec with Factories {
       }
 
       override def optionalList(name: String): Option[Seq[String]] = {
-        if (name == "dependency.www.host")  {
+        if (name == "dependency.www.host") {
           Some(Seq("http://localhost"))
         } else {
           None
@@ -26,7 +26,7 @@ class UrlsSpec extends PlaySpec with Factories {
       }
 
       override def get(name: String): Option[String] =
-        if (name == "dependency.www.host")  {
+        if (name == "dependency.www.host") {
           Some("http://localhost")
         } else {
           None
@@ -34,11 +34,11 @@ class UrlsSpec extends PlaySpec with Factories {
     }
   )
 
-  "www" in  {
+  "www" in {
     urls.www("/foo") must be("http://localhost/foo")
   }
 
-  "recommendation" in  {
+  "recommendation" in {
     val binary = makeRecommendation(`type` = RecommendationType.Binary)
     urls.recommendation(binary) must be(s"/binaries/${binary.`object`.id}")
 
@@ -49,7 +49,7 @@ class UrlsSpec extends PlaySpec with Factories {
     urls.recommendation(other) must be("#")
   }
 
-  "itemSummary" in  {
+  "itemSummary" in {
     val binary = makeBinarySummary()
     urls.itemSummary(binary) must be(s"/binaries/${binary.id}")
 

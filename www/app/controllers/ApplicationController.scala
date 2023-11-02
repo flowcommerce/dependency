@@ -8,12 +8,13 @@ import play.api.mvc._
 
 import scala.concurrent.ExecutionContext
 
-class ApplicationController @javax.inject.Inject()(
+class ApplicationController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Dashboard)
 
@@ -37,6 +38,5 @@ class ApplicationController @javax.inject.Inject()(
       )
     }
   }
-
 
 }

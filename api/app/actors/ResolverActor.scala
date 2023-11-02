@@ -22,13 +22,13 @@ object ResolverActor {
 
 }
 
-class ResolverActor @Inject()(
+class ResolverActor @Inject() (
   resolversCache: ResolversCache,
   librariesDao: LibrariesDao,
   projectLibrariesDao: InternalProjectLibrariesDao,
   staticUserProvider: StaticUserProvider,
   rollbar: RollbarLogger,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
 ) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
@@ -41,11 +41,13 @@ class ResolverActor @Inject()(
     case ResolverActor.Messages.Sync(resolverId) => sync(resolverId)
 
     case ResolverActor.Messages.Deleted(resolverId) =>
-      Pager.create { offset =>
-        librariesDao.findAll(Authorization.All, resolverId = Some(resolverId), limit = None, offset = offset)
-      }.foreach { library =>
-        librariesDao.delete(SystemUser, library)
-      }
+      Pager
+        .create { offset =>
+          librariesDao.findAll(Authorization.All, resolverId = Some(resolverId), limit = None, offset = offset)
+        }
+        .foreach { library =>
+          librariesDao.delete(SystemUser, library)
+        }
   }
 
   def sync(resolverId: String): Unit = {
@@ -61,8 +63,9 @@ class ResolverActor @Inject()(
         }
       }
 
-      projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = None, orderBy = None).foreach { projectLibrary =>
-        projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.projectId, projectLibrary.id)
+      projectLibrariesDao.findAll(auth, hasLibrary = Some(false), limit = None, orderBy = None).foreach {
+        projectLibrary =>
+          projectActor ! ProjectActor.Messages.ProjectLibrarySync(projectLibrary.projectId, projectLibrary.id)
       }
     }
   }

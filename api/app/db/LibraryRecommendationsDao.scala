@@ -14,59 +14,63 @@ case class LibraryRecommendation(
 )
 
 @Singleton
-class LibraryRecommendationsDao @Inject()(
+class LibraryRecommendationsDao @Inject() (
   internalProjectLibrariesDao: InternalProjectLibrariesDao,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  librariesDaoProvider: Provider[LibrariesDao],
-){
+  librariesDaoProvider: Provider[LibrariesDao]
+) {
 
   def forProject(project: Project): Seq[LibraryRecommendation] = {
     val recommendations = scala.collection.mutable.ListBuffer[LibraryRecommendation]()
     val auth = Authorization.Organization(project.organization.id)
 
-    internalProjectLibrariesDao.findAll(
-      Authorization.Organization(project.organization.id),
-      projectId = Some(project.id),
-      hasLibrary = Some(true),
-      limit = None,
-      orderBy = None,
-    ).foreach { projectLibrary =>
-      projectLibrary.db.libraryId.flatMap { libraryId => librariesDaoProvider.get.findById(auth, libraryId) }.map { library =>
-        val recentVersions = versionsGreaterThan(auth, library, projectLibrary)
-        recommend(projectLibrary, recentVersions).map { v =>
-          recommendations ++= Seq(
-            LibraryRecommendation(
-              library = library,
-              from = projectLibrary.db.version,
-              to = v,
-              latest = recentVersions.headOption.getOrElse(v)
-            )
-          )
+    internalProjectLibrariesDao
+      .findAll(
+        Authorization.Organization(project.organization.id),
+        projectId = Some(project.id),
+        hasLibrary = Some(true),
+        limit = None,
+        orderBy = None
+      )
+      .foreach { projectLibrary =>
+        projectLibrary.db.libraryId.flatMap { libraryId => librariesDaoProvider.get.findById(auth, libraryId) }.map {
+          library =>
+            val recentVersions = versionsGreaterThan(auth, library, projectLibrary)
+            recommend(projectLibrary, recentVersions).map { v =>
+              recommendations ++= Seq(
+                LibraryRecommendation(
+                  library = library,
+                  from = projectLibrary.db.version,
+                  to = v,
+                  latest = recentVersions.headOption.getOrElse(v)
+                )
+              )
+            }
         }
       }
-    }
 
     recommendations.toSeq
   }
 
   def recommend(current: InternalProjectLibrary, others: Seq[LibraryVersion]): Option[LibraryVersion] = {
-    Recommendations.version(
-      VersionForm(current.db.version, current.db.crossBuildVersion),
-      others.map(v => VersionForm(v.version, v.crossBuildVersion))
-    ).map { version =>
-      others.find { _.version == version }.getOrElse {
-        sys.error(s"Failed to find recommended library with version[$version]")
+    Recommendations
+      .version(
+        VersionForm(current.db.version, current.db.crossBuildVersion),
+        others.map(v => VersionForm(v.version, v.crossBuildVersion))
+      )
+      .map { version =>
+        others.find { _.version == version }.getOrElse {
+          sys.error(s"Failed to find recommended library with version[$version]")
+        }
       }
-    }
   }
 
-  /**
-   * Returns all versions of a library greater than the one specified
-   */
+  /** Returns all versions of a library greater than the one specified
+    */
   private[this] def versionsGreaterThan(
     auth: Authorization,
     library: Library,
-    projectLibrary: InternalProjectLibrary,
+    projectLibrary: InternalProjectLibrary
   ): Seq[LibraryVersion] = {
     libraryVersionsDaoProvider.get.findAll(
       auth,

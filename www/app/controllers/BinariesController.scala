@@ -9,12 +9,13 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BinariesController @javax.inject.Inject()(
+class BinariesController @javax.inject.Inject() (
   dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 
@@ -76,13 +77,16 @@ class BinariesController @javax.inject.Inject()(
   )(
     f: Binary => Future[Result]
   ): Future[Result] = {
-    dependencyClient(request).binaries.getById(id).flatMap { binary =>
-      f(binary)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.BinariesController.index()).flashing("warning" -> s"Binary not found")
+    dependencyClient(request).binaries
+      .getById(id)
+      .flatMap { binary =>
+        f(binary)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.BinariesController.index()).flashing("warning" -> s"Binary not found")
+        }
+      }
   }
 
 }

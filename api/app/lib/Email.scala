@@ -19,7 +19,8 @@ object Email {
 
   private[this] def fromEmail(config: Config) = config.requiredString("mail.default.from.email")
 
-  def localDeliveryDir(config: Config): Option[Path] = config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
+  def localDeliveryDir(config: Config): Option[Path] =
+    config.optionalString("mail.local.delivery.dir").map(Paths.get(_))
 
   // Initialize sendgrid on startup to verify that all of our settings
   // are here. If using localDeliveryDir, set password to a test

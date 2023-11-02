@@ -1,15 +1,13 @@
 package services
 
-/**
- * Captures assumptions on matching artifact names to the projects
- * that product them.
- */
+/** Captures assumptions on matching artifact names to the projects that product them.
+  */
 object ArtifactNameMatcher {
 
   // will match "xxx-akka" and "xxx-akka26"
   private[this] val KnownSuffixes = Seq(
     "akka",
-    "play",
+    "play"
   ).map(format)
 
   def matches(artifactId: String, projectName: String): Boolean = {

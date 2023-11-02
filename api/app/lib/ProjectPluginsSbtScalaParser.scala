@@ -3,9 +3,8 @@ package io.flow.dependency.api.lib
 import io.flow.dependency.v0.models.ProjectSummary
 import io.flow.log.RollbarLogger
 
-/**
-  * Takes the contents of a project/plugins.sbt file and parses it, providing
-  * access to its dependencies (repositories and plugins).
+/** Takes the contents of a project/plugins.sbt file and parses it, providing access to its dependencies (repositories
+  * and plugins).
   */
 case class ProjectPluginsSbtScalaParser(
   override val project: ProjectSummary,
@@ -17,10 +16,7 @@ case class ProjectPluginsSbtScalaParser(
   val plugins: Seq[Artifact] = parseLibraries()
 
   val resolverUris: Seq[String] = {
-    lines.
-      filter(_.startsWith("resolvers ")).
-      flatMap(toResolver(_)).
-      distinct.sortBy(_.toLowerCase)
+    lines.filter(_.startsWith("resolvers ")).flatMap(toResolver(_)).distinct.sortBy(_.toLowerCase)
   }
 
   def toResolver(line: String): Option[String] = {

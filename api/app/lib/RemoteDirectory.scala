@@ -7,15 +7,10 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.commons.text.StringEscapeUtils
 import java.net.URL
 
-
 import scala.util.{Failure, Success, Try}
 
-
-/**
-  * Accepts the URI of a resolver
-  * (e.g. https://oss.sonatype.org/content/repositories/snapshots) and
-  * parsers the contents in a list of files and
-  * directories. Intentionally NOT recursive.
+/** Accepts the URI of a resolver (e.g. https://oss.sonatype.org/content/repositories/snapshots) and parsers the
+  * contents in a list of files and directories. Intentionally NOT recursive.
   */
 object RemoteDirectory {
 
@@ -27,7 +22,7 @@ object RemoteDirectory {
   def fetch(
     url: String,
     credentials: Option[Credentials] = None
-  ) (
+  )(
     filter: String => Boolean = { !_.startsWith(".") }
   ): Result = {
     val base = Result()
@@ -36,10 +31,10 @@ object RemoteDirectory {
     val uc = (new URL(url)).openConnection()
     credentials.map { cred =>
       cred match {
-        case UsernamePassword(username, password) =>{
+        case UsernamePassword(username, password) => {
           val userpass = username + ":" + password.getOrElse("")
           val basicAuth = "Basic " + new String(new Base64().encode(userpass.getBytes()))
-          uc.setRequestProperty ("Authorization", basicAuth)
+          uc.setRequestProperty("Authorization", basicAuth)
         }
         case CredentialsUndefinedType(_) => {
           // No-op

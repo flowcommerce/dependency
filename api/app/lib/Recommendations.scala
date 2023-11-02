@@ -5,35 +5,35 @@ import io.flow.util.{Tag, Version}
 
 object Recommendations {
 
-  /**
-    * Given the current version and a list of possible versions,
-    * suggests the best version to which to upgrade (or None if not
-    * found)
+  /** Given the current version and a list of possible versions, suggests the best version to which to upgrade (or None
+    * if not found)
     */
   def version(current: VersionForm, others: Seq[VersionForm]): Option[String] = {
     val currentTag = Version(current.version) // TODO: are we missing crossBuildVersion here?
 
-    others.
-      filter(_ != current).
-      filter(v => matchesCrossBuild(v.crossBuildVersion, current.crossBuildVersion)).
-      map(v => Version(v.version)).
-      filter(_ > currentTag).
-      filter(v => isSimple(v) || (currentTag.tags.size == v.tags.size && matchesText(currentTag, v))).
-      sorted.
-      reverse.
-      headOption.
-      map { _.value }
+    others
+      .filter(_ != current)
+      .filter(v => matchesCrossBuild(v.crossBuildVersion, current.crossBuildVersion))
+      .map(v => Version(v.version))
+      .filter(_ > currentTag)
+      .filter(v => isSimple(v) || (currentTag.tags.size == v.tags.size && matchesText(currentTag, v)))
+      .sorted
+      .reverse
+      .headOption
+      .map { _.value }
   }
 
   private[this] def matchesText(current: Version, other: Version): Boolean = {
-    (current.tags zip other.tags).map{ case (a, b) =>
-      (a, b) match {
-        case (_: Tag.Semver, _: Tag.Semver) => true
-        case (_: Tag.Date, _: Tag.Date) => true
-        case (Tag.Text(value1), Tag.Text(value2)) => value1 == value2
-        case (_, _) => false
+    (current.tags zip other.tags)
+      .map { case (a, b) =>
+        (a, b) match {
+          case (_: Tag.Semver, _: Tag.Semver) => true
+          case (_: Tag.Date, _: Tag.Date) => true
+          case (Tag.Text(value1), Tag.Text(value2)) => value1 == value2
+          case (_, _) => false
+        }
       }
-    }.forall( el => el )
+      .forall(el => el)
   }
 
   private[this] def isSimple(version: Version): Boolean = {

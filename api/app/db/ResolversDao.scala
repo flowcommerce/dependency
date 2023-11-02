@@ -15,7 +15,7 @@ import io.flow.dependency.actors.ResolverActor
 import play.api.db._
 import play.api.libs.json._
 
-class ResolversDao @Inject()(
+class ResolversDao @Inject() (
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
   librariesDaoProvider: Provider[LibrariesDao],
@@ -55,9 +55,13 @@ class ResolversDao @Inject()(
   def credentials(resolver: Resolver): Option[Credentials] = {
     resolver.credentials.flatMap { _ =>
       db.withConnection { implicit c =>
-        SQL(SelectCredentialsQuery).on("id" -> resolver.id).as(
-          SqlParser.str("credentials").*
-        ).headOption.flatMap { parseCredentials(resolver.id, _) }
+        SQL(SelectCredentialsQuery)
+          .on("id" -> resolver.id)
+          .as(
+            SqlParser.str("credentials").*
+          )
+          .headOption
+          .flatMap { parseCredentials(resolver.id, _) }
       }
     }
   }
@@ -131,15 +135,17 @@ class ResolversDao @Inject()(
         val id = IdGenerator("res").randomId()
 
         db.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "organization_id" -> org.id,
-            "visibility" -> form.visibility.toString,
-            "credentials" -> form.credentials.map { cred => Json.stringify(Json.toJson(cred)) },
-            "position" -> nextPosition(org.id, form.visibility),
-            "uri" -> form.uri.trim,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "organization_id" -> org.id,
+              "visibility" -> form.visibility.toString,
+              "credentials" -> form.credentials.map { cred => Json.stringify(Json.toJson(cred)) },
+              "position" -> nextPosition(org.id, form.visibility),
+              "uri" -> form.uri.trim,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
 
         resolverActor ! ResolverActor.Messages.Created(id)
@@ -155,16 +161,18 @@ class ResolversDao @Inject()(
   }
 
   def delete(deletedBy: UserReference, resolver: Resolver): Unit = {
-    Pager.create { offset =>
-      librariesDaoProvider.get.findAll(
-        Authorization.All,
-        resolverId = Some(resolver.id),
-        limit = Some(1000),
-        offset = offset,
-      )
-    }.foreach { library =>
-      librariesDaoProvider.get.delete(staticUserProviderProvider.get.systemUser, library)
-    }
+    Pager
+      .create { offset =>
+        librariesDaoProvider.get.findAll(
+          Authorization.All,
+          resolverId = Some(resolver.id),
+          limit = Some(1000),
+          offset = offset
+        )
+      }
+      .foreach { library =>
+        librariesDaoProvider.get.delete(staticUserProviderProvider.get.systemUser, library)
+      }
 
     resolverActor ! ResolverActor.Messages.Deleted(resolver.id)
     dbHelpers.delete(deletedBy.id, resolver.id)
@@ -199,26 +207,27 @@ class ResolversDao @Inject()(
     offset: Long = 0
   ): Seq[Resolver] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "resolvers",
-        auth = auth.organizations("resolvers.organization_id", Some("resolvers.visibility")),
-        id = id,
-        ids = ids,
-        orderBy = Some(s"""
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "resolvers",
+          auth = auth.organizations("resolvers.organization_id", Some("resolvers.visibility")),
+          id = id,
+          ids = ids,
+          orderBy = Some(s"""
           case when visibility = '${Visibility.Public}' then 0
                when visibility = '${Visibility.Private}' then 1
                else 2 end,
           resolvers.position, lower(resolvers.uri),resolvers.created_at
         """),
-        limit = limit,
-        offset = offset
-      ).
-        optionalText("resolvers.visibility", visibility).
-        optionalText("organizations.key", organization.map(_.toLowerCase)).
-        equals("organizations.id", organizationId).
-        optionalText("resolvers.uri", uri).
-        as(parser.*)
+          limit = limit,
+          offset = offset
+        )
+        .optionalText("resolvers.visibility", visibility)
+        .optionalText("organizations.key", organization.map(_.toLowerCase))
+        .equals("organizations.id", organizationId)
+        .optionalText("resolvers.uri", uri)
+        .as(parser.*)
     }
   }
 
@@ -235,8 +244,7 @@ class ResolversDao @Inject()(
        and organization_id = {organization_id}
   """
 
-  /**
-    * Returns the next free position
+  /** Returns the next free position
     */
   def nextPosition(
     organizationId: String,
@@ -247,8 +255,10 @@ class ResolversDao @Inject()(
         case Visibility.Public => {
           SQL(NextPublicPositionQuery).as(SqlParser.int("position").single)
         }
-        case  Visibility.Private | Visibility.UNDEFINED(_) => {
-          SQL(NextPrivatePositionQuery).on("organization_id" -> organizationId.toString).as(SqlParser.int("position").single)
+        case Visibility.Private | Visibility.UNDEFINED(_) => {
+          SQL(NextPrivatePositionQuery)
+            .on("organization_id" -> organizationId.toString)
+            .as(SqlParser.int("position").single)
         }
       }
     }
@@ -256,20 +266,20 @@ class ResolversDao @Inject()(
 
   private[this] val parser: RowParser[io.flow.dependency.v0.models.Resolver] = {
     SqlParser.str("id") ~
-    io.flow.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
-    io.flow.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization").? ~
-    SqlParser.str("uri") ~
-    SqlParser.str("credentials").? map {
-      case id ~ visibility ~ organization ~ uri ~ credentials => {
-        io.flow.dependency.v0.models.Resolver(
-          id = id,
-          visibility = visibility,
-          organization = organization,
-          uri = uri,
-          credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials)
-        )
+      io.flow.dependency.v0.anorm.parsers.Visibility.parser("visibility") ~
+      io.flow.dependency.v0.anorm.parsers.OrganizationSummary.parserWithPrefix("organization").? ~
+      SqlParser.str("uri") ~
+      SqlParser.str("credentials").? map {
+        case id ~ visibility ~ organization ~ uri ~ credentials => {
+          io.flow.dependency.v0.models.Resolver(
+            id = id,
+            visibility = visibility,
+            organization = organization,
+            uri = uri,
+            credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials)
+          )
+        }
       }
-    }
   }
 
   private[this] def parseCredentials(resolverId: String, value: String): Option[Credentials] = {
@@ -278,7 +288,10 @@ class ResolversDao @Inject()(
         Some(credentials)
       }
       case JsError(error) => {
-        logger.withKeyValue("resolver", resolverId).withKeyValue("error", error.toString()).warn(s"Resolver has credentials that could not be parsed")
+        logger
+          .withKeyValue("resolver", resolverId)
+          .withKeyValue("error", error.toString())
+          .warn(s"Resolver has credentials that could not be parsed")
         None
       }
     }

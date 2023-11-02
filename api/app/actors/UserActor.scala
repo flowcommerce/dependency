@@ -18,7 +18,7 @@ object UserActor {
 
 }
 
-class UserActor @Inject()(
+class UserActor @Inject() (
   organizationsDao: OrganizationsDao,
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
@@ -28,26 +28,24 @@ class UserActor @Inject()(
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
-  def receive: Receive = SafeReceive.withLogUnhandled {
+  def receive: Receive = SafeReceive.withLogUnhandled { case UserActor.Messages.Created(userId) =>
+    usersDao.findById(userId).foreach { user =>
+      organizationsDao.upsertForUser(user)
 
-    case UserActor.Messages.Created(userId) =>
-      usersDao.findById(userId).foreach { user =>
-        organizationsDao.upsertForUser(user)
+      // This method will force create an identifier
+      userIdentifiersDao.latestForUser(usersDao.systemUser, user)
 
-        // This method will force create an identifier
-        userIdentifiersDao.latestForUser(usersDao.systemUser, user)
-
-        // Subscribe the user automatically to key personalized emails.
-        Seq(Publication.DailySummary).foreach { publication =>
-          subscriptionsDao.upsertByUserIdAndPublication(
-            usersDao.systemUser,
-            SubscriptionForm(
-              userId = user.id,
-              publication = publication
-            )
+      // Subscribe the user automatically to key personalized emails.
+      Seq(Publication.DailySummary).foreach { publication =>
+        subscriptionsDao.upsertByUserIdAndPublication(
+          usersDao.systemUser,
+          SubscriptionForm(
+            userId = user.id,
+            publication = publication
           )
-        }
+        )
       }
+    }
   }
 
 }

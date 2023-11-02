@@ -5,7 +5,7 @@ import util.DependencySpec
 class SimpleScalaParserSpec extends DependencySpec {
 
   "definesVariable" in {
-    SimpleScalaParserUtil.toVariable("var foo = 3") must be (
+    SimpleScalaParserUtil.toVariable("var foo = 3") must be(
       Some(SimpleScalaParserUtil.Variable("foo", "3"))
     )
 

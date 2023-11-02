@@ -16,10 +16,10 @@ trait LibraryArtifactProvider {
 
   def resolversDao: ResolversDao
 
-  /**
-    * Returns the artifacts for this library.
+  /** Returns the artifacts for this library.
     *
-    * @param organizationId Used to look up private resolvers for this organization.
+    * @param organizationId
+    *   Used to look up private resolvers for this organization.
     */
   def resolve(
     organizationId: String,
@@ -27,9 +27,7 @@ trait LibraryArtifactProvider {
     artifactId: String
   ): Option[ArtifactResolution]
 
-  /**
-    * Attempts to resolve a library at the specified resolver. A
-    * return value of None indicates we did NOT find this
+  /** Attempts to resolve a library at the specified resolver. A return value of None indicates we did NOT find this
     * groupId/artifactId on this resolver.
     */
   def resolve(
@@ -50,10 +48,9 @@ trait LibraryArtifactProvider {
 
 }
 
-
 class DefaultLibraryArtifactProvider @Inject() (
   override val resolversDao: ResolversDao,
-  organizationsCache: OrganizationsCache,
+  organizationsCache: OrganizationsCache
 ) extends LibraryArtifactProvider {
 
   override def resolve(
@@ -80,7 +77,7 @@ class DefaultLibraryArtifactProvider @Inject() (
     resolversDao.findAll(
       Authorization.Organization(organizationId),
       limit = limit,
-      offset = offset,
+      offset = offset
     ) match {
       case Nil => {
         None
@@ -116,10 +113,11 @@ class DefaultLibraryArtifactProvider @Inject() (
       id = resolver.id,
       organization = resolver.visibility match {
         case Visibility.Public => None
-        case Visibility.Private | Visibility.UNDEFINED(_) => organizationsCache.findSummaryByOrganizationId(organizationId)
+        case Visibility.Private | Visibility.UNDEFINED(_) =>
+          organizationsCache.findSummaryByOrganizationId(organizationId)
       },
       visibility = resolver.visibility,
-      uri = resolver.uri,
+      uri = resolver.uri
     )
   }
 

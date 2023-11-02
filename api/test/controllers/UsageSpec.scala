@@ -15,19 +15,19 @@ class UsageSpec extends FlowPlaySpec {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  "Check usage"  in {
+  "Check usage" in {
     val j = Json.toJson(uu.currentUsage)
-    println(s"Found API Usage: $j" )
+    println(s"Found API Usage: $j")
     val r = Json.toJson(
       Await.result(
         new Client(
           wsClient,
           s"http://localhost:$port"
-        ).Usages.getUsage(), 3 seconds
+        ).Usages.getUsage(),
+        3 seconds
       )
     )
 
     j must be(r)
   }
 }
-

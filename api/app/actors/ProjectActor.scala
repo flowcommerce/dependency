@@ -37,13 +37,13 @@ class ProjectActor @javax.inject.Inject() (
   rollbar: RollbarLogger,
   projectsCache: ProjectsCache,
   syncsDao: SyncsDao,
-  projectBinariesDao:ProjectBinariesDao,
+  projectBinariesDao: ProjectBinariesDao,
   projectLibrariesDao: InternalProjectLibrariesDao,
   recommendationsDao: RecommendationsDao,
   librariesDao: LibrariesDao,
   binariesDao: BinariesDao,
   staticUserProvider: StaticUserProvider,
-  defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider,
+  defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider
 ) extends ReapedActor {
 
   private[this] lazy val SystemUser = staticUserProvider.systemUser
@@ -75,45 +75,49 @@ class ProjectActor @javax.inject.Inject() (
       }
 
     case ProjectActor.Messages.Delete(projectId: String) =>
-      Pager.create { offset =>
-        recommendationsDao.findAll(Authorization.All, projectId = Some(projectId), offset = offset)
-      }.foreach { rec =>
-        recommendationsDao.delete(SystemUser, rec)
-      }
+      Pager
+        .create { offset =>
+          recommendationsDao.findAll(Authorization.All, projectId = Some(projectId), offset = offset)
+        }
+        .foreach { rec =>
+          recommendationsDao.delete(SystemUser, rec)
+        }
 
     case ProjectActor.Messages.ProjectLibraryDeleted(projectId, id, version) =>
       findProject(projectId).foreach { project =>
-        recommendationsDao.findAll(
-          Authorization.All,
-          projectId = Some(project.id),
-          `type` = Some(RecommendationType.Library),
-          objectId = Some(id),
-          fromVersion = Some(version)
-        ).foreach { rec =>
-          recommendationsDao.delete(SystemUser, rec)
-        }
+        recommendationsDao
+          .findAll(
+            Authorization.All,
+            projectId = Some(project.id),
+            `type` = Some(RecommendationType.Library),
+            objectId = Some(id),
+            fromVersion = Some(version)
+          )
+          .foreach { rec =>
+            recommendationsDao.delete(SystemUser, rec)
+          }
 
         processPendingSync(project)
       }
 
     case ProjectActor.Messages.ProjectBinaryDeleted(projectId, id, version) =>
       findProject(projectId).foreach { project =>
-        recommendationsDao.findAll(
-          Authorization.All,
-          projectId = Some(project.id),
-          `type` = Some(RecommendationType.Binary),
-          objectId = Some(id),
-          fromVersion = Some(version)
-        ).foreach { rec =>
-          recommendationsDao.delete(SystemUser, rec)
-        }
+        recommendationsDao
+          .findAll(
+            Authorization.All,
+            projectId = Some(project.id),
+            `type` = Some(RecommendationType.Binary),
+            objectId = Some(id),
+            fromVersion = Some(version)
+          )
+          .foreach { rec =>
+            recommendationsDao.delete(SystemUser, rec)
+          }
         processPendingSync(project)
       }
   }
 
-  /**
-    * Attempts to resolve the library. If successful, sets the
-    * project_libraries.library_id
+  /** Attempts to resolve the library. If successful, sets the project_libraries.library_id
     */
   def syncProjectLibrary(projectId: String, id: String): Unit = {
     syncsDao.withStartedAndCompleted("project_library", id) {
@@ -155,22 +159,30 @@ class ProjectActor @javax.inject.Inject() (
 
   // NB: We don't return ALL dependencies
   private[this] def dependenciesPendingCompletion(project: Project): Seq[String] = {
-    projectLibrariesDao.findAll(
-      Authorization.All,
-      projectId = Some(project.id),
-      isSynced = Some(false),
-      limit = None,
-      orderBy = Some(OrderBy("group_id,artifact_id")),
-    ).map( lib => s"Library ${lib.groupId}.${lib.artifactId}" ) ++
-    projectBinariesDao.findAll(
-      Authorization.All,
-      projectId = Some(project.id),
-      isSynced = Some(false)
-    ).map( bin => s"Binary ${bin.name}" )
+    projectLibrariesDao
+      .findAll(
+        Authorization.All,
+        projectId = Some(project.id),
+        isSynced = Some(false),
+        limit = None,
+        orderBy = Some(OrderBy("group_id,artifact_id"))
+      )
+      .map(lib => s"Library ${lib.groupId}.${lib.artifactId}") ++
+      projectBinariesDao
+        .findAll(
+          Authorization.All,
+          projectId = Some(project.id),
+          isSynced = Some(false)
+        )
+        .map(bin => s"Binary ${bin.name}")
   }
 
   private[this] def resolveLibrary(projectLibrary: InternalProjectLibrary): Option[Library] = {
-    librariesDao.findByGroupIdAndArtifactId(Authorization.All, projectLibrary.groupId, projectLibrary.artifactId) match {
+    librariesDao.findByGroupIdAndArtifactId(
+      Authorization.All,
+      projectLibrary.groupId,
+      projectLibrary.artifactId
+    ) match {
       case Some(lib) => {
         Some(lib)
       }
@@ -197,7 +209,8 @@ class ProjectActor @javax.inject.Inject() (
                 logger
                   .organization(projectLibrary.organizationId)
                   .withKeyValue("project_id", projectLibrary.projectId)
-                  .withKeyValue("errors", errors).error("Error upserting library")
+                  .withKeyValue("errors", errors)
+                  .error("Error upserting library")
                 None
               }
               case Right(library) => {
@@ -221,7 +234,10 @@ class ProjectActor @javax.inject.Inject() (
           )
         ) match {
           case Left(errors) => {
-            logger.withKeyValue("project", Json.toJson(projectBinary)).withKeyValue("errors", errors).error(s"error upserting binary")
+            logger
+              .withKeyValue("project", Json.toJson(projectBinary))
+              .withKeyValue("errors", errors)
+              .error(s"error upserting binary")
             None
           }
           case Right(binary) => {

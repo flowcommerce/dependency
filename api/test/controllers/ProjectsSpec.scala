@@ -10,7 +10,7 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  "GET /projects by id" in  {
+  "GET /projects by id" in {
     val org = createOrganization()
     val project1 = createProject(org)
     val client = identifiedClient(UserReference(systemUser.id))
@@ -19,7 +19,7 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
   }
 
-  "GET /projects by id that does not exist" in  {
+  "GET /projects by id that does not exist" in {
     await(
       identifiedClient().projects.get(id = Option(UUID.randomUUID.toString))
     ).map(_.id) must be(Nil)
@@ -48,7 +48,7 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
       await(
         identifiedClient().projects.getById(project.id)
-      ).id must be (project.id)
+      ).id must be(project.id)
     }
 
   }

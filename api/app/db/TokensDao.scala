@@ -41,10 +41,10 @@ object InternalTokenForm {
 }
 
 @Singleton
-class TokensDao @Inject()(
+class TokensDao @Inject() (
   db: Database,
   usersDaoProvider: Provider[UsersDao]
-){
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "tokens")
 
@@ -113,19 +113,23 @@ class TokensDao @Inject()(
     }
   }
 
-  private[this] def createWithConnection(createdBy: UserReference, form: InternalTokenForm)(implicit c: java.sql.Connection): Either[Seq[String], Token] = {
+  private[this] def createWithConnection(createdBy: UserReference, form: InternalTokenForm)(implicit
+    c: java.sql.Connection
+  ): Either[Seq[String], Token] = {
     validate(form) match {
       case Nil => {
         val id = IdGenerator("tok").randomId()
 
-        SQL(InsertQuery).on(
-          "id" -> id,
-          "user_id" -> form.userId,
-          "tag" -> form.tag.trim,
-          "token" -> form.token.trim,
-          "description" -> Util.trimmedString(form.description),
-          "updated_by_user_id" -> createdBy.id
-        ).execute()
+        SQL(InsertQuery)
+          .on(
+            "id" -> id,
+            "user_id" -> form.userId,
+            "tag" -> form.tag.trim,
+            "token" -> form.token.trim,
+            "description" -> Util.trimmedString(form.description),
+            "updated_by_user_id" -> createdBy.id
+          )
+          .execute()
 
         Right(
           findAllWithConnection(Authorization.All, id = Some(id), limit = 1).headOption.getOrElse {
@@ -139,9 +143,12 @@ class TokensDao @Inject()(
 
   def addCleartextIfAvailable(user: UserReference, token: Token): Token = {
     db.withConnection { implicit c =>
-      SelectCleartextTokenQuery.equals("tokens.id", Some(token.id)).as(
-        cleartextTokenParser().*
-      ).headOption match {
+      SelectCleartextTokenQuery
+        .equals("tokens.id", Some(token.id))
+        .as(
+          cleartextTokenParser().*
+        )
+        .headOption match {
         case None => token
         case Some(clear) => {
           clear.numberViews match {
@@ -158,13 +165,15 @@ class TokensDao @Inject()(
     }
   }
 
-  private[this] def incrementNumberViews(createdBy: UserReference, tokenId: String)(
-    implicit c: java.sql.Connection
+  private[this] def incrementNumberViews(createdBy: UserReference, tokenId: String)(implicit
+    c: java.sql.Connection
   ): Unit = {
-    SQL(IncrementNumberViewsQuery).on(
-      "id" -> tokenId,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(IncrementNumberViewsQuery)
+      .on(
+        "id" -> tokenId,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
     ()
   }
 
@@ -176,21 +185,25 @@ class TokensDao @Inject()(
     userId: String
   ): Option[String] = {
     db.withConnection { implicit c =>
-      SelectCleartextTokenQuery.
-        equals("tokens.user_id", Some(userId)).
-        optionalText("tokens.tag", Some(InternalTokenForm.GithubOauthTag)).
-        limit(1).
-        orderBy("tokens.created_at desc").
-        as(
+      SelectCleartextTokenQuery
+        .equals("tokens.user_id", Some(userId))
+        .optionalText("tokens.tag", Some(InternalTokenForm.GithubOauthTag))
+        .limit(1)
+        .orderBy("tokens.created_at desc")
+        .as(
           cleartextTokenParser().*
-        ).headOption.map(_.token)
+        )
+        .headOption
+        .map(_.token)
     }
   }
 
   private[this] case class CleartextToken(token: String, numberViews: Long)
 
   private[this] def cleartextTokenParser() = {
-    SqlParser.str("token") ~ SqlParser.long("number_views") map { case token ~ numberViews => CleartextToken(token, numberViews) }
+    SqlParser.str("token") ~ SqlParser.long("number_views") map { case token ~ numberViews =>
+      CleartextToken(token, numberViews)
+    }
   }
 
   def findById(auth: Authorization, id: String): Option[Token] = {
@@ -238,21 +251,22 @@ class TokensDao @Inject()(
     limit: Long,
     offset: Long = 0
   )(implicit c: java.sql.Connection): Seq[Token] = {
-    Standards.query(
-      BaseQuery,
-      tableName = "tokens",
-      auth = auth.users("tokens.user_id"),
-      id = id,
-      ids = ids,
-      orderBy = orderBy.sql,
-      limit = limit,
-      offset = offset
-    ).
-      equals("tokens.user_id", userId).
-      equals("tokens.token", token).
-      optionalText("tokens.tag", tag, valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)).
-      orderBy(orderBy.sql).
-      as(
+    Standards
+      .query(
+        BaseQuery,
+        tableName = "tokens",
+        auth = auth.users("tokens.user_id"),
+        id = id,
+        ids = ids,
+        orderBy = orderBy.sql,
+        limit = limit,
+        offset = offset
+      )
+      .equals("tokens.user_id", userId)
+      .equals("tokens.token", token)
+      .optionalText("tokens.tag", tag, valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim))
+      .orderBy(orderBy.sql)
+      .as(
         io.flow.dependency.v0.anorm.parsers.Token.parser().*
       )
   }

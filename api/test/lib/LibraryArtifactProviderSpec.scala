@@ -28,19 +28,25 @@ class LibraryArtifactProviderSpec extends DependencySpec {
 
   "parseUri" in {
     val library = makeLibrary(groupId = "com.github.tototoshi", artifactId = "scala-csv")
-    val resolution = provider.resolve(organizationId = orgSummary.id, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
-      sys.error("Could not find scala-csv library")
-    }
-    resolution.versions.find { v =>
-      v.tag.value == "1.2.2" && v.crossBuildVersion.map(_.value).contains("2.11")
-    }.map(_.tag.value) must be(Some("1.2.2"))
+    val resolution = provider
+      .resolve(organizationId = orgSummary.id, groupId = library.groupId, artifactId = library.artifactId)
+      .getOrElse {
+        sys.error("Could not find scala-csv library")
+      }
+    resolution.versions
+      .find { v =>
+        v.tag.value == "1.2.2" && v.crossBuildVersion.map(_.value).contains("2.11")
+      }
+      .map(_.tag.value) must be(Some("1.2.2"))
   }
 
   "swagger" in {
     val library = makeLibrary(groupId = "io.swagger", artifactId = "swagger-parser")
-    val resolution = provider.resolve(organizationId = orgSummary.id, groupId = library.groupId, artifactId = library.artifactId).getOrElse {
-      sys.error("Could not find swagger-parser library")
-    }
+    val resolution = provider
+      .resolve(organizationId = orgSummary.id, groupId = library.groupId, artifactId = library.artifactId)
+      .getOrElse {
+        sys.error("Could not find swagger-parser library")
+      }
     val tags = resolution.versions.map(_.tag.value)
     tags.contains("1.0.4") must be(true)
     tags.contains("1.0.13") must be(true)

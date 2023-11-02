@@ -7,7 +7,7 @@ import io.flow.common.v0.models.User
 import play.api.mvc.{Result, Results}
 
 @Singleton
-class UsersHelper @Inject()(
+class UsersHelper @Inject() (
   usersDao: UsersDao
 ) {
 

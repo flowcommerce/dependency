@@ -5,7 +5,7 @@ import io.flow.dependency.v0.models.Project
 import io.flow.util.CacheWithFallbackToStaleData
 
 @javax.inject.Singleton
-case class ProjectsCache @javax.inject.Inject()(
+case class ProjectsCache @javax.inject.Inject() (
   projectsDao: ProjectsDao
 ) extends CacheWithFallbackToStaleData[String, Option[Project]] {
 

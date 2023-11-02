@@ -9,14 +9,17 @@ class ResolversDaoSpec extends DependencySpec {
 
   private[this] lazy val org = createOrganization()
 
-  private[this] lazy val publicResolver = resolversDao.findAll(
-    Authorization.All,
-    visibility = Some(Visibility.Public),
-    uri = Some("https://jcenter.bintray.com/"),
-    limit = 1
-  ).headOption.getOrElse {
-    sys.error("No public resolvers found")
-  }
+  private[this] lazy val publicResolver = resolversDao
+    .findAll(
+      Authorization.All,
+      visibility = Some(Visibility.Public),
+      uri = Some("https://jcenter.bintray.com/"),
+      limit = 1
+    )
+    .headOption
+    .getOrElse {
+      sys.error("No public resolvers found")
+    }
 
   "upsert" in {
     val form = createResolverForm(org)
@@ -61,27 +64,43 @@ class ResolversDaoSpec extends DependencySpec {
 
       resolversDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
       resolversDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-      resolversDao.findAll(Authorization.All, ids = Some(Seq(resolver1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(resolver1.id))
+      resolversDao
+        .findAll(Authorization.All, ids = Some(Seq(resolver1.id, UUID.randomUUID.toString)))
+        .map(_.id) must be(Seq(resolver1.id))
     }
 
     "find by organizationId" in {
       val resolver = createResolver(org)
 
-      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(org.id)).map(_.id).sorted must be(
+      resolversDao
+        .findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(org.id))
+        .map(_.id)
+        .sorted must be(
         Seq(resolver.id)
       )
 
-      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organizationId = Some(createOrganization().id)) must be(Nil)
+      resolversDao.findAll(
+        Authorization.All,
+        id = Some(resolver.id),
+        organizationId = Some(createOrganization().id)
+      ) must be(Nil)
     }
 
     "find by org" in {
       val resolver = createResolver(org)
 
-      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(org.key)).map(_.id).sorted must be(
+      resolversDao
+        .findAll(Authorization.All, id = Some(resolver.id), organization = Some(org.key))
+        .map(_.id)
+        .sorted must be(
         Seq(resolver.id)
       )
 
-      resolversDao.findAll(Authorization.All, id = Some(resolver.id), organization = Some(createOrganization().key)) must be(Nil)
+      resolversDao.findAll(
+        Authorization.All,
+        id = Some(resolver.id),
+        organization = Some(createOrganization().key)
+      ) must be(Nil)
     }
 
   }
@@ -102,28 +121,36 @@ class ResolversDaoSpec extends DependencySpec {
   "private resolvers sort after public" in {
     val resolver = createResolver(org)(createResolverForm(org = org, visibility = Visibility.Private))
 
-    resolversDao.findAll(
-      Authorization.All,
-      ids = Some(Seq(publicResolver.id, resolver.id))
-    ).map(_.id) must be(Seq(publicResolver.id, resolver.id))
+    resolversDao
+      .findAll(
+        Authorization.All,
+        ids = Some(Seq(publicResolver.id, resolver.id))
+      )
+      .map(_.id) must be(Seq(publicResolver.id, resolver.id))
   }
 
   "private resolvers require authorization" in {
     val organization = createOrganization()
-    val resolver = createResolver(org)(createResolverForm(
-      org = organization,
-      visibility = Visibility.Private
-    ))
+    val resolver = createResolver(org)(
+      createResolverForm(
+        org = organization,
+        visibility = Visibility.Private
+      )
+    )
 
-    resolversDao.findAll(
-      Authorization.All,
-      id = Some(resolver.id)
-    ).map(_.id) must be(Seq(resolver.id))
+    resolversDao
+      .findAll(
+        Authorization.All,
+        id = Some(resolver.id)
+      )
+      .map(_.id) must be(Seq(resolver.id))
 
-    resolversDao.findAll(
-      Authorization.Organization(organization.id),
-      id = Some(resolver.id)
-    ).map(_.id) must be(Seq(resolver.id))
+    resolversDao
+      .findAll(
+        Authorization.Organization(organization.id),
+        id = Some(resolver.id)
+      )
+      .map(_.id) must be(Seq(resolver.id))
 
     resolversDao.findAll(
       Authorization.PublicOnly,
@@ -142,7 +169,7 @@ class ResolversDaoSpec extends DependencySpec {
         )
       )
     )
-    //resolver.credentials must be(Some(UsernamePassword(credentials.username, None)))
+    // resolver.credentials must be(Some(UsernamePassword(credentials.username, None)))
     resolversDao.credentials(resolver) must be(Some(credentials))
   }
 
@@ -158,10 +185,14 @@ class ResolversDaoSpec extends DependencySpec {
         )
       )
     )
-    resolver.credentials must be(Some(UsernamePassword(
-      username = credentials.username,
-      password = Some("masked")
-    )))
+    resolver.credentials must be(
+      Some(
+        UsernamePassword(
+          username = credentials.username,
+          password = Some("masked")
+        )
+      )
+    )
 
     resolversDao.credentials(resolver) must be(Some(credentials))
   }

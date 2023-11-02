@@ -11,11 +11,11 @@ import play.api.db._
 
 import scala.util.{Failure, Success, Try}
 
-class BinaryVersionsDao @Inject()(
+class BinaryVersionsDao @Inject() (
   db: Database,
   logger: RollbarLogger,
   internalTasksDao: InternalTasksDao
-){
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "binary_versions")
 
@@ -44,8 +44,8 @@ class BinaryVersionsDao @Inject()(
     }
   }
 
-  private[db] def upsertWithConnection(createdBy: UserReference, binaryId: String, version: String)(
-    implicit c: java.sql.Connection
+  private[db] def upsertWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit
+    c: java.sql.Connection
   ): BinaryVersion = {
     findAllWithConnection(
       binaryId = Some(binaryId),
@@ -76,17 +76,21 @@ class BinaryVersionsDao @Inject()(
     }
   }
 
-  def createWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit c: java.sql.Connection): BinaryVersion = {
+  def createWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit
+    c: java.sql.Connection
+  ): BinaryVersion = {
     assert(!version.trim.isEmpty, "Version must be non empty")
     val id = IdGenerator("biv").randomId()
 
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "binary_id" -> binaryId,
-      "version" -> version.trim,
-      "sort_key" -> Version(version.trim).sortKey,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "binary_id" -> binaryId,
+        "version" -> version.trim,
+        "sort_key" -> Version(version.trim).sortKey,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
 
     sync(binaryId)
 
@@ -107,7 +111,8 @@ class BinaryVersionsDao @Inject()(
   }
 
   def findByBinaryAndVersion(
-    binary: Binary, version: String
+    binary: Binary,
+    version: String
   ): Option[BinaryVersion] = {
     findAll(
       binaryId = Some(binary.id),
@@ -126,8 +131,8 @@ class BinaryVersionsDao @Inject()(
 
   def findByIdWithConnection(
     id: String
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Option[BinaryVersion] = {
     findAllWithConnection(id = Some(id), limit = 1).headOption
   }
@@ -166,40 +171,41 @@ class BinaryVersionsDao @Inject()(
     orderBy: OrderBy = OrderBy(s"-binary_versions.sort_key, binary_versions.created_at"),
     limit: Long = 25,
     offset: Long = 0
-  ) (
-    implicit c: java.sql.Connection
+  )(implicit
+    c: java.sql.Connection
   ): Seq[BinaryVersion] = {
     // N.B.: at this time, all binary versions are public and thus we
     // do not need to filter by auth. It is here in the API for
     // consistency and to explicitly declare we are respecting it.
 
-    BaseQuery.
-      equals("binary_versions.id", id).
-      optionalIn("binary_versions.id", ids).
-      equals("binary_versions.binary_id", binaryId).
-      and(
+    BaseQuery
+      .equals("binary_versions.id", id)
+      .optionalIn("binary_versions.id", ids)
+      .equals("binary_versions.binary_id", binaryId)
+      .and(
         projectId.map { _ =>
           "binary_versions.binary_id in (select binary_id from project_bainaries where binary_id is not null and project_id = {project_id})"
         }
-      ).bind("project_id", projectId).
-      optionalText(
+      )
+      .bind("project_id", projectId)
+      .optionalText(
         "binary_versions.version",
         version,
         columnFunctions = Seq(Query.Function.Lower),
         valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-      ).
-      and(
+      )
+      .and(
         greaterThanVersion.map { _ =>
           s"binary_versions.sort_key > {greater_than_version_sort_key}"
         }
-      ).bind("greater_than_version_sort_key", greaterThanVersion).
-      orderBy(orderBy.sql).
-      limit(limit).
-      offset(offset).
-      as(
+      )
+      .bind("greater_than_version_sort_key", greaterThanVersion)
+      .orderBy(orderBy.sql)
+      .limit(limit)
+      .offset(offset)
+      .as(
         io.flow.dependency.v0.anorm.parsers.BinaryVersion.parser().*
       )
   }
 
 }
-

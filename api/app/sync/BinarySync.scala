@@ -15,7 +15,7 @@ class BinarySync @Inject() (
   binaryVersionsDao: BinaryVersionsDao,
   syncsDao: SyncsDao,
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
-  logger: RollbarLogger,
+  logger: RollbarLogger
 ) {
 
   def sync(user: UserReference, binaryId: String): Unit = {
@@ -36,10 +36,12 @@ class BinarySync @Inject() (
     searchActor ! SearchActor.Messages.SyncBinary(binaryId)
   }
   def iterateAll()(f: Binary => Any): Unit = {
-    Pager.create { offset =>
-      binariesDao.findAll(offset = offset, limit = 1000)
-    }.foreach { rec =>
-      f(rec)
-    }
+    Pager
+      .create { offset =>
+        binariesDao.findAll(offset = offset, limit = 1000)
+      }
+      .foreach { rec =>
+        f(rec)
+      }
   }
 }

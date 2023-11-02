@@ -14,14 +14,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 // Custom implementation based on FlowController.Identified but with database fallback for auth
 @Singleton
-class IdentificationWithFallback @Inject()(
+class IdentificationWithFallback @Inject() (
   val parser: BodyParsers.Default,
   val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
   usersDao: UsersDao
 )(implicit val executionContext: ExecutionContext, logger: RollbarLogger)
-  extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
+  extends ActionBuilder[IdentifiedRequest, AnyContent]
+  with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
     auth(request.headers)(AuthData.Identified.fromMap) match {
@@ -29,7 +30,12 @@ class IdentificationWithFallback @Inject()(
         legacyUser(request.headers) match {
           case None => Future.successful(unauthorized(request))
           case Some(user) =>
-            val ad = AuthData.Identified(user = user, session = None, requestId = "lib-play-" + UUID.randomUUID.toString, customer = None)
+            val ad = AuthData.Identified(
+              user = user,
+              session = None,
+              requestId = "lib-play-" + UUID.randomUUID.toString,
+              customer = None
+            )
             block(new IdentifiedRequest(ad, request))
         }
       case Some(ad) => block(new IdentifiedRequest(ad, request))
@@ -55,9 +61,7 @@ class IdentificationWithFallback @Inject()(
     }
   }
 
-  /**
-    * If present, parses the basic authorization header and returns
-    * its decoded value.
+  /** If present, parses the basic authorization header and returns its decoded value.
     */
   private[this] def basicAuthorizationToken(
     headers: play.api.mvc.Headers

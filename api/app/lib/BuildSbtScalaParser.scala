@@ -4,9 +4,8 @@ import db.ProjectBinaryForm
 import io.flow.dependency.v0.models.{BinaryType, ProjectSummary}
 import io.flow.log.RollbarLogger
 
-/**
-  * Takes the contents of a build.sbt file and parses it, providing
-  * access to its dependencies (libraries, binaries and versions).
+/** Takes the contents of a build.sbt file and parses it, providing access to its dependencies (libraries, binaries and
+  * versions).
   */
 case class BuildSbtScalaParser(
   override val project: ProjectSummary,
@@ -22,9 +21,7 @@ case class BuildSbtScalaParser(
   val libraries: Seq[Artifact] = parseLibraries()
 
   val binaries: Seq[ProjectBinaryForm] = {
-    lines.
-      filter(_.contains("scalaVersion")).
-      flatMap { line =>
+    lines.filter(_.contains("scalaVersion")).flatMap { line =>
       line.split(":=").map(_.trim).toList match {
         case _ :: version :: Nil => {
           Some(

@@ -19,9 +19,11 @@ class OrganizationsDaoSpec extends DependencySpec {
       user.copy(email = Some("mbryzek@alum.mit.edu"))
     ) must be("mbryzek")
 
-    organizationsDao.defaultUserName(
-      user.copy(name = Name())
-    ).length must be(organizationsDao.DefaultUserNameLength)
+    organizationsDao
+      .defaultUserName(
+        user.copy(name = Name())
+      )
+      .length must be(organizationsDao.DefaultUserNameLength)
 
     organizationsDao.defaultUserName(
       user.copy(name = Name(first = Some("Michael")))
@@ -75,13 +77,18 @@ class OrganizationsDaoSpec extends DependencySpec {
     val organization1 = createOrganization()
     val organization2 = createOrganization()
 
-    organizationsDao.findAll(Authorization.All, ids = Some(Seq(organization1.id, organization2.id))).map(_.id).sorted must be(
+    organizationsDao
+      .findAll(Authorization.All, ids = Some(Seq(organization1.id, organization2.id)))
+      .map(_.id)
+      .sorted must be(
       Seq(organization1.id, organization2.id).sorted
     )
 
     organizationsDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
     organizationsDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
-    organizationsDao.findAll(Authorization.All, ids = Some(Seq(organization1.id, UUID.randomUUID.toString))).map(_.id) must be(Seq(organization1.id))
+    organizationsDao
+      .findAll(Authorization.All, ids = Some(Seq(organization1.id, UUID.randomUUID.toString)))
+      .map(_.id) must be(Seq(organization1.id))
   }
 
   "findAll by userId includes user's org" in {
@@ -92,7 +99,9 @@ class OrganizationsDaoSpec extends DependencySpec {
     }
 
     val org = organizationsDao.findAll(Authorization.All, forUserId = Some(user.id)).head
-    organizationsDao.findAll(Authorization.All, id = Some(org.id), userId = Some(user.id)).map(_.id) must be(Seq(org.id))
+    organizationsDao.findAll(Authorization.All, id = Some(org.id), userId = Some(user.id)).map(_.id) must be(
+      Seq(org.id)
+    )
     organizationsDao.findAll(Authorization.All, id = Some(org.id), userId = Some(UUID.randomUUID.toString)) must be(Nil)
   }
 
@@ -100,7 +109,9 @@ class OrganizationsDaoSpec extends DependencySpec {
 
     "keep key url friendly" in {
       organizationsDao.validate(createOrganizationForm().copy(key = "flow commerce")) must be(
-        Seq("Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: flowcommerce")
+        Seq(
+          "Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: flowcommerce"
+        )
       )
     }
 

@@ -4,7 +4,7 @@ import java.util.UUID
 
 import util.DependencySpec
 
-class GithubUsersDaoSpec extends  DependencySpec {
+class GithubUsersDaoSpec extends DependencySpec {
 
   "upsertById" in {
     val form = createGithubUserForm()
@@ -15,8 +15,8 @@ class GithubUsersDaoSpec extends  DependencySpec {
 
     val user3 = githubUsersDao.upsertById(Some(systemUser), createGithubUserForm())
 
-    user2.id must not be(user3.id)
-    user2.id must not be(user3.id)
+    user2.id must not be (user3.id)
+    user2.id must not be (user3.id)
   }
 
   "findById" in {

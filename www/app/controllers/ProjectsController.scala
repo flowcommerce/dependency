@@ -13,12 +13,13 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ProjectsController @javax.inject.Inject()(
+class ProjectsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents
-)(implicit ec: ExecutionContext) extends controllers.BaseController(config, dependencyClientProvider) {
+)(implicit ec: ExecutionContext)
+  extends controllers.BaseController(config, dependencyClientProvider) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Projects)
 
@@ -38,42 +39,43 @@ class ProjectsController @javax.inject.Inject()(
     }
   }
 
-  def show(id: String, recommendationsPage: Int = 0, binariesPage: Int = 0, librariesPage: Int = 0) = User.async { implicit request =>
-    withProject(request, id) { project =>
-      for {
-        recommendations <- dependencyClient(request).recommendations.get(
-          projectId = Some(project.id),
-          limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = recommendationsPage * Pagination.DefaultLimit.toLong
-        )
-        projectBinaries <- dependencyClient(request).projectBinaries.get(
-          projectId = Some(id),
-          limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = binariesPage * Pagination.DefaultLimit.toLong
-        )
-        projectLibraries <- dependencyClient(request).projectLibraries.get(
-          projectId = Some(id),
-          limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = librariesPage * Pagination.DefaultLimit.toLong
-        )
-        syncs <- dependencyClient(request).syncs.get(
-          objectId = Some(id),
-          event = Some(SyncEvent.Completed),
-          limit = 1
-        )
-      } yield {
-        Ok(
-          views.html.projects.show(
-            uiData(request),
-            project,
-            PaginatedCollection(recommendationsPage, recommendations),
-            PaginatedCollection(binariesPage, projectBinaries),
-            PaginatedCollection(librariesPage, projectLibraries),
-            syncs.headOption
+  def show(id: String, recommendationsPage: Int = 0, binariesPage: Int = 0, librariesPage: Int = 0) = User.async {
+    implicit request =>
+      withProject(request, id) { project =>
+        for {
+          recommendations <- dependencyClient(request).recommendations.get(
+            projectId = Some(project.id),
+            limit = Pagination.DefaultLimit.toLong + 1L,
+            offset = recommendationsPage * Pagination.DefaultLimit.toLong
           )
-        )
+          projectBinaries <- dependencyClient(request).projectBinaries.get(
+            projectId = Some(id),
+            limit = Pagination.DefaultLimit.toLong + 1L,
+            offset = binariesPage * Pagination.DefaultLimit.toLong
+          )
+          projectLibraries <- dependencyClient(request).projectLibraries.get(
+            projectId = Some(id),
+            limit = Pagination.DefaultLimit.toLong + 1L,
+            offset = librariesPage * Pagination.DefaultLimit.toLong
+          )
+          syncs <- dependencyClient(request).syncs.get(
+            objectId = Some(id),
+            event = Some(SyncEvent.Completed),
+            limit = 1
+          )
+        } yield {
+          Ok(
+            views.html.projects.show(
+              uiData(request),
+              project,
+              PaginatedCollection(recommendationsPage, recommendations),
+              PaginatedCollection(binariesPage, projectBinaries),
+              PaginatedCollection(librariesPage, projectLibraries),
+              syncs.headOption
+            )
+          )
+        }
       }
-    }
   }
 
   def github() = User.async { implicit request =>
@@ -82,7 +84,8 @@ class ProjectsController @javax.inject.Inject()(
     } yield {
       orgs match {
         case Nil => {
-          Redirect(routes.OrganizationsController.index()).flashing("warning" -> "Add a new org before adding a project")
+          Redirect(routes.OrganizationsController.index())
+            .flashing("warning" -> "Add a new org before adding a project")
         }
         case one :: Nil => {
           Redirect(routes.ProjectsController.githubOrg(one.key))
@@ -90,7 +93,8 @@ class ProjectsController @javax.inject.Inject()(
         case multiple => {
           Ok(
             views.html.projects.github(
-              uiData(request), multiple
+              uiData(request),
+              multiple
             )
           )
         }
@@ -110,7 +114,9 @@ class ProjectsController @javax.inject.Inject()(
       } yield {
         Ok(
           views.html.projects.githubOrg(
-            uiData(request), org, PaginatedCollection(repositoriesPage, repositories)
+            uiData(request),
+            org,
+            PaginatedCollection(repositoriesPage, repositories)
           )
         )
       }
@@ -120,40 +126,45 @@ class ProjectsController @javax.inject.Inject()(
   @nowarn
   def postGithubOrg(
     orgKey: String,
-    owner: String, // github owner, ex. flowcommerce    
+    owner: String, // github owner, ex. flowcommerce
     name: String, // github repo name, ex. user
     repositoriesPage: Int = 0
   ) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
-      dependencyClient(request).repositories.getGithub(
-        organizationId = Some(org.id),
-        owner = Some(owner),
-        name = Some(name)
-      ).flatMap { selected =>
-        selected.headOption match {
-          case None => Future {
-            Redirect(routes.ProjectsController.github()).flashing("warning" -> "Project not found")
-          }
-          case Some(repo) => {
-            dependencyClient(request).projects.post(
-              ProjectForm(
-                organization = org.key,
-                name = repo.name,
-                scms = Scms.Github,
-                visibility = if (repo.`private`) {
-                  Visibility.Private
-                } else {
-                  Visibility.Public
-                },
-                uri = repo.htmlUrl,
-                branch = repo.defaultBranch
-              )
-            ).map { project =>
-              Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project added")
+      dependencyClient(request).repositories
+        .getGithub(
+          organizationId = Some(org.id),
+          owner = Some(owner),
+          name = Some(name)
+        )
+        .flatMap { selected =>
+          selected.headOption match {
+            case None =>
+              Future {
+                Redirect(routes.ProjectsController.github()).flashing("warning" -> "Project not found")
+              }
+            case Some(repo) => {
+              dependencyClient(request).projects
+                .post(
+                  ProjectForm(
+                    organization = org.key,
+                    name = repo.name,
+                    scms = Scms.Github,
+                    visibility = if (repo.`private`) {
+                      Visibility.Private
+                    } else {
+                      Visibility.Public
+                    },
+                    uri = repo.htmlUrl,
+                    branch = repo.defaultBranch
+                  )
+                )
+                .map { project =>
+                  Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project added")
+                }
             }
           }
         }
-      }
     }
   }
 
@@ -174,28 +185,30 @@ class ProjectsController @javax.inject.Inject()(
 
     organizations(request).flatMap { orgs =>
       boundForm.fold(
-
-        formWithErrors => Future {
-          Ok(views.html.projects.create(uiData(request), formWithErrors, orgs))
-        },
-
+        formWithErrors =>
+          Future {
+            Ok(views.html.projects.create(uiData(request), formWithErrors, orgs))
+          },
         uiForm => {
-          dependencyClient(request).projects.post(
-            projectForm = ProjectForm(
-              organization = uiForm.organization,
-              name = uiForm.name,
-              scms = Scms(uiForm.scms),
-              visibility = Visibility(uiForm.visibility),
-              uri = uiForm.uri,
-              branch = uiForm.branch
+          dependencyClient(request).projects
+            .post(
+              projectForm = ProjectForm(
+                organization = uiForm.organization,
+                name = uiForm.name,
+                scms = Scms(uiForm.scms),
+                visibility = Visibility(uiForm.visibility),
+                uri = uiForm.uri,
+                branch = uiForm.branch
+              )
             )
-          ).map { project =>
-            Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
-          }.recover {
-            case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-              Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.genericError.messages))
+            .map { project =>
+              Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
             }
-          }
+            .recover {
+              case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.genericError.messages))
+              }
+            }
         }
       )
     }
@@ -230,29 +243,33 @@ class ProjectsController @javax.inject.Inject()(
       withProject(request, id) { project =>
         val boundForm = ProjectsController.uiForm.bindFromRequest()
         boundForm.fold(
-
-          formWithErrors => Future {
-            Ok(views.html.projects.edit(uiData(request), project, formWithErrors, orgs))
-          },
-
+          formWithErrors =>
+            Future {
+              Ok(views.html.projects.edit(uiData(request), project, formWithErrors, orgs))
+            },
           uiForm => {
-            dependencyClient(request).projects.putById(
-              project.id,
-              ProjectForm(
-                organization = project.organization.key,
-                name = uiForm.name,
-                scms = Scms(uiForm.scms),
-                visibility = Visibility(uiForm.visibility),
-                uri = uiForm.uri,
-                branch = uiForm.branch
+            dependencyClient(request).projects
+              .putById(
+                project.id,
+                ProjectForm(
+                  organization = project.organization.key,
+                  name = uiForm.name,
+                  scms = Scms(uiForm.scms),
+                  visibility = Visibility(uiForm.visibility),
+                  uri = uiForm.uri,
+                  branch = uiForm.branch
+                )
               )
-            ).map { project =>
-              Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")
-            }.recover {
-              case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
-                Ok(views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericError.messages))
+              .map { project =>
+                Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")
               }
-            }
+              .recover {
+                case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
+                  Ok(
+                    views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericError.messages)
+                  )
+                }
+              }
           }
         )
       }
@@ -260,20 +277,22 @@ class ProjectsController @javax.inject.Inject()(
   }
 
   def postDelete(id: String) = User.async { implicit request =>
-    dependencyClient(request).projects.deleteById(id).map { _ =>
-      Redirect(routes.ProjectsController.index()).flashing("success" -> s"Project deleted")
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
+    dependencyClient(request).projects
+      .deleteById(id)
+      .map { _ =>
+        Redirect(routes.ProjectsController.index()).flashing("success" -> s"Project deleted")
       }
-      case GenericErrorResponse(_, msg) => {
-        Redirect(routes.ProjectsController.index()).flashing("error" -> msg.getOrElse("Error deleting project"))
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
+        }
+        case GenericErrorResponse(_, msg) => {
+          Redirect(routes.ProjectsController.index()).flashing("error" -> msg.getOrElse("Error deleting project"))
+        }
       }
-    }
   }
 
-  /**
-    * Waits for the latest sync to complete for this project.
+  /** Waits for the latest sync to complete for this project.
     */
   @nowarn
   def sync(id: String, n: Int, librariesPage: Int = 0) = User.async { implicit request =>
@@ -365,13 +384,16 @@ class ProjectsController @javax.inject.Inject()(
   )(
     f: Project => Future[Result]
   ) = {
-    dependencyClient(request).projects.getById(id).flatMap { project =>
-      f(project)
-    }.recover {
-      case UnitResponse(404) => {
-        Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
+    dependencyClient(request).projects
+      .getById(id)
+      .flatMap { project =>
+        f(project)
       }
-    }
+      .recover {
+        case UnitResponse(404) => {
+          Redirect(routes.ProjectsController.index()).flashing("warning" -> s"Project not found")
+        }
+      }
   }
 
 }

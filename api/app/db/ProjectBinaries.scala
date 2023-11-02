@@ -18,12 +18,12 @@ case class ProjectBinaryForm(
 )
 
 @Singleton
-class ProjectBinariesDao @Inject()(
+class ProjectBinariesDao @Inject() (
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
   projectsDaoProvider: Provider[ProjectsDao],
   @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
-){
+) {
 
   private[this] val dbHelpers = DbHelpers(db, "project_binaries")
 
@@ -91,7 +91,10 @@ class ProjectBinariesDao @Inject()(
 
     val existsErrors = if (nameErrors.isEmpty && versionErrors.isEmpty) {
       findByProjectIdAndNameAndVersion(
-        Authorization.All, form.projectId, form.name.toString, form.version
+        Authorization.All,
+        form.projectId,
+        form.name.toString,
+        form.version
       ) match {
         case None => Nil
         case Some(_) => {
@@ -107,7 +110,10 @@ class ProjectBinariesDao @Inject()(
 
   def upsert(createdBy: UserReference, form: ProjectBinaryForm): Either[Seq[String], ProjectBinary] = {
     findByProjectIdAndNameAndVersion(
-      Authorization.All, form.projectId, form.name.toString, form.version
+      Authorization.All,
+      form.projectId,
+      form.name.toString,
+      form.version
     ) match {
       case None => {
         create(createdBy, form)
@@ -124,14 +130,16 @@ class ProjectBinariesDao @Inject()(
         val id = IdGenerator("prb").randomId()
 
         db.withConnection { implicit c =>
-          SQL(InsertQuery).on(
-            "id" -> id,
-            "project_id" -> form.projectId,
-            "name" -> form.name.toString.trim,
-            "version" -> form.version.trim,
-            "path" -> form.path.trim,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(InsertQuery)
+            .on(
+              "id" -> id,
+              "project_id" -> form.projectId,
+              "name" -> form.name.toString.trim,
+              "version" -> form.version.trim,
+              "path" -> form.path.trim,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
           projectActor ! ProjectActor.Messages.ProjectBinaryCreated(form.projectId, id)
         }
 
@@ -147,36 +155,41 @@ class ProjectBinariesDao @Inject()(
 
   def removeBinary(user: UserReference, projectBinary: ProjectBinary): Unit = {
     db.withConnection { implicit c =>
-      SQL(RemoveBinaryQuery).on(
-        "id" -> projectBinary.id,
-        "updated_by_user_id" -> user.id
-      ).execute()
+      SQL(RemoveBinaryQuery)
+        .on(
+          "id" -> projectBinary.id,
+          "updated_by_user_id" -> user.id
+        )
+        .execute()
     }
     ()
   }
 
-  /**
-    * Removes any project binary ids for this project not specified in this list
+  /** Removes any project binary ids for this project not specified in this list
     */
   def setIds(user: UserReference, projectId: String, projectBinaries: Seq[ProjectBinary]): Unit = {
     val ids = projectBinaries.map(_.id)
-    Pager.create { offset =>
-      findAll(Authorization.All, projectId = Some(projectId), limit = 100, offset = offset)
-    }.foreach { projectBinary =>
-      if (!ids.contains(projectBinary.id)) {
-        delete(user, projectBinary)
+    Pager
+      .create { offset =>
+        findAll(Authorization.All, projectId = Some(projectId), limit = 100, offset = offset)
       }
-    }
+      .foreach { projectBinary =>
+        if (!ids.contains(projectBinary.id)) {
+          delete(user, projectBinary)
+        }
+      }
 
   }
 
   def setBinary(user: UserReference, projectBinary: ProjectBinary, binary: Binary): Unit = {
     db.withConnection { implicit c =>
-      SQL(SetBinaryQuery).on(
-        "id" -> projectBinary.id,
-        "binary_id" -> binary.id,
-        "updated_by_user_id" -> user.id
-      ).execute()
+      SQL(SetBinaryQuery)
+        .on(
+          "id" -> projectBinary.id,
+          "binary_id" -> binary.id,
+          "updated_by_user_id" -> user.id
+        )
+        .execute()
     }
     ()
   }
@@ -220,29 +233,30 @@ class ProjectBinariesDao @Inject()(
     offset: Long = 0
   ): Seq[ProjectBinary] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "project_binaries",
-        auth = auth.organizations("organizations.id", Some("projects.visibility")),
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        equals("project_binaries.project_id", projectId).
-        equals("project_binaries.binary_id", binaryId).
-        optionalText(
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "project_binaries",
+          auth = auth.organizations("organizations.id", Some("projects.visibility")),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .equals("project_binaries.project_id", projectId)
+        .equals("project_binaries.binary_id", binaryId)
+        .optionalText(
           "project_binaries.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        optionalText(
+        )
+        .optionalText(
           "project_binaries.version",
           version
-        ).
-        and(
+        )
+        .and(
           isSynced.map { value =>
             val clause = "select 1 from syncs where object_id = project_binaries.id and event = {sync_event_completed}"
             value match {
@@ -250,10 +264,10 @@ class ProjectBinariesDao @Inject()(
               case false => s"not exists ($clause)"
             }
           }
-        ).
-        bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString)).
-        nullBoolean("project_binaries.binary_id", hasBinary).
-        as(
+        )
+        .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
+        .nullBoolean("project_binaries.binary_id", hasBinary)
+        .as(
           io.flow.dependency.v0.anorm.parsers.ProjectBinary.parser().*
         )
     }

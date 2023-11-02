@@ -11,7 +11,7 @@ case class Artifact(
   artifactId: String,
   version: String,
   isCrossBuilt: Boolean,
-  isPlugin: Boolean,
+  isPlugin: Boolean
 ) {
 
   def toProjectLibraryForm(
@@ -29,7 +29,7 @@ case class Artifact(
       } else {
         None
       },
-      libraryId = None,
+      libraryId = None
     )
   }
 

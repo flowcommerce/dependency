@@ -5,9 +5,8 @@ import io.flow.play.util.{Config => FlowConfig}
 import java.net.URLEncoder
 import javax.inject.{Inject, Singleton}
 
-
 @Singleton
-class GitHubConfig @Inject()(config: FlowConfig) {
+class GitHubConfig @Inject() (config: FlowConfig) {
   private val Scopes = Seq("user:email", "repo", "read:repo_hook", "write:repo_hook")
   private val OauthUrl = "https://github.com/login/oauth/authorize"
 
@@ -28,11 +27,10 @@ class GitHubConfig @Inject()(config: FlowConfig) {
     ).flatten.toMap
 
     val queryParams =
-      params
-        .view
+      params.view
         .mapValues(URLEncoder.encode(_, "UTF-8"))
-        .map {
-          case (key, value) => s"$key=$value"
+        .map { case (key, value) =>
+          s"$key=$value"
         }
 
     OauthUrl + "?" + queryParams.mkString("&")
@@ -43,8 +41,7 @@ class GitHubConfig @Inject()(config: FlowConfig) {
 object Config {
   val VersionsPerPage = 5
 
-  /**
-    * Returns full URL to the file with the specified path
+  /** Returns full URL to the file with the specified path
     */
   def scmsUrl(scms: Scms, uri: String, path: String): String = {
     val separator = if (path.startsWith("/")) "" else "/"
@@ -60,4 +57,3 @@ object Config {
   }
 
 }
-

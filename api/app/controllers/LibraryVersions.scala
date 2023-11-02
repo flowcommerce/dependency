@@ -45,7 +45,7 @@ class LibraryVersions @javax.inject.Inject() (
     }
   }
 
-  def withLibraryVersion(user: UserReference, id: String) (
+  def withLibraryVersion(user: UserReference, id: String)(
     f: LibraryVersion => Result
   ): Result = {
     libraryVersionsDao.findById(
@@ -61,4 +61,3 @@ class LibraryVersions @javax.inject.Inject() (
     }
   }
 }
-

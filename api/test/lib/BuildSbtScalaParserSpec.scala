@@ -37,7 +37,9 @@ lazy val root = project
 """
 
     val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
-    result.binaries must contain theSameElementsAs Seq(ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.13.5", "test.sbt"))
+    result.binaries must contain theSameElementsAs Seq(
+      ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.13.5", "test.sbt")
+    )
     result.libraries mustBe empty
   }
 
@@ -66,7 +68,9 @@ lazy val root = project
 
     "parse dependencies" in {
       val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
-      result.binaries must contain theSameElementsAs Seq(ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.11.7", "test.sbt"))
+      result.binaries must contain theSameElementsAs Seq(
+        ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.11.7", "test.sbt")
+      )
       result.libraries must be(
         Seq(
           Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true, false),
@@ -74,7 +78,7 @@ lazy val root = project
         )
       )
     }
- }
+  }
 
   "dependencies w/ comments" should {
 
@@ -173,7 +177,6 @@ lazy val avro = project
     )
   }
 
-
   "with inline resolvers" should {
 
     val contents = """
@@ -219,7 +222,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
     }
   }
 
- "with multiple lines" should {
+  "with multiple lines" should {
     val contents = """
 lazy val rules = project.settings(
   libraryDependencies += "ch.epfl.scala" %% "scalafix-core" % V.scalafixVersion,
@@ -244,7 +247,7 @@ lazy val tests = project.settings(
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-core", "V.scalafixVersion", true, false),
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-play26", "0.5.28", true, false),
-        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-testkit", "V.scalafixVersion", false, false),
+        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-testkit", "V.scalafixVersion", false, false)
       )
       result.resolverUris must be(Nil)
     }
@@ -259,7 +262,7 @@ lazy val tests = project.settings(
       val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
-        Artifact(projectSummary, "test.sbt", "io.flow", "scalafix-rules", "0.0.1", true, false),
+        Artifact(projectSummary, "test.sbt", "io.flow", "scalafix-rules", "0.0.1", true, false)
       )
       result.resolverUris must be(Nil)
     }

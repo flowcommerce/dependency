@@ -84,7 +84,7 @@ class Projects @javax.inject.Inject() (
         case s: JsSuccess[ProjectPatchForm] => {
           val patch = s.get
           val form = ProjectForm(
-            organization = project.organization.key,  // do not support patch to move project to a new org
+            organization = project.organization.key, // do not support patch to move project to a new org
             name = patch.name.getOrElse(project.name),
             visibility = patch.visibility.getOrElse(project.visibility),
             scms = patch.scms.getOrElse(project.scms),

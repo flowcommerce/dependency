@@ -12,11 +12,11 @@ import io.flow.postgresql.{OrderBy, Pager, Query}
 import play.api.db._
 
 @Singleton
-class OrganizationsDao @Inject()(
+class OrganizationsDao @Inject() (
   db: Database,
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao]
-){
+) {
 
   val DefaultUserNameLength = 8
 
@@ -94,15 +94,21 @@ class OrganizationsDao @Inject()(
     }
   }
 
-  private[this] def create(implicit c: java.sql.Connection, createdBy: UserReference, form: OrganizationForm): String = {
+  private[this] def create(implicit
+    c: java.sql.Connection,
+    createdBy: UserReference,
+    form: OrganizationForm
+  ): String = {
     val id = IdGenerator("org").randomId()
 
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "user_id" -> createdBy.id,
-      "key" -> form.key.trim,
-      "updated_by_user_id" -> createdBy.id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "user_id" -> createdBy.id,
+        "key" -> form.key.trim,
+        "updated_by_user_id" -> createdBy.id
+      )
+      .execute()
 
     membershipsDaoProvider.get.create(
       c,
@@ -115,15 +121,21 @@ class OrganizationsDao @Inject()(
     id
   }
 
-  def update(createdBy: UserReference, organization: Organization, form: OrganizationForm): Either[Seq[String], Organization] = {
+  def update(
+    createdBy: UserReference,
+    organization: Organization,
+    form: OrganizationForm
+  ): Either[Seq[String], Organization] = {
     validate(form, Some(organization)) match {
       case Nil => {
         db.withConnection { implicit c =>
-          SQL(UpdateQuery).on(
-            "id" -> organization.id,
-            "key" -> form.key.trim,
-            "updated_by_user_id" -> createdBy.id
-          ).execute()
+          SQL(UpdateQuery)
+            .on(
+              "id" -> organization.id,
+              "key" -> form.key.trim,
+              "updated_by_user_id" -> createdBy.id
+            )
+            .execute()
         }
 
         Right(
@@ -138,17 +150,26 @@ class OrganizationsDao @Inject()(
 
   def delete(deletedBy: UserReference, organization: Organization): Either[Seq[String], Unit] = {
     membershipsDaoProvider.get.authorizeOrgId(organization.id, deletedBy) {
-      Pager.create { offset =>
-        projectsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), limit = None, offset = offset)
-      }.foreach { project =>
-        projectsDaoProvider.get.delete(deletedBy, project)
-      }
+      Pager
+        .create { offset =>
+          projectsDaoProvider.get.findAll(
+            Authorization.All,
+            organizationId = Some(organization.id),
+            limit = None,
+            offset = offset
+          )
+        }
+        .foreach { project =>
+          projectsDaoProvider.get.delete(deletedBy, project)
+        }
 
-      Pager.create { offset =>
-        membershipsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
-      }.foreach { membership =>
-        membershipsDaoProvider.get.delete(deletedBy, membership)
-      }
+      Pager
+        .create { offset =>
+          membershipsDaoProvider.get.findAll(Authorization.All, organizationId = Some(organization.id), offset = offset)
+        }
+        .foreach { membership =>
+          membershipsDaoProvider.get.delete(deletedBy, membership)
+        }
 
       dbHelpers.delete(deletedBy.id, organization.id)
     }
@@ -159,16 +180,22 @@ class OrganizationsDao @Inject()(
       val key = urlKey.generate(defaultUserName(user))
 
       val orgId = db.withTransaction { implicit c =>
-        val orgId = create(c, UserReference(id = user.id), OrganizationForm(
-          key = key
-        ))
+        val orgId = create(
+          c,
+          UserReference(id = user.id),
+          OrganizationForm(
+            key = key
+          )
+        )
 
-        SQL(InsertUserOrganizationQuery).on(
-          "id" -> IdGenerator("uso").randomId(),
-          "user_id" -> user.id,
-          "organization_id" -> orgId,
-          "updated_by_user_id" -> user.id
-        ).execute()
+        SQL(InsertUserOrganizationQuery)
+          .on(
+            "id" -> IdGenerator("uso").randomId(),
+            "user_id" -> user.id,
+            "organization_id" -> orgId,
+            "updated_by_user_id" -> user.id
+          )
+          .execute()
 
         orgId
       }
@@ -178,10 +205,8 @@ class OrganizationsDao @Inject()(
     }
   }
 
-  /**
-   * Generates a default username for this user based on email or
-   * name.
-   */
+  /** Generates a default username for this user based on email or name.
+    */
   def defaultUserName(user: User): String = {
     urlKey.format(
       user.email match {
@@ -220,33 +245,36 @@ class OrganizationsDao @Inject()(
     offset: Long = 0
   ): Seq[Organization] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "organizations",
-        auth = auth.organizations("organizations.id"),
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        and(
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "organizations",
+          auth = auth.organizations("organizations.id"),
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .and(
           userId.map { _ =>
             "organizations.id in (select organization_id from memberships where user_id = {user_id})"
           }
-        ).bind("user_id", userId).
-        optionalText(
+        )
+        .bind("user_id", userId)
+        .optionalText(
           "organizations.key",
           key,
           columnFunctions = Seq(Query.Function.Lower),
           valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
-        ).
-        and(
+        )
+        .and(
           forUserId.map { _ =>
             "organizations.id in (select organization_id from user_organizations where user_id = {for_user_id})"
           }
-        ).bind("for_user_id", forUserId).
-        as(
+        )
+        .bind("for_user_id", forUserId)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Organization.parser().*
         )
     }

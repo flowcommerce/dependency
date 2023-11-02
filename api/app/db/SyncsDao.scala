@@ -14,7 +14,7 @@ case class SyncForm(
 )
 
 @Singleton
-class SyncsDao @Inject()(
+class SyncsDao @Inject() (
   db: Database,
   staticUserProvider: StaticUserProvider
 ) {
@@ -40,8 +40,9 @@ class SyncsDao @Inject()(
   """
 
   def withStartedAndCompleted[T](
-    `type`: String, id: String
-  ) (
+    `type`: String,
+    id: String
+  )(
     f: => T
   ): T = {
     recordStarted(`type`, id)
@@ -72,13 +73,15 @@ class SyncsDao @Inject()(
     val id = IdGenerator("syn").randomId()
 
     db.withConnection { implicit c =>
-      SQL(InsertQuery).on(
-        "id" -> id,
-        "type" -> form.`type`,
-        "object_id" -> form.objectId,
-        "event" -> form.event.toString,
-        "updated_by_user_id" -> systemUser.id
-      ).execute()
+      SQL(InsertQuery)
+        .on(
+          "id" -> id,
+          "type" -> form.`type`,
+          "object_id" -> form.objectId,
+          "event" -> form.event.toString,
+          "updated_by_user_id" -> systemUser.id
+        )
+        .execute()
     }
 
     id
@@ -105,19 +108,20 @@ class SyncsDao @Inject()(
     offset: Long = 0
   ): Seq[Sync] = {
     db.withConnection { implicit c =>
-      Standards.query(
-        BaseQuery,
-        tableName = "syncs",
-        auth = Clause.True, // TODO
-        id = id,
-        ids = ids,
-        orderBy = orderBy.sql,
-        limit = limit,
-        offset = offset
-      ).
-        equals("syncs.object_id", objectId).
-        optionalText("syncs.event", event).
-        as(
+      Standards
+        .query(
+          BaseQuery,
+          tableName = "syncs",
+          auth = Clause.True, // TODO
+          id = id,
+          ids = ids,
+          orderBy = orderBy.sql,
+          limit = limit,
+          offset = offset
+        )
+        .equals("syncs.object_id", objectId)
+        .optionalText("syncs.event", event)
+        .as(
           io.flow.dependency.v0.anorm.parsers.Sync.parser().*
         )
     }

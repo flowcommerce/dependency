@@ -19,7 +19,7 @@ trait BaseIdentifiedControllerWithFallback extends FlowController {
       config,
       baseIdentifiedControllerWithFallbackComponents.authorization,
       baseIdentifiedControllerWithFallbackComponents.tokensDao,
-      baseIdentifiedControllerWithFallbackComponents.usersDao,
+      baseIdentifiedControllerWithFallbackComponents.usersDao
     )(
       controllerComponents.executionContext,
       baseIdentifiedControllerWithFallbackComponents.logger

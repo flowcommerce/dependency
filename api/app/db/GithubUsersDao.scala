@@ -9,10 +9,10 @@ import anorm._
 import com.google.inject.Provider
 import play.api.db._
 
-class GithubUsersDao @Inject()(
+class GithubUsersDao @Inject() (
   db: Database,
   usersDaoProvider: Provider[UsersDao]
-){
+) {
 
   private[this] val BaseQuery = Query(s"""
     select github_users.id,
@@ -35,7 +35,9 @@ class GithubUsersDao @Inject()(
     }
   }
 
-  def upsertByIdWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit c: java.sql.Connection): GithubUser = {
+  def upsertByIdWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit
+    c: java.sql.Connection
+  ): GithubUser = {
     findByGithubUserId(form.githubUserId).getOrElse {
       createWithConnection(createdBy, form)
     }
@@ -47,15 +49,19 @@ class GithubUsersDao @Inject()(
     }
   }
 
-  private[db] def createWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit c: java.sql.Connection): GithubUser = {
+  private[db] def createWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit
+    c: java.sql.Connection
+  ): GithubUser = {
     val id = IdGenerator("ghu").randomId()
-    SQL(InsertQuery).on(
-      "id" -> id,
-      "user_id" -> form.userId,
-      "github_user_id" -> form.githubUserId,
-      "login" -> form.login.trim,
-      "updated_by_user_id" -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id
-    ).execute()
+    SQL(InsertQuery)
+      .on(
+        "id" -> id,
+        "user_id" -> form.userId,
+        "github_user_id" -> form.githubUserId,
+        "login" -> form.login.trim,
+        "updated_by_user_id" -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id
+      )
+      .execute()
 
     findById(id).getOrElse {
       sys.error("Failed to create github user")
@@ -80,19 +86,18 @@ class GithubUsersDao @Inject()(
     offset: Long = 0
   ): Seq[GithubUser] = {
     db.withConnection { implicit c =>
-      BaseQuery.
-        optionalIn("github_users.id", id).
-        equals("github_users.user_id", userId).
-        optionalText("github_users.login", login).
-        equals("github_users.github_user_id", githubUserId).
-        orderBy(orderBy.sql).
-        limit(limit).
-        offset(offset).
-        as(
+      BaseQuery
+        .optionalIn("github_users.id", id)
+        .equals("github_users.user_id", userId)
+        .optionalText("github_users.login", login)
+        .equals("github_users.github_user_id", githubUserId)
+        .orderBy(orderBy.sql)
+        .limit(limit)
+        .offset(offset)
+        .as(
           io.flow.dependency.v0.anorm.parsers.GithubUser.parser().*
         )
     }
   }
 
 }
-
