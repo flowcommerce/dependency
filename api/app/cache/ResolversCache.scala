@@ -6,7 +6,7 @@ import io.flow.util.CacheWithFallbackToStaleData
 
 @javax.inject.Singleton
 case class ResolversCache @javax.inject.Inject() (
-  resolversDao: ResolversDao
+  resolversDao: ResolversDao,
 ) extends CacheWithFallbackToStaleData[String, Option[Resolver]] {
 
   override def refresh(resolverId: String): Option[Resolver] = {

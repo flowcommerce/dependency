@@ -12,9 +12,9 @@ class HealthchecksSpec extends DependencySpec with MockDependencyClient {
 
   "GET /_internal_/healthcheck" in {
     await(
-      client.healthchecks.getHealthcheck()
+      client.healthchecks.getHealthcheck(),
     ) must be(
-      Healthcheck("healthy")
+      Healthcheck("healthy"),
     )
   }
 

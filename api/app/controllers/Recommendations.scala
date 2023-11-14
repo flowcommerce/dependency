@@ -17,7 +17,7 @@ class Recommendations @javax.inject.Inject() (
   val tokensDao: TokensDao,
   val staticUserProvider: StaticUserProvider,
   recommendationsDao: RecommendationsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -25,7 +25,7 @@ class Recommendations @javax.inject.Inject() (
     projectId: Option[String],
     `type`: Option[RecommendationType],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -35,9 +35,9 @@ class Recommendations @javax.inject.Inject() (
           projectId = projectId,
           `type` = `type`,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

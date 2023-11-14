@@ -14,7 +14,7 @@ case class ProjectBinaryForm(
   projectId: String,
   name: BinaryType,
   version: String,
-  path: String
+  path: String,
 )
 
 @Singleton
@@ -22,7 +22,7 @@ class ProjectBinariesDao @Inject() (
   db: Database,
   membershipsDaoProvider: Provider[MembershipsDao],
   projectsDaoProvider: Provider[ProjectsDao],
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "project_binaries")
@@ -65,7 +65,7 @@ class ProjectBinariesDao @Inject() (
 
   private[db] def validate(
     user: UserReference,
-    form: ProjectBinaryForm
+    form: ProjectBinaryForm,
   ): Seq[String] = {
     val nameErrors = if (form.name.toString.trim.isEmpty) {
       Seq("Name cannot be empty")
@@ -94,7 +94,7 @@ class ProjectBinariesDao @Inject() (
         Authorization.All,
         form.projectId,
         form.name.toString,
-        form.version
+        form.version,
       ) match {
         case None => Nil
         case Some(_) => {
@@ -113,7 +113,7 @@ class ProjectBinariesDao @Inject() (
       Authorization.All,
       form.projectId,
       form.name.toString,
-      form.version
+      form.version,
     ) match {
       case None => {
         create(createdBy, form)
@@ -137,7 +137,7 @@ class ProjectBinariesDao @Inject() (
               "name" -> form.name.toString.trim,
               "version" -> form.version.trim,
               "path" -> form.path.trim,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
           projectActor ! ProjectActor.Messages.ProjectBinaryCreated(form.projectId, id)
@@ -146,7 +146,7 @@ class ProjectBinariesDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create project binary")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -158,7 +158,7 @@ class ProjectBinariesDao @Inject() (
       SQL(RemoveBinaryQuery)
         .on(
           "id" -> projectBinary.id,
-          "updated_by_user_id" -> user.id
+          "updated_by_user_id" -> user.id,
         )
         .execute()
     }
@@ -187,7 +187,7 @@ class ProjectBinariesDao @Inject() (
         .on(
           "id" -> projectBinary.id,
           "binary_id" -> binary.id,
-          "updated_by_user_id" -> user.id
+          "updated_by_user_id" -> user.id,
         )
         .execute()
     }
@@ -203,14 +203,14 @@ class ProjectBinariesDao @Inject() (
     auth: Authorization,
     projectId: String,
     name: String,
-    version: String
+    version: String,
   ): Option[ProjectBinary] = {
     findAll(
       auth,
       projectId = Some(projectId),
       name = Some(name),
       version = Some(version),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
@@ -230,7 +230,7 @@ class ProjectBinariesDao @Inject() (
     hasBinary: Option[Boolean] = None,
     orderBy: OrderBy = OrderBy("lower(project_binaries.name), project_binaries.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[ProjectBinary] = {
     db.withConnection { implicit c =>
       Standards
@@ -242,7 +242,7 @@ class ProjectBinariesDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .equals("project_binaries.project_id", projectId)
         .equals("project_binaries.binary_id", binaryId)
@@ -250,11 +250,11 @@ class ProjectBinariesDao @Inject() (
           "project_binaries.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .optionalText(
           "project_binaries.version",
-          version
+          version,
         )
         .and(
           isSynced.map { value =>
@@ -263,12 +263,12 @@ class ProjectBinariesDao @Inject() (
               case true => s"exists ($clause)"
               case false => s"not exists ($clause)"
             }
-          }
+          },
         )
         .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
         .nullBoolean("project_binaries.binary_id", hasBinary)
         .as(
-          io.flow.dependency.v0.anorm.parsers.ProjectBinary.parser().*
+          io.flow.dependency.v0.anorm.parsers.ProjectBinary.parser().*,
         )
     }
   }

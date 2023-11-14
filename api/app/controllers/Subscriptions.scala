@@ -21,7 +21,7 @@ class Subscriptions @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   subscriptionsDao: SubscriptionsDao,
-  subscriptionIdentified: SubscriptionActionBuilder
+  subscriptionIdentified: SubscriptionActionBuilder,
 )(implicit val ec: ExecutionContext)
   extends FlowController {
 
@@ -32,11 +32,11 @@ class Subscriptions @javax.inject.Inject() (
     userIdentifier: Option[String],
     publication: Option[Publication],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = subscriptionIdentified { request =>
     assert(
       userId.isEmpty,
-      "user id parameter no longer supported"
+      "user id parameter no longer supported",
     )
     Ok(
       Json.toJson(
@@ -47,9 +47,9 @@ class Subscriptions @javax.inject.Inject() (
           identifier = userIdentifier,
           publication = publication,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -91,7 +91,7 @@ class Subscriptions @javax.inject.Inject() (
   }
 
   def withSubscription(user: UserReference, id: String)(
-    f: Subscription => Result
+    f: Subscription => Result,
   ): Result = {
     subscriptionsDao.findById(id) match {
       case None => {

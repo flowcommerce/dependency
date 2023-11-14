@@ -11,14 +11,14 @@ case class BinaryRecommendation(
   binary: Binary,
   from: String,
   to: BinaryVersion,
-  latest: BinaryVersion
+  latest: BinaryVersion,
 )
 
 @Singleton
 class BinaryRecommendationsDao @Inject() (
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
   projectBinariesDaoProvider: Provider[ProjectBinariesDao],
-  binariesDaoProvider: Provider[BinariesDao]
+  binariesDaoProvider: Provider[BinariesDao],
 ) {
 
   def forProject(project: Project): Seq[BinaryRecommendation] = {
@@ -30,7 +30,7 @@ class BinaryRecommendationsDao @Inject() (
           Authorization.Organization(project.organization.id),
           projectId = Some(project.id),
           hasBinary = Some(true),
-          offset = offset
+          offset = offset,
         )
       }
       .foreach { projectBinary =>
@@ -42,8 +42,8 @@ class BinaryRecommendationsDao @Inject() (
                 binary = binary,
                 from = projectBinary.version,
                 to = v,
-                latest = recentVersions.headOption.getOrElse(v)
-              )
+                latest = recentVersions.headOption.getOrElse(v),
+              ),
             )
           }
         }
@@ -56,7 +56,7 @@ class BinaryRecommendationsDao @Inject() (
     Recommendations
       .version(
         VersionForm(current.version),
-        others.map(v => VersionForm(v.version))
+        others.map(v => VersionForm(v.version)),
       )
       .map { version =>
         others
@@ -78,7 +78,7 @@ class BinaryRecommendationsDao @Inject() (
         binaryVersionsDaoProvider.get.findAll(
           binaryId = Some(binary.id),
           greaterThanVersion = Some(version),
-          offset = offset
+          offset = offset,
         )
       }
       .foreach { binaryVersion =>

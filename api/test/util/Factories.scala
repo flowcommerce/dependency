@@ -16,30 +16,30 @@ trait Factories {
 
   def makeOrganizationSummary(
     id: String = UUID.randomUUID.toString,
-    key: String = makeKey()
+    key: String = makeKey(),
   ) = OrganizationSummary(
     id = id,
-    key = key
+    key = key,
   )
 
   def makeProjectSummary(
     id: String = UUID.randomUUID.toString,
     org: OrganizationSummary = makeOrganizationSummary(),
-    name: String = makeName()
+    name: String = makeName(),
   ) = ProjectSummary(
     id = id,
     organization = org,
-    name = name
+    name = name,
   )
 
   def makeResolverSummary(
     id: String = UUID.randomUUID.toString,
-    org: OrganizationSummary = makeOrganizationSummary()
+    org: OrganizationSummary = makeOrganizationSummary(),
   ) = ResolverSummary(
     id = id,
     organization = Some(org),
     visibility = Visibility.Private,
-    uri = "http://" + makeKey() + ".test.flow.io"
+    uri = "http://" + makeKey() + ".test.flow.io",
   )
 
 }

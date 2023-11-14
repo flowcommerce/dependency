@@ -43,7 +43,7 @@ object InternalTokenForm {
 @Singleton
 class TokensDao @Inject() (
   db: Database,
-  usersDaoProvider: Provider[UsersDao]
+  usersDaoProvider: Provider[UsersDao],
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "tokens")
@@ -100,7 +100,7 @@ class TokensDao @Inject() (
   }
 
   private[db] def validate(
-    form: InternalTokenForm
+    form: InternalTokenForm,
   ): Seq[String] = {
     form match {
       case InternalTokenForm.GithubOauth(_, _) => Nil
@@ -114,7 +114,7 @@ class TokensDao @Inject() (
   }
 
   private[this] def createWithConnection(createdBy: UserReference, form: InternalTokenForm)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): Either[Seq[String], Token] = {
     validate(form) match {
       case Nil => {
@@ -127,14 +127,14 @@ class TokensDao @Inject() (
             "tag" -> form.tag.trim,
             "token" -> form.token.trim,
             "description" -> Util.trimmedString(form.description),
-            "updated_by_user_id" -> createdBy.id
+            "updated_by_user_id" -> createdBy.id,
           )
           .execute()
 
         Right(
           findAllWithConnection(Authorization.All, id = Some(id), limit = 1).headOption.getOrElse {
             sys.error("Failed to create token")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -146,7 +146,7 @@ class TokensDao @Inject() (
       SelectCleartextTokenQuery
         .equals("tokens.id", Some(token.id))
         .as(
-          cleartextTokenParser().*
+          cleartextTokenParser().*,
         )
         .headOption match {
         case None => token
@@ -166,12 +166,12 @@ class TokensDao @Inject() (
   }
 
   private[this] def incrementNumberViews(createdBy: UserReference, tokenId: String)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): Unit = {
     SQL(IncrementNumberViewsQuery)
       .on(
         "id" -> tokenId,
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
     ()
@@ -182,7 +182,7 @@ class TokensDao @Inject() (
   }
 
   def getCleartextGithubOauthTokenByUserId(
-    userId: String
+    userId: String,
   ): Option[String] = {
     db.withConnection { implicit c =>
       SelectCleartextTokenQuery
@@ -191,7 +191,7 @@ class TokensDao @Inject() (
         .limit(1)
         .orderBy("tokens.created_at desc")
         .as(
-          cleartextTokenParser().*
+          cleartextTokenParser().*,
         )
         .headOption
         .map(_.token)
@@ -223,7 +223,7 @@ class TokensDao @Inject() (
     tag: Option[String] = None,
     orderBy: OrderBy = OrderBy("tokens.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Token] = {
     db.withConnection { implicit c =>
       findAllWithConnection(
@@ -235,7 +235,7 @@ class TokensDao @Inject() (
         tag = tag,
         limit = limit,
         offset = offset,
-        orderBy = orderBy
+        orderBy = orderBy,
       )
     }
   }
@@ -249,7 +249,7 @@ class TokensDao @Inject() (
     tag: Option[String] = None,
     orderBy: OrderBy = OrderBy("tokens.created_at"),
     limit: Long,
-    offset: Long = 0
+    offset: Long = 0,
   )(implicit c: java.sql.Connection): Seq[Token] = {
     Standards
       .query(
@@ -260,14 +260,14 @@ class TokensDao @Inject() (
         ids = ids,
         orderBy = orderBy.sql,
         limit = limit,
-        offset = offset
+        offset = offset,
       )
       .equals("tokens.user_id", userId)
       .equals("tokens.token", token)
       .optionalText("tokens.tag", tag, valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim))
       .orderBy(orderBy.sql)
       .as(
-        io.flow.dependency.v0.anorm.parsers.Token.parser().*
+        io.flow.dependency.v0.anorm.parsers.Token.parser().*,
       )
   }
 

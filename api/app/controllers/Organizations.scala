@@ -18,7 +18,7 @@ class Organizations @javax.inject.Inject() (
   organizationsDao: OrganizationsDao,
   organizationsHelper: OrganizationsHelper,
   usersHelper: UsersHelper,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback
   with BaseIdentifiedController {
 
@@ -28,7 +28,7 @@ class Organizations @javax.inject.Inject() (
     userId: Option[String],
     key: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -39,9 +39,9 @@ class Organizations @javax.inject.Inject() (
           userId = userId,
           key = key,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

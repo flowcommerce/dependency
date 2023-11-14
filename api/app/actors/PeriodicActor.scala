@@ -30,7 +30,7 @@ class PeriodicActor @Inject() (
   system: ActorSystem,
   syncsDao: SyncsDao,
   internalTasksDao: InternalTasksDao,
-  logger: RollbarLogger
+  logger: RollbarLogger,
 ) extends ReapedActor
   with ActorLogging
   with Scheduler
@@ -45,15 +45,15 @@ class PeriodicActor @Inject() (
   registerScheduledTask(
     scheduleRecurring(
       ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.sync_all"),
-      SyncAll
-    )
+      SyncAll,
+    ),
   )
 
   registerScheduledTask(
     scheduleRecurring(
       ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.periodic.purge"),
-      Purge
-    )
+      Purge,
+    ),
   )
 
   override def postStop(): Unit = try {

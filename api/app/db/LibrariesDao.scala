@@ -14,7 +14,7 @@ class LibrariesDao @Inject() (
   db: Database,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
-  internalTasksDao: InternalTasksDao
+  internalTasksDao: InternalTasksDao,
 ) {
   private[this] val dbHelpers = DbHelpers(db, "libraries")
 
@@ -44,7 +44,7 @@ class LibrariesDao @Inject() (
 
   private[db] def validate(
     form: LibraryForm,
-    existing: Option[Library] = None
+    existing: Option[Library] = None,
   ): Seq[String] = {
     val groupIdErrors = if (form.groupId.trim.isEmpty) {
       Seq("Group ID cannot be empty")
@@ -105,7 +105,7 @@ class LibrariesDao @Inject() (
               "group_id" -> form.groupId.trim,
               "artifact_id" -> form.artifactId.trim,
               "resolver_id" -> form.resolverId,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
           form.version.foreach { version =>
@@ -118,7 +118,7 @@ class LibrariesDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create library")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -131,7 +131,7 @@ class LibrariesDao @Inject() (
         .findAll(
           Authorization.All,
           libraryId = Some(library.id),
-          limit = None
+          limit = None,
         )
         .foreach { lv =>
           libraryVersionsDaoProvider.get.delete(deletedBy, lv)
@@ -144,20 +144,20 @@ class LibrariesDao @Inject() (
 
   private[this] def sync(libraryId: String): Unit = {
     internalTasksDao.createSyncIfNotQueued(
-      TaskDataSyncOne(libraryId, SyncType.Library)
+      TaskDataSyncOne(libraryId, SyncType.Library),
     )
   }
 
   def findByGroupIdAndArtifactId(
     auth: Authorization,
     groupId: String,
-    artifactId: String
+    artifactId: String,
   ): Option[Library] = {
     findAll(
       auth,
       groupId = Some(groupId),
       artifactId = Some(artifactId),
-      limit = Some(1)
+      limit = Some(1),
     ).headOption
   }
 
@@ -177,7 +177,7 @@ class LibrariesDao @Inject() (
     prefix: Option[String] = None,
     orderBy: OrderBy = OrderBy("lower(libraries.group_id), lower(libraries.artifact_id), libraries.created_at"),
     limit: Option[Long],
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Library] = {
     db.withConnection { implicit c =>
       Standards
@@ -189,36 +189,36 @@ class LibrariesDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .equals("libraries.organization_id", organizationId)
         .and(
           projectId.map { _ =>
             "libraries.id in (select library_id from project_libraries where project_id = {project_id})"
-          }
+          },
         )
         .bind("project_id", projectId)
         .optionalText(
           "libraries.group_id",
           groupId,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .optionalText(
           "libraries.artifact_id",
           artifactId,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .equals("libraries.resolver_id", resolverId)
         .and(
           prefix.map { _ =>
             "lower(artifact_id) like lower(trim({prefix})) || '%'"
-          }
+          },
         )
         .bind("prefix", prefix)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Library.parser().*
+          io.flow.dependency.v0.anorm.parsers.Library.parser().*,
         )
     }
   }

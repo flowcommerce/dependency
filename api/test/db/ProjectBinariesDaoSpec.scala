@@ -16,28 +16,28 @@ class ProjectBinariesDaoSpec extends DependencySpec {
     "catch empty name" in {
       projectBinariesDao.validate(
         systemUser,
-        createProjectBinaryForm(project).copy(name = BinaryType.UNDEFINED("   "))
+        createProjectBinaryForm(project).copy(name = BinaryType.UNDEFINED("   ")),
       ) must be(Seq("Name cannot be empty"))
     }
 
     "catch empty version" in {
       projectBinariesDao.validate(
         systemUser,
-        createProjectBinaryForm(project).copy(version = "   ")
+        createProjectBinaryForm(project).copy(version = "   "),
       ) must be(Seq("Version cannot be empty"))
     }
 
     "catch invalid project" in {
       projectBinariesDao.validate(
         systemUser,
-        createProjectBinaryForm(project).copy(projectId = UUID.randomUUID.toString)
+        createProjectBinaryForm(project).copy(projectId = UUID.randomUUID.toString),
       ) must be(Seq("Project not found"))
     }
 
     "catch project we cannot access" in {
       projectBinariesDao.validate(
         createUser(),
-        createProjectBinaryForm(project)
+        createProjectBinaryForm(project),
       ) must be(Seq("You are not authorized to edit this project"))
     }
 
@@ -70,7 +70,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
     val binary = createBinary(org)
     projectBinariesDao.setBinary(systemUser, projectBinary, binary)
     projectBinariesDao.findById(Authorization.All, projectBinary.id).flatMap(_.binary.map(_.id)) must be(
-      Some(binary.id)
+      Some(binary.id),
     )
 
     projectBinariesDao.removeBinary(systemUser, projectBinary)
@@ -97,7 +97,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
 
     "filter by id" in {
       projectBinariesDao.findAll(Authorization.All, id = Some(projectBinary.id)).map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
@@ -109,14 +109,14 @@ class ProjectBinariesDaoSpec extends DependencySpec {
         .findAll(Authorization.All, ids = Some(Seq(projectBinary.id, other.id)))
         .map(_.id)
         .sorted must be(
-        Seq(projectBinary.id, other.id).sorted
+        Seq(projectBinary.id, other.id).sorted,
       )
 
       projectBinariesDao
         .findAll(Authorization.All, ids = Some(Seq(projectBinary.id, UUID.randomUUID.toString)))
         .map(_.id)
         .sorted must be(
-        Seq(projectBinary.id).sorted
+        Seq(projectBinary.id).sorted,
       )
 
       projectBinariesDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
@@ -126,7 +126,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), projectId = Some(project.id))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, projectId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
@@ -139,7 +139,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), binaryId = Some(binary.id))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
     }
@@ -148,7 +148,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), name = Some(projectBinary.name))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, name = Some(UUID.randomUUID.toString)) must be(Nil)
     }
@@ -157,7 +157,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), version = Some(projectBinary.version))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, version = Some(UUID.randomUUID.toString)) must be(Nil)
     }
@@ -168,7 +168,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), isSynced = Some(true))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, id = Some(projectBinary.id), isSynced = Some(false)) must be(Nil)
     }
@@ -180,7 +180,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), hasBinary = Some(false))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
 
       projectBinariesDao.setBinary(systemUser, projectBinary, createBinary(org))
@@ -188,7 +188,7 @@ class ProjectBinariesDaoSpec extends DependencySpec {
       projectBinariesDao
         .findAll(Authorization.All, id = Some(projectBinary.id), hasBinary = Some(true))
         .map(_.id) must be(
-        Seq(projectBinary.id)
+        Seq(projectBinary.id),
       )
       projectBinariesDao.findAll(Authorization.All, id = Some(projectBinary.id), hasBinary = Some(false)) must be(Nil)
     }

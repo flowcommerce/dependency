@@ -4,5 +4,5 @@ import io.flow.util.Version
 
 case class ArtifactVersion(
   tag: Version,
-  crossBuildVersion: Option[Version]
+  crossBuildVersion: Option[Version],
 )

@@ -9,12 +9,12 @@ class DependencyClientProviderModule extends Module {
     env.mode match {
       case Mode.Prod | Mode.Dev =>
         Seq(
-          bind[DependencyClientProvider].to[DefaultDependencyClientProvider]
+          bind[DependencyClientProvider].to[DefaultDependencyClientProvider],
         )
       case Mode.Test =>
         Seq(
           // TODO: Add mock
-          bind[DependencyClientProvider].to[DependencyClientProvider]
+          bind[DependencyClientProvider].to[DependencyClientProvider],
         )
     }
   }

@@ -15,14 +15,14 @@ trait BinaryVersionProvider {
 
 @javax.inject.Singleton
 case class DefaultBinaryVersionProvider @javax.inject.Inject() (
-  logger: RollbarLogger
+  logger: RollbarLogger,
 ) extends BinaryVersionProvider {
 
   private[this] val ScalaUrl = "https://www.scala-lang.org/download/all.html"
   private[this] val SbtUrl = "https://flow.jfrog.io/flow/libs-release/org/scala-sbt/sbt/"
 
   override def versions(
-    binary: BinaryType
+    binary: BinaryType,
   ): Seq[Version] = {
     binary match {
       case BinaryType.Scala => {
@@ -60,9 +60,9 @@ case class DefaultBinaryVersionProvider @javax.inject.Inject() (
       StringUtils
         .stripStart(
           StringUtils.stripStart(value, "scala"),
-          "Scala"
+          "Scala",
         )
-        .trim
+        .trim,
     )
     tag.major match {
       case None => None

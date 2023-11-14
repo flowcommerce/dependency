@@ -18,7 +18,7 @@ class Repositories @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
   organizationsDao: OrganizationsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 )(implicit val ec: ExecutionContext)
   extends BaseIdentifiedControllerWithFallback {
 
@@ -28,14 +28,14 @@ class Repositories @javax.inject.Inject() (
     organizationId: Option[String] = None,
     existingProject: Option[Boolean] = None,
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback.async { request =>
     if (!existingProject.isEmpty && organizationId.isEmpty) {
       Future {
         UnprocessableEntity(
           Json.toJson(
-            Validation.error("When filtering by existing projects, you must also provide the organization_id")
-          )
+            Validation.error("When filtering by existing projects, you must also provide the organization_id"),
+          ),
         )
       }
     } else {

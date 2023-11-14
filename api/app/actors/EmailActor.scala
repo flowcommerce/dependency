@@ -22,7 +22,7 @@ class EmailActor @Inject() (
   rollbar: RollbarLogger,
   config: ApplicationConfig,
   subscriptionsDao: SubscriptionsDao,
-  batchEmailProcessor: BatchEmailProcessor
+  batchEmailProcessor: BatchEmailProcessor,
 ) extends ReapedActor
   with ActorLogging
   with Scheduler
@@ -37,8 +37,8 @@ class EmailActor @Inject() (
   registerScheduledTask(
     scheduleRecurring(
       ScheduleConfig.fromConfig(config.underlying.underlying, "io.flow.dependency.api.email"),
-      ProcessDailySummary
-    )
+      ProcessDailySummary,
+    ),
   )
 
   val PreferredHourToSendEst: Int = {
@@ -86,9 +86,9 @@ class EmailActor @Inject() (
             publication = Some(Publication.DailySummary),
             minHoursSinceLastEmail = Some(hours),
             minHoursSinceRegistration = Some(hours),
-            offset = offset
+            offset = offset,
           )
-        }
+        },
       )
   }
 }
@@ -98,12 +98,12 @@ class BatchEmailProcessor @Inject() (
   lastEmailsDao: LastEmailsDao,
   recommendationsDao: RecommendationsDao,
   userIdentifiersDao: UserIdentifiersDao,
-  config: Config
+  config: Config,
 ) {
 
   def process(
     publication: Publication,
-    subscriptions: Iterator[Subscription]
+    subscriptions: Iterator[Subscription],
   ): Unit = {
     subscriptions.foreach { subscription =>
       usersDao
@@ -117,15 +117,15 @@ class BatchEmailProcessor @Inject() (
             usersDao.systemUser,
             LastEmailForm(
               userId = recipient.userId,
-              publication = publication
-            )
+              publication = publication,
+            ),
           )
 
           Email.sendHtml(
             config = config,
             recipient = generator.recipient,
             subject = generator.subject,
-            body = generator.body(lastEmailsDao, recommendationsDao, config)
+            body = generator.body(lastEmailsDao, recommendationsDao, config),
           )
         }
     }
@@ -141,7 +141,7 @@ trait EmailMessageGenerator {
 /** Class which generates email message
   */
 class DailySummaryEmailMessage(
-  val recipient: Recipient
+  val recipient: Recipient,
 ) extends EmailMessageGenerator {
 
   private[this] val MaxRecommendations = 250L
@@ -154,7 +154,7 @@ class DailySummaryEmailMessage(
   override def body(lastEmailsDao: LastEmailsDao, recommendationsDao: RecommendationsDao, config: Config): String = {
     val recommendations = recommendationsDao.findAll(
       Authorization.User(recipient.userId),
-      limit = MaxRecommendations
+      limit = MaxRecommendations,
     )
 
     val (oldRecommendations, newRecommendations) = lastEmail(lastEmailsDao) match {
@@ -169,7 +169,7 @@ class DailySummaryEmailMessage(
         newRecommendations = newRecommendations,
         oldRecommendations = oldRecommendations,
         lastEmail = lastEmail(lastEmailsDao),
-        urls = Urls(config)
+        urls = Urls(config),
       )
       .toString
   }

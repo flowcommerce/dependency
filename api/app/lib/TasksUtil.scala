@@ -9,7 +9,7 @@ import io.flow.dependency.v0.models.{
   TaskDataSyncOne,
   TaskDataSyncOrganizationLibraries,
   TaskDataUndefinedType,
-  TaskDataUpserted
+  TaskDataUpserted,
 }
 import io.flow.log.RollbarLogger
 import io.flow.postgresql.OrderBy
@@ -25,7 +25,7 @@ class TasksUtil @Inject() (
   binarySync: BinarySync,
   librarySync: LibrarySync,
   projectSync: ProjectSync,
-  staticUserProvider: StaticUserProvider
+  staticUserProvider: StaticUserProvider,
 ) {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
@@ -53,7 +53,7 @@ class TasksUtil @Inject() (
     val all = internalTasksDao.findAll(
       hasProcessedAt = Some(false),
       limit = Some(limit),
-      orderBy = OrderBy("priority, num_attempts, created_at")
+      orderBy = OrderBy("priority, num_attempts, created_at"),
     )
     all.filter(accepts).foreach { t =>
       processData(t.id, t.data)
@@ -75,7 +75,7 @@ class TasksUtil @Inject() (
         process(taskId) {
           librarySync.iterateAll(
             Authorization.All,
-            organizationId = Some(data.organizationId)
+            organizationId = Some(data.organizationId),
           ) { r => internalTasksDao.queueLibrary(r) }
         }
       }
@@ -83,7 +83,7 @@ class TasksUtil @Inject() (
         process(taskId) {
           librarySync.iterateAll(
             Authorization.User(data.userId),
-            prefix = Some(data.prefix)
+            prefix = Some(data.prefix),
           ) { r => internalTasksDao.queueLibrary(r) }
         }
       }

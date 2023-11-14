@@ -41,7 +41,7 @@ class SyncsDaoSpec extends DependencySpec {
   "findById" in {
     val sync = createSync()
     syncsDao.findById(sync.id).map(_.id) must be(
-      Some(sync.id)
+      Some(sync.id),
     )
 
     syncsDao.findById(UUID.randomUUID.toString) must be(None)
@@ -52,7 +52,7 @@ class SyncsDaoSpec extends DependencySpec {
     val sync2 = createSync()
 
     syncsDao.findAll(ids = Some(Seq(sync1.id, sync2.id))).map(_.id).sorted must be(
-      Seq(sync1.id, sync2.id).sorted
+      Seq(sync1.id, sync2.id).sorted,
     )
 
     syncsDao.findAll(ids = Some(Nil)) must be(Nil)
@@ -67,20 +67,20 @@ class SyncsDaoSpec extends DependencySpec {
     syncsDao
       .findAll(
         ids = Some(Seq(start.id, completed.id)),
-        event = Some(SyncEvent.Started)
+        event = Some(SyncEvent.Started),
       )
       .map(_.id) must be(Seq(start.id))
 
     syncsDao
       .findAll(
         ids = Some(Seq(start.id, completed.id)),
-        event = Some(SyncEvent.Completed)
+        event = Some(SyncEvent.Completed),
       )
       .map(_.id) must be(Seq(completed.id))
 
     syncsDao.findAll(
       ids = Some(Seq(start.id, completed.id)),
-      event = Some(SyncEvent.UNDEFINED("other"))
+      event = Some(SyncEvent.UNDEFINED("other")),
     ) must be(Nil)
   }
 
@@ -91,12 +91,12 @@ class SyncsDaoSpec extends DependencySpec {
     syncsDao
       .findAll(
         ids = Some(Seq(sync.id)),
-        objectId = Some(form.objectId)
+        objectId = Some(form.objectId),
       )
       .map(_.id) must be(Seq(sync.id))
 
     syncsDao.findAll(
-      objectId = Some(UUID.randomUUID.toString)
+      objectId = Some(UUID.randomUUID.toString),
     ) must be(Nil)
   }
 

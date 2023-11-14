@@ -28,12 +28,12 @@ class InternalProjectLibrariesDao @Inject() (
   dao: generated.ProjectLibrariesDao,
   projectsDaoProvider: Provider[ProjectsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) {
 
   private[db] def validate(
     user: UserReference,
-    form: ProjectLibraryForm
+    form: ProjectLibraryForm,
   ): Seq[String] = {
     val groupIdErrors = if (form.groupId.trim.isEmpty) {
       Seq("Group ID cannot be empty")
@@ -72,8 +72,8 @@ class InternalProjectLibrariesDao @Inject() (
         form.artifactId,
         VersionForm(
           form.version,
-          form.crossBuildVersion
-        )
+          form.crossBuildVersion,
+        ),
       ) match {
         case None => Nil
         case Some(_) => {
@@ -95,8 +95,8 @@ class InternalProjectLibrariesDao @Inject() (
       form.artifactId,
       VersionForm(
         version = form.version,
-        crossBuildVersion = form.crossBuildVersion
-      )
+        crossBuildVersion = form.crossBuildVersion,
+      ),
     ) match {
       case None => {
         create(createdBy, form)
@@ -117,7 +117,7 @@ class InternalProjectLibrariesDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create project library")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -129,8 +129,8 @@ class InternalProjectLibrariesDao @Inject() (
       user,
       projectLibrary.db,
       projectLibrary.db.form.copy(
-        libraryId = None
-      )
+        libraryId = None,
+      ),
     )
     dao.deleteById(user, projectLibrary.id)
   }
@@ -149,8 +149,8 @@ class InternalProjectLibrariesDao @Inject() (
       user,
       projectLibrary.db,
       projectLibrary.db.form.copy(
-        libraryId = Some(library.id)
-      )
+        libraryId = Some(library.id),
+      ),
     )
   }
 
@@ -164,7 +164,7 @@ class InternalProjectLibrariesDao @Inject() (
     projectId: String,
     groupId: String,
     artifactId: String,
-    version: VersionForm
+    version: VersionForm,
   ): Option[InternalProjectLibrary] = {
     findAll(
       auth,
@@ -174,7 +174,7 @@ class InternalProjectLibrariesDao @Inject() (
       version = Some(version.version),
       crossBuildVersion = Some(version.crossBuildVersion),
       limit = Some(1),
-      orderBy = None
+      orderBy = None,
     ).headOption
   }
 
@@ -201,7 +201,7 @@ class InternalProjectLibrariesDao @Inject() (
     hasLibrary: Option[Boolean] = None,
     orderBy: Option[OrderBy],
     limit: Option[Long],
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[InternalProjectLibrary] = {
     dao
       .findAll(
@@ -213,7 +213,7 @@ class InternalProjectLibrariesDao @Inject() (
         version = version,
         orderBy = orderBy,
         limit = limit,
-        offset = offset
+        offset = offset,
       ) { q =>
         q
           .and(auth.organizationProjects("organization_id", "project_id").sql)
@@ -223,7 +223,7 @@ class InternalProjectLibrariesDao @Inject() (
             crossBuildVersion.map {
               case None => "cross_build_version is null"
               case Some(_) => "cross_build_version = {cross_build_version}"
-            }
+            },
           )
           .bind("cross_build_version", crossBuildVersion.flatten)
           .and(
@@ -235,7 +235,7 @@ class InternalProjectLibrariesDao @Inject() (
               } else {
                 s"not exists ($clause)"
               }
-            }
+            },
           )
           .bind("sync_event_completed", isSynced.map(_ => SyncEvent.Completed.toString))
           .nullBoolean("library_id", hasLibrary)

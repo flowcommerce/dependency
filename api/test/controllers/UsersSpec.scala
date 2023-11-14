@@ -17,7 +17,7 @@ class UsersSpec extends DependencySpec with MockDependencyClient {
     expectErrors {
       anonClient.users.get()
     }.genericError.messages must equal(
-      Seq("Must specify id, email or identifier")
+      Seq("Must specify id, email or identifier"),
     )
   }
 
@@ -29,25 +29,25 @@ class UsersSpec extends DependencySpec with MockDependencyClient {
 
   "GET /users by id" in {
     await(
-      identifiedClient().users.get(id = Some(user1.id))
+      identifiedClient().users.get(id = Some(user1.id)),
     ).map(_.id) must contain theSameElementsAs Seq(user1.id)
 
     await(
-      identifiedClient().users.get(id = Some(UUID.randomUUID.toString))
+      identifiedClient().users.get(id = Some(UUID.randomUUID.toString)),
     ).map(_.id) must be(
-      Nil
+      Nil,
     )
   }
 
   "GET /users by email" in {
     await(
-      identifiedClient().users.get(email = user1.email)
+      identifiedClient().users.get(email = user1.email),
     ).map(_.email) must contain theSameElementsAs Seq(user1.email)
 
     await(
-      identifiedClient().users.get(email = Some(UUID.randomUUID.toString))
+      identifiedClient().users.get(email = Some(UUID.randomUUID.toString)),
     ) must be(
-      Nil
+      Nil,
     )
   }
 
@@ -79,10 +79,10 @@ class UsersSpec extends DependencySpec with MockDependencyClient {
         UserForm(
           email = Some(email),
           name = Some(
-            Name(first = Some("Michael"), last = Some("Bryzek"))
-          )
-        )
-      )
+            Name(first = Some("Michael"), last = Some("Bryzek")),
+          ),
+        ),
+      ),
     )
     user.email must be(Some(email))
     user.name.first must be(Some("Michael"))
@@ -91,19 +91,19 @@ class UsersSpec extends DependencySpec with MockDependencyClient {
 
   "POST /users validates duplicate email" in {
     expectErrors(
-      anonClient.users.post(UserForm(email = Some(user1.email.get)))
+      anonClient.users.post(UserForm(email = Some(user1.email.get))),
     ).genericError.messages must contain theSameElementsAs Seq("Email is already registered")
   }
 
   "POST /users validates empty email" in {
     expectErrors(
-      anonClient.users.post(UserForm(email = Some("   ")))
+      anonClient.users.post(UserForm(email = Some("   "))),
     ).genericError.messages must contain theSameElementsAs Seq("Email address cannot be empty")
   }
 
   "POST /users validates email address format" in {
     expectErrors(
-      anonClient.users.post(UserForm(email = Some("mbfoo.com")))
+      anonClient.users.post(UserForm(email = Some("mbfoo.com"))),
     ).genericError.messages must contain theSameElementsAs Seq("Please enter a valid email address")
   }
 

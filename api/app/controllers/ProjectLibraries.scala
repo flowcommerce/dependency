@@ -16,7 +16,7 @@ class ProjectLibraries @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   projectLibrariesDao: InternalProjectLibrariesDao,
-  conversions: Conversions
+  conversions: Conversions,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -26,7 +26,7 @@ class ProjectLibraries @javax.inject.Inject() (
     libraryId: Option[String],
     isSynced: Option[Boolean],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Action[AnyContent] = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -40,10 +40,10 @@ class ProjectLibraries @javax.inject.Inject() (
             isSynced = isSynced,
             limit = Some(limit),
             offset = offset,
-            orderBy = Some(OrderBy("created_at"))
-          )
-        )
-      )
+            orderBy = Some(OrderBy("created_at")),
+          ),
+        ),
+      ),
     )
   }
 

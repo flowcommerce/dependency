@@ -9,7 +9,7 @@ import io.flow.dependency.v0.models.{
   ProjectDependencyResolution,
   ProjectDependencyResolutionResolved,
   ProjectSummary,
-  ProjectUnresolvedSummary
+  ProjectUnresolvedSummary,
 }
 import javax.inject.Inject
 
@@ -21,18 +21,18 @@ trait ProjectDependencyResolutionService {
 class ProjectDependencyResolutionServiceImpl @Inject() (
   projectsDao: ProjectsDao,
   projectLibrariesDao: InternalProjectLibrariesDao,
-  librariesDao: LibrariesDao
+  librariesDao: LibrariesDao,
 ) extends ProjectDependencyResolutionService {
 
   override def getByOrganizationKey(organizationKey: String, groupId: String): ProjectDependencyResolution = {
     val allProjects = projects(organizationKey)
     val r = DependencyResolver(
-      buildProjectInfo(allProjects.values.toSeq, groupId = groupId)
+      buildProjectInfo(allProjects.values.toSeq, groupId = groupId),
     ).resolution
 
     val resolved = r.resolved.map { p =>
       ProjectDependencyResolutionResolved(
-        projects = p.map(_.projectId).map(allProjects)
+        projects = p.map(_.projectId).map(allProjects),
       )
     }
 
@@ -45,9 +45,9 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
         ProjectUnresolvedSummary(
           project = allProjects(p.projectId),
           resolvedLibraries = p.resolvedDependencies.map(_.identifier),
-          unresolvedLibraries = p.unresolvedDependencies.map(_.identifier)
+          unresolvedLibraries = p.unresolvedDependencies.map(_.identifier),
         )
-      }
+      },
     )
   }
 
@@ -57,7 +57,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
   // and use that to build up the project info we need to resolve dependencies
   private[services] def buildProjectInfo(
     allProjects: Seq[ProjectSummary],
-    groupId: String
+    groupId: String,
   ): Seq[ProjectInfo] = {
     val allLibraries = libraries(groupId)
     val allDependentLibraries = dependentLibraries(allProjects.map(_.id), groupId)
@@ -73,7 +73,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
         projectId = p.id,
         projectName = p.name,
         dependsOn = dependsOn,
-        provides = provides
+        provides = provides,
       )
     }
   }
@@ -92,7 +92,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
         projectIds = Some(projectIds),
         groupId = Some(groupId),
         limit = None,
-        orderBy = None
+        orderBy = None,
       )
       .groupBy(_.projectId)
       .map { case (pid, libs) =>
@@ -105,7 +105,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       .findAll(
         Authorization.All,
         organizationKey = Some(organizationKey),
-        limit = None
+        limit = None,
       )
       .map { p => p.id -> projectsDao.toSummary(p) }
       .toMap
@@ -116,7 +116,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       .findAll(
         Authorization.All,
         groupId = Some(groupId),
-        limit = None
+        limit = None,
       )
       .map(toLibrarySummary)
   }
@@ -126,7 +126,7 @@ class ProjectDependencyResolutionServiceImpl @Inject() (
       id = library.id,
       organization = library.organization,
       groupId = library.groupId,
-      artifactId = library.artifactId
+      artifactId = library.artifactId,
     )
   }
 }

@@ -8,7 +8,7 @@ case class Recipient(
   email: String,
   name: Name,
   userId: String,
-  identifier: String
+  identifier: String,
 ) {
   def fullName: Option[String] = {
     Seq(name.first, name.last).flatten.map(_.trim).filter(!_.isEmpty).toList match {

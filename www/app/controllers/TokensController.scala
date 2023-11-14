@@ -16,7 +16,7 @@ class TokensController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -26,7 +26,7 @@ class TokensController @javax.inject.Inject() (
     for {
       tokens <- dependencyClient(request).tokens.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(views.html.tokens.index(uiData(request), PaginatedCollection(page, tokens)))
@@ -57,8 +57,8 @@ class TokensController @javax.inject.Inject() (
           .post(
             TokenForm(
               userId = request.user.id,
-              description = valid.description
-            )
+              description = valid.description,
+            ),
           )
           .map { token =>
             Redirect(routes.TokensController.show(token.id)).flashing("success" -> "Token created")
@@ -68,7 +68,7 @@ class TokensController @javax.inject.Inject() (
               Ok(views.html.tokens.create(uiData(request), form, r.genericError.messages))
             }
           }
-      }
+      },
     )
   }
 
@@ -87,9 +87,9 @@ class TokensController @javax.inject.Inject() (
 
   def withToken[T](
     request: IdentifiedRequest[T],
-    id: String
+    id: String,
   )(
-    f: Token => Future[Result]
+    f: Token => Future[Result],
   ) = {
     dependencyClient(request).tokens
       .getById(id)
@@ -108,12 +108,12 @@ class TokensController @javax.inject.Inject() (
 object TokensController {
 
   case class TokenData(
-    description: Option[String]
+    description: Option[String],
   )
 
   private[controllers] val tokenForm = Form(
     mapping(
-      "description" -> optional(nonEmptyText)
-    )(TokenData.apply)(TokenData.unapply)
+      "description" -> optional(nonEmptyText),
+    )(TokenData.apply)(TokenData.unapply),
   )
 }

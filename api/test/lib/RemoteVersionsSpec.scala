@@ -8,8 +8,8 @@ class RemoteVersionsSpec extends DependencySpec {
     RemoteVersions.makeUrls("https://oss.sonatype.org/content/repositories/snapshots/", "com.github.tototoshi") must be(
       Seq(
         "https://oss.sonatype.org/content/repositories/snapshots/com/github/tototoshi",
-        "https://oss.sonatype.org/content/repositories/snapshots/com.github.tototoshi"
-      )
+        "https://oss.sonatype.org/content/repositories/snapshots/com.github.tototoshi",
+      ),
     )
   }
 

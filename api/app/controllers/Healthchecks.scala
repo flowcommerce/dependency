@@ -9,7 +9,7 @@ import play.api.libs.json._
 
 @Singleton
 class Healthchecks @Inject() (
-  val controllerComponents: ControllerComponents
+  val controllerComponents: ControllerComponents,
 ) extends BaseController {
 
   private val HealthyJson = Json.toJson(Healthcheck(status = "healthy"))

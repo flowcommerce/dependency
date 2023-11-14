@@ -15,7 +15,7 @@ import play.api.db._
 class OrganizationsDao @Inject() (
   db: Database,
   projectsDaoProvider: Provider[ProjectsDao],
-  membershipsDaoProvider: Provider[MembershipsDao]
+  membershipsDaoProvider: Provider[MembershipsDao],
 ) {
 
   val DefaultUserNameLength = 8
@@ -55,7 +55,7 @@ class OrganizationsDao @Inject() (
 
   private[db] def validate(
     form: OrganizationForm,
-    existing: Option[Organization] = None
+    existing: Option[Organization] = None,
   ): Seq[String] = {
     if (form.key.trim == "") {
       Seq("Key cannot be empty")
@@ -87,7 +87,7 @@ class OrganizationsDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create organization")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -97,7 +97,7 @@ class OrganizationsDao @Inject() (
   private[this] def create(implicit
     c: java.sql.Connection,
     createdBy: UserReference,
-    form: OrganizationForm
+    form: OrganizationForm,
   ): String = {
     val id = IdGenerator("org").randomId()
 
@@ -106,7 +106,7 @@ class OrganizationsDao @Inject() (
         "id" -> id,
         "user_id" -> createdBy.id,
         "key" -> form.key.trim,
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
 
@@ -115,7 +115,7 @@ class OrganizationsDao @Inject() (
       createdBy,
       id,
       createdBy.id,
-      Role.Admin
+      Role.Admin,
     )
 
     id
@@ -124,7 +124,7 @@ class OrganizationsDao @Inject() (
   def update(
     createdBy: UserReference,
     organization: Organization,
-    form: OrganizationForm
+    form: OrganizationForm,
   ): Either[Seq[String], Organization] = {
     validate(form, Some(organization)) match {
       case Nil => {
@@ -133,7 +133,7 @@ class OrganizationsDao @Inject() (
             .on(
               "id" -> organization.id,
               "key" -> form.key.trim,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -141,7 +141,7 @@ class OrganizationsDao @Inject() (
         Right(
           findById(Authorization.All, organization.id).getOrElse {
             sys.error("Failed to create organization")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -156,7 +156,7 @@ class OrganizationsDao @Inject() (
             Authorization.All,
             organizationId = Some(organization.id),
             limit = None,
-            offset = offset
+            offset = offset,
           )
         }
         .foreach { project =>
@@ -184,8 +184,8 @@ class OrganizationsDao @Inject() (
           c,
           UserReference(id = user.id),
           OrganizationForm(
-            key = key
-          )
+            key = key,
+          ),
         )
 
         SQL(InsertUserOrganizationQuery)
@@ -193,7 +193,7 @@ class OrganizationsDao @Inject() (
             "id" -> IdGenerator("uso").randomId(),
             "user_id" -> user.id,
             "organization_id" -> orgId,
-            "updated_by_user_id" -> user.id
+            "updated_by_user_id" -> user.id,
           )
           .execute()
 
@@ -221,7 +221,7 @@ class OrganizationsDao @Inject() (
             case (Some(first), Some(last)) => s"${first(0)}$last"
           }
         }
-      }
+      },
     )
   }
 
@@ -242,7 +242,7 @@ class OrganizationsDao @Inject() (
     forUserId: Option[String] = None,
     orderBy: OrderBy = OrderBy("organizations.key, -organizations.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Organization] = {
     db.withConnection { implicit c =>
       Standards
@@ -254,28 +254,28 @@ class OrganizationsDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .and(
           userId.map { _ =>
             "organizations.id in (select organization_id from memberships where user_id = {user_id})"
-          }
+          },
         )
         .bind("user_id", userId)
         .optionalText(
           "organizations.key",
           key,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .and(
           forUserId.map { _ =>
             "organizations.id in (select organization_id from user_organizations where user_id = {for_user_id})"
-          }
+          },
         )
         .bind("for_user_id", forUserId)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Organization.parser().*
+          io.flow.dependency.v0.anorm.parsers.Organization.parser().*,
         )
     }
   }

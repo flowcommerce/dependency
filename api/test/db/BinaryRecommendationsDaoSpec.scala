@@ -9,19 +9,19 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(30, Seconds)),
-    interval = scaled(Span(250, Millis))
+    interval = scaled(Span(250, Millis)),
   )
 
   def createBinaryWithMultipleVersions(
-    org: Organization
+    org: Organization,
   )(implicit
-    versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2")
+    versions: Seq[String] = Seq("1.0.0", "1.0.1", "1.0.2"),
   ): (Binary, Seq[BinaryVersion]) = {
     val binary = createBinary(org)(createBinaryForm(org))
     versions.map { version =>
       createBinaryVersion(org)(
         binary = binary,
-        version = version
+        version = version,
       )
     }
     (
@@ -29,9 +29,9 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
       binaryVersionsDao
         .findAll(
           binaryId = Some(binary.id),
-          limit = versions.size.toLong
+          limit = versions.size.toLong,
         )
-        .reverse
+        .reverse,
     )
   }
 
@@ -43,9 +43,9 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
           projectId = project.id,
           name = binaryVersion.binary.name,
           version = binaryVersion.version,
-          path = "test.sbt"
-        )
-      )
+          path = "test.sbt",
+        ),
+      ),
     )
     projectBinariesDao.setBinary(systemUser, projectBinary, binaryVersion.binary)
   }
@@ -76,16 +76,16 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
             binary = binary,
             from = "1.0.0",
             to = binaryVersions.find(_.version == "1.0.2").get,
-            latest = binaryVersions.find(_.version == "1.0.2").get
-          )
-        )
+            latest = binaryVersions.find(_.version == "1.0.2").get,
+          ),
+        ),
       )
     }
   }
 
   "Prefers latest production release even when more recent beta release is available" in {
     val (binary, binaryVersions) = createBinaryWithMultipleVersions(org)(
-      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1")
+      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1"),
     )
     val project = createProject(org)
     addBinaryVersion(project, binaryVersions.find(_.version == "1.0.0").get)
@@ -97,9 +97,9 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
             binary = binary,
             from = "1.0.0",
             to = binaryVersions.find(_.version == "1.0.1").get,
-            latest = binaryVersions.find(_.version == "1.0.2-RC1").get
-          )
-        )
+            latest = binaryVersions.find(_.version == "1.0.2-RC1").get,
+          ),
+        ),
       )
     }
   }
@@ -118,7 +118,7 @@ class BinaryRecommendationsDaoSpec extends DependencySpec with Eventually with I
                 case true => {}
                 case false => {
                   sys.error(
-                    s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]"
+                    s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]",
                   )
                 }
               }

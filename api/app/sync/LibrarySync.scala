@@ -8,7 +8,7 @@ import db.{
   LibraryVersionsDao,
   InternalProjectLibrariesDao,
   ResolversDao,
-  SyncsDao
+  SyncsDao,
 }
 import io.flow.common.v0.models.UserReference
 import io.flow.dependency.actors.SearchActor
@@ -25,7 +25,7 @@ class LibrarySync @Inject() (
   internalTasksDao: InternalTasksDao,
   artifactProvider: DefaultLibraryArtifactProvider,
   syncsDao: SyncsDao,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
 
   private[this] def toVersionForm(version: ArtifactVersion): VersionForm =
@@ -39,7 +39,7 @@ class LibrarySync @Inject() (
       .findAll(
         Authorization.All,
         libraryId = Some(libraryId),
-        limit = None
+        limit = None,
       )
       .map(toVersionForm)
       .toSet
@@ -51,7 +51,7 @@ class LibrarySync @Inject() (
     artifactProvider.resolve(
       resolver = resolver,
       groupId = lib.groupId,
-      artifactId = lib.artifactId
+      artifactId = lib.artifactId,
     ) match {
       case None => Nil
       case Some(r) => r.versions.map(toVersionForm)
@@ -71,7 +71,7 @@ class LibrarySync @Inject() (
           libraryVersionsDao.upsert(
             createdBy = user,
             libraryId = lib.id,
-            form = versionForm
+            form = versionForm,
           )
         }
         if (newVersions.nonEmpty) {
@@ -85,7 +85,7 @@ class LibrarySync @Inject() (
   def iterateAll(
     auth: Authorization,
     organizationId: Option[String] = None,
-    prefix: Option[String] = None
+    prefix: Option[String] = None,
   )(f: Library => Any): Unit = {
     Pager
       .create { offset =>
@@ -94,7 +94,7 @@ class LibrarySync @Inject() (
           organizationId = organizationId,
           prefix = prefix,
           offset = offset,
-          limit = Some(1000)
+          limit = Some(1000),
         )
       }
       .foreach { rec =>
@@ -109,10 +109,10 @@ class LibrarySync @Inject() (
           Authorization.All,
           libraryId = Some(libraryId),
           limit = None,
-          orderBy = None
+          orderBy = None,
         )
         .map(_.projectId),
-      priority = InternalTask.MediumPriority
+      priority = InternalTask.MediumPriority,
     )
   }
 }

@@ -35,8 +35,8 @@ class InternalItemsDaoSpec
     val item3 = itemsDao.replace(
       systemUser,
       form.copy(
-        label = newLabel
-      )
+        label = newLabel,
+      ),
     )
     item3.id must be(item2.id)
     item3.label must be(newLabel)
@@ -91,7 +91,7 @@ class InternalItemsDaoSpec
     }
 
     itemsDao.findAll(Authorization.All, ids = Some(Seq(item1.id, item2.id)), limit = None).map(_.id).sorted must be(
-      Seq(item1.id, item2.id).sorted
+      Seq(item1.id, item2.id).sorted,
     )
 
     itemsDao.findAll(Authorization.All, ids = Some(Nil), limit = None) must be(Nil)
@@ -113,12 +113,12 @@ class InternalItemsDaoSpec
       BinarySummary(
         id = binary.id,
         organization = OrganizationSummary(org.id, org.key),
-        name = binary.name
-      )
+        name = binary.name,
+      ),
     )
 
     itemsDao.findAll(Authorization.All, q = Some(binary.id.toString), limit = None).headOption.map(_.id) must be(
-      Some(actual.id)
+      Some(actual.id),
     )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
@@ -136,12 +136,12 @@ class InternalItemsDaoSpec
         id = library.id,
         organization = OrganizationSummary(org.id, org.key),
         groupId = library.groupId,
-        artifactId = library.artifactId
-      )
+        artifactId = library.artifactId,
+      ),
     )
 
     itemsDao.findAll(Authorization.All, q = Some(library.id.toString), limit = None).headOption.map(_.id) must be(
-      Some(actual.id)
+      Some(actual.id),
     )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
@@ -158,12 +158,12 @@ class InternalItemsDaoSpec
       ProjectSummary(
         id = project.id,
         organization = OrganizationSummary(org.id, org.key),
-        name = project.name
-      )
+        name = project.name,
+      ),
     )
 
     itemsDao.findAll(Authorization.All, q = Some(project.id.toString), limit = None).headOption.map(_.id) must be(
-      Some(actual.id)
+      Some(actual.id),
     )
     itemsDao.findAll(Authorization.All, q = Some(UUID.randomUUID.toString), limit = None) must be(Nil)
   }
@@ -175,17 +175,17 @@ class InternalItemsDaoSpec
     val item = itemsDao.replaceProject(systemUser, project)
 
     itemsDao.findAll(Authorization.PublicOnly, objectId = Some(project.id), limit = None).map(_.id) must be(
-      Seq(item.id)
+      Seq(item.id),
     )
     itemsDao.findAll(Authorization.All, objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
     itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(
-      Seq(item.id)
+      Seq(item.id),
     )
     itemsDao
       .findAll(Authorization.Organization(createOrganization().id), objectId = Some(project.id), limit = None)
       .map(_.id) must be(Seq(item.id))
     itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(
-      Seq(item.id)
+      Seq(item.id),
     )
   }
 
@@ -198,15 +198,15 @@ class InternalItemsDaoSpec
     itemsDao.findAll(Authorization.PublicOnly, objectId = Some(project.id), limit = None) must be(Nil)
     itemsDao.findAll(Authorization.All, objectId = Some(project.id), limit = None).map(_.id) must be(Seq(item.id))
     itemsDao.findAll(Authorization.Organization(org.id), objectId = Some(project.id), limit = None).map(_.id) must be(
-      Seq(item.id)
+      Seq(item.id),
     )
     itemsDao.findAll(
       Authorization.Organization(createOrganization().id),
       objectId = Some(project.id),
-      limit = None
+      limit = None,
     ) must be(Nil)
     itemsDao.findAll(Authorization.User(user.id), objectId = Some(project.id), limit = None).map(_.id) must be(
-      Seq(item.id)
+      Seq(item.id),
     )
     itemsDao.findAll(Authorization.User(createUser().id), objectId = Some(project.id), limit = None) must be(Nil)
   }

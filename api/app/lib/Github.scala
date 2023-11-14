@@ -22,7 +22,7 @@ case class GithubUserData(
   token: String,
   emails: Seq[String],
   name: Option[String],
-  avatarUrl: Option[String]
+  avatarUrl: Option[String],
 )
 
 object GithubHelper {
@@ -32,8 +32,8 @@ object GithubHelper {
       wsClient,
       baseUrl = "https://api.github.com",
       defaultHeaders = Seq(
-        ("Authorization" -> s"token $oauthToken")
-      )
+        ("Authorization" -> s"token $oauthToken"),
+      ),
     )
   }
 
@@ -64,9 +64,9 @@ abstract class Github {
     user: UserReference,
     projectUri: String,
     path: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[String]]
 
   /** Given an auth validation code, pings the github UI to access the user data, upserts that user with the dependency
@@ -76,7 +76,7 @@ abstract class Github {
     *   The oauth authorization code from github
     */
   def getUserFromCode(usersDao: UsersDao, githubUsersDao: GithubUsersDao, tokensDao: TokensDao, code: String)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Either[Seq[String], User]] = {
     getGithubUserFromCode(code).map {
       case Left(errors) => Left(errors)
@@ -97,8 +97,8 @@ abstract class Github {
                   createdBy = None,
                   form = UserForm(
                     email = githubUserWithToken.emails.headOption,
-                    name = githubUserWithToken.name.map(GithubHelper.parseName(_))
-                  )
+                    name = githubUserWithToken.name.map(GithubHelper.parseName(_)),
+                  ),
                 )
               }
             }
@@ -115,16 +115,16 @@ abstract class Github {
               form = GithubUserForm(
                 userId = user.id,
                 githubUserId = githubUserWithToken.githubId,
-                login = githubUserWithToken.login
-              )
+                login = githubUserWithToken.login,
+              ),
             )
 
             tokensDao.setLatestByTag(
               createdBy = UserReference(id = user.id),
               form = InternalTokenForm.GithubOauth(
                 userId = user.id,
-                token = githubUserWithToken.token
-              )
+                token = githubUserWithToken.token,
+              ),
             )
 
             Right(user)
@@ -149,11 +149,11 @@ abstract class Github {
     offset: Long,
     limit: Long,
     resultsSoFar: Seq[GithubRepository] = Nil,
-    page: Long = 1 // internal parameter
+    page: Long = 1, // internal parameter
   )(
-    acceptsFilter: GithubRepository => Boolean = { _ => true }
+    acceptsFilter: GithubRepository => Boolean = { _ => true },
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Seq[GithubRepository]] = {
     githubRepos(user, page).flatMap { thisPage =>
       if (thisPage.isEmpty) {
@@ -188,21 +188,21 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
     wsClient,
     baseUrl = "https://github.com",
     defaultHeaders = Seq(
-      "Accept" -> "application/json"
-    )
+      "Accept" -> "application/json",
+    ),
   )
 
   override def getGithubUserFromCode(
-    code: String
+    code: String,
   )(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
     val form = AccessTokenForm(
       clientId = clientId,
       clientSecret = clientSecret,
-      code = code
+      code = code,
     )
     oauthClient.accessTokens
       .postAccessToken(
-        form
+        form,
       )
       .flatMap { response =>
         val client = GithubHelper.apiClient(wsClient, response.accessToken)
@@ -220,8 +220,8 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
               token = response.accessToken,
               emails = sortedEmailAddresses,
               name = githubUser.name,
-              avatarUrl = githubUser.avatarUrl
-            )
+              avatarUrl = githubUser.avatarUrl,
+            ),
           )
         }
       }
@@ -230,7 +230,7 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
   /** Fetches one page of repositories from the Github API
     */
   override def githubRepos(user: UserReference, page: Long = 1)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Seq[GithubRepository]] = {
     oauthToken(user) match {
       case None => Future { Nil }
@@ -248,9 +248,9 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
     user: UserReference,
     projectUri: String,
     path: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[String]] = {
     GithubUtil.parseUri(projectUri) match {
       case Left(error) => {
@@ -270,7 +270,7 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
                 owner = repo.owner,
                 repo = repo.project,
                 path = path,
-                ref = branch
+                ref = branch,
               )
               .map { contents =>
                 Some(GithubUtil.toText(contents))
@@ -291,7 +291,7 @@ class DefaultGithub @Inject() (wsClient: WSClient, config: Config, tokensDao: To
 class MockGithub() extends Github {
 
   override def getGithubUserFromCode(
-    code: String
+    code: String,
   )(implicit ec: ExecutionContext): Future[Either[Seq[String], GithubUserData]] = {
     Future {
       MockGithubData.getUserByCode(code) match {
@@ -302,7 +302,7 @@ class MockGithub() extends Github {
   }
 
   override def githubRepos(user: UserReference, page: Long = 1)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Seq[GithubRepository]] = {
     Future {
       MockGithubData.repositories(user)
@@ -317,9 +317,9 @@ class MockGithub() extends Github {
     user: UserReference,
     projectUri: String,
     path: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[String]] = {
     Future {
       MockGithubData.getFile(projectUri, path)
@@ -343,7 +343,7 @@ object MockGithubData {
         token = token.getOrElse(IdGenerator("tok").randomId()),
         emails = Seq(githubUser.email).flatten,
         name = githubUser.name,
-        avatarUrl = githubUser.avatarUrl
+        avatarUrl = githubUser.avatarUrl,
       )
     )
   }
@@ -374,14 +374,14 @@ object MockGithubData {
   def addFile(
     projectUri: String,
     path: String,
-    contents: String
+    contents: String,
   ): Unit = {
     files +== (s"${projectUri}.$path" -> contents)
   }
 
   def getFile(
     projectUri: String,
-    path: String
+    path: String,
   ): Option[String] = {
     files.get(s"${projectUri}.$path")
   }

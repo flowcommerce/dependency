@@ -22,7 +22,7 @@ class ResolversDao @Inject() (
   organizationsDaoProvider: Provider[OrganizationsDao],
   staticUserProviderProvider: Provider[StaticUserProvider],
   logger: RollbarLogger,
-  @javax.inject.Named("resolver-actor") resolverActor: akka.actor.ActorRef
+  @javax.inject.Named("resolver-actor") resolverActor: akka.actor.ActorRef,
 ) {
 
   val GithubOauthResolverTag = "github_oauth"
@@ -58,7 +58,7 @@ class ResolversDao @Inject() (
         SQL(SelectCredentialsQuery)
           .on("id" -> resolver.id)
           .as(
-            SqlParser.str("credentials").*
+            SqlParser.str("credentials").*,
           )
           .headOption
           .flatMap { parseCredentials(resolver.id, _) }
@@ -73,7 +73,7 @@ class ResolversDao @Inject() (
         OrganizationSummary(org.id, org.key)
       },
       visibility = resolver.visibility,
-      uri = resolver.uri
+      uri = resolver.uri,
     )
   }
 
@@ -89,7 +89,7 @@ class ResolversDao @Inject() (
           Authorization.All,
           visibility = Some(Visibility.Public),
           uri = Some(form.uri),
-          limit = 1
+          limit = 1,
         ).headOption match {
           case None => Nil
           case Some(_) => Seq(s"Public resolver with uri[${form.uri}] already exists")
@@ -101,7 +101,7 @@ class ResolversDao @Inject() (
           visibility = Some(Visibility.Private),
           organization = Some(form.organization),
           uri = Some(form.uri),
-          limit = 1
+          limit = 1,
         ).headOption match {
           case None => Nil
           case Some(_) => Seq(s"Organization already has a resolver with uri[${form.uri}]")
@@ -143,7 +143,7 @@ class ResolversDao @Inject() (
               "credentials" -> form.credentials.map { cred => Json.stringify(Json.toJson(cred)) },
               "position" -> nextPosition(org.id, form.visibility),
               "uri" -> form.uri.trim,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -153,7 +153,7 @@ class ResolversDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create resolver")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -167,7 +167,7 @@ class ResolversDao @Inject() (
           Authorization.All,
           resolverId = Some(resolver.id),
           limit = Some(1000),
-          offset = offset
+          offset = offset,
         )
       }
       .foreach { library =>
@@ -181,13 +181,13 @@ class ResolversDao @Inject() (
   def findByOrganizationAndUri(
     auth: Authorization,
     organization: String,
-    uri: String
+    uri: String,
   ): Option[Resolver] = {
     findAll(
       auth,
       organization = Some(organization),
       uri = Some(uri),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
@@ -204,7 +204,7 @@ class ResolversDao @Inject() (
     organizationId: Option[String] = None,
     uri: Option[String] = None,
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Resolver] = {
     db.withConnection { implicit c =>
       Standards
@@ -221,7 +221,7 @@ class ResolversDao @Inject() (
           resolvers.position, lower(resolvers.uri),resolvers.created_at
         """),
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .optionalText("resolvers.visibility", visibility)
         .optionalText("organizations.key", organization.map(_.toLowerCase))
@@ -248,7 +248,7 @@ class ResolversDao @Inject() (
     */
   def nextPosition(
     organizationId: String,
-    visibility: Visibility
+    visibility: Visibility,
   ): Int = {
     db.withConnection { implicit c =>
       visibility match {
@@ -276,7 +276,7 @@ class ResolversDao @Inject() (
             visibility = visibility,
             organization = organization,
             uri = uri,
-            credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials)
+            credentials = credentials.flatMap { parseCredentials(id, _) }.flatMap(Util.maskCredentials),
           )
         }
       }

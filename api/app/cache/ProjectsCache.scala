@@ -6,7 +6,7 @@ import io.flow.util.CacheWithFallbackToStaleData
 
 @javax.inject.Singleton
 case class ProjectsCache @javax.inject.Inject() (
-  projectsDao: ProjectsDao
+  projectsDao: ProjectsDao,
 ) extends CacheWithFallbackToStaleData[String, Option[Project]] {
 
   override def refresh(projectId: String): Option[Project] = {

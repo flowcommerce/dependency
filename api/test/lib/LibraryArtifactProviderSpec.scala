@@ -9,21 +9,21 @@ class LibraryArtifactProviderSpec extends DependencySpec {
 
   def makeLibrary(
     groupId: String = UUID.randomUUID.toString,
-    artifactId: String = UUID.randomUUID.toString
+    artifactId: String = UUID.randomUUID.toString,
   ): Library = {
     Library(
       id = UUID.randomUUID.toString,
       organization = orgSummary,
       groupId = groupId,
       artifactId = artifactId,
-      resolver = makeResolverSummary()
+      resolver = makeResolverSummary(),
     )
   }
 
   private[this] lazy val provider = init[DefaultLibraryArtifactProvider]
   private[this] lazy val orgSummary = OrganizationSummary(
     id = UUID.randomUUID.toString,
-    key = s"z-test-${UUID.randomUUID.toString.toLowerCase}"
+    key = s"z-test-${UUID.randomUUID.toString.toLowerCase}",
   )
 
   "parseUri" in {

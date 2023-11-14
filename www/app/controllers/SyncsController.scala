@@ -12,7 +12,7 @@ class SyncsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -23,7 +23,7 @@ class SyncsController @javax.inject.Inject() (
       syncs <- dependencyClient(request).syncs.get(
         objectId = objectId,
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(views.html.syncs.index(uiData(request), PaginatedCollection(page, syncs), objectId))

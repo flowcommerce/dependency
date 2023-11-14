@@ -17,7 +17,7 @@ class Resolvers @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   resolversDao: ResolversDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -26,7 +26,7 @@ class Resolvers @javax.inject.Inject() (
     organization: Option[String],
     visibility: Option[Visibility],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -37,9 +37,9 @@ class Resolvers @javax.inject.Inject() (
           visibility = visibility,
           organization = organization,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -71,7 +71,7 @@ class Resolvers @javax.inject.Inject() (
   }
 
   def withResolver(user: UserReference, id: String)(
-    f: Resolver => Result
+    f: Resolver => Result,
   ): Result = {
     resolversDao.findById(Authorization.User(user.id), id) match {
       case None => {

@@ -16,7 +16,7 @@ class OrganizationsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -30,14 +30,14 @@ class OrganizationsController @javax.inject.Inject() (
     for {
       organizations <- dependencyClient(request).organizations.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.organizations.index(
           uiData(request),
-          PaginatedCollection(page, organizations)
-        )
+          PaginatedCollection(page, organizations),
+        ),
       )
     }
   }
@@ -48,15 +48,15 @@ class OrganizationsController @javax.inject.Inject() (
         projects <- dependencyClient(request).projects.get(
           organization = Some(key),
           limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = projectsPage * Pagination.DefaultLimit.toLong
+          offset = projectsPage * Pagination.DefaultLimit.toLong,
         )
       } yield {
         Ok(
           views.html.organizations.show(
             uiData(request),
             org,
-            PaginatedCollection(projectsPage, projects)
-          )
+            PaginatedCollection(projectsPage, projects),
+          ),
         )
       }
     }
@@ -66,8 +66,8 @@ class OrganizationsController @javax.inject.Inject() (
     Ok(
       views.html.organizations.create(
         uiData(request),
-        OrganizationsController.uiForm
-      )
+        OrganizationsController.uiForm,
+      ),
     )
   }
 
@@ -90,7 +90,7 @@ class OrganizationsController @javax.inject.Inject() (
               Ok(views.html.organizations.create(uiData(request), boundForm, response.genericError.messages))
             }
           }
-      }
+      },
     )
   }
 
@@ -103,10 +103,10 @@ class OrganizationsController @javax.inject.Inject() (
             organization,
             OrganizationsController.uiForm.fill(
               OrganizationsController.UiForm(
-                key = organization.key
-              )
-            )
-          )
+                key = organization.key,
+              ),
+            ),
+          ),
         )
       }
     }
@@ -130,11 +130,11 @@ class OrganizationsController @javax.inject.Inject() (
               case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
                 Ok(
                   views.html.organizations
-                    .edit(uiData(request), organization, boundForm, response.genericError.messages)
+                    .edit(uiData(request), organization, boundForm, response.genericError.messages),
                 )
               }
             }
-        }
+        },
       )
     }
   }
@@ -159,19 +159,19 @@ class OrganizationsController @javax.inject.Inject() (
 object OrganizationsController {
 
   case class UiForm(
-    key: String
+    key: String,
   ) {
 
     val organizationForm = OrganizationForm(
-      key = key
+      key = key,
     )
 
   }
 
   private val uiForm = Form(
     mapping(
-      "key" -> nonEmptyText
-    )(UiForm.apply)(UiForm.unapply)
+      "key" -> nonEmptyText,
+    )(UiForm.apply)(UiForm.unapply),
   )
 
 }

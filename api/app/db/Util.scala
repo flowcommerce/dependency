@@ -23,8 +23,8 @@ object Util {
         Some(
           UsernamePassword(
             username,
-            password = password.map(_ => "masked")
-          )
+            password = password.map(_ => "masked"),
+          ),
         )
       }
     }

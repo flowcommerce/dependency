@@ -15,7 +15,7 @@ class BinarySync @Inject() (
   binaryVersionsDao: BinaryVersionsDao,
   syncsDao: SyncsDao,
   @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
-  logger: RollbarLogger
+  logger: RollbarLogger,
 ) {
 
   def sync(user: UserReference, binaryId: String): Unit = {

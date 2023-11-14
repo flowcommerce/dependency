@@ -20,14 +20,14 @@ class Syncs @javax.inject.Inject() (
   librariesHelper: LibrariesHelper,
   binaryHelper: BinaryHelper,
   projectHelper: ProjectHelper,
-  librariesDao: LibrariesDao
+  librariesDao: LibrariesDao,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
     objectId: Option[String],
     event: Option[SyncEvent],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
@@ -35,9 +35,9 @@ class Syncs @javax.inject.Inject() (
           objectId = objectId,
           event = event,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

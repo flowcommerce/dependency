@@ -38,7 +38,7 @@ lazy val root = project
 
     val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
     result.binaries must contain theSameElementsAs Seq(
-      ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.13.5", "test.sbt")
+      ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.13.5", "test.sbt"),
     )
     result.libraries mustBe empty
   }
@@ -69,13 +69,13 @@ lazy val root = project
     "parse dependencies" in {
       val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must contain theSameElementsAs Seq(
-        ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.11.7", "test.sbt")
+        ProjectBinaryForm(projectSummary.id, BinaryType.Scala, "2.11.7", "test.sbt"),
       )
       result.libraries must be(
         Seq(
           Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true, false),
-          Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false)
-        )
+          Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false),
+        ),
       )
     }
   }
@@ -99,7 +99,7 @@ lazy val root = project
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true, false),
-        Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false)
+        Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false),
       )
     }
   }
@@ -133,7 +133,7 @@ lazy val www = project
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.1-SNAPSHOT", true, false),
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-postgresql", "0.0.2-SNAPSHOT", true, false),
-        Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false)
+        Artifact(projectSummary, "test.sbt", "org.postgresql", "postgresql", "9.4-1202-jdbc42", false, false),
       )
     }
   }
@@ -158,7 +158,7 @@ lazy val avro = project
     result.libraries must contain theSameElementsAs Seq(
       Artifact(projectSummary, "test.sbt", "com.typesafe.akka", "akka-cluster", "2.3.4", true, false),
       Artifact(projectSummary, "test.sbt", "com.typesafe.akka", "akka-testkit", "2.3.4", true, false),
-      Artifact(projectSummary, "test.sbt", "org.apache.avro", "avro", "1.7.7", false, false)
+      Artifact(projectSummary, "test.sbt", "org.apache.avro", "avro", "1.7.7", false, false),
     )
   }
 
@@ -173,7 +173,7 @@ lazy val avro = project
     val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
     result.binaries must be(Nil)
     result.libraries must contain theSameElementsAs Seq(
-      Artifact(projectSummary, "test.sbt", "org.scalatest", "scalatest", "2.2.0", true, false)
+      Artifact(projectSummary, "test.sbt", "org.scalatest", "scalatest", "2.2.0", true, false),
     )
   }
 
@@ -200,7 +200,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "io.dropwizard.metrics", "metrics-core", "3.1.0", false, false),
         Artifact(projectSummary, "test.sbt", "io.dropwizard.metrics", "metrics-jvm", "3.1.0", false, false),
-        Artifact(projectSummary, "test.sbt", "org.scalatest", "scalatest", "2.1.2", true, false)
+        Artifact(projectSummary, "test.sbt", "org.scalatest", "scalatest", "2.1.2", true, false),
       )
       result.resolverUris must contain theSameElementsAs Seq("http://repo.typesafe.com/typesafe/releases/")
     }
@@ -216,7 +216,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
       val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
-        Artifact(projectSummary, "test.sbt", "com.typesafe.play", "play-json", "2.2.2", true, false)
+        Artifact(projectSummary, "test.sbt", "com.typesafe.play", "play-json", "2.2.2", true, false),
       )
       result.resolverUris must be(Nil)
     }
@@ -247,7 +247,7 @@ lazy val tests = project.settings(
       result.libraries must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-core", "V.scalafixVersion", true, false),
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-play-play26", "0.5.28", true, false),
-        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-testkit", "V.scalafixVersion", false, false)
+        Artifact(projectSummary, "test.sbt", "ch.epfl.scala", "scalafix-testkit", "V.scalafixVersion", false, false),
       )
       result.resolverUris must be(Nil)
     }
@@ -262,7 +262,7 @@ lazy val tests = project.settings(
       val result = BuildSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.binaries must be(Nil)
       result.libraries must contain theSameElementsAs Seq(
-        Artifact(projectSummary, "test.sbt", "io.flow", "scalafix-rules", "0.0.1", true, false)
+        Artifact(projectSummary, "test.sbt", "io.flow", "scalafix-rules", "0.0.1", true, false),
       )
       result.resolverUris must be(Nil)
     }
@@ -295,7 +295,7 @@ lazy val commonSettings: Seq[Def.Setting[_]] = Seq(
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-event-play26", "0.4.55", true, false),
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-postgresql-play-play26", "0.3.6", true, false),
         Artifact(projectSummary, "test.sbt", "io.flow", "lib-reference-scala", "0.2.28", true, false),
-        Artifact(projectSummary, "test.sbt", "io.flow", "lib-log", "0.0.64", true, false)
+        Artifact(projectSummary, "test.sbt", "io.flow", "lib-log", "0.0.64", true, false),
       )
     }
 

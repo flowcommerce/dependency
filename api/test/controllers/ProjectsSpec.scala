@@ -21,7 +21,7 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
   "GET /projects by id that does not exist" in {
     await(
-      identifiedClient().projects.get(id = Option(UUID.randomUUID.toString))
+      identifiedClient().projects.get(id = Option(UUID.randomUUID.toString)),
     ).map(_.id) must be(Nil)
   }
 
@@ -43,11 +43,11 @@ class ProjectsSpec extends DependencySpec with MockDependencyClient {
 
       val user2 = createUser()
       expectErrors(
-        identifiedClient(UserReference(user2.id)).projects.deleteById(project.id)
+        identifiedClient(UserReference(user2.id)).projects.deleteById(project.id),
       )
 
       await(
-        identifiedClient().projects.getById(project.id)
+        identifiedClient().projects.getById(project.id),
       ).id must be(project.id)
     }
 

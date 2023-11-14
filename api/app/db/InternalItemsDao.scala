@@ -9,7 +9,7 @@ import io.flow.dependency.v0.models.{
   ItemSummary,
   ItemSummaryUndefinedType,
   Library,
-  LibrarySummary
+  LibrarySummary,
 }
 import io.flow.dependency.v0.models.{OrganizationSummary, Project, ProjectSummary, Visibility}
 import io.flow.dependency.v0.models.json._
@@ -24,7 +24,7 @@ case class InternalItemForm(
   label: String,
   description: Option[String],
   contents: String,
-  visibility: Visibility
+  visibility: Visibility,
 ) {
 
   val objectId: String = {
@@ -53,7 +53,7 @@ case class InternalItemForm(
       label = label,
       description = description,
       summary = Some(Json.toJson(summary)),
-      contents = contents.trim.toLowerCase()
+      contents = contents.trim.toLowerCase(),
     )
   }
 }
@@ -64,7 +64,7 @@ class InternalItemsDao @Inject() (
   dao: generated.ItemsDao,
   librariesDaoProvider: Provider[LibrariesDao],
   projectsDaoProvider: Provider[ProjectsDao],
-  organizationsCache: OrganizationsCache
+  organizationsCache: OrganizationsCache,
 ) {
   private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
 
@@ -93,7 +93,7 @@ class InternalItemsDao @Inject() (
     val summary = BinarySummary(
       id = binary.id,
       organization = binary.organization,
-      name = binary.name
+      name = binary.name,
     )
     replace(
       user,
@@ -102,8 +102,8 @@ class InternalItemsDao @Inject() (
         visibility = visibility(summary),
         label = label,
         description = None,
-        contents = Seq(binary.id.toString, label).mkString(" ")
-      )
+        contents = Seq(binary.id.toString, label).mkString(" "),
+      ),
     )
   }
 
@@ -113,7 +113,7 @@ class InternalItemsDao @Inject() (
       id = library.id,
       organization = library.organization,
       groupId = library.groupId,
-      artifactId = library.artifactId
+      artifactId = library.artifactId,
     )
     replace(
       user,
@@ -122,8 +122,8 @@ class InternalItemsDao @Inject() (
         visibility = visibility(summary),
         label = label,
         description = None,
-        contents = Seq(library.id.toString, label).mkString(" ")
-      )
+        contents = Seq(library.id.toString, label).mkString(" "),
+      ),
     )
   }
 
@@ -133,7 +133,7 @@ class InternalItemsDao @Inject() (
     val summary = ProjectSummary(
       id = project.id,
       organization = project.organization,
-      name = project.name
+      name = project.name,
     )
     replace(
       user,
@@ -142,15 +142,15 @@ class InternalItemsDao @Inject() (
         visibility = visibility(summary),
         label = label,
         description = Some(description),
-        contents = Seq(project.id.toString, label, description).mkString(" ")
-      )
+        contents = Seq(project.id.toString, label, description).mkString(" "),
+      ),
     )
   }
 
   def replace(user: UserReference, form: InternalItemForm): Item = {
     dao.upsertByObjectId(
       user,
-      form.dbForm
+      form.dbForm,
     )
     findByObjectId(Authorization.All, form.objectId).getOrElse {
       sys.error("Failed to replace item")
@@ -173,7 +173,7 @@ class InternalItemsDao @Inject() (
     findAll(
       auth,
       objectId = Some(objectId),
-      limit = Some(1)
+      limit = Some(1),
     ).headOption
   }
 
@@ -186,7 +186,7 @@ class InternalItemsDao @Inject() (
     objectId: Option[String] = None,
     orderBy: OrderBy = OrderBy("-lower(items.label), items.created_at"),
     limit: Option[Long],
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Item] = {
     dao
       .findAll(
@@ -195,7 +195,7 @@ class InternalItemsDao @Inject() (
         objectId = objectId,
         limit = limit,
         offset = offset,
-        orderBy = orderBy
+        orderBy = orderBy,
       ) { queryMod =>
         queryMod
           .equals("id", id)
@@ -218,14 +218,14 @@ class InternalItemsDao @Inject() (
             .withKeyValue("organization_id", db.organizationId)
             .warn("Could not find org in cache - key will be incorrect")
           db.organizationId
-        }
+        },
       ),
       visibility = Visibility(db.visibility),
       summary = db.summary.map(_.as[ItemSummary]).getOrElse {
         sys.error(s"Item[${db.id}] missing summary")
       },
       label = db.label,
-      description = db.description
+      description = db.description,
     )
   }
 }

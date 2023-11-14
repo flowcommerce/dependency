@@ -7,7 +7,7 @@ object ArtifactNameMatcher {
   // will match "xxx-akka" and "xxx-akka26"
   private[this] val KnownSuffixes = Seq(
     "akka",
-    "play"
+    "play",
   ).map(format)
 
   def matches(artifactId: String, projectName: String): Boolean = {

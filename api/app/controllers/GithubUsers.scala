@@ -17,7 +17,7 @@ class GithubUsers @javax.inject.Inject() (
   usersDao: UsersDao,
   githubUsersDao: GithubUsersDao,
   tokensDao: TokensDao,
-  val controllerComponents: ControllerComponents
+  val controllerComponents: ControllerComponents,
 ) extends BaseController {
 
   import scala.concurrent.ExecutionContext.Implicits.global

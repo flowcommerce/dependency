@@ -11,7 +11,7 @@ import play.api.db._
 
 class GithubUsersDao @Inject() (
   db: Database,
-  usersDaoProvider: Provider[UsersDao]
+  usersDaoProvider: Provider[UsersDao],
 ) {
 
   private[this] val BaseQuery = Query(s"""
@@ -36,7 +36,7 @@ class GithubUsersDao @Inject() (
   }
 
   def upsertByIdWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): GithubUser = {
     findByGithubUserId(form.githubUserId).getOrElse {
       createWithConnection(createdBy, form)
@@ -50,7 +50,7 @@ class GithubUsersDao @Inject() (
   }
 
   private[db] def createWithConnection(createdBy: Option[UserReference], form: GithubUserForm)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): GithubUser = {
     val id = IdGenerator("ghu").randomId()
     SQL(InsertQuery)
@@ -59,7 +59,7 @@ class GithubUsersDao @Inject() (
         "user_id" -> form.userId,
         "github_user_id" -> form.githubUserId,
         "login" -> form.login.trim,
-        "updated_by_user_id" -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id
+        "updated_by_user_id" -> createdBy.getOrElse(usersDaoProvider.get.anonymousUser).id,
       )
       .execute()
 
@@ -83,7 +83,7 @@ class GithubUsersDao @Inject() (
     githubUserId: Option[Long] = None,
     orderBy: OrderBy = OrderBy("github_users.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[GithubUser] = {
     db.withConnection { implicit c =>
       BaseQuery
@@ -95,7 +95,7 @@ class GithubUsersDao @Inject() (
         .limit(limit)
         .offset(offset)
         .as(
-          io.flow.dependency.v0.anorm.parsers.GithubUser.parser().*
+          io.flow.dependency.v0.anorm.parsers.GithubUser.parser().*,
         )
     }
   }

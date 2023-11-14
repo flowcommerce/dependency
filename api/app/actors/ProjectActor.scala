@@ -43,7 +43,7 @@ class ProjectActor @javax.inject.Inject() (
   librariesDao: LibrariesDao,
   binariesDao: BinariesDao,
   staticUserProvider: StaticUserProvider,
-  defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider
+  defaultLibraryArtifactProvider: DefaultLibraryArtifactProvider,
 ) extends ReapedActor {
 
   private[this] lazy val SystemUser = staticUserProvider.systemUser
@@ -91,7 +91,7 @@ class ProjectActor @javax.inject.Inject() (
             projectId = Some(project.id),
             `type` = Some(RecommendationType.Library),
             objectId = Some(id),
-            fromVersion = Some(version)
+            fromVersion = Some(version),
           )
           .foreach { rec =>
             recommendationsDao.delete(SystemUser, rec)
@@ -108,7 +108,7 @@ class ProjectActor @javax.inject.Inject() (
             projectId = Some(project.id),
             `type` = Some(RecommendationType.Binary),
             objectId = Some(id),
-            fromVersion = Some(version)
+            fromVersion = Some(version),
           )
           .foreach { rec =>
             recommendationsDao.delete(SystemUser, rec)
@@ -165,14 +165,14 @@ class ProjectActor @javax.inject.Inject() (
         projectId = Some(project.id),
         isSynced = Some(false),
         limit = None,
-        orderBy = Some(OrderBy("group_id,artifact_id"))
+        orderBy = Some(OrderBy("group_id,artifact_id")),
       )
       .map(lib => s"Library ${lib.groupId}.${lib.artifactId}") ++
       projectBinariesDao
         .findAll(
           Authorization.All,
           projectId = Some(project.id),
-          isSynced = Some(false)
+          isSynced = Some(false),
         )
         .map(bin => s"Binary ${bin.name}")
   }
@@ -181,7 +181,7 @@ class ProjectActor @javax.inject.Inject() (
     librariesDao.findByGroupIdAndArtifactId(
       Authorization.All,
       projectLibrary.groupId,
-      projectLibrary.artifactId
+      projectLibrary.artifactId,
     ) match {
       case Some(lib) => {
         Some(lib)
@@ -190,7 +190,7 @@ class ProjectActor @javax.inject.Inject() (
         defaultLibraryArtifactProvider.resolve(
           organizationId = projectLibrary.organizationId,
           groupId = projectLibrary.groupId,
-          artifactId = projectLibrary.artifactId
+          artifactId = projectLibrary.artifactId,
         ) match {
           case None => {
             None
@@ -202,8 +202,8 @@ class ProjectActor @javax.inject.Inject() (
                 organizationId = projectLibrary.organizationId,
                 groupId = projectLibrary.groupId,
                 artifactId = projectLibrary.artifactId,
-                resolverId = resolution.resolver.id
-              )
+                resolverId = resolution.resolver.id,
+              ),
             ) match {
               case Left(errors) => {
                 logger
@@ -230,8 +230,8 @@ class ProjectActor @javax.inject.Inject() (
           SystemUser,
           BinaryForm(
             organizationId = projectBinary.project.organization.id,
-            name = BinaryType(projectBinary.name)
-          )
+            name = BinaryType(projectBinary.name),
+          ),
         ) match {
           case Left(errors) => {
             logger

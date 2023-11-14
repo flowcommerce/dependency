@@ -6,7 +6,7 @@ package object TimeUtil {
   def toZonedDateTime(originDateTime: DateTime): ZonedDateTime = {
     ZonedDateTime.ofInstant(
       Instant.ofEpochMilli(originDateTime.getMillis),
-      java.time.ZoneId.of(originDateTime.getZone.getID)
+      java.time.ZoneId.of(originDateTime.getZone.getID),
     )
   }
 }

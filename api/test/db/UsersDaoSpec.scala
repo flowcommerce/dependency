@@ -10,13 +10,13 @@ class UsersDaoSpec extends DependencySpec {
   "Special users" must {
     "anonymous user exists" in {
       usersDao.findById(usersDao.anonymousUser.id).get.email must be(
-        Some(usersDao.AnonymousEmailAddress)
+        Some(usersDao.AnonymousEmailAddress),
       )
     }
 
     "system user exists" in {
       usersDao.findById(usersDao.systemUser.id).get.email must be(
-        Some(usersDao.SystemEmailAddress)
+        Some(usersDao.SystemEmailAddress),
       )
     }
 
@@ -34,7 +34,7 @@ class UsersDaoSpec extends DependencySpec {
 
   "findByEmail" in {
     usersDao.findByEmail(usersDao.SystemEmailAddress).flatMap(_.email) must be(
-      Some(usersDao.SystemEmailAddress)
+      Some(usersDao.SystemEmailAddress),
     )
 
     usersDao.findByEmail(UUID.randomUUID.toString) must be(None)
@@ -53,7 +53,7 @@ class UsersDaoSpec extends DependencySpec {
 
   "findById" in {
     usersDao.findById(usersDao.systemUser.id).map(_.id) must be(
-      Some(usersDao.systemUser.id)
+      Some(usersDao.systemUser.id),
     )
 
     usersDao.findById(UUID.randomUUID.toString) must be(None)
@@ -64,7 +64,7 @@ class UsersDaoSpec extends DependencySpec {
     val githubUser = createGithubUser(createGithubUserForm(user = user))
 
     usersDao.findByGithubUserId(githubUser.githubUserId).map(_.id) must be(
-      Some(user.id)
+      Some(user.id),
     )
 
     usersDao.findByGithubUserId(0) must be(None)
@@ -77,7 +77,7 @@ class UsersDaoSpec extends DependencySpec {
       val user2 = createUser()
 
       usersDao.findAll(ids = Some(Seq(user1.id, user2.id))).map(_.id) must be(
-        Seq(user1.id, user2.id)
+        Seq(user1.id, user2.id),
       )
 
       usersDao.findAll(ids = Some(Nil)) must be(Nil)
@@ -110,14 +110,14 @@ class UsersDaoSpec extends DependencySpec {
       val email = createTestEmail()
       val name = Name(
         first = Some("Michael"),
-        last = Some("Bryzek")
+        last = Some("Bryzek"),
       )
       usersDao.create(
         createdBy = None,
         form = createUserForm(
           email = email,
-          name = Some(name)
-        )
+          name = Some(name),
+        ),
       ) match {
         case Left(errors) => fail(errors.mkString(", "))
         case Right(user) => {
@@ -131,11 +131,11 @@ class UsersDaoSpec extends DependencySpec {
     "processes empty name" in {
       val name = Name(
         first = Some("  "),
-        last = Some("   ")
+        last = Some("   "),
       )
       usersDao.create(
         createdBy = None,
-        form = createUserForm().copy(name = Some(name))
+        form = createUserForm().copy(name = Some(name)),
       ) match {
         case Left(errors) => fail(errors.mkString(", "))
         case Right(user) => {

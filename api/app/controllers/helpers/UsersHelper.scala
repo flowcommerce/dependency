@@ -8,11 +8,11 @@ import play.api.mvc.{Result, Results}
 
 @Singleton
 class UsersHelper @Inject() (
-  usersDao: UsersDao
+  usersDao: UsersDao,
 ) {
 
   def withUser(id: String)(
-    f: User => Result
+    f: User => Result,
   ) = {
     usersDao.findById(id) match {
       case None => {

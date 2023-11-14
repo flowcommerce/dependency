@@ -4,7 +4,7 @@ import scala.annotation.tailrec
 
 case class DependencyResolution(
   resolved: List[Seq[ProjectInfo]],
-  unresolved: Seq[ProjectInfo]
+  unresolved: Seq[ProjectInfo],
 ) {
 
   private[this] lazy val allResolvedLibraries: Set[String] =
@@ -37,7 +37,7 @@ case class ProjectInfo(
   provides: Seq[LibraryReference],
   resolvedDependencies: Seq[LibraryReference] = Nil,
   unresolvedDependencies: Seq[LibraryReference] = Nil,
-  unknownLibraries: Seq[LibraryReference] = Nil
+  unknownLibraries: Seq[LibraryReference] = Nil,
 )
 
 /** Given a list of projects, resolves the dependencies among them to return an ordered list of sets of projects that
@@ -49,7 +49,7 @@ case class DependencyResolver(projects: Seq[ProjectInfo]) {
 
   private[this] def areDependenciesSatisfied(
     resolution: DependencyResolution,
-    libraries: Seq[LibraryReference]
+    libraries: Seq[LibraryReference],
   ): Boolean = {
     libraries.forall { l =>
       resolution.isLibraryResolved(l.identifier)
@@ -59,7 +59,7 @@ case class DependencyResolver(projects: Seq[ProjectInfo]) {
   @tailrec
   private[this] def resolve(
     resolution: DependencyResolution,
-    remainingProjects: List[ProjectInfo]
+    remainingProjects: List[ProjectInfo],
   ): DependencyResolution = {
     val (resolved, remaining) = remainingProjects.partition { p =>
       areDependenciesSatisfied(resolution, p.dependsOn)
@@ -75,17 +75,17 @@ case class DependencyResolver(projects: Seq[ProjectInfo]) {
 
             p.copy(
               resolvedDependencies = resolvedDependencies,
-              unresolvedDependencies = unresolvedDependencies
+              unresolvedDependencies = unresolvedDependencies,
             )
-          }
+          },
         )
       }
       case _ => {
         resolve(
           resolution.copy(
-            resolved = resolution.resolved ++ Seq(resolved)
+            resolved = resolution.resolved ++ Seq(resolved),
           ),
-          remaining
+          remaining,
         )
       }
     }

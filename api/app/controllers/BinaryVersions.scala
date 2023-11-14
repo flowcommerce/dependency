@@ -14,7 +14,7 @@ class BinaryVersions @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   binaryVersionsDao: BinaryVersionsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -23,7 +23,7 @@ class BinaryVersions @javax.inject.Inject() (
     binaryId: Option[String],
     projectId: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
@@ -33,9 +33,9 @@ class BinaryVersions @javax.inject.Inject() (
           binaryId = binaryId,
           projectId = projectId,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -46,7 +46,7 @@ class BinaryVersions @javax.inject.Inject() (
   }
 
   def withBinaryVersion(id: String)(
-    f: BinaryVersion => Result
+    f: BinaryVersion => Result,
   ): Result = {
     binaryVersionsDao.findById(id) match {
       case None => {

@@ -10,12 +10,12 @@ object RemoteVersions {
     resolver: String,
     groupId: String,
     artifactId: String,
-    credentials: Option[Credentials]
+    credentials: Option[Credentials],
   ): Seq[ArtifactVersion] = {
     val versions = fetchUrl(
       joinUrl(resolver, groupId.replaceAll("\\.", "/")),
       artifactId,
-      credentials
+      credentials,
     ) match {
       case Nil => {
         fetchUrl(joinUrl(resolver, groupId), artifactId, credentials)
@@ -30,10 +30,10 @@ object RemoteVersions {
   private[this] def fetchUrl(
     url: String,
     artifactId: String,
-    credentials: Option[Credentials]
+    credentials: Option[Credentials],
   ): Seq[ArtifactVersion] = {
     val result = RemoteDirectory.fetch(url, credentials = credentials)(
-      filter = { name => name == artifactId || name.startsWith(artifactId + "_") }
+      filter = { name => name == artifactId || name.startsWith(artifactId + "_") },
     )
 
     result.directories.flatMap { dir =>
@@ -41,7 +41,7 @@ object RemoteVersions {
       RemoteDirectory.fetch(thisUrl, credentials = credentials)().directories.map { d =>
         ArtifactVersion(
           tag = Version(StringUtils.stripEnd(d, "/")),
-          crossBuildVersion = crossBuildVersion(dir)
+          crossBuildVersion = crossBuildVersion(dir),
         )
       }
     }
@@ -67,20 +67,20 @@ object RemoteVersions {
 
   def makeUrls(
     resolver: String,
-    groupId: String
+    groupId: String,
   ): Seq[String] = {
     Seq(
       joinUrl(
         resolver,
-        groupId.replaceAll("\\.", "/")
+        groupId.replaceAll("\\.", "/"),
       ),
-      joinUrl(resolver, groupId)
+      joinUrl(resolver, groupId),
     )
   }
 
   def joinUrl(
     a: String,
-    b: String
+    b: String,
   ): String = {
     Seq(a, b).map(StringUtils.stripEnd(_, "/")).mkString("/")
   }

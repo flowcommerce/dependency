@@ -10,13 +10,13 @@ import play.api.db._
 case class SyncForm(
   `type`: String,
   objectId: String,
-  event: SyncEvent
+  event: SyncEvent,
 )
 
 @Singleton
 class SyncsDao @Inject() (
   db: Database,
-  staticUserProvider: StaticUserProvider
+  staticUserProvider: StaticUserProvider,
 ) {
 
   private[this] val BaseQuery = Query(s"""
@@ -41,9 +41,9 @@ class SyncsDao @Inject() (
 
   def withStartedAndCompleted[T](
     `type`: String,
-    id: String
+    id: String,
   )(
-    f: => T
+    f: => T,
   ): T = {
     recordStarted(`type`, id)
     val result = f
@@ -79,7 +79,7 @@ class SyncsDao @Inject() (
           "type" -> form.`type`,
           "object_id" -> form.objectId,
           "event" -> form.event.toString,
-          "updated_by_user_id" -> systemUser.id
+          "updated_by_user_id" -> systemUser.id,
         )
         .execute()
     }
@@ -105,7 +105,7 @@ class SyncsDao @Inject() (
     event: Option[SyncEvent] = None,
     orderBy: OrderBy = OrderBy("-syncs.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Sync] = {
     db.withConnection { implicit c =>
       Standards
@@ -117,12 +117,12 @@ class SyncsDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .equals("syncs.object_id", objectId)
         .optionalText("syncs.event", event)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Sync.parser().*
+          io.flow.dependency.v0.anorm.parsers.Sync.parser().*,
         )
     }
   }

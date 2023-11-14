@@ -9,11 +9,11 @@ import play.api.mvc.{Result, Results}
 
 @Singleton
 class OrganizationsHelper @Inject() (
-  organizationsDao: OrganizationsDao
+  organizationsDao: OrganizationsDao,
 ) {
 
   def withOrganization(user: UserReference, id: String)(
-    f: Organization => Result
+    f: Organization => Result,
   ) = {
     organizationsDao.findById(Authorization.User(user.id), id) match {
       case None => {

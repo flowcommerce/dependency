@@ -16,7 +16,7 @@ class Memberships @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   membershipsDao: MembershipsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -26,7 +26,7 @@ class Memberships @javax.inject.Inject() (
     userId: Option[String],
     role: Option[Role],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -38,9 +38,9 @@ class Memberships @javax.inject.Inject() (
           userId = userId,
           role = role,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -72,7 +72,7 @@ class Memberships @javax.inject.Inject() (
   }
 
   def withMembership(user: UserReference, id: String)(
-    f: Membership => Result
+    f: Membership => Result,
   ): Result = {
     membershipsDao.findById(Authorization.User(user.id), id) match {
       case None => {

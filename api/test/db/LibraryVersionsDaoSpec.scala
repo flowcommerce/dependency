@@ -51,7 +51,7 @@ class LibraryVersionsDaoSpec extends DependencySpec {
   "findById" in {
     val version = createLibraryVersion(org)
     libraryVersionsDao.findById(Authorization.All, version.id).map(_.id) must be(
-      Some(version.id)
+      Some(version.id),
     )
 
     libraryVersionsDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
@@ -65,7 +65,7 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       .findAll(Authorization.All, limit = None, ids = Some(Seq(version1.id, version2.id)))
       .map(_.id)
       .sorted must be(
-      Seq(version1.id, version2.id).sorted
+      Seq(version1.id, version2.id).sorted,
     )
 
     libraryVersionsDao.findAll(Authorization.All, limit = None, ids = Some(Nil)) must be(Nil)
@@ -92,10 +92,10 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       val user = createUser()
       val org = createOrganization(user = user)
       val resolver = createResolver(org, user)(
-        createResolverForm(org = org, visibility = Visibility.Public)
+        createResolverForm(org = org, visibility = Visibility.Public),
       )
       val library = createLibrary(org, user)(
-        createLibraryForm(org, user)(resolver = resolver)
+        createLibraryForm(org, user)(resolver = resolver),
       )
       val libraryVersion = createLibraryVersion(org, user = user)(library = library)
       libraryVersion.library.resolver.visibility must be(Visibility.Public)
@@ -104,7 +104,7 @@ class LibraryVersionsDaoSpec extends DependencySpec {
         .findAll(Authorization.PublicOnly, limit = None, id = Some(libraryVersion.id))
         .map(_.id) must be(Seq(libraryVersion.id))
       libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(
-        Seq(libraryVersion.id)
+        Seq(libraryVersion.id),
       )
       libraryVersionsDao
         .findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id))
@@ -121,16 +121,16 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       val user = createUser()
       val org = createOrganization(user = user)
       val resolver = createResolver(org, user)(
-        createResolverForm(org = org, visibility = Visibility.Private)
+        createResolverForm(org = org, visibility = Visibility.Private),
       )
       val library = createLibrary(org, user)(
-        createLibraryForm(org, user)(resolver = resolver)
+        createLibraryForm(org, user)(resolver = resolver),
       )
       val libraryVersion = createLibraryVersion(org, user = user)(library = library)
       libraryVersion.library.resolver.visibility must be(Visibility.Private)
 
       libraryVersionsDao.findAll(Authorization.All, limit = None, id = Some(libraryVersion.id)).map(_.id) must be(
-        Seq(libraryVersion.id)
+        Seq(libraryVersion.id),
       )
       libraryVersionsDao
         .findAll(Authorization.Organization(org.id), limit = None, id = Some(libraryVersion.id))
@@ -143,12 +143,12 @@ class LibraryVersionsDaoSpec extends DependencySpec {
       libraryVersionsDao.findAll(
         Authorization.Organization(createOrganization().id),
         limit = None,
-        id = Some(libraryVersion.id)
+        id = Some(libraryVersion.id),
       ) must be(Nil)
       libraryVersionsDao.findAll(
         Authorization.User(createUser().id),
         limit = None,
-        id = Some(libraryVersion.id)
+        id = Some(libraryVersion.id),
       ) must be(Nil)
     }
 

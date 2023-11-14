@@ -9,11 +9,11 @@ import play.api.mvc.{Result, Results}
 
 @Singleton
 class LibrariesHelper @Inject() (
-  librariesDao: LibrariesDao
+  librariesDao: LibrariesDao,
 ) {
 
   def withLibrary(user: UserReference, id: String)(
-    f: Library => Result
+    f: Library => Result,
   ): Result = {
     librariesDao.findById(Authorization.User(user.id), id) match {
       case None => {

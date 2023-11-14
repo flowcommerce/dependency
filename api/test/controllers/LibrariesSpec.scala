@@ -16,41 +16,41 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
 
   "GET /libraries by id" in {
     await(
-      client.libraries.get(id = Some(library1.id))
+      client.libraries.get(id = Some(library1.id)),
     ).map(_.id) must contain theSameElementsAs (
       Seq(library1.id)
     )
 
     await(
-      client.libraries.get(id = Some(UUID.randomUUID.toString))
+      client.libraries.get(id = Some(UUID.randomUUID.toString)),
     ).map(_.id) must be(
-      Nil
+      Nil,
     )
   }
 
   "GET /libraries by groupId" in {
     await(
-      client.libraries.get(groupId = Some(library1.groupId))
+      client.libraries.get(groupId = Some(library1.groupId)),
     ).map(_.groupId) must contain theSameElementsAs (
       Seq(library1.groupId)
     )
 
     await(
-      client.libraries.get(groupId = Some(UUID.randomUUID.toString))
+      client.libraries.get(groupId = Some(UUID.randomUUID.toString)),
     ) must be(
-      Nil
+      Nil,
     )
   }
 
   "GET /libraries by artifactId" in {
     await(
-      client.libraries.get(artifactId = Some(library1.artifactId))
+      client.libraries.get(artifactId = Some(library1.artifactId)),
     ).map(_.artifactId) must contain theSameElementsAs Seq(library1.artifactId)
 
     await(
-      client.libraries.get(artifactId = Some(UUID.randomUUID.toString))
+      client.libraries.get(artifactId = Some(UUID.randomUUID.toString)),
     ) must be(
-      Nil
+      Nil,
     )
   }
 
@@ -75,26 +75,26 @@ class LibrariesSpec extends DependencySpec with MockDependencyClient {
       client.libraries.post(
         createLibraryForm(org)().copy(
           groupId = library1.groupId,
-          artifactId = library1.artifactId
-        )
-      )
+          artifactId = library1.artifactId,
+        ),
+      ),
     ).genericError.messages must contain theSameElementsAs Seq(
-      "Library with this group id and artifact id already exists"
+      "Library with this group id and artifact id already exists",
     )
   }
 
   "DELETE /libraries" in {
     val library = createLibrary(org)()
     await(
-      client.libraries.deleteById(library.id)
+      client.libraries.deleteById(library.id),
     ) must be(())
 
     expectNotFound(
-      client.libraries.getById(library.id)
+      client.libraries.getById(library.id),
     )
 
     expectNotFound(
-      client.libraries.deleteById(library.id)
+      client.libraries.deleteById(library.id),
     )
   }
 

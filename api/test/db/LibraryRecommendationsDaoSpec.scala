@@ -9,7 +9,7 @@ class LibraryRecommendationsDaoSpec extends DependencySpec with Eventually with 
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(60, Seconds)),
-    interval = scaled(Span(250, Millis))
+    interval = scaled(Span(250, Millis)),
   )
 
   private[this] lazy val org = createOrganization()
@@ -24,7 +24,7 @@ class LibraryRecommendationsDaoSpec extends DependencySpec with Eventually with 
             {}
           } else {
             sys.error(
-              s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]"
+              s"Expected[${b.from} => ${b.to.version}] but got[${a.from} => ${a.to.version}]. For latest version, expected[${b.latest.version}] but got[${a.latest.version}]",
             )
           }
         }
@@ -58,9 +58,9 @@ class LibraryRecommendationsDaoSpec extends DependencySpec with Eventually with 
             library = library,
             from = "1.0.0",
             to = libraryVersions.last,
-            latest = libraryVersions.last
-          )
-        )
+            latest = libraryVersions.last,
+          ),
+        ),
       )
     }
   }
@@ -79,7 +79,7 @@ class LibraryRecommendationsDaoSpec extends DependencySpec with Eventually with 
 
   "Prefers latest production release even when more recent beta release is available" in {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
-      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1")
+      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1"),
     )
     val project = createProject(org)
     addLibraryVersion(project, libraryVersions.head)
@@ -91,9 +91,9 @@ class LibraryRecommendationsDaoSpec extends DependencySpec with Eventually with 
             library = library,
             from = "1.0.0",
             to = libraryVersions.find(_.version == "1.0.1").get,
-            latest = libraryVersions.find(_.version == "1.0.2-RC1").get
-          )
-        )
+            latest = libraryVersions.find(_.version == "1.0.2-RC1").get,
+          ),
+        ),
       )
     }
   }

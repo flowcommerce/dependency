@@ -8,11 +8,11 @@ import play.api.mvc.{Result, Results}
 
 @Singleton
 class BinaryHelper @Inject() (
-  binariesDao: BinariesDao
+  binariesDao: BinariesDao,
 ) {
 
   def withBinary(id: String)(
-    f: Binary => Result
+    f: Binary => Result,
   ): Result = {
     binariesDao.findById(id) match {
       case None => {

@@ -19,7 +19,7 @@ trait StaticUserProvider {
 @Singleton
 class UsersDao @Inject() (
   db: Database,
-  @javax.inject.Named("user-actor") userActor: akka.actor.ActorRef
+  @javax.inject.Named("user-actor") userActor: akka.actor.ActorRef,
 ) extends StaticUserProvider {
 
   private[db] val SystemEmailAddress = "system@bryzek.com"
@@ -28,13 +28,13 @@ class UsersDao @Inject() (
   override lazy val systemUser = UserReference(
     id = findAll(email = Some(SystemEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find system user[$SystemEmailAddress]")
-    }
+    },
   )
 
   override lazy val anonymousUser = UserReference(
     id = findAll(email = Some(AnonymousEmailAddress), limit = 1).headOption.map(_.id).getOrElse {
       sys.error(s"Could not find anonymous user[$AnonymousEmailAddress]")
-    }
+    },
   )
 
   private[this] val BaseQuery = Query(s"""
@@ -93,7 +93,7 @@ class UsersDao @Inject() (
               "first_name" -> Util.trimmedString(form.name.flatMap(_.first)),
               "last_name" -> Util.trimmedString(form.name.flatMap(_.last)),
               "updated_by_user_id" -> createdBy.getOrElse(anonymousUser).id,
-              "status" -> Option("inactive")
+              "status" -> Option("inactive"),
             )
             .execute()
         }
@@ -103,7 +103,7 @@ class UsersDao @Inject() (
         Right(
           findById(id).getOrElse {
             sys.error("Failed to create user")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -139,7 +139,7 @@ class UsersDao @Inject() (
     githubUserId: Option[Long] = None,
     orderBy: OrderBy = OrderBy("users.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[User] = {
     db.withConnection { implicit c =>
       Standards
@@ -151,34 +151,34 @@ class UsersDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .optionalText(
           "users.email",
           email,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .and(
           identifier.map { _ =>
             "users.id in (select user_id from user_identifiers where value = trim({identifier}))"
-          }
+          },
         )
         .bind("identifier", identifier)
         .and(
           token.map { _ =>
             "users.id in (select user_id from tokens where token = trim({token}))"
-          }
+          },
         )
         .bind("token", token)
         .and(
           githubUserId.map { _ =>
             "users.id in (select user_id from github_users where github_user_id = {github_user_id}::numeric)"
-          }
+          },
         )
         .bind("github_user_id", githubUserId)
         .as(
-          io.flow.common.v0.anorm.parsers.User.parser().*
+          io.flow.common.v0.anorm.parsers.User.parser().*,
         )
     }
   }

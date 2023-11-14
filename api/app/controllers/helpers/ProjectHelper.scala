@@ -9,11 +9,11 @@ import play.api.mvc.{Result, Results}
 
 @Singleton
 class ProjectHelper @Inject() (
-  projectsDao: ProjectsDao
+  projectsDao: ProjectsDao,
 ) {
 
   def withProject(user: UserReference, id: String)(
-    f: Project => Result
+    f: Project => Result,
   ): Result = {
     projectsDao.findById(Authorization.User(user.id), id) match {
       case None => {

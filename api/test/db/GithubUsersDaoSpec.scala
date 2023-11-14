@@ -22,7 +22,7 @@ class GithubUsersDaoSpec extends DependencySpec {
   "findById" in {
     val user = createGithubUser()
     githubUsersDao.findById(user.id).map(_.id) must be(
-      Some(user.id)
+      Some(user.id),
     )
 
     usersDao.findById(UUID.randomUUID.toString) must be(None)
@@ -33,7 +33,7 @@ class GithubUsersDaoSpec extends DependencySpec {
     val user2 = createGithubUser()
 
     githubUsersDao.findAll(id = Some(Seq(user1.id, user2.id))).map(_.id) must be(
-      Seq(user1.id, user2.id)
+      Seq(user1.id, user2.id),
     )
 
     githubUsersDao.findAll(id = Some(Nil)) must be(Nil)
