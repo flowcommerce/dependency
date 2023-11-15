@@ -17,7 +17,7 @@ private[db] case object Standards {
     ids: Option[Seq[String]],
     orderBy: Option[String],
     limit: Option[Long],
-    offset: Long = 0
+    offset: Long = 0,
   ): Query = {
     query
       .equals(s"$tableName.id", id)
@@ -36,7 +36,7 @@ private[db] case object Standards {
     ids: Option[Seq[String]],
     orderBy: Option[String],
     limit: Long,
-    offset: Long = 0
+    offset: Long = 0,
   ): Query = {
     query
       .equals(s"$tableName.id", id)

@@ -22,10 +22,10 @@ class UsageSpec extends FlowPlaySpec {
       Await.result(
         new Client(
           wsClient,
-          s"http://localhost:$port"
+          s"http://localhost:$port",
         ).Usages.getUsage(),
-        3 seconds
-      )
+        3 seconds,
+      ),
     )
 
     j must be(r)

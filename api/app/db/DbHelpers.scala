@@ -17,7 +17,7 @@ case class DbHelpers(db: Database, tableName: String) {
   def delete(implicit
     c: java.sql.Connection,
     deletedById: String,
-    id: String
+    id: String,
   ): Unit = {
     delete(c, UserReference(deletedById), id)
   }
@@ -31,12 +31,12 @@ case class DbHelpers(db: Database, tableName: String) {
   def delete(implicit
     c: java.sql.Connection,
     deletedBy: UserReference,
-    id: String
+    id: String,
   ): Unit = {
     SQL(Query.format(tableName))
       .on(
         "id" -> id,
-        "updated_by_user_id" -> deletedBy.id
+        "updated_by_user_id" -> deletedBy.id,
       )
       .execute()
     ()

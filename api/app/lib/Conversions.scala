@@ -5,7 +5,7 @@ import io.flow.dependency.v0.models.{Project, ProjectDetail, ProjectLibrary, Ref
 import javax.inject.Inject
 
 class Conversions @Inject() (
-  projectsDao: ProjectsDao
+  projectsDao: ProjectsDao,
 ) {
 
   def toProjectLibraryModels(libraries: Seq[InternalProjectLibrary]): Seq[ProjectLibrary] = {
@@ -13,7 +13,7 @@ class Conversions @Inject() (
       .findAll(
         Authorization.All,
         ids = Some(libraries.map(_.projectId).distinct),
-        limit = None
+        limit = None,
       )
       .map { p => p.id -> p }
       .toMap
@@ -28,7 +28,7 @@ class Conversions @Inject() (
           version = pl.db.version,
           crossBuildVersion = pl.db.crossBuildVersion,
           path = pl.db.path,
-          library = pl.db.libraryId.map { id => Reference(id) }
+          library = pl.db.libraryId.map { id => Reference(id) },
         )
       }
     }
@@ -42,7 +42,7 @@ class Conversions @Inject() (
     ProjectDetail(
       id = project.id,
       organization = project.organization,
-      name = project.name
+      name = project.name,
     )
   }
 }

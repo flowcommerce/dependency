@@ -11,11 +11,11 @@ case class Artifact(
   artifactId: String,
   version: String,
   isCrossBuilt: Boolean,
-  isPlugin: Boolean
+  isPlugin: Boolean,
 ) {
 
   def toProjectLibraryForm(
-    crossBuildVersion: Option[Version]
+    crossBuildVersion: Option[Version],
   ): ProjectLibraryForm = {
     ProjectLibraryForm(
       organizationId = project.organization.id,
@@ -29,7 +29,7 @@ case class Artifact(
       } else {
         None
       },
-      libraryId = None
+      libraryId = None,
     )
   }
 

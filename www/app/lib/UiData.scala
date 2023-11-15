@@ -24,7 +24,7 @@ case class UiData(
   headTitle: Option[String] = None,
   user: Option[User] = None,
   query: Option[String] = None,
-  config: FlowConfig
+  config: FlowConfig,
 ) {
 
   lazy val urls = Urls(config)

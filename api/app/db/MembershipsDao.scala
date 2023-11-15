@@ -12,7 +12,7 @@ import play.api.db._
 @Singleton
 class MembershipsDao @Inject() (
   db: Database,
-  organizationsDaoProvider: Provider[OrganizationsDao]
+  organizationsDaoProvider: Provider[OrganizationsDao],
 ) {
 
   val DefaultUserNameLength = 8
@@ -68,7 +68,7 @@ class MembershipsDao @Inject() (
 
   private[db] def validate(
     user: UserReference,
-    form: MembershipForm
+    form: MembershipForm,
   ): Seq[String] = {
     val roleErrors = form.role match {
       case Role.UNDEFINED(_) => Seq("Invalid role. Must be one of: " + Role.all.map(_.toString).mkString(", "))
@@ -110,7 +110,7 @@ class MembershipsDao @Inject() (
         Right(
           findById(Authorization.All, id).getOrElse {
             sys.error("Failed to create membership")
-          }
+          },
         )
       }
       case errors => Left(errors)
@@ -130,7 +130,7 @@ class MembershipsDao @Inject() (
     createdBy: UserReference,
     orgId: String,
     userId: String,
-    role: Role
+    role: Role,
   ): String = {
     val id = IdGenerator("mem").randomId()
 
@@ -140,7 +140,7 @@ class MembershipsDao @Inject() (
         "user_id" -> userId,
         "organization_id" -> orgId,
         "role" -> role.toString,
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
     id
@@ -153,26 +153,26 @@ class MembershipsDao @Inject() (
   def findByOrganizationAndUserId(
     auth: Authorization,
     organization: String,
-    userId: String
+    userId: String,
   ): Option[Membership] = {
     findAll(
       auth,
       organization = Some(organization),
       userId = Some(userId),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
   def findByOrganizationIdAndUserId(
     auth: Authorization,
     organizationId: String,
-    userId: String
+    userId: String,
   ): Option[Membership] = {
     findAll(
       auth,
       organizationId = Some(organizationId),
       userId = Some(userId),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
@@ -190,7 +190,7 @@ class MembershipsDao @Inject() (
     role: Option[Role] = None,
     orderBy: OrderBy = OrderBy("memberships.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Membership] = {
     db.withConnection { implicit c =>
       Standards
@@ -202,18 +202,18 @@ class MembershipsDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .equals("memberships.organization_id", organizationId)
         .optionalText(
           "organizations.key",
           organization,
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .equals("memberships.user_id", userId)
         .optionalText("memberships.role", role.map(_.toString.toLowerCase))
         .as(
-          io.flow.dependency.v0.anorm.parsers.Membership.parser().*
+          io.flow.dependency.v0.anorm.parsers.Membership.parser().*,
         )
     }
   }

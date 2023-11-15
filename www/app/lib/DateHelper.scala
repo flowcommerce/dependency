@@ -10,12 +10,12 @@ object DateHelper {
   private[this] val DefaultLabel = "N/A"
 
   def shortDate(
-    dateTime: DateTime
+    dateTime: DateTime,
   ): String = shortDateOption(Some(dateTime))
 
   def shortDateOption(
     dateTime: Option[DateTime],
-    default: String = DefaultLabel
+    default: String = DefaultLabel,
   ): String = {
     dateTime match {
       case None => default
@@ -26,12 +26,12 @@ object DateHelper {
   }
 
   def longDateTime(
-    dateTime: DateTime
+    dateTime: DateTime,
   ): String = longDateTimeOption(Some(dateTime))
 
   def longDateTimeOption(
     dateTime: Option[DateTime],
-    default: String = DefaultLabel
+    default: String = DefaultLabel,
   ): String = {
     dateTime match {
       case None => default

@@ -23,7 +23,7 @@ class GitHubConfig @Inject() (config: FlowConfig) {
     val params: Map[String, String] = Seq(
       Some("scope" -> Scopes.mkString(",")),
       Some("client_id" -> githubClientId),
-      returnUrlParam.map("redirect_uri" -> _)
+      returnUrlParam.map("redirect_uri" -> _),
     ).flatten.toMap
 
     val queryParams =

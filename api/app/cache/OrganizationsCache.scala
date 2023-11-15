@@ -6,7 +6,7 @@ import io.flow.util.CacheWithFallbackToStaleData
 
 @javax.inject.Singleton
 case class OrganizationsCache @javax.inject.Inject() (
-  organizationsDao: OrganizationsDao
+  organizationsDao: OrganizationsDao,
 ) extends CacheWithFallbackToStaleData[String, Option[Organization]] {
 
   override def refresh(organizationId: String): Option[Organization] = {
@@ -24,7 +24,7 @@ case class OrganizationsCache @javax.inject.Inject() (
   def toSummary(org: Organization): OrganizationSummary = {
     OrganizationSummary(
       id = org.id,
-      key = org.key
+      key = org.key,
     )
   }
 }

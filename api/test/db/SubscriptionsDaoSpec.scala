@@ -21,7 +21,7 @@ class SubscriptionsDaoSpec extends DependencySpec {
   "findById" in {
     val subscription = createSubscription()
     subscriptionsDao.findById(subscription.id).map(_.id) must be(
-      Some(subscription.id)
+      Some(subscription.id),
     )
 
     subscriptionsDao.findById(UUID.randomUUID.toString) must be(None)
@@ -30,14 +30,14 @@ class SubscriptionsDaoSpec extends DependencySpec {
   "findByUserIdAndPublication" in {
     val subscription = createSubscription()
     subscriptionsDao.findByUserIdAndPublication(subscription.user.id, subscription.publication).map(_.id) must be(
-      Some(subscription.id)
+      Some(subscription.id),
     )
 
     subscriptionsDao.findByUserIdAndPublication(UUID.randomUUID.toString, subscription.publication).map(_.id) must be(
-      None
+      None,
     )
     subscriptionsDao.findByUserIdAndPublication(subscription.user.id, Publication.UNDEFINED("other")).map(_.id) must be(
-      None
+      None,
     )
   }
 
@@ -47,13 +47,13 @@ class SubscriptionsDaoSpec extends DependencySpec {
     val subscription2 = createSubscription(user = createUser())
 
     subscriptionsDao.findAll(ids = Some(Seq(subscription1.id, subscription2.id))).map(_.id) must be(
-      Seq(subscription1.id, subscription2.id)
+      Seq(subscription1.id, subscription2.id),
     )
 
     subscriptionsDao.findAll(ids = Some(Nil)) must be(Nil)
     subscriptionsDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
     subscriptionsDao.findAll(ids = Some(Seq(subscription1.id, UUID.randomUUID.toString))).map(_.id) must be(
-      Seq(subscription1.id)
+      Seq(subscription1.id),
     )
   }
 
@@ -69,13 +69,13 @@ class SubscriptionsDaoSpec extends DependencySpec {
   "findAll by minHoursSinceLastEmail" in {
     val user = createUser()
     val subscription = createSubscription(
-      createSubscriptionForm(user = user, publication = Publication.DailySummary)
+      createSubscriptionForm(user = user, publication = Publication.DailySummary),
     )
 
     subscriptionsDao
       .findAll(
         id = Some(subscription.id),
-        minHoursSinceLastEmail = Some(1)
+        minHoursSinceLastEmail = Some(1),
       )
       .map(_.id) must be(Seq(subscription.id))
 
@@ -83,7 +83,7 @@ class SubscriptionsDaoSpec extends DependencySpec {
 
     subscriptionsDao.findAll(
       id = Some(subscription.id),
-      minHoursSinceLastEmail = Some(1)
+      minHoursSinceLastEmail = Some(1),
     ) must be(Nil)
   }
 

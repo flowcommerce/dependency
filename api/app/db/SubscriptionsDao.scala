@@ -12,7 +12,7 @@ import play.api.db._
 @Singleton
 class SubscriptionsDao @Inject() (
   db: Database,
-  usersDaoProvider: Provider[UsersDao]
+  usersDaoProvider: Provider[UsersDao],
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "subscriptions")
@@ -36,7 +36,7 @@ class SubscriptionsDao @Inject() (
   private[this] val idGenerator = IdGenerator("sub")
 
   private[db] def validate(
-    form: SubscriptionForm
+    form: SubscriptionForm,
   ): Seq[String] = {
     val userErrors = usersDaoProvider.get.findById(form.userId) match {
       case None => Seq("User not found")
@@ -60,7 +60,7 @@ class SubscriptionsDao @Inject() (
               "id" -> idGenerator.randomId(),
               "user_id" -> form.userId,
               "publication" -> form.publication.toString,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -76,12 +76,12 @@ class SubscriptionsDao @Inject() (
 
   def findByUserIdAndPublication(
     userId: String,
-    publication: Publication
+    publication: Publication,
   ): Option[Subscription] = {
     findAll(
       userId = Some(userId),
       publication = Some(publication),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
@@ -99,7 +99,7 @@ class SubscriptionsDao @Inject() (
     minHoursSinceRegistration: Option[Int] = None,
     orderBy: OrderBy = OrderBy("subscriptions.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Subscription] = {
     db.withConnection { implicit c =>
       Standards
@@ -111,7 +111,7 @@ class SubscriptionsDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .equals("subscriptions.user_id", userId)
         .optionalText("subscriptions.publication", publication)
@@ -124,7 +124,7 @@ class SubscriptionsDao @Inject() (
                            and last_emails.publication = subscriptions.publication
                            and last_emails.created_at > now() - interval '1 hour' * {min_hours}::int)
           """.trim
-          }
+          },
         )
         .bind("min_hours", minHoursSinceLastEmail)
         .and(
@@ -135,17 +135,17 @@ class SubscriptionsDao @Inject() (
                      where users.id = subscriptions.user_id
                        and users.created_at <= now() - interval '1 hour' * {min_hours_since_registration}::int)
           """.trim
-          }
+          },
         )
         .bind("min_hours_since_registration", minHoursSinceRegistration)
         .and(
           identifier.map { _ =>
             "subscriptions.user_id in (select user_id from user_identifiers where value = trim({identifier}))"
-          }
+          },
         )
         .bind("identifier", identifier)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Subscription.parser().*
+          io.flow.dependency.v0.anorm.parsers.Subscription.parser().*,
         )
     }
   }

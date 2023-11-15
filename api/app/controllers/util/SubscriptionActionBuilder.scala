@@ -17,7 +17,7 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
   override val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
 )(implicit override val executionContext: ExecutionContext, logger: RollbarLogger)
   extends IdentificationWithFallback(parser, config, authorization, tokensDao, usersDao) {
 
@@ -37,7 +37,7 @@ class SubscriptionActionBuilder @javax.inject.Inject() (
               user = UserReference(id = user.id),
               session = None,
               requestId = "dependency-api-" + UUID.randomUUID.toString,
-              customer = None
+              customer = None,
             )
             block(new IdentifiedRequest(ad, request))
           }

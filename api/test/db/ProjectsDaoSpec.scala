@@ -25,7 +25,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
     version: Option[String] = None,
     libraryId: Option[String] = None,
     limit: Option[Long] = None,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Project] = {
     projectsDao.findAll(
       auth,
@@ -41,13 +41,13 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
       version = version,
       libraryId = libraryId,
       limit = limit,
-      offset = offset
+      offset = offset,
     )
   }
 
   "findByOrganizationIdAndName" in {
     projectsDao.findByOrganizationKeyAndName(Authorization.All, org.key, project1.name).map(_.id) must be(
-      Some(project1.id)
+      Some(project1.id),
     )
 
     projectsDao.findByOrganizationKeyAndName(Authorization.All, createTestKey(), project1.name) must be(None)
@@ -56,7 +56,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
   "findById" in {
     projectsDao.findById(Authorization.All, project1.id).map(_.id) must be(
-      Some(project1.id)
+      Some(project1.id),
     )
 
     projectsDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
@@ -87,7 +87,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
     "validates SCMS URI" in {
       val form = createProjectForm(org).copy(scms = Scms.Github, uri = "http://github.com/mbryzek")
       projectsDao.create(systemUser, form) must be(
-        Left(Seq("Invalid uri path[http://github.com/mbryzek] missing project name"))
+        Left(Seq("Invalid uri path[http://github.com/mbryzek] missing project name")),
       )
     }
 
@@ -124,7 +124,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
     "ids" in {
       findAll(ids = Some(Seq(project1.id, project2.id))).map(_.id).sorted must be(
-        Seq(project1.id, project2.id).sorted
+        Seq(project1.id, project2.id).sorted,
       )
 
       findAll(ids = Some(Nil)) must be(Nil)
@@ -134,7 +134,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
     "name" in {
       findAll(name = Some(project1.name.toUpperCase)).map(_.id) must be(
-        Seq(project1.id)
+        Seq(project1.id),
       )
 
       findAll(name = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
@@ -142,7 +142,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
     "organizationId" in {
       findAll(id = Some(project1.id), organizationId = Some(org.id)).map(_.id) must be(
-        Seq(project1.id)
+        Seq(project1.id),
       )
 
       findAll(id = Some(project1.id), organizationId = Some(createOrganization().id)) must be(Nil)
@@ -150,7 +150,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
     "organizationKey" in {
       findAll(id = Some(project1.id), organizationKey = Some(org.key)).map(_.id) must be(
-        Seq(project1.id)
+        Seq(project1.id),
       )
 
       findAll(id = Some(project1.id), organizationKey = Some(createOrganization().key)) must be(Nil)
@@ -162,7 +162,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
         val (project, version) = createProjectWithLibrary(org)
 
         findAll(id = Some(project.id), groupId = Some(version.library.groupId)).map(_.id) must be(
-          Seq(project.id)
+          Seq(project.id),
         )
 
         findAll(id = Some(project.id), groupId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
@@ -172,7 +172,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
         val (project, version) = createProjectWithLibrary(org)
 
         findAll(id = Some(project.id), artifactId = Some(version.library.artifactId)).map(_.id) must be(
-          Seq(project.id)
+          Seq(project.id),
         )
 
         findAll(id = Some(project.id), artifactId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
@@ -182,7 +182,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
         val (project, version) = createProjectWithLibrary(org)
 
         findAll(id = Some(project.id), version = Some(version.version)).map(_.id) must be(
-          Seq(project.id)
+          Seq(project.id),
         )
 
         findAll(id = Some(project.id), version = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
@@ -192,7 +192,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
         val (project, version) = createProjectWithLibrary(org)
 
         findAll(id = Some(project.id), libraryId = Some(version.library.id)).map(_.id) must be(
-          Seq(project.id)
+          Seq(project.id),
         )
 
         findAll(id = Some(project.id), libraryId = Some(UUID.randomUUID.toString)).map(_.id) must be(Nil)
@@ -206,7 +206,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
         eventually {
           findAll(id = Some(project.id), binary = Some(version.binary.name.toString)).map(_.id) must be(
-            Seq(project.id)
+            Seq(project.id),
           )
           findAll(id = Some(project.id), binary = Some(UUID.randomUUID.toString)) must be(Nil)
         }
@@ -217,7 +217,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
         eventually {
           findAll(id = Some(project.id), binaryId = Some(version.binary.id)).map(_.id) must be(
-            Seq(project.id)
+            Seq(project.id),
           )
           findAll(id = Some(project.id), binaryId = Some(UUID.randomUUID.toString)) must be(Nil)
         }
@@ -233,7 +233,7 @@ class ProjectsDaoSpec extends DependencySpec with Eventually with IntegrationPat
       findAll(id = Some(project.id)).map(_.id) must be(Seq(project.id))
       findAll(Authorization.Organization(org.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
       findAll(Authorization.Organization(createOrganization().id), id = Some(project.id)).map(_.id) must be(
-        Seq(project.id)
+        Seq(project.id),
       )
       findAll(Authorization.User(user.id), id = Some(project.id)).map(_.id) must be(Seq(project.id))
     }

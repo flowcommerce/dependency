@@ -12,7 +12,7 @@ class SearchController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -20,24 +20,24 @@ class SearchController @javax.inject.Inject() (
 
   def index(
     q: Option[String],
-    page: Int
+    page: Int,
   ) = User.async { implicit request =>
     for {
       items <- dependencyClient(request).items.get(
         q = q,
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.search.index(
           uiData(request).copy(
             title = q.map { v => s"Search results for $v" },
-            query = q
+            query = q,
           ),
           q,
-          PaginatedCollection(page, items)
-        )
+          PaginatedCollection(page, items),
+        ),
       )
     }
   }

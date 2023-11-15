@@ -19,10 +19,10 @@ trait BaseIdentifiedControllerWithFallback extends FlowController {
       config,
       baseIdentifiedControllerWithFallbackComponents.authorization,
       baseIdentifiedControllerWithFallbackComponents.tokensDao,
-      baseIdentifiedControllerWithFallbackComponents.usersDao
+      baseIdentifiedControllerWithFallbackComponents.usersDao,
     )(
       controllerComponents.executionContext,
-      baseIdentifiedControllerWithFallbackComponents.logger
+      baseIdentifiedControllerWithFallbackComponents.logger,
     )
 
   def IdentifiedWithFallback = identifiedWithFallback
@@ -34,5 +34,5 @@ case class BaseIdentifiedControllerWithFallbackComponents @Inject() (
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
   usersDao: UsersDao,
-  logger: RollbarLogger
+  logger: RollbarLogger,
 )

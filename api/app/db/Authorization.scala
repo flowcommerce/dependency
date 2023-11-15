@@ -51,16 +51,16 @@ sealed trait Authorization {
 
   def organizationProjects(
     organizationIdColumn: String,
-    projectIdColumn: String
+    projectIdColumn: String,
   ): Clause
 
   def organizations(
     organizationIdColumn: String,
-    visibilityColumnName: Option[String] = None
+    visibilityColumnName: Option[String] = None,
   ): Clause
 
   def users(
-    userIdColumn: String
+    userIdColumn: String,
   ): Clause
 
 }
@@ -79,7 +79,7 @@ object Authorization {
 
     override def organizations(
       organizationIdColumn: String,
-      visibilityColumnName: Option[String] = None
+      visibilityColumnName: Option[String] = None,
     ): Clause = {
       visibilityColumnName match {
         case None => Clause.False
@@ -89,13 +89,13 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String
+      projectIdColumn: String,
     ): Clause = {
       Clause.single(publicProjectsClause(projectIdColumn))
     }
 
     override def users(
-      userIdColumn: String
+      userIdColumn: String,
     ) = Clause.False
 
   }
@@ -104,16 +104,16 @@ object Authorization {
 
     override def organizations(
       organizationIdColumn: String,
-      visibilityColumnName: Option[String] = None
+      visibilityColumnName: Option[String] = None,
     ): Clause = Clause.True
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String
+      projectIdColumn: String,
     ): Clause = Clause.True
 
     override def users(
-      userIdColumn: String
+      userIdColumn: String,
     ) = Clause.True
 
   }
@@ -123,7 +123,7 @@ object Authorization {
 
     override def organizations(
       organizationIdColumn: String,
-      visibilityColumnName: Option[String] = None
+      visibilityColumnName: Option[String] = None,
     ): Clause = {
       // TODO: Bind
       val userClause = s"$organizationIdColumn in (select organization_id from memberships where user_id = '$id')"
@@ -135,7 +135,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String
+      projectIdColumn: String,
     ): Clause = {
       // TODO: Bind
       val userClause = s"$organizationIdColumn in (select organization_id from memberships where user_id = '$id')"
@@ -143,7 +143,7 @@ object Authorization {
     }
 
     override def users(
-      userIdColumn: String
+      userIdColumn: String,
     ) = Clause.single(s"$userIdColumn = '$id'")
 
   }
@@ -153,7 +153,7 @@ object Authorization {
 
     override def organizations(
       organizationIdColumn: String,
-      visibilityColumnName: Option[String] = None
+      visibilityColumnName: Option[String] = None,
     ): Clause = {
       val orgClause = s"$organizationIdColumn = '$id'"
       visibilityColumnName match {
@@ -164,7 +164,7 @@ object Authorization {
 
     override def organizationProjects(
       organizationIdColumn: String,
-      projectIdColumn: String
+      projectIdColumn: String,
     ): Clause = {
       // TODO: Bind
       val orgClause = s"$organizationIdColumn = '$id'"
@@ -172,7 +172,7 @@ object Authorization {
     }
 
     override def users(
-      userIdColumn: String
+      userIdColumn: String,
     ) = Clause.single(s"$userIdColumn in (select user_id from memberships where organization_id = '$id')")
 
   }

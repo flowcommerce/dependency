@@ -20,7 +20,7 @@ class LibraryActor @Inject() (
   projectLibrariesDao: InternalProjectLibrariesDao,
   staticUserProvider: StaticUserProvider,
   logger: RollbarLogger,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)

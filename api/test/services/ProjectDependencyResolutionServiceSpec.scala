@@ -12,7 +12,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec with BeforeA
   private[this] val defaultGroupId = createTestId()
   private[this] lazy val libS3Project = {
     val p = createProject(defaultOrg)(
-      createProjectForm(defaultOrg, name = "lib-s3")
+      createProjectForm(defaultOrg, name = "lib-s3"),
     )
     upsertLibrary(groupId = defaultGroupId, artifactId = "lib-s3")
     projectsDao.toSummary(p)
@@ -20,14 +20,14 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec with BeforeA
 
   private[this] lazy val libInvoiceProject = {
     val p = createProject(defaultOrg)(
-      createProjectForm(defaultOrg, name = "lib-invoice")
+      createProjectForm(defaultOrg, name = "lib-invoice"),
     )
     println(s"Creating project library for id: ${p.id}")
     createProjectLibrary(p)(
       createProjectLibraryForm(p).copy(
         groupId = defaultGroupId,
-        artifactId = "lib-s3"
-      )
+        artifactId = "lib-s3",
+      ),
     )
     projectsDao.toSummary(p)
   }
@@ -47,7 +47,7 @@ class ProjectDependencyResolutionServiceSpec extends DependencySpec with BeforeA
   "buildProjectInfo 'depends' and 'provides'" in {
     val all = projectDependencyResolutionService.buildProjectInfo(
       Seq(libS3Project, libInvoiceProject),
-      groupId = defaultGroupId
+      groupId = defaultGroupId,
     )
     all.size must be(2)
 

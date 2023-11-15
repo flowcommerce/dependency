@@ -17,17 +17,17 @@ class SubscriptionsSpec extends DependencySpec with MockDependencyClient {
 
   "GET /subscriptions by identifier" in {
     await(
-      identifiedClient().subscriptions.get(identifier = Some(defaultUser1Identifier.value))
+      identifiedClient().subscriptions.get(identifier = Some(defaultUser1Identifier.value)),
     ).map(_.id) must contain theSameElementsAs Seq(defaultSubscription1.id)
 
     await(
-      identifiedClient().subscriptions.get(identifier = Some(defaultUser2Identifier.value))
+      identifiedClient().subscriptions.get(identifier = Some(defaultUser2Identifier.value)),
     ).map(_.id) must contain theSameElementsAs Seq(defaultSubscription2.id)
 
     await(
-      identifiedClient().users.get(id = Some(UUID.randomUUID.toString))
+      identifiedClient().users.get(id = Some(UUID.randomUUID.toString)),
     ).map(_.id) must be(
-      Nil
+      Nil,
     )
   }
 
@@ -37,7 +37,7 @@ class SubscriptionsSpec extends DependencySpec with MockDependencyClient {
     val subscription = createSubscription(createSubscriptionForm(user))
 
     await(
-      identifiedClient().subscriptions.deleteById(id = subscription.id, identifier = Some(user1Identifier.value))
+      identifiedClient().subscriptions.deleteById(id = subscription.id, identifier = Some(user1Identifier.value)),
     )
     subscriptionsDao.findById(subscription.id) must be(empty)
   }

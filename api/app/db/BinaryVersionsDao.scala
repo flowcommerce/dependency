@@ -14,7 +14,7 @@ import scala.util.{Failure, Success, Try}
 class BinaryVersionsDao @Inject() (
   db: Database,
   logger: RollbarLogger,
-  internalTasksDao: InternalTasksDao
+  internalTasksDao: InternalTasksDao,
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "binary_versions")
@@ -45,12 +45,12 @@ class BinaryVersionsDao @Inject() (
   }
 
   private[db] def upsertWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): BinaryVersion = {
     findAllWithConnection(
       binaryId = Some(binaryId),
       version = Some(version),
-      limit = 1
+      limit = 1,
     ).headOption.getOrElse {
       Try {
         createWithConnection(createdBy, binaryId, version)
@@ -60,7 +60,7 @@ class BinaryVersionsDao @Inject() (
           findAllWithConnection(
             binaryId = Some(binaryId),
             version = Some(version),
-            limit = 1
+            limit = 1,
           ).headOption.getOrElse {
             logger.error(ex.getMessage, ex)
             sys.error(ex.getMessage)
@@ -77,7 +77,7 @@ class BinaryVersionsDao @Inject() (
   }
 
   def createWithConnection(createdBy: UserReference, binaryId: String, version: String)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): BinaryVersion = {
     assert(!version.trim.isEmpty, "Version must be non empty")
     val id = IdGenerator("biv").randomId()
@@ -88,7 +88,7 @@ class BinaryVersionsDao @Inject() (
         "binary_id" -> binaryId,
         "version" -> version.trim,
         "sort_key" -> Version(version.trim).sortKey,
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
 
@@ -106,23 +106,23 @@ class BinaryVersionsDao @Inject() (
 
   private[this] def sync(binaryId: String): Unit = {
     internalTasksDao.createSyncIfNotQueued(
-      TaskDataSyncOne(binaryId, SyncType.Binary)
+      TaskDataSyncOne(binaryId, SyncType.Binary),
     )
   }
 
   def findByBinaryAndVersion(
     binary: Binary,
-    version: String
+    version: String,
   ): Option[BinaryVersion] = {
     findAll(
       binaryId = Some(binary.id),
       version = Some(version),
-      limit = 1
+      limit = 1,
     ).headOption
   }
 
   def findById(
-    id: String
+    id: String,
   ): Option[BinaryVersion] = {
     db.withConnection { implicit c =>
       findByIdWithConnection(id)
@@ -130,9 +130,9 @@ class BinaryVersionsDao @Inject() (
   }
 
   def findByIdWithConnection(
-    id: String
+    id: String,
   )(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): Option[BinaryVersion] = {
     findAllWithConnection(id = Some(id), limit = 1).headOption
   }
@@ -145,7 +145,7 @@ class BinaryVersionsDao @Inject() (
     version: Option[String] = None,
     greaterThanVersion: Option[String] = None,
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[BinaryVersion] = {
     db.withConnection { implicit c =>
       findAllWithConnection(
@@ -156,7 +156,7 @@ class BinaryVersionsDao @Inject() (
         version = version,
         greaterThanVersion = greaterThanVersion,
         limit = limit,
-        offset = offset
+        offset = offset,
       )
     }
   }
@@ -170,9 +170,9 @@ class BinaryVersionsDao @Inject() (
     greaterThanVersion: Option[String] = None,
     orderBy: OrderBy = OrderBy(s"-binary_versions.sort_key, binary_versions.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   )(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): Seq[BinaryVersion] = {
     // N.B.: at this time, all binary versions are public and thus we
     // do not need to filter by auth. It is here in the API for
@@ -185,26 +185,26 @@ class BinaryVersionsDao @Inject() (
       .and(
         projectId.map { _ =>
           "binary_versions.binary_id in (select binary_id from project_bainaries where binary_id is not null and project_id = {project_id})"
-        }
+        },
       )
       .bind("project_id", projectId)
       .optionalText(
         "binary_versions.version",
         version,
         columnFunctions = Seq(Query.Function.Lower),
-        valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+        valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
       )
       .and(
         greaterThanVersion.map { _ =>
           s"binary_versions.sort_key > {greater_than_version_sort_key}"
-        }
+        },
       )
       .bind("greater_than_version_sort_key", greaterThanVersion)
       .orderBy(orderBy.sql)
       .limit(limit)
       .offset(offset)
       .as(
-        io.flow.dependency.v0.anorm.parsers.BinaryVersion.parser().*
+        io.flow.dependency.v0.anorm.parsers.BinaryVersion.parser().*,
       )
   }
 

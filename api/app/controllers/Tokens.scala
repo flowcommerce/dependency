@@ -16,7 +16,7 @@ class Tokens @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   tokensDao: TokensDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback
   with BaseIdentifiedController {
 
@@ -24,7 +24,7 @@ class Tokens @javax.inject.Inject() (
     ids: Option[Seq[String]],
     userId: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -33,9 +33,9 @@ class Tokens @javax.inject.Inject() (
           ids = optionals(ids),
           userId = userId,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -67,7 +67,7 @@ class Tokens @javax.inject.Inject() (
   }
 
   def withUserCreatedToken(user: UserReference, id: String)(
-    f: Token => Result
+    f: Token => Result,
   ) = {
     tokensDao
       .findAll(Authorization.User(user.id), id = Some(id), tag = Some(InternalTokenForm.UserCreatedTag), limit = 1)

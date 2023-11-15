@@ -16,7 +16,7 @@ class MembersController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -28,15 +28,15 @@ class MembersController @javax.inject.Inject() (
         memberships <- dependencyClient(request).memberships.get(
           organization = Some(org.key),
           limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = page * Pagination.DefaultLimit.toLong
+          offset = page * Pagination.DefaultLimit.toLong,
         )
       } yield {
         Ok(
           views.html.members.index(
             uiData(request).copy(organization = Some(org.key)),
             org,
-            PaginatedCollection(page, memberships)
-          )
+            PaginatedCollection(page, memberships),
+          ),
         )
       }
     }
@@ -49,8 +49,8 @@ class MembersController @javax.inject.Inject() (
           views.html.members.create(
             uiData(request).copy(organization = Some(org.key)),
             org,
-            MembersController.uiForm
-          )
+            MembersController.uiForm,
+          ),
         )
       }
     }
@@ -76,8 +76,8 @@ class MembersController @javax.inject.Inject() (
                         uiData(request).copy(organization = Some(org.key)),
                         org,
                         boundForm,
-                        Seq("User with specified email not found")
-                      )
+                        Seq("User with specified email not found"),
+                      ),
                     )
                   }
                 case Some(user) => {
@@ -86,8 +86,8 @@ class MembersController @javax.inject.Inject() (
                       MembershipForm(
                         organization = org.key,
                         userId = user.id,
-                        role = Role(uiForm.role)
-                      )
+                        role = Role(uiForm.role),
+                      ),
                     )
                     .map { membership =>
                       Redirect(routes.MembersController.index(org.key))
@@ -100,15 +100,15 @@ class MembersController @javax.inject.Inject() (
                             uiData(request).copy(organization = Some(org.key)),
                             org,
                             boundForm,
-                            response.genericError.messages
-                          )
+                            response.genericError.messages,
+                          ),
                         )
                       }
                     }
                 }
               }
             }
-          }
+          },
         )
       }
     }
@@ -141,7 +141,7 @@ class MembersController @javax.inject.Inject() (
     request: IdentifiedRequest[T],
     orgKey: String,
     id: String,
-    role: Role
+    role: Role,
   ): Future[Result] = {
     withOrganization(request, orgKey) { org =>
       withMembership(org.key, request, id) { membership =>
@@ -150,8 +150,8 @@ class MembersController @javax.inject.Inject() (
             MembershipForm(
               organization = membership.organization.key,
               userId = membership.user.id,
-              role = role
-            )
+              role = role,
+            ),
           )
           .map { membership =>
             Redirect(routes.MembersController.index(membership.organization.key))
@@ -171,9 +171,9 @@ class MembersController @javax.inject.Inject() (
   def withMembership[T](
     org: String,
     request: IdentifiedRequest[T],
-    id: String
+    id: String,
   )(
-    f: Membership => Future[Result]
+    f: Membership => Future[Result],
   ) = {
     dependencyClient(request).memberships
       .getById(id)
@@ -192,14 +192,14 @@ object MembersController {
 
   case class UiForm(
     role: String,
-    email: String
+    email: String,
   )
 
   private val uiForm = Form(
     mapping(
       "role" -> default(nonEmptyText, io.flow.dependency.v0.models.Role.Member.toString),
-      "email" -> nonEmptyText
-    )(UiForm.apply)(UiForm.unapply)
+      "email" -> nonEmptyText,
+    )(UiForm.apply)(UiForm.unapply),
   )
 
 }

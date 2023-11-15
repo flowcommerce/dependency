@@ -7,7 +7,7 @@ import play.api.mvc._
 
 class HealthchecksController @javax.inject.Inject() (
   config: Config,
-  val controllerComponents: ControllerComponents
+  val controllerComponents: ControllerComponents,
 ) extends play.api.mvc.BaseController
   with I18nSupport {
 
@@ -15,8 +15,8 @@ class HealthchecksController @javax.inject.Inject() (
     Ok(
       views.html.healthchecks.index(
         UiData(requestPath = request.path, config = config),
-        "healthy"
-      )
+        "healthy",
+      ),
     )
 
   }

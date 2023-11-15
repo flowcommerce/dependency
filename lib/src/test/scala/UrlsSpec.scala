@@ -31,7 +31,7 @@ class UrlsSpec extends PlaySpec with Factories {
         } else {
           None
         }
-    }
+    },
   )
 
   "www" in {

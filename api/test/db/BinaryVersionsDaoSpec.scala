@@ -21,7 +21,7 @@ class BinaryVersionsDaoSpec extends DependencySpec {
   "findById" in {
     val version = createBinaryVersion(org)()
     binaryVersionsDao.findById(version.id).map(_.id) must be(
-      Some(version.id)
+      Some(version.id),
     )
 
     binaryVersionsDao.findById(UUID.randomUUID.toString) must be(None)
@@ -32,13 +32,13 @@ class BinaryVersionsDaoSpec extends DependencySpec {
     val version2 = createBinaryVersion(org)()
 
     binaryVersionsDao.findAll(ids = Some(Seq(version1.id, version2.id))).map(_.id).sorted must be(
-      Seq(version1.id, version2.id).sorted
+      Seq(version1.id, version2.id).sorted,
     )
 
     binaryVersionsDao.findAll(ids = Some(Nil)) must be(Nil)
     binaryVersionsDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
     binaryVersionsDao.findAll(ids = Some(Seq(version1.id, UUID.randomUUID.toString))).map(_.id) must be(
-      Seq(version1.id)
+      Seq(version1.id),
     )
   }
 

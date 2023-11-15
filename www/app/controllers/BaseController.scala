@@ -16,9 +16,9 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 class UserActionBuilder(
   val parser: BodyParser[AnyContent],
-  onUnauthorized: RequestHeader => Result
+  onUnauthorized: RequestHeader => Result,
 )(implicit
-  val executionContext: ExecutionContext
+  val executionContext: ExecutionContext,
 ) extends ActionBuilder[IdentifiedRequest, AnyContent] {
 
   def invokeBlock[A](request: Request[A], block: IdentifiedRequest[A] => Future[Result]): Future[Result] =
@@ -32,7 +32,7 @@ class UserActionBuilder(
 
 abstract class BaseController(
   config: Config,
-  dependencyClientProvider: DependencyClientProvider
+  dependencyClientProvider: DependencyClientProvider,
 )(implicit val ec: ExecutionContext)
   extends FlowController
   with I18nSupport {
@@ -51,11 +51,11 @@ abstract class BaseController(
 
   def withOrganization[T](
     request: IdentifiedRequest[T],
-    key: String
+    key: String,
   )(
-    f: Organization => Future[Result]
+    f: Organization => Future[Result],
   )(implicit
-    ec: scala.concurrent.ExecutionContext
+    ec: scala.concurrent.ExecutionContext,
   ) = {
     dependencyClient(request).organizations.get(key = Some(key), limit = 1).flatMap { organizations =>
       organizations.headOption match {
@@ -71,25 +71,25 @@ abstract class BaseController(
   }
 
   def organizations[T](
-    request: IdentifiedRequest[T]
+    request: IdentifiedRequest[T],
   )(implicit
-    ec: scala.concurrent.ExecutionContext
+    ec: scala.concurrent.ExecutionContext,
   ): Future[Seq[Organization]] = {
     dependencyClient(request).organizations.get(
       userId = Some(request.user.id),
-      limit = 100
+      limit = 100,
     )
   }
 
   def uiData[T](
-    request: IdentifiedRequest[T]
+    request: IdentifiedRequest[T],
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): UiData = {
     val user = Await
       .result(
         dependencyClient(request).users.get(id = Some(request.user.id)),
-        Duration(1, "seconds")
+        Duration(1, "seconds"),
       )
       .headOption
 
@@ -97,21 +97,21 @@ abstract class BaseController(
       requestPath = request.path,
       user = user,
       section = section,
-      config = config
+      config = config,
     )
   }
 
   def uiData[T](
     request: AnonymousRequest[T],
-    userReferenceOption: Option[UserReference]
+    userReferenceOption: Option[UserReference],
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): UiData = {
     val user = userReferenceOption.flatMap { ref =>
       Await
         .result(
           client.users.get(id = Some(ref.id)),
-          Duration(1, "seconds")
+          Duration(1, "seconds"),
         )
         .headOption
     }
@@ -120,7 +120,7 @@ abstract class BaseController(
       requestPath = request.path,
       user = user,
       section = section,
-      config = config
+      config = config,
     )
   }
 

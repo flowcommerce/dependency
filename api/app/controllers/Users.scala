@@ -20,14 +20,14 @@ class Users @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   usersDao: UsersDao,
-  userIdentifiersDao: UserIdentifiersDao
+  userIdentifiersDao: UserIdentifiersDao,
 )(implicit val ec: ExecutionContext)
   extends BaseIdentifiedControllerWithFallback {
 
   def get(
     id: Option[String],
     email: Option[String],
-    identifier: Option[String]
+    identifier: Option[String],
   ) = Anonymous { _ =>
     if (Seq(id, email, identifier).flatten.isEmpty) {
       UnprocessableEntity(Json.toJson(Validation.error("Must specify id, email or identifier")))
@@ -39,9 +39,9 @@ class Users @javax.inject.Inject() (
             email = email,
             identifier = identifier,
             limit = 1,
-            offset = 0
-          )
-        )
+            offset = 0,
+          ),
+        ),
       )
     }
   }
@@ -81,7 +81,7 @@ class Users @javax.inject.Inject() (
   }
 
   def withUser(id: String)(
-    f: User => Result
+    f: User => Result,
   ) = {
     usersDao.findById(id) match {
       case None => {

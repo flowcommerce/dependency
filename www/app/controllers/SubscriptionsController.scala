@@ -24,7 +24,7 @@ class SubscriptionsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -46,20 +46,20 @@ class SubscriptionsController @javax.inject.Inject() (
   def identifier(identifier: String) = Action.async { implicit request =>
     for {
       users <- client.users.get(
-        identifier = Some(identifier)
+        identifier = Some(identifier),
       )
       subscriptions <- dependencyClientProvider
         .newClient(user = users.headOption.map(u => UserReference(u.id)), requestId = None)
         .subscriptions
         .get(
           identifier = Some(identifier),
-          limit = Publication.all.size.toLong + 1L
+          limit = Publication.all.size.toLong + 1L,
         )
     } yield {
       val userPublications = Publication.all.map { p =>
         Subscriptions.UserPublication(
           publication = p,
-          isSubscribed = subscriptions.exists(_.publication == p)
+          isSubscribed = subscriptions.exists(_.publication == p),
         )
       }
       Ok(views.html.subscriptions.identifier(uiData(request, users.headOption), identifier, userPublications))
@@ -79,7 +79,7 @@ class SubscriptionsController @javax.inject.Inject() (
           identifiedClient.subscriptions
             .get(
               identifier = Some(identifier),
-              publication = Some(publication)
+              publication = Some(publication),
             )
             .flatMap { subscriptions =>
               subscriptions.headOption match {
@@ -88,9 +88,9 @@ class SubscriptionsController @javax.inject.Inject() (
                     .post(
                       SubscriptionForm(
                         userId = user.id,
-                        publication = publication
+                        publication = publication,
                       ),
-                      identifier = Some(identifier)
+                      identifier = Some(identifier),
                     )
                     .map { _ =>
                       Redirect(routes.SubscriptionsController.identifier(identifier))
@@ -101,7 +101,7 @@ class SubscriptionsController @javax.inject.Inject() (
                   identifiedClient.subscriptions
                     .deleteById(
                       subscription.id,
-                      identifier = Some(identifier)
+                      identifier = Some(identifier),
                     )
                     .map { _ =>
                       Redirect(routes.SubscriptionsController.identifier(identifier))
@@ -120,7 +120,7 @@ class SubscriptionsController @javax.inject.Inject() (
       requestPath = request.path,
       user = user,
       section = Some(io.flow.dependency.www.lib.Section.Subscriptions),
-      config = config
+      config = config,
     )
   }
 

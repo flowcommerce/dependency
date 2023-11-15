@@ -17,15 +17,15 @@ class ProjectDependencyResolutions @Inject() (
   val flowControllerComponents: FlowControllerComponents,
   val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
   membershipsDao: MembershipsDao,
-  service: ProjectDependencyResolutionServiceCache
+  service: ProjectDependencyResolutionServiceCache,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(organization: String, groupId: String): Action[AnyContent] = IdentifiedWithFallback { request =>
     withValidatedMember(request.user, organization) {
       Ok(
         Json.toJson(
-          service.getByOrganizationKey(organization, groupId = groupId)
-        )
+          service.getByOrganizationKey(organization, groupId = groupId),
+        ),
       )
     }
   }

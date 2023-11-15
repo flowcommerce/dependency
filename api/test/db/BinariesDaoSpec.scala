@@ -13,7 +13,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
   "findByName" in {
     val lang = createBinary(org)
     binariesDao.findByName(lang.name.toString).map(_.name) must be(
-      Some(lang.name)
+      Some(lang.name),
     )
 
     binariesDao.findByName(UUID.randomUUID.toString) must be(None)
@@ -22,7 +22,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
   "findById" in {
     val lang = createBinary(org)
     binariesDao.findById(lang.id).map(_.id) must be(
-      Some(lang.id)
+      Some(lang.id),
     )
 
     binariesDao.findById(UUID.randomUUID.toString) must be(None)
@@ -33,7 +33,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
     val binary2 = createBinary(org)
 
     binariesDao.findAll(ids = Some(Seq(binary1.id, binary2.id))).map(_.id).sorted must be(
-      Seq(binary1, binary2).map(_.id).sorted
+      Seq(binary1, binary2).map(_.id).sorted,
     )
 
     binariesDao.findAll(ids = Some(Nil)) must be(Nil)
@@ -54,7 +54,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
 
     eventually {
       binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(project.id)).map(_.id) must be(
-        Seq(binaryVersion.binary.id)
+        Seq(binaryVersion.binary.id),
       )
       binariesDao.findAll(id = Some(binaryVersion.binary.id), projectId = Some(createProject().id)) must be(Nil)
     }
@@ -64,7 +64,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
     "validates empty name" in {
       val form = createBinaryForm(org).copy(name = BinaryType.UNDEFINED("   "))
       binariesDao.validate(form) must be(
-        Seq("Name cannot be empty")
+        Seq("Name cannot be empty"),
       )
     }
 
@@ -72,7 +72,7 @@ class BinariesDaoSpec extends DependencySpec with Eventually with IntegrationPat
       val lang = createBinary(org)
       val form = createBinaryForm(org).copy(name = BinaryType.UNDEFINED(lang.name.toString.toUpperCase))
       binariesDao.validate(form) must be(
-        Seq("Binary with this name already exists")
+        Seq("Binary with this name already exists"),
       )
     }
   }

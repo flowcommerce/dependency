@@ -23,7 +23,7 @@ class UserActor @Inject() (
   userIdentifiersDao: UserIdentifiersDao,
   subscriptionsDao: SubscriptionsDao,
   usersDao: UsersDao,
-  rollbar: RollbarLogger
+  rollbar: RollbarLogger,
 ) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
@@ -41,8 +41,8 @@ class UserActor @Inject() (
           usersDao.systemUser,
           SubscriptionForm(
             userId = user.id,
-            publication = publication
-          )
+            publication = publication,
+          ),
         )
       }
     }

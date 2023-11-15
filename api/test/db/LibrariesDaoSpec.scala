@@ -17,7 +17,7 @@ class LibrariesDaoSpec extends DependencySpec {
     resolverId: Option[String] = None,
     prefix: Option[String] = None,
     limit: Option[Long] = None,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Library] = {
     librariesDao.findAll(
       auth,
@@ -27,7 +27,7 @@ class LibrariesDaoSpec extends DependencySpec {
       resolverId = resolverId,
       prefix = prefix,
       limit = limit,
-      offset = offset
+      offset = offset,
     )
   }
 
@@ -37,27 +37,27 @@ class LibrariesDaoSpec extends DependencySpec {
       .findByGroupIdAndArtifactId(
         Authorization.All,
         library.groupId,
-        library.artifactId
+        library.artifactId,
       )
       .map(_.id) must be(Some(library.id))
 
     librariesDao.findByGroupIdAndArtifactId(
       Authorization.All,
       library.groupId + "-2",
-      library.artifactId
+      library.artifactId,
     ) must be(None)
 
     librariesDao.findByGroupIdAndArtifactId(
       Authorization.All,
       library.groupId,
-      library.artifactId + "-2"
+      library.artifactId + "-2",
     ) must be(None)
   }
 
   "findById" in {
     val library = createLibrary(org)
     librariesDao.findById(Authorization.All, library.id).map(_.id) must be(
-      Some(library.id)
+      Some(library.id),
     )
 
     librariesDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
@@ -68,7 +68,7 @@ class LibrariesDaoSpec extends DependencySpec {
     val library2 = createLibrary(org)
 
     findAll(ids = Some(Seq(library1.id, library2.id))).map(_.id) must be(
-      Seq(library1, library2).sortWith { (x, y) => x.groupId.toString < y.groupId.toString }.map(_.id)
+      Seq(library1, library2).sortWith { (x, y) => x.groupId.toString < y.groupId.toString }.map(_.id),
     )
 
     findAll(ids = Some(Nil)) must be(Nil)
@@ -88,17 +88,17 @@ class LibrariesDaoSpec extends DependencySpec {
     val org = createOrganization()
     val resolver = createResolver(org)
     val library1 = createLibrary(org)(
-      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-bar")
+      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-bar"),
     )
     val library2 = createLibrary(org)(
-      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-baz")
+      createLibraryForm(org).copy(resolverId = resolver.id, artifactId = "foo-baz"),
     )
 
     def ids(prefix: String) = {
       findAll(
         Authorization.All,
         organizationId = Some(org.id),
-        prefix = Some(prefix)
+        prefix = Some(prefix),
       ).map(_.id).sorted
     }
 
@@ -112,14 +112,14 @@ class LibrariesDaoSpec extends DependencySpec {
     "validates empty group id" in {
       val form = createLibraryForm(org).copy(groupId = "   ")
       librariesDao.validate(form) must be(
-        Seq("Group ID cannot be empty")
+        Seq("Group ID cannot be empty"),
       )
     }
 
     "validates empty artifact id" in {
       val form = createLibraryForm(org).copy(artifactId = "   ")
       librariesDao.validate(form) must be(
-        Seq("Artifact ID cannot be empty")
+        Seq("Artifact ID cannot be empty"),
       )
     }
 
@@ -127,10 +127,10 @@ class LibrariesDaoSpec extends DependencySpec {
       val library = createLibrary(org)
       val form = createLibraryForm(org).copy(
         groupId = library.groupId,
-        artifactId = library.artifactId
+        artifactId = library.artifactId,
       )
       librariesDao.validate(form) must be(
-        Seq("Library with this group id and artifact id already exists")
+        Seq("Library with this group id and artifact id already exists"),
       )
     }
   }
@@ -141,7 +141,7 @@ class LibrariesDaoSpec extends DependencySpec {
       val user = createUser()
       val org = createOrganization(user = user)
       val resolver = createResolver(org, user)(
-        createResolverForm(org).copy(visibility = Visibility.Public)
+        createResolverForm(org).copy(visibility = Visibility.Public),
       )
       val lib = createLibrary(org, user = user)(createLibraryForm(org)(resolver = resolver))
 
@@ -156,7 +156,7 @@ class LibrariesDaoSpec extends DependencySpec {
       val user = createUser()
       val org = createOrganization(user = user)
       val resolver = createResolver(org, user)(
-        createResolverForm(org).copy(visibility = Visibility.Private)
+        createResolverForm(org).copy(visibility = Visibility.Private),
       )
       val lib = createLibrary(org, user = user)(createLibraryForm(org)(resolver = resolver))
       lib.resolver.visibility must be(Visibility.Private)

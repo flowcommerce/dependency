@@ -9,7 +9,7 @@ case class Dependencies(
   binaries: Option[Seq[ProjectBinaryForm]] = None,
   libraries: Option[Seq[Artifact]] = None,
   resolverUris: Option[Seq[String]] = None,
-  plugins: Option[Seq[Artifact]] = None
+  plugins: Option[Seq[Artifact]] = None,
 ) {
 
   def librariesAndPlugins: Option[Seq[Artifact]] = {

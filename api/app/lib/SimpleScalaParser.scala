@@ -61,7 +61,7 @@ trait SimpleScalaParser {
             version =
               if (version.startsWith("\"")) SimpleScalaParserUtil.stripQuotes(version) else interpolate(version),
             isCrossBuilt = addSbtPlugin != null || crossBuilt.length > 1,
-            isPlugin = (addSbtPlugin != null)
+            isPlugin = (addSbtPlugin != null),
           )
         }
       }

@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 class LoginController @javax.inject.Inject() (
   val provider: DependencyClientProvider,
   val controllerComponents: ControllerComponents,
-  config: Config
+  config: Config,
 )(implicit ec: ExecutionContext, dependencyConfig: lib.GitHubConfig)
   extends play.api.mvc.BaseController
   with I18nSupport {
@@ -28,15 +28,15 @@ class LoginController @javax.inject.Inject() (
   def githubCallback(
     code: String,
     state: Option[String],
-    returnUrl: Option[String]
+    returnUrl: Option[String],
   ): Action[AnyContent] = Action.async { implicit request =>
     provider
       .newClient(user = None, requestId = None)
       .githubUsers
       .postGithub(
         GithubAuthenticationForm(
-          code = code
-        )
+          code = code,
+        ),
       )
       .map { user =>
         val url = returnUrl match {
@@ -53,7 +53,7 @@ class LoginController @javax.inject.Inject() (
       .recover { case response: io.flow.dependency.v0.errors.GenericErrorResponse =>
         Ok(
           views.html.login
-            .index(UiData(requestPath = request.path, config = config), returnUrl, response.genericError.messages)
+            .index(UiData(requestPath = request.path, config = config), returnUrl, response.genericError.messages),
         )
       }
   }

@@ -51,11 +51,11 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.1")
       val result = ProjectPluginsSbtScalaParser(projectSummary, "test.sbt", contents, logger)
       result.resolverUris must contain theSameElementsAs Seq(
         "http://repo.typesafe.com/typesafe/releases/",
-        "https://dl.bintray.com/sksamuel/sbt-plugins/"
+        "https://dl.bintray.com/sksamuel/sbt-plugins/",
       )
       result.plugins must contain theSameElementsAs Seq(
         Artifact(projectSummary, "test.sbt", "com.typesafe.play", "sbt-plugin", "2.4.3", true, true),
-        Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true, true)
+        Artifact(projectSummary, "test.sbt", "org.scoverage", "sbt-scoverage", "1.0.1", true, true),
       )
     }
 

@@ -17,7 +17,7 @@ class Libraries @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   librariesDao: LibrariesDao,
   librariesHelper: LibrariesHelper,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback
   with BaseIdentifiedController {
 
@@ -29,7 +29,7 @@ class Libraries @javax.inject.Inject() (
     artifactId: Option[String],
     resolverId: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -42,9 +42,9 @@ class Libraries @javax.inject.Inject() (
           artifactId = artifactId,
           resolverId = resolverId,
           limit = Some(limit),
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

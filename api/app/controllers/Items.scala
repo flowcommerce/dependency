@@ -13,14 +13,14 @@ class Items @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   itemsDao: InternalItemsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback
   with BaseIdentifiedController {
 
   def get(
     q: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -28,9 +28,9 @@ class Items @javax.inject.Inject() (
           authorization(request),
           q = q,
           limit = Some(limit),
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

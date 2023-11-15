@@ -14,29 +14,29 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
 
   "GET /binaries by id" in {
     await(
-      identifiedClient().binaries.get(id = Some(binary1.id))
+      identifiedClient().binaries.get(id = Some(binary1.id)),
     ).map(_.id) must contain theSameElementsAs Seq(binary1.id)
 
     await(
-      identifiedClient().binaries.get(id = Some(UUID.randomUUID.toString))
+      identifiedClient().binaries.get(id = Some(UUID.randomUUID.toString)),
     ).map(_.id) must be(
-      Nil
+      Nil,
     )
   }
 
   "GET /binaries by name" in {
     await(
-      identifiedClient().binaries.get(name = Some(binary1.name.toString))
+      identifiedClient().binaries.get(name = Some(binary1.name.toString)),
     ).map(_.name) must contain theSameElementsAs Seq(binary1.name)
 
     await(
-      identifiedClient().binaries.get(name = Some(binary1.name.toString.toUpperCase))
+      identifiedClient().binaries.get(name = Some(binary1.name.toString.toUpperCase)),
     ).map(_.name) must contain theSameElementsAs Seq(binary1.name)
 
     await(
-      identifiedClient().binaries.get(name = Some(UUID.randomUUID.toString))
+      identifiedClient().binaries.get(name = Some(UUID.randomUUID.toString)),
     ) must be(
-      Nil
+      Nil,
     )
   }
 
@@ -57,22 +57,22 @@ class BinariesSpec extends DependencySpec with MockDependencyClient {
 
   "POST /binaries validates duplicate name" in {
     expectErrors(
-      identifiedClient().binaries.post(createBinaryForm(org).copy(name = binary1.name))
+      identifiedClient().binaries.post(createBinaryForm(org).copy(name = binary1.name)),
     ).genericError.messages must contain theSameElementsAs Seq("Binary with this name already exists")
   }
 
   "DELETE /binaries" in {
     val binary = createBinary(org)()
     await(
-      identifiedClient(org.user).binaries.deleteById(binary.id)
+      identifiedClient(org.user).binaries.deleteById(binary.id),
     ) must be(())
 
     expectNotFound(
-      identifiedClient().binaries.getById(binary.id)
+      identifiedClient().binaries.getById(binary.id),
     )
 
     expectNotFound(
-      identifiedClient().binaries.deleteById(binary.id)
+      identifiedClient().binaries.deleteById(binary.id),
     )
   }
 

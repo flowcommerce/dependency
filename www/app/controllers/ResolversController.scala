@@ -16,7 +16,7 @@ class ResolversController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -26,14 +26,14 @@ class ResolversController @javax.inject.Inject() (
     for {
       resolvers <- dependencyClient(request).resolvers.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.resolvers.index(
           uiData(request),
-          PaginatedCollection(page, resolvers)
-        )
+          PaginatedCollection(page, resolvers),
+        ),
       )
     }
   }
@@ -44,15 +44,15 @@ class ResolversController @javax.inject.Inject() (
         libraries <- dependencyClient(request).libraries.get(
           resolverId = Some(id),
           limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = librariesPage * Pagination.DefaultLimit.toLong
+          offset = librariesPage * Pagination.DefaultLimit.toLong,
         )
       } yield {
         Ok(
           views.html.resolvers.show(
             uiData(request),
             resolver,
-            PaginatedCollection(librariesPage, libraries)
-          )
+            PaginatedCollection(librariesPage, libraries),
+          ),
         )
       }
     }
@@ -64,8 +64,8 @@ class ResolversController @javax.inject.Inject() (
         views.html.resolvers.create(
           uiData(request),
           ResolversController.uiForm,
-          orgs
-        )
+          orgs,
+        ),
       )
     }
   }
@@ -82,7 +82,7 @@ class ResolversController @javax.inject.Inject() (
         uiForm => {
           dependencyClient(request).resolvers
             .post(
-              resolverForm = uiForm.resolverForm()
+              resolverForm = uiForm.resolverForm(),
             )
             .map { resolver =>
               Redirect(routes.ResolversController.show(resolver.id)).flashing("success" -> "Resolver created")
@@ -92,16 +92,16 @@ class ResolversController @javax.inject.Inject() (
                 Ok(views.html.resolvers.create(uiData(request), boundForm, orgs, response.genericError.messages))
               }
             }
-        }
+        },
       )
     }
   }
 
   def withResolver[T](
     request: IdentifiedRequest[T],
-    id: String
+    id: String,
   )(
-    f: Resolver => Future[Result]
+    f: Resolver => Future[Result],
   ) = {
     dependencyClient(request).resolvers
       .getById(id)
@@ -136,14 +136,14 @@ object ResolversController {
     organization: String,
     uri: String,
     username: Option[String],
-    password: Option[String]
+    password: Option[String],
   ) {
 
     def resolverForm() = ResolverForm(
       organization = organization,
       visibility = Visibility.Private,
       uri = uri,
-      credentials = credentials
+      credentials = credentials,
     )
 
     val credentials = username.map(_.trim) match {
@@ -153,8 +153,8 @@ object ResolversController {
         Some(
           UsernamePassword(
             username = username,
-            password = password.map(_.trim)
-          )
+            password = password.map(_.trim),
+          ),
         )
       }
     }
@@ -166,8 +166,8 @@ object ResolversController {
       "organization" -> nonEmptyText,
       "uri" -> nonEmptyText,
       "username" -> optional(text),
-      "password" -> optional(text)
-    )(UiForm.apply)(UiForm.unapply)
+      "password" -> optional(text),
+    )(UiForm.apply)(UiForm.unapply),
   )
 
 }

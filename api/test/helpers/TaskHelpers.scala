@@ -13,7 +13,7 @@ trait TaskHelpers {
 
   def deleteAllNonProcessedTasks(): Unit = {
     internalTasksDao.deleteAllNonProcessedTasks(
-      createdOnOrBefore = (DateTime.now.plusYears(1))
+      createdOnOrBefore = (DateTime.now.plusYears(1)),
     )
   }
 
@@ -24,14 +24,14 @@ trait TaskHelpers {
 
   def makeTaskDataSync(typ: Option[SyncType] = None): TaskDataSync = {
     TaskDataSync(
-      `type` = typ
+      `type` = typ,
     )
   }
 
   def makeTaskDataSyncOneProject(projectId: String = createTestId()): TaskDataSyncOne = {
     TaskDataSyncOne(
       `type` = SyncType.Project,
-      id = projectId
+      id = projectId,
     )
   }
 

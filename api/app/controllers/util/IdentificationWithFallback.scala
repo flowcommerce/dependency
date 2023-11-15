@@ -19,7 +19,7 @@ class IdentificationWithFallback @Inject() (
   val config: Config,
   authorization: AuthorizationImpl,
   tokensDao: TokensDao,
-  usersDao: UsersDao
+  usersDao: UsersDao,
 )(implicit val executionContext: ExecutionContext, logger: RollbarLogger)
   extends ActionBuilder[IdentifiedRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -34,7 +34,7 @@ class IdentificationWithFallback @Inject() (
               user = user,
               session = None,
               requestId = "lib-play-" + UUID.randomUUID.toString,
-              customer = None
+              customer = None,
             )
             block(new IdentifiedRequest(ad, request))
         }
@@ -64,7 +64,7 @@ class IdentificationWithFallback @Inject() (
   /** If present, parses the basic authorization header and returns its decoded value.
     */
   private[this] def basicAuthorizationToken(
-    headers: play.api.mvc.Headers
+    headers: play.api.mvc.Headers,
   ): Option[Authorization] = {
     headers.get("Authorization").flatMap { h =>
       authorization.get(h)

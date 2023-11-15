@@ -9,11 +9,11 @@ class RecommendationsDaoSpec extends DependencySpec with Eventually with Integra
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(60, Seconds)),
-    interval = scaled(Span(250, Millis))
+    interval = scaled(Span(250, Millis)),
   )
 
   def createRecommendation(
-    org: Organization
+    org: Organization,
   ): Recommendation = {
     val (_, libraryVersions) = createLibraryWithMultipleVersions(org)
     val project = createProject(org)
@@ -42,8 +42,8 @@ class RecommendationsDaoSpec extends DependencySpec with Eventually with Integra
           objectId = library.id,
           name = Seq(library.groupId, library.artifactId).mkString("."),
           from = "1.0.9",
-          to = "1.1.0"
-        )
+          to = "1.1.0",
+        ),
       )(c)
     }
     val rec = recommendationsDao.findAll(Authorization.All, projectId = Some(project.id)).head
@@ -72,32 +72,32 @@ class RecommendationsDaoSpec extends DependencySpec with Eventually with Integra
       .findAll(Authorization.All, projectId = Some(rec.project.id))
       .map(rec => (rec.from, rec.to)) must be(
       Seq(
-        ("1.0.0", "1.0.2")
-      )
+        ("1.0.0", "1.0.2"),
+      ),
     )
 
     recommendationsDao
       .findAll(
         Authorization.All,
         organization = Some(rec.project.organization.key),
-        projectId = Some(rec.project.id)
+        projectId = Some(rec.project.id),
       )
       .map(rec => (rec.from, rec.to)) must be(
       Seq(
-        ("1.0.0", "1.0.2")
-      )
+        ("1.0.0", "1.0.2"),
+      ),
     )
 
     recommendationsDao.findAll(
       Authorization.All,
       organization = Some(createOrganization().key),
-      projectId = Some(rec.project.id)
+      projectId = Some(rec.project.id),
     ) must be(Nil)
   }
 
   "Prefers latest production release even when more recent beta release is available" in {
     val (library, libraryVersions) = createLibraryWithMultipleVersions(org)(
-      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1")
+      versions = Seq("1.0.0", "1.0.2-RC1", "1.0.1"),
     )
     val project = createProject(org)()
     addLibraryVersion(project, libraryVersions.head)
@@ -108,9 +108,9 @@ class RecommendationsDaoSpec extends DependencySpec with Eventually with Integra
             library = library,
             from = "1.0.0",
             to = libraryVersions.find(_.version == "1.0.1").get,
-            latest = libraryVersions.find(_.version == "1.0.2-RC1").get
-          )
-        )
+            latest = libraryVersions.find(_.version == "1.0.2-RC1").get,
+          ),
+        ),
       )
     }
   }

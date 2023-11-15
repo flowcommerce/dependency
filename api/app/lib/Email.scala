@@ -36,7 +36,7 @@ object Email {
     config: Config,
     recipient: Recipient,
     subject: String,
-    body: String
+    body: String,
   ): Unit = {
     val prefixedSubject = subjectWithPrefix(config, subject)
 
@@ -63,7 +63,7 @@ object Email {
         val response = sendgrid(config).api(request)
         assert(
           response.getStatusCode() == 202,
-          s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode()}]"
+          s"Error sending email. Expected statusCode[202] but got[${response.getStatusCode()}]",
         )
       }
     }

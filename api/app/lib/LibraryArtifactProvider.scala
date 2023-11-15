@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 case class ArtifactResolution(
   resolver: ResolverSummary,
-  versions: Seq[ArtifactVersion]
+  versions: Seq[ArtifactVersion],
 ) {
   assert(versions.nonEmpty, "Must have at least one version")
 }
@@ -24,7 +24,7 @@ trait LibraryArtifactProvider {
   def resolve(
     organizationId: String,
     groupId: String,
-    artifactId: String
+    artifactId: String,
   ): Option[ArtifactResolution]
 
   /** Attempts to resolve a library at the specified resolver. A return value of None indicates we did NOT find this
@@ -33,13 +33,13 @@ trait LibraryArtifactProvider {
   def resolve(
     resolver: Resolver,
     groupId: String,
-    artifactId: String
+    artifactId: String,
   ): Option[ArtifactResolution] = {
     RemoteVersions.fetch(
       resolver = resolver.uri,
       groupId = groupId,
       artifactId = artifactId,
-      credentials = resolversDao.credentials(resolver)
+      credentials = resolversDao.credentials(resolver),
     ) match {
       case Nil => None
       case versions => Some(ArtifactResolution(resolversDao.toSummary(resolver), versions))
@@ -50,20 +50,20 @@ trait LibraryArtifactProvider {
 
 class DefaultLibraryArtifactProvider @Inject() (
   override val resolversDao: ResolversDao,
-  organizationsCache: OrganizationsCache
+  organizationsCache: OrganizationsCache,
 ) extends LibraryArtifactProvider {
 
   override def resolve(
     organizationId: String,
     groupId: String,
-    artifactId: String
+    artifactId: String,
   ): Option[ArtifactResolution] = {
     internalResolve(
       organizationId = organizationId,
       groupId = groupId,
       artifactId = artifactId,
       limit = 100,
-      offset = 0
+      offset = 0,
     )
   }
 
@@ -72,12 +72,12 @@ class DefaultLibraryArtifactProvider @Inject() (
     groupId: String,
     artifactId: String,
     limit: Long,
-    offset: Long
+    offset: Long,
   ): Option[ArtifactResolution] = {
     resolversDao.findAll(
       Authorization.Organization(organizationId),
       limit = limit,
-      offset = offset
+      offset = offset,
     ) match {
       case Nil => {
         None
@@ -88,7 +88,7 @@ class DefaultLibraryArtifactProvider @Inject() (
             resolver = resolver.uri,
             groupId = groupId,
             artifactId = artifactId,
-            credentials = resolversDao.credentials(resolver)
+            credentials = resolversDao.credentials(resolver),
           ) match {
             case Nil => {}
             case versions => {
@@ -102,7 +102,7 @@ class DefaultLibraryArtifactProvider @Inject() (
           groupId = groupId,
           artifactId = artifactId,
           limit = limit,
-          offset = offset + limit
+          offset = offset + limit,
         )
       }
     }
@@ -117,7 +117,7 @@ class DefaultLibraryArtifactProvider @Inject() (
           organizationsCache.findSummaryByOrganizationId(organizationId)
       },
       visibility = resolver.visibility,
-      uri = resolver.uri
+      uri = resolver.uri,
     )
   }
 

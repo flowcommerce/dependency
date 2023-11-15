@@ -12,7 +12,7 @@ import play.api.db._
 @Singleton
 class UserIdentifiersDao @Inject() (
   db: Database,
-  staticUserProvider: StaticUserProvider
+  staticUserProvider: StaticUserProvider,
 ) {
 
   val GithubOauthUserIdentifierValue = "github_oauth"
@@ -46,7 +46,7 @@ class UserIdentifiersDao @Inject() (
         email = email,
         name = user.name,
         userId = user.id,
-        identifier = latestForUser(staticUserProvider.systemUser, user).value
+        identifier = latestForUser(staticUserProvider.systemUser, user).value,
       )
     }
   }
@@ -75,7 +75,7 @@ class UserIdentifiersDao @Inject() (
   }
 
   private[this] def createWithConnection(createdBy: UserReference, user: User)(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): UserIdentifier = {
     val id = IdGenerator("usi").randomId()
 
@@ -84,7 +84,7 @@ class UserIdentifiersDao @Inject() (
         "id" -> id,
         "user_id" -> user.id,
         "value" -> generateIdentifier(),
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
 
@@ -107,7 +107,7 @@ class UserIdentifiersDao @Inject() (
     userId: Option[String] = None,
     value: Option[String] = None,
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[UserIdentifier] = {
     db.withConnection { implicit c =>
       findAllWithConnection(
@@ -116,7 +116,7 @@ class UserIdentifiersDao @Inject() (
         userId = userId,
         value = value,
         limit = limit,
-        offset = offset
+        offset = offset,
       )
     }
   }
@@ -128,7 +128,7 @@ class UserIdentifiersDao @Inject() (
     value: Option[String] = None,
     orderBy: OrderBy = OrderBy("-user_identifiers.created_at"),
     limit: Long,
-    offset: Long = 0
+    offset: Long = 0,
   )(implicit c: java.sql.Connection): Seq[UserIdentifier] = {
     Standards
       .query(
@@ -139,12 +139,12 @@ class UserIdentifiersDao @Inject() (
         ids = ids,
         orderBy = orderBy.sql,
         limit = limit,
-        offset = offset
+        offset = offset,
       )
       .equals("user_identifiers.user_id", userId)
       .optionalText("user_identifiers.value", value)
       .as(
-        io.flow.dependency.v0.anorm.parsers.UserIdentifier.parser().*
+        io.flow.dependency.v0.anorm.parsers.UserIdentifier.parser().*,
       )
   }
 

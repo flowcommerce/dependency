@@ -15,7 +15,7 @@ class LibraryVersions @javax.inject.Inject() (
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
   libraryVersionsDao: LibraryVersionsDao,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -23,7 +23,7 @@ class LibraryVersions @javax.inject.Inject() (
     ids: Option[Seq[String]],
     libraryId: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -33,9 +33,9 @@ class LibraryVersions @javax.inject.Inject() (
           ids = optionals(ids),
           libraryId = libraryId,
           limit = Some(limit),
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -46,11 +46,11 @@ class LibraryVersions @javax.inject.Inject() (
   }
 
   def withLibraryVersion(user: UserReference, id: String)(
-    f: LibraryVersion => Result
+    f: LibraryVersion => Result,
   ): Result = {
     libraryVersionsDao.findById(
       Authorization.User(user.id),
-      id
+      id,
     ) match {
       case None => {
         NotFound

@@ -17,7 +17,7 @@ class Projects @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   projectsDao: ProjectsDao,
   projectHelper: ProjectHelper,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -32,7 +32,7 @@ class Projects @javax.inject.Inject() (
     binary: _root_.scala.Option[String],
     binaryId: _root_.scala.Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback { request =>
     Ok(
       Json.toJson(
@@ -49,9 +49,9 @@ class Projects @javax.inject.Inject() (
           binary = binary,
           binaryId = binaryId,
           limit = Some(limit),
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 
@@ -89,7 +89,7 @@ class Projects @javax.inject.Inject() (
             visibility = patch.visibility.getOrElse(project.visibility),
             scms = patch.scms.getOrElse(project.scms),
             uri = patch.uri.getOrElse(project.uri),
-            branch = patch.branch.getOrElse(project.branch)
+            branch = patch.branch.getOrElse(project.branch),
           )
           projectsDao.update(request.user, project, form) match {
             case Left(errors) => UnprocessableEntity(Json.toJson(Validation.errors(errors)))

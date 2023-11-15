@@ -17,7 +17,7 @@ class ProjectsController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -27,14 +27,14 @@ class ProjectsController @javax.inject.Inject() (
     for {
       projects <- dependencyClient(request).projects.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.projects.index(
           uiData(request),
-          PaginatedCollection(page, projects)
-        )
+          PaginatedCollection(page, projects),
+        ),
       )
     }
   }
@@ -46,22 +46,22 @@ class ProjectsController @javax.inject.Inject() (
           recommendations <- dependencyClient(request).recommendations.get(
             projectId = Some(project.id),
             limit = Pagination.DefaultLimit.toLong + 1L,
-            offset = recommendationsPage * Pagination.DefaultLimit.toLong
+            offset = recommendationsPage * Pagination.DefaultLimit.toLong,
           )
           projectBinaries <- dependencyClient(request).projectBinaries.get(
             projectId = Some(id),
             limit = Pagination.DefaultLimit.toLong + 1L,
-            offset = binariesPage * Pagination.DefaultLimit.toLong
+            offset = binariesPage * Pagination.DefaultLimit.toLong,
           )
           projectLibraries <- dependencyClient(request).projectLibraries.get(
             projectId = Some(id),
             limit = Pagination.DefaultLimit.toLong + 1L,
-            offset = librariesPage * Pagination.DefaultLimit.toLong
+            offset = librariesPage * Pagination.DefaultLimit.toLong,
           )
           syncs <- dependencyClient(request).syncs.get(
             objectId = Some(id),
             event = Some(SyncEvent.Completed),
-            limit = 1
+            limit = 1,
           )
         } yield {
           Ok(
@@ -71,8 +71,8 @@ class ProjectsController @javax.inject.Inject() (
               PaginatedCollection(recommendationsPage, recommendations),
               PaginatedCollection(binariesPage, projectBinaries),
               PaginatedCollection(librariesPage, projectLibraries),
-              syncs.headOption
-            )
+              syncs.headOption,
+            ),
           )
         }
       }
@@ -94,8 +94,8 @@ class ProjectsController @javax.inject.Inject() (
           Ok(
             views.html.projects.github(
               uiData(request),
-              multiple
-            )
+              multiple,
+            ),
           )
         }
       }
@@ -109,15 +109,15 @@ class ProjectsController @javax.inject.Inject() (
           organizationId = Some(org.id),
           existingProject = Some(false),
           limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = repositoriesPage * Pagination.DefaultLimit.toLong
+          offset = repositoriesPage * Pagination.DefaultLimit.toLong,
         )
       } yield {
         Ok(
           views.html.projects.githubOrg(
             uiData(request),
             org,
-            PaginatedCollection(repositoriesPage, repositories)
-          )
+            PaginatedCollection(repositoriesPage, repositories),
+          ),
         )
       }
     }
@@ -128,14 +128,14 @@ class ProjectsController @javax.inject.Inject() (
     orgKey: String,
     owner: String, // github owner, ex. flowcommerce
     name: String, // github repo name, ex. user
-    repositoriesPage: Int = 0
+    repositoriesPage: Int = 0,
   ) = User.async { implicit request =>
     withOrganization(request, orgKey) { org =>
       dependencyClient(request).repositories
         .getGithub(
           organizationId = Some(org.id),
           owner = Some(owner),
-          name = Some(name)
+          name = Some(name),
         )
         .flatMap { selected =>
           selected.headOption match {
@@ -156,8 +156,8 @@ class ProjectsController @javax.inject.Inject() (
                       Visibility.Public
                     },
                     uri = repo.htmlUrl,
-                    branch = repo.defaultBranch
-                  )
+                    branch = repo.defaultBranch,
+                  ),
                 )
                 .map { project =>
                   Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project added")
@@ -174,8 +174,8 @@ class ProjectsController @javax.inject.Inject() (
         views.html.projects.create(
           uiData(request),
           ProjectsController.uiForm,
-          orgs
-        )
+          orgs,
+        ),
       )
     }
   }
@@ -198,8 +198,8 @@ class ProjectsController @javax.inject.Inject() (
                 scms = Scms(uiForm.scms),
                 visibility = Visibility(uiForm.visibility),
                 uri = uiForm.uri,
-                branch = uiForm.branch
-              )
+                branch = uiForm.branch,
+              ),
             )
             .map { project =>
               Redirect(routes.ProjectsController.sync(project.id)).flashing("success" -> "Project created")
@@ -209,7 +209,7 @@ class ProjectsController @javax.inject.Inject() (
                 Ok(views.html.projects.create(uiData(request), boundForm, orgs, response.genericError.messages))
               }
             }
-        }
+        },
       )
     }
   }
@@ -228,11 +228,11 @@ class ProjectsController @javax.inject.Inject() (
                 scms = project.scms.toString,
                 visibility = project.visibility.toString,
                 uri = project.uri,
-                branch = project.branch
-              )
+                branch = project.branch,
+              ),
             ),
-            orgs
-          )
+            orgs,
+          ),
         )
       }
     }
@@ -257,8 +257,8 @@ class ProjectsController @javax.inject.Inject() (
                   scms = Scms(uiForm.scms),
                   visibility = Visibility(uiForm.visibility),
                   uri = uiForm.uri,
-                  branch = uiForm.branch
-                )
+                  branch = uiForm.branch,
+                ),
               )
               .map { project =>
                 Redirect(routes.ProjectsController.show(project.id)).flashing("success" -> "Project updated")
@@ -266,11 +266,11 @@ class ProjectsController @javax.inject.Inject() (
               .recover {
                 case response: io.flow.dependency.v0.errors.GenericErrorResponse => {
                   Ok(
-                    views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericError.messages)
+                    views.html.projects.edit(uiData(request), project, boundForm, orgs, response.genericError.messages),
                   )
                 }
               }
-          }
+          },
         )
       }
     }
@@ -299,27 +299,27 @@ class ProjectsController @javax.inject.Inject() (
     withProject(request, id) { _ =>
       for {
         syncs <- dependencyClient(request).syncs.get(
-          objectId = Some(id)
+          objectId = Some(id),
         )
         pendingProjectLibraries <- dependencyClient(request).projectLibraries.get(
           projectId = Some(id),
           isSynced = Some(false),
-          limit = 100
+          limit = 100,
         )
         completedProjectLibraries <- dependencyClient(request).projectLibraries.get(
           projectId = Some(id),
           isSynced = Some(true),
-          limit = 100
+          limit = 100,
         )
         pendingProjectBinaries <- dependencyClient(request).projectBinaries.get(
           projectId = Some(id),
           isSynced = Some(false),
-          limit = 100
+          limit = 100,
         )
         completedProjectBinaries <- dependencyClient(request).projectBinaries.get(
           projectId = Some(id),
           isSynced = Some(true),
-          limit = 100
+          limit = 100,
         )
       } yield {
         val actualN = if (n < 1) {
@@ -368,8 +368,8 @@ class ProjectsController @javax.inject.Inject() (
                   sleepTime,
                   syncStarted,
                   pending,
-                  completed
-                )
+                  completed,
+                ),
               )
             }
           }
@@ -380,9 +380,9 @@ class ProjectsController @javax.inject.Inject() (
 
   def withProject[T](
     request: IdentifiedRequest[T],
-    id: String
+    id: String,
   )(
-    f: Project => Future[Result]
+    f: Project => Future[Result],
   ) = {
     dependencyClient(request).projects
       .getById(id)
@@ -406,7 +406,7 @@ object ProjectsController {
     scms: String,
     visibility: String,
     uri: String,
-    branch: String
+    branch: String,
   )
 
   private val uiForm = Form(
@@ -416,8 +416,8 @@ object ProjectsController {
       "scms" -> nonEmptyText,
       "visibility" -> nonEmptyText,
       "uri" -> nonEmptyText,
-      "branch" -> nonEmptyText
-    )(UiForm.apply)(UiForm.unapply)
+      "branch" -> nonEmptyText,
+    )(UiForm.apply)(UiForm.unapply),
   )
 
 }

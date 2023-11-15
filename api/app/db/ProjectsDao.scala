@@ -20,7 +20,7 @@ class ProjectsDao @Inject() (
   recommendationsDaoProvider: Provider[RecommendationsDao],
   organizationsDaoProvider: Provider[OrganizationsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "projects")
@@ -69,14 +69,14 @@ class ProjectsDao @Inject() (
     ProjectSummary(
       id = project.id,
       organization = OrganizationSummary(project.organization.id, project.organization.key),
-      name = project.name
+      name = project.name,
     )
   }
 
   private[db] def validate(
     user: UserReference,
     form: ProjectForm,
-    existing: Option[Project] = None
+    existing: Option[Project] = None,
   ): Seq[String] = {
     val uriErrors = if (form.uri.trim == "") {
       Seq("Uri cannot be empty")
@@ -141,7 +141,7 @@ class ProjectsDao @Inject() (
               "name" -> form.name.trim,
               "uri" -> form.uri.trim,
               "branch" -> form.branch.trim,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -164,7 +164,7 @@ class ProjectsDao @Inject() (
         // own record to be able to track changes.
         assert(
           project.organization.key == form.organization,
-          "Changing organization not currently supported"
+          "Changing organization not currently supported",
         )
 
         db.withConnection { implicit c =>
@@ -176,7 +176,7 @@ class ProjectsDao @Inject() (
               "name" -> form.name.trim,
               "uri" -> form.uri.trim,
               "branch" -> form.branch.trim,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -236,7 +236,7 @@ class ProjectsDao @Inject() (
     binaryId: Option[String] = None,
     orderBy: OrderBy = OrderBy("lower(projects.name), projects.created_at"),
     limit: Option[Long],
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Project] = {
 
     db.withConnection { implicit c =>
@@ -249,47 +249,47 @@ class ProjectsDao @Inject() (
           ids = ids,
           orderBy = orderBy.sql,
           limit = limit,
-          offset = offset
+          offset = offset,
         )
         .optionalText(
           "organizations.key",
           organizationKey,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .equals("organizations.id", organizationId)
         .optionalText(
           "projects.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .and(
-          groupId.map { _ => FilterProjectLibraries.format("project_libraries.group_id = trim({group_id})") }
+          groupId.map { _ => FilterProjectLibraries.format("project_libraries.group_id = trim({group_id})") },
         )
         .bind("group_id", groupId)
         .and(
-          artifactId.map { _ => FilterProjectLibraries.format("project_libraries.artifact_id = trim({artifact_id})") }
+          artifactId.map { _ => FilterProjectLibraries.format("project_libraries.artifact_id = trim({artifact_id})") },
         )
         .bind("artifact_id", artifactId)
         .and(
-          version.map { _ => FilterProjectLibraries.format("project_libraries.version = trim({version})") }
+          version.map { _ => FilterProjectLibraries.format("project_libraries.version = trim({version})") },
         )
         .bind("version", version)
         .and(
-          libraryId.map { _ => FilterProjectLibraries.format("project_libraries.library_id = {library_id}") }
+          libraryId.map { _ => FilterProjectLibraries.format("project_libraries.library_id = {library_id}") },
         )
         .bind("library_id", libraryId)
         .and(
-          binary.map { _ => FilterProjectBinaries.format("project_binaries.name = trim({binary})") }
+          binary.map { _ => FilterProjectBinaries.format("project_binaries.name = trim({binary})") },
         )
         .bind("binary", binary)
         .and(
-          binaryId.map { _ => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") }
+          binaryId.map { _ => FilterProjectBinaries.format("project_binaries.binary_id = {binary_id}") },
         )
         .bind("binary_id", binaryId)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Project.parser().*
+          io.flow.dependency.v0.anorm.parsers.Project.parser().*,
         )
     }
   }

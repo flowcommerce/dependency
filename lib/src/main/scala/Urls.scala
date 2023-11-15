@@ -8,7 +8,7 @@ import io.flow.dependency.v0.models.{
   OrganizationSummary,
   ProjectSummary,
   Recommendation,
-  RecommendationType
+  RecommendationType,
 }
 import io.flow.util.Config
 
@@ -17,7 +17,7 @@ import io.flow.util.Config
   * in one file for easier maintenance.
   */
 case class Urls(
-  config: Config
+  config: Config,
 ) {
 
   val github = "https://github.com/flowcommerce/dependency"

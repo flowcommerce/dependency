@@ -12,19 +12,19 @@ import play.api.db._
 
 case class LastEmailForm(
   userId: String,
-  publication: Publication
+  publication: Publication,
 )
 
 case class LastEmail(
   id: String,
   user: Reference,
   publication: Publication,
-  createdAt: DateTime
+  createdAt: DateTime,
 )
 
 @Singleton
 class LastEmailsDao @Inject() (
-  db: Database
+  db: Database,
 ) {
   private[this] val dbHelpers = DbHelpers(db, "last_emails")
 
@@ -42,7 +42,7 @@ class LastEmailsDao @Inject() (
 
   def record(
     createdBy: UserReference,
-    form: LastEmailForm
+    form: LastEmailForm,
   ): LastEmail = {
     val id = db.withTransaction { implicit c =>
       findByUserIdAndPublication(form.userId, form.publication).foreach { rec =>
@@ -61,9 +61,9 @@ class LastEmailsDao @Inject() (
 
   private[this] def create(
     createdBy: UserReference,
-    form: LastEmailForm
+    form: LastEmailForm,
   )(implicit
-    c: java.sql.Connection
+    c: java.sql.Connection,
   ): String = {
     val id = IdGenerator("lse").randomId()
     SQL(InsertQuery)
@@ -71,7 +71,7 @@ class LastEmailsDao @Inject() (
         "id" -> id,
         "user_id" -> form.userId,
         "publication" -> form.publication.toString,
-        "updated_by_user_id" -> createdBy.id
+        "updated_by_user_id" -> createdBy.id,
       )
       .execute()
     id
@@ -92,7 +92,7 @@ class LastEmailsDao @Inject() (
     publication: Option[Publication] = None,
     orderBy: OrderBy = OrderBy("-last_emails.publication, last_emails.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[LastEmail] = {
 
     db.withConnection { implicit c =>
@@ -118,7 +118,7 @@ class LastEmailsDao @Inject() (
             id = id,
             user = user,
             publication = publication,
-            createdAt = createdAt
+            createdAt = createdAt,
           )
         }
       }

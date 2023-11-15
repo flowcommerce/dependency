@@ -26,7 +26,7 @@ class SearchActor @Inject() (
   projectsDao: ProjectsDao,
   internalItemsDao: InternalItemsDao,
   staticUserProvider: StaticUserProvider,
-  logger: RollbarLogger
+  logger: RollbarLogger,
 ) extends ReapedActor {
 
   private[this] implicit val configuredRollbar: RollbarLogger = logger.fingerprint(getClass.getName)

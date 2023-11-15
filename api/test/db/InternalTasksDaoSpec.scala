@@ -28,7 +28,7 @@ class InternalTasksDaoSpec
         .findAll(
           ids = Some(ids),
           hasProcessedAt = Some(hasProcessed),
-          limit = None
+          limit = None,
         )
         .map(_.id)
         .sorted
@@ -43,7 +43,7 @@ class InternalTasksDaoSpec
       internalTasksDao.findAll(
         data = Some(TaskDataSync()),
         hasProcessedAt = Some(false),
-        limit = None
+        limit = None,
       )
     }
 
@@ -63,7 +63,7 @@ class InternalTasksDaoSpec
     def findTaskData(data: TaskDataSyncOne) = {
       internalTasksDao.findAll(
         data = Some(data),
-        limit = None
+        limit = None,
       )
     }
 

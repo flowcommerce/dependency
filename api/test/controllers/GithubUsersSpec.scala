@@ -20,7 +20,7 @@ class GithubUsersSpec extends DependencySpec with MockDependencyClient {
       gravatarId = None,
       url = s"https://github.com/$login",
       htmlUrl = s"https://github.com/$login",
-      `type` = OwnerType.User
+      `type` = OwnerType.User,
     )
   }
 
@@ -46,7 +46,7 @@ class GithubUsersSpec extends DependencySpec with MockDependencyClient {
 
     MockGithubData.addUser(githubUser, code)
     val user = await(
-      anonClient.githubUsers.postGithub(GithubAuthenticationForm(code = code))
+      anonClient.githubUsers.postGithub(GithubAuthenticationForm(code = code)),
     )
     user.email must be(None)
     usersDao.findByGithubUserId(githubUser.id).map(_.id) must be(Some(user.id))

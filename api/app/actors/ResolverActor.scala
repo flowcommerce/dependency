@@ -28,7 +28,7 @@ class ResolverActor @Inject() (
   projectLibrariesDao: InternalProjectLibrariesDao,
   staticUserProvider: StaticUserProvider,
   rollbar: RollbarLogger,
-  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef
+  @javax.inject.Named("project-actor") projectActor: akka.actor.ActorRef,
 ) extends ReapedActor {
 
   private[this] implicit val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)

@@ -16,7 +16,7 @@ object GithubUtil {
 
   case class Repository(
     owner: String,
-    project: String
+    project: String,
   )
 
   def parseUri(uri: String): Either[String, Repository] = {
@@ -66,7 +66,7 @@ object GithubDependencyProviderClient {
     tokensDao: TokensDao,
     project: ProjectSummary,
     user: UserReference,
-    logger: RollbarLogger
+    logger: RollbarLogger,
   ) = {
     new GithubDependencyProvider(new DefaultGithub(wsClient, config, tokensDao), project, user, logger)
   }
@@ -77,7 +77,7 @@ private[lib] case class GithubDependencyProvider(
   github: Github,
   project: ProjectSummary,
   user: UserReference,
-  logger: RollbarLogger
+  logger: RollbarLogger,
 ) extends DependencyProvider {
 
   private val BuildSbtFilename = "build.sbt"
@@ -95,7 +95,7 @@ private[lib] case class GithubDependencyProvider(
           libraries = Some((all.libraries.getOrElse(Nil) ++ dep.libraries.getOrElse(Nil)).distinct),
           resolverUris = Some((all.resolverUris.getOrElse(Nil) ++ dep.resolverUris.getOrElse(Nil)).distinct),
           plugins = Some((all.plugins.getOrElse(Nil) ++ dep.plugins.getOrElse(Nil)).distinct),
-          binaries = Some((all.binaries.getOrElse(Nil) ++ dep.binaries.getOrElse(Nil)).distinct)
+          binaries = Some((all.binaries.getOrElse(Nil) ++ dep.binaries.getOrElse(Nil)).distinct),
         )
       }
     }
@@ -103,9 +103,9 @@ private[lib] case class GithubDependencyProvider(
 
   private[this] def getBuildDependencies(
     projectUri: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, BuildSbtFilename, branch).map { result =>
       result.flatMap { text =>
@@ -113,14 +113,14 @@ private[lib] case class GithubDependencyProvider(
           project = project,
           path = BuildSbtFilename,
           contents = text,
-          logger = logger
+          logger = logger,
         )
         Some(
           Dependencies(
             binaries = Some(result.binaries),
             libraries = Some(result.libraries),
-            resolverUris = Some(result.resolverUris)
-          )
+            resolverUris = Some(result.resolverUris),
+          ),
         )
       }
     }
@@ -128,9 +128,9 @@ private[lib] case class GithubDependencyProvider(
 
   private[this] def parseProperties(
     projectUri: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, BuildPropertiesFilename, branch).map { result =>
       result.flatMap { text =>
@@ -138,7 +138,7 @@ private[lib] case class GithubDependencyProvider(
           project = project,
           path = BuildPropertiesFilename,
           contents = text,
-          logger = logger
+          logger = logger,
         )
         properties.get("sbt.version").map { value =>
           Dependencies(
@@ -148,10 +148,10 @@ private[lib] case class GithubDependencyProvider(
                   projectId = project.id,
                   name = BinaryType.Sbt,
                   version = value,
-                  path = BuildPropertiesFilename
-                )
-              )
-            )
+                  path = BuildPropertiesFilename,
+                ),
+              ),
+            ),
           )
         }
       }
@@ -160,9 +160,9 @@ private[lib] case class GithubDependencyProvider(
 
   private[this] def getPluginsDependencies(
     projectUri: String,
-    branch: String
+    branch: String,
   )(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Option[Dependencies]] = {
     github.file(user, projectUri, ProjectPluginsSbtFilename, branch).map { result =>
       result.flatMap { text =>
@@ -170,13 +170,13 @@ private[lib] case class GithubDependencyProvider(
           project = project,
           contents = text,
           path = ProjectPluginsSbtFilename,
-          logger = logger
+          logger = logger,
         )
         Some(
           Dependencies(
             plugins = Some(result.plugins),
-            resolverUris = Some(result.resolverUris)
-          )
+            resolverUris = Some(result.resolverUris),
+          ),
         )
       }
     }

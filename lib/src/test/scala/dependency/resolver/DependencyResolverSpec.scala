@@ -8,31 +8,31 @@ class DependencyResolverSpec extends AnyWordSpec with Matchers with ResolverHelp
 
   private[this] def makeFlowLibRef(artifactId: String): LibraryReference = makeLibraryReference(
     groupId = "io.flow",
-    artifactId = artifactId
+    artifactId = artifactId,
   )
 
   private[this] val libS3 = makeProjectInfo(
     projectId = "lib-s3",
-    provides = Seq(makeFlowLibRef("lib-s3"))
+    provides = Seq(makeFlowLibRef("lib-s3")),
   )
   private[this] val libInvoice = makeProjectInfo(
     projectId = "lib-invoice",
     provides = Seq(makeFlowLibRef("lib-invoice-generator")),
-    dependsOn = Seq(makeFlowLibRef("lib-s3"))
+    dependsOn = Seq(makeFlowLibRef("lib-s3")),
   )
   private[this] val ftp = makeProjectInfo(
     projectId = "ftp",
-    dependsOn = Seq(makeFlowLibRef("lib-s3"))
+    dependsOn = Seq(makeFlowLibRef("lib-s3")),
   )
   private[this] val billing = makeProjectInfo(
     projectId = "billing",
-    dependsOn = Seq(makeFlowLibRef("lib-invoice-generator"))
+    dependsOn = Seq(makeFlowLibRef("lib-invoice-generator")),
   )
 
   // simplify output for failing test cases
   private[this] case class DependencyResolutionIds(
     resolved: List[Seq[String]],
-    circular: Seq[String]
+    circular: Seq[String],
   )
   private[this] val EmptyDependencyResolutionIds = DependencyResolutionIds(resolved = Nil, circular = Nil)
 
@@ -40,7 +40,7 @@ class DependencyResolverSpec extends AnyWordSpec with Matchers with ResolverHelp
     val r = DependencyResolver(projects).resolution
     DependencyResolutionIds(
       resolved = r.resolved.map(_.map(_.projectId).sorted),
-      circular = r.unresolved.map(_.projectId).sorted
+      circular = r.unresolved.map(_.projectId).sorted,
     )
   }
 
@@ -52,22 +52,22 @@ class DependencyResolverSpec extends AnyWordSpec with Matchers with ResolverHelp
     val projects = Seq(makeProjectInfo(), makeProjectInfo())
     resolve(projects) must equal(
       EmptyDependencyResolutionIds.copy(
-        resolved = List(projects.map(_.projectId).sorted)
-      )
+        resolved = List(projects.map(_.projectId).sorted),
+      ),
     )
   }
 
   "projects w/ resolvable dependencies" in {
     resolve(
-      Seq(billing, ftp, libS3, libInvoice)
+      Seq(billing, ftp, libS3, libInvoice),
     ) must equal(
       EmptyDependencyResolutionIds.copy(
         resolved = List(
           Seq(libS3.projectId),
           Seq(ftp.projectId, libInvoice.projectId).sorted,
-          Seq(billing.projectId)
-        )
-      )
+          Seq(billing.projectId),
+        ),
+      ),
     )
   }
 
@@ -75,17 +75,17 @@ class DependencyResolverSpec extends AnyWordSpec with Matchers with ResolverHelp
     val libA = makeProjectInfo(
       projectId = "lib-a",
       dependsOn = Seq(makeFlowLibRef("lib-b"), makeFlowLibRef("lib-s3")),
-      provides = Seq(makeFlowLibRef("lib-a"))
+      provides = Seq(makeFlowLibRef("lib-a")),
     )
     val libB = makeProjectInfo(
       projectId = "lib-b",
       dependsOn = Seq(makeFlowLibRef("lib-c")),
-      provides = Seq(makeFlowLibRef("lib-b"))
+      provides = Seq(makeFlowLibRef("lib-b")),
     )
     val libC = makeProjectInfo(
       projectId = "lib-c",
       dependsOn = Seq(makeFlowLibRef("lib-a")),
-      provides = Seq(makeFlowLibRef("lib-c"))
+      provides = Seq(makeFlowLibRef("lib-c")),
     )
 
     val r = DependencyResolver(Seq(libA, libB, libC, libS3)).resolution

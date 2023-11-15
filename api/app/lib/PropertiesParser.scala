@@ -7,7 +7,7 @@ case class PropertiesParser(
   override val project: ProjectSummary,
   override val path: String,
   contents: String,
-  override val logger: RollbarLogger
+  override val logger: RollbarLogger,
 ) extends SimpleScalaParser {
 
   private[this] lazy val properties: Map[String, String] = {

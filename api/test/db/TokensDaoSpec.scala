@@ -17,7 +17,7 @@ class TokensDaoSpec extends DependencySpec {
   "findById" in {
     val token = createToken()
     tokensDao.findById(Authorization.All, token.id).map(_.id) must be(
-      Some(token.id)
+      Some(token.id),
     )
 
     tokensDao.findById(Authorization.All, UUID.randomUUID.toString) must be(None)
@@ -49,13 +49,13 @@ class TokensDaoSpec extends DependencySpec {
     val token2 = createToken()
 
     tokensDao.findAll(Authorization.All, ids = Some(Seq(token1.id, token2.id))).map(_.id) must be(
-      Seq(token1.id, token2.id)
+      Seq(token1.id, token2.id),
     )
 
     tokensDao.findAll(Authorization.All, ids = Some(Nil)) must be(Nil)
     tokensDao.findAll(Authorization.All, ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
     tokensDao.findAll(Authorization.All, ids = Some(Seq(token1.id, UUID.randomUUID.toString))).map(_.id) must be(
-      Seq(token1.id)
+      Seq(token1.id),
     )
   }
 

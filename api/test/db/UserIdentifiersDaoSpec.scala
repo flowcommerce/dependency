@@ -29,7 +29,7 @@ class UserIdentifiersDaoSpec extends DependencySpec {
     val (_, identifier) = createUserIdentifier()
 
     userIdentifiersDao.findById(identifier.id).map(_.id) must be(
-      Some(identifier.id)
+      Some(identifier.id),
     )
 
     userIdentifiersDao.findById(UUID.randomUUID.toString) must be(None)
@@ -41,13 +41,13 @@ class UserIdentifiersDaoSpec extends DependencySpec {
       val (_, identifier2) = createUserIdentifier()
 
       userIdentifiersDao.findAll(ids = Some(Seq(identifier1.id, identifier2.id))).map(_.id).sorted must be(
-        Seq(identifier1.id, identifier2.id).sorted
+        Seq(identifier1.id, identifier2.id).sorted,
       )
 
       userIdentifiersDao.findAll(ids = Some(Nil)) must be(Nil)
       userIdentifiersDao.findAll(ids = Some(Seq(UUID.randomUUID.toString))) must be(Nil)
       userIdentifiersDao.findAll(ids = Some(Seq(identifier1.id, UUID.randomUUID.toString))).map(_.id) must be(
-        Seq(identifier1.id)
+        Seq(identifier1.id),
       )
     }
 

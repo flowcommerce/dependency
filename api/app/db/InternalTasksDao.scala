@@ -16,7 +16,7 @@ object InternalTask {
   def assertPriorityValid(priority: Int): Unit = {
     assert(
       priority >= HighestPriority && priority <= LowestPriority,
-      s"Invalid priority[$priority] - must be in range $LowestPriority - $HighestPriority"
+      s"Invalid priority[$priority] - must be in range $LowestPriority - $HighestPriority",
     )
   }
 }
@@ -28,7 +28,7 @@ case class InternalTask(db: generated.Task) {
 
 class InternalTasksDao @Inject() (
   dao: generated.TasksDao,
-  staticUserProvider: StaticUserProvider
+  staticUserProvider: StaticUserProvider,
 ) {
 
   def findById(id: String): Option[InternalTask] = {
@@ -41,7 +41,7 @@ class InternalTasksDao @Inject() (
     limit: Option[Long],
     hasProcessedAt: Option[Boolean] = None,
     offset: Long = 0,
-    orderBy: OrderBy = OrderBy("tasks.id")
+    orderBy: OrderBy = OrderBy("tasks.id"),
   ): Seq[InternalTask] = {
     dao
       .findAll(
@@ -49,7 +49,7 @@ class InternalTasksDao @Inject() (
         hasProcessedAt = hasProcessedAt,
         limit = limit,
         offset = offset,
-        orderBy = orderBy
+        orderBy = orderBy,
       ) { q =>
         q.equals("data", data.map(Json.toJson(_).toString))
       }
@@ -66,8 +66,8 @@ class InternalTasksDao @Inject() (
         data = Json.toJson(data).toString,
         priority = priority,
         numAttempts = 0,
-        processedAt = None
-      )
+        processedAt = None,
+      ),
     )
   }
 
@@ -89,9 +89,9 @@ class InternalTasksDao @Inject() (
     createSyncIfNotQueued(
       TaskDataSyncLibrariesByPrefix(
         userId = user.id,
-        prefix = prefix
+        prefix = prefix,
       ),
-      priority = priority
+      priority = priority,
     )
   }
 
@@ -117,7 +117,7 @@ class InternalTasksDao @Inject() (
     findAll(
       data = Some(taskData),
       hasProcessedAt = Some(false),
-      limit = Some(1)
+      limit = Some(1),
     ).headOption match {
       case None => {
         create(taskData, priority = priority)
@@ -138,8 +138,8 @@ class InternalTasksDao @Inject() (
       staticUserProvider.systemUser,
       task.db,
       task.db.form.copy(
-        priority = priority
-      )
+        priority = priority,
+      ),
     )
   }
 
@@ -150,8 +150,8 @@ class InternalTasksDao @Inject() (
         t,
         t.form.copy(
           numAttempts = t.numAttempts + 1,
-          processedAt = Some(DateTime.now)
-        )
+          processedAt = Some(DateTime.now),
+        ),
       )
     }
   }
@@ -162,7 +162,7 @@ class InternalTasksDao @Inject() (
       ids = None,
       numAttempts = None,
       processedAt = None,
-      hasProcessedAt = None
+      hasProcessedAt = None,
     ) { q =>
       q.isNull("processed_at")
       q.lessThanOrEquals("created_at", createdOnOrBefore)

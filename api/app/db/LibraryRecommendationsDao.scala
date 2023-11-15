@@ -10,14 +10,14 @@ case class LibraryRecommendation(
   library: Library,
   from: String,
   to: LibraryVersion,
-  latest: LibraryVersion
+  latest: LibraryVersion,
 )
 
 @Singleton
 class LibraryRecommendationsDao @Inject() (
   internalProjectLibrariesDao: InternalProjectLibrariesDao,
   libraryVersionsDaoProvider: Provider[LibraryVersionsDao],
-  librariesDaoProvider: Provider[LibrariesDao]
+  librariesDaoProvider: Provider[LibrariesDao],
 ) {
 
   def forProject(project: Project): Seq[LibraryRecommendation] = {
@@ -30,7 +30,7 @@ class LibraryRecommendationsDao @Inject() (
         projectId = Some(project.id),
         hasLibrary = Some(true),
         limit = None,
-        orderBy = None
+        orderBy = None,
       )
       .foreach { projectLibrary =>
         projectLibrary.db.libraryId.flatMap { libraryId => librariesDaoProvider.get.findById(auth, libraryId) }.map {
@@ -42,8 +42,8 @@ class LibraryRecommendationsDao @Inject() (
                   library = library,
                   from = projectLibrary.db.version,
                   to = v,
-                  latest = recentVersions.headOption.getOrElse(v)
-                )
+                  latest = recentVersions.headOption.getOrElse(v),
+                ),
               )
             }
         }
@@ -56,7 +56,7 @@ class LibraryRecommendationsDao @Inject() (
     Recommendations
       .version(
         VersionForm(current.db.version, current.db.crossBuildVersion),
-        others.map(v => VersionForm(v.version, v.crossBuildVersion))
+        others.map(v => VersionForm(v.version, v.crossBuildVersion)),
       )
       .map { version =>
         others.find { _.version == version }.getOrElse {
@@ -70,14 +70,14 @@ class LibraryRecommendationsDao @Inject() (
   private[this] def versionsGreaterThan(
     auth: Authorization,
     library: Library,
-    projectLibrary: InternalProjectLibrary
+    projectLibrary: InternalProjectLibrary,
   ): Seq[LibraryVersion] = {
     libraryVersionsDaoProvider.get.findAll(
       auth,
       libraryId = Some(library.id),
       // we don't use greaterThanVersion because it assumes the current version is present in the DB
       greaterThanSortKey = Some(projectLibrary.sortKey),
-      limit = None
+      limit = None,
     )
   }
 

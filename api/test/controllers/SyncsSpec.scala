@@ -9,7 +9,7 @@ class SyncsSpec extends DependencySpec with MockDependencyClient with ScalaFutur
 
   "POST /syncs" in {
     await(
-      identifiedClient().syncs.postLibrariesByOrganization(createTestId())
+      identifiedClient().syncs.postLibrariesByOrganization(createTestId()),
     )
   }
 }

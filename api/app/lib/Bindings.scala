@@ -9,11 +9,11 @@ class GithubModule extends Module {
     env.mode match {
       case Mode.Prod | Mode.Dev =>
         Seq(
-          bind[Github].to[DefaultGithub]
+          bind[Github].to[DefaultGithub],
         )
       case Mode.Test =>
         Seq(
-          bind[Github].to[MockGithub]
+          bind[Github].to[MockGithub],
         )
     }
   }

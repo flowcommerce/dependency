@@ -18,7 +18,7 @@ class Binaries @javax.inject.Inject() (
   val flowControllerComponents: FlowControllerComponents,
   binariesDao: BinariesDao,
   binaryHelper: BinaryHelper,
-  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents
+  val baseIdentifiedControllerWithFallbackComponents: BaseIdentifiedControllerWithFallbackComponents,
 ) extends BaseIdentifiedControllerWithFallback {
 
   def get(
@@ -27,7 +27,7 @@ class Binaries @javax.inject.Inject() (
     projectId: Option[String],
     name: Option[String],
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ) = IdentifiedWithFallback {
     Ok(
       Json.toJson(
@@ -37,9 +37,9 @@ class Binaries @javax.inject.Inject() (
           projectId = projectId,
           name = name,
           limit = limit,
-          offset = offset
-        )
-      )
+          offset = offset,
+        ),
+      ),
     )
   }
 

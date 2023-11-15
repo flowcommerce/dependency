@@ -16,14 +16,14 @@ object RemoteDirectory {
 
   case class Result(
     directories: Seq[String] = Nil,
-    files: Seq[String] = Nil
+    files: Seq[String] = Nil,
   )
 
   def fetch(
     url: String,
-    credentials: Option[Credentials] = None
+    credentials: Option[Credentials] = None,
   )(
-    filter: String => Boolean = { !_.startsWith(".") }
+    filter: String => Boolean = { !_.startsWith(".") },
   ): Result = {
     val base = Result()
     val cleaner = new HtmlCleaner()

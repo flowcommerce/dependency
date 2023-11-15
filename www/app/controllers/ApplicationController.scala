@@ -12,7 +12,7 @@ class ApplicationController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -27,14 +27,14 @@ class ApplicationController @javax.inject.Inject() (
       recommendations <- dependencyClient(request).recommendations.get(
         organization = organization,
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.index(
           uiData(request).copy(organization = organization),
-          PaginatedCollection(page, recommendations)
-        )
+          PaginatedCollection(page, recommendations),
+        ),
       )
     }
   }

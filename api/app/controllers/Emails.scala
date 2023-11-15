@@ -13,7 +13,7 @@ class Emails @javax.inject.Inject() (
   usersDao: UsersDao,
   lastEmailsDao: LastEmailsDao,
   recommendationsDao: RecommendationsDao,
-  userIdentifiersDao: UserIdentifiersDao
+  userIdentifiersDao: UserIdentifiersDao,
 ) extends BaseController {
   private val mikeEmail = "mbryzek@alum.mit.edu"
 
@@ -36,8 +36,8 @@ class Emails @javax.inject.Inject() (
               Seq(
                 "Subject: " + Email.subjectWithPrefix(config, generator.subject),
                 "<br/><br/><hr size=1/>",
-                generator.body(lastEmailsDao, recommendationsDao, config)
-              ).mkString("\n")
+                generator.body(lastEmailsDao, recommendationsDao, config),
+              ).mkString("\n"),
             ).as(HTML)
           }
         }

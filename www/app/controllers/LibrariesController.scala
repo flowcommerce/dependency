@@ -14,7 +14,7 @@ class LibrariesController @javax.inject.Inject() (
   val dependencyClientProvider: DependencyClientProvider,
   val config: Config,
   val controllerComponents: ControllerComponents,
-  val flowControllerComponents: FlowControllerComponents
+  val flowControllerComponents: FlowControllerComponents,
 )(implicit ec: ExecutionContext)
   extends controllers.BaseController(config, dependencyClientProvider) {
 
@@ -24,14 +24,14 @@ class LibrariesController @javax.inject.Inject() (
     for {
       libraries <- dependencyClient(request).libraries.get(
         limit = Pagination.DefaultLimit.toLong + 1L,
-        offset = page * Pagination.DefaultLimit.toLong
+        offset = page * Pagination.DefaultLimit.toLong,
       )
     } yield {
       Ok(
         views.html.libraries.index(
           uiData(request),
-          PaginatedCollection(page, libraries)
-        )
+          PaginatedCollection(page, libraries),
+        ),
       )
     }
   }
@@ -39,24 +39,24 @@ class LibrariesController @javax.inject.Inject() (
   def show(
     id: String,
     versionsPage: Int = 0,
-    projectsPage: Int = 0
+    projectsPage: Int = 0,
   ) = User.async { implicit request =>
     withLibrary(request, id) { library =>
       for {
         versions <- dependencyClient(request).libraryVersions.get(
           libraryId = Some(id),
           limit = Config.VersionsPerPage.toLong + 1L,
-          offset = versionsPage * Config.VersionsPerPage.toLong
+          offset = versionsPage * Config.VersionsPerPage.toLong,
         )
         projectLibraries <- dependencyClient(request).projectLibraries.get(
           libraryId = Some(id),
           limit = Pagination.DefaultLimit.toLong + 1L,
-          offset = projectsPage * Pagination.DefaultLimit.toLong
+          offset = projectsPage * Pagination.DefaultLimit.toLong,
         )
         syncs <- dependencyClient(request).syncs.get(
           objectId = Some(id),
           event = Some(SyncEvent.Completed),
-          limit = 1
+          limit = 1,
         )
       } yield {
         Ok(
@@ -65,8 +65,8 @@ class LibrariesController @javax.inject.Inject() (
             library,
             PaginatedCollection(versionsPage, versions, Config.VersionsPerPage),
             PaginatedCollection(projectsPage, projectLibraries),
-            syncs.headOption
-          )
+            syncs.headOption,
+          ),
         )
       }
     }
@@ -74,9 +74,9 @@ class LibrariesController @javax.inject.Inject() (
 
   def withLibrary[T](
     request: IdentifiedRequest[T],
-    id: String
+    id: String,
   )(
-    f: Library => Future[Result]
+    f: Library => Future[Result],
   ) = {
     dependencyClient(request).libraries
       .getById(id)

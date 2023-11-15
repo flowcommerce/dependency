@@ -11,7 +11,7 @@ case class BuildSbtScalaParser(
   override val project: ProjectSummary,
   override val path: String,
   contents: String,
-  override val logger: RollbarLogger
+  override val logger: RollbarLogger,
 ) extends SimpleScalaParser {
 
   private lazy val pluginParser = ProjectPluginsSbtScalaParser(project, path, contents, logger)
@@ -29,8 +29,8 @@ case class BuildSbtScalaParser(
               projectId = project.id,
               name = BinaryType.Scala,
               version = interpolate(version),
-              path
-            )
+              path,
+            ),
           )
         }
         case _ => {

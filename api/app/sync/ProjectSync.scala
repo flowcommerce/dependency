@@ -29,7 +29,7 @@ class ProjectSync @Inject() (
   tokensDao: TokensDao,
   staticUserProvider: StaticUserProvider,
   wsClient: WSClient,
-  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef
+  @javax.inject.Named("search-actor") searchActor: akka.actor.ActorRef,
 ) {
   private[this] val logger: RollbarLogger = rollbar.fingerprint(getClass.getName)
   private[this] val HookBaseUrl = config.requiredString("dependency.api.host") + "/webhooks/github/"
@@ -54,7 +54,7 @@ class ProjectSync @Inject() (
         await(
           doSync(project),
           "doSync",
-          project
+          project,
         )
       }
     }
@@ -117,8 +117,8 @@ class ProjectSync @Inject() (
       projectLibrariesDao.upsert(
         project.user,
         artifact.toProjectLibraryForm(
-          crossBuildVersion = crossBuildVersion
-        )
+          crossBuildVersion = crossBuildVersion,
+        ),
       ) match {
         case Left(errors) => {
           logger
@@ -173,11 +173,11 @@ class ProjectSync @Inject() (
                       name = HookName,
                       config = io.flow.github.v0.models.HookConfig(
                         url = Some(targetUrl),
-                        contentType = Some("json")
+                        contentType = Some("json"),
                       ),
                       events = HookEvents,
-                      active = true
-                    )
+                      active = true,
+                    ),
                   )
                   .map { _ =>
                     Right(())
@@ -191,7 +191,7 @@ class ProjectSync @Inject() (
   }
 
   private[this] def await[T](f: => Future[T], message: String, project: Project)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Either[Unit, T] = {
     Await.result(
       f.map { r => Right(r) }
@@ -204,7 +204,7 @@ class ProjectSync @Inject() (
             Left(())
           }
         },
-      FiniteDuration(30, SECONDS)
+      FiniteDuration(30, SECONDS),
     )
   }
 }

@@ -15,7 +15,7 @@ trait DependencyClientProvider {
 class DefaultDependencyClientProvider @javax.inject.Inject() (
   config: io.flow.play.util.Config,
   wsClient: WSClient,
-  authHeaders: AuthHeaders
+  authHeaders: AuthHeaders,
 ) extends DependencyClientProvider {
 
   def host: String = config.requiredString("dependency.api.host")
@@ -39,10 +39,10 @@ class DefaultDependencyClientProvider @javax.inject.Inject() (
           auth = Some(
             Authorization.Basic(
               username = u.id.toString,
-              password = None
-            )
+              password = None,
+            ),
           ),
-          defaultHeaders = authHeaders.headers(authHeaderUser)
+          defaultHeaders = authHeaders.headers(authHeaderUser),
         )
       }
     }

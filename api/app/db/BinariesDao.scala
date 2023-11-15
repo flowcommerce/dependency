@@ -16,7 +16,7 @@ class BinariesDao @Inject() (
   binaryVersionsDaoProvider: Provider[BinaryVersionsDao],
   membershipsDaoProvider: Provider[MembershipsDao],
   internalTasksDao: InternalTasksDao,
-  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef
+  @javax.inject.Named("binary-actor") binaryActor: akka.actor.ActorRef,
 ) {
 
   private[this] val dbHelpers = DbHelpers(db, "binaries")
@@ -38,7 +38,7 @@ class BinariesDao @Inject() (
   """
 
   private[db] def validate(
-    form: BinaryForm
+    form: BinaryForm,
   ): Seq[String] = {
     if (form.name.toString.trim == "") {
       Seq("Name cannot be empty")
@@ -69,7 +69,7 @@ class BinariesDao @Inject() (
               "id" -> id,
               "organization_id" -> form.organizationId,
               "name" -> form.name.toString.toLowerCase,
-              "updated_by_user_id" -> createdBy.id
+              "updated_by_user_id" -> createdBy.id,
             )
             .execute()
         }
@@ -116,7 +116,7 @@ class BinariesDao @Inject() (
     isSynced: Option[Boolean] = None,
     orderBy: OrderBy = OrderBy(s"-lower(binaries.name),binaries.created_at"),
     limit: Long = 25,
-    offset: Long = 0
+    offset: Long = 0,
   ): Seq[Binary] = {
     db.withConnection { implicit c =>
       BaseQuery
@@ -125,7 +125,7 @@ class BinariesDao @Inject() (
         .and(
           projectId.map { _ =>
             s"binaries.id in (select binary_id from project_binaries where binary_id is not null and project_id = {project_id})"
-          }
+          },
         )
         .bind("project_id", projectId)
         .equals("binaries.organization_id", organizationId)
@@ -133,7 +133,7 @@ class BinariesDao @Inject() (
           "binaries.name",
           name,
           columnFunctions = Seq(Query.Function.Lower),
-          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim)
+          valueFunctions = Seq(Query.Function.Lower, Query.Function.Trim),
         )
         .and(
           isSynced.map { value =>
@@ -143,14 +143,14 @@ class BinariesDao @Inject() (
             } else {
               s"not exists ($clause)"
             }
-          }
+          },
         )
         .bind("sync_event_completed", SyncEvent.Completed.toString)
         .orderBy(orderBy.sql)
         .limit(limit)
         .offset(offset)
         .as(
-          io.flow.dependency.v0.anorm.parsers.Binary.parser().*
+          io.flow.dependency.v0.anorm.parsers.Binary.parser().*,
         )
     }
   }
