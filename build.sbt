@@ -43,7 +43,6 @@ lazy val api = project
   .dependsOn(generated, lib)
   .aggregate(generated, lib)
   .enablePlugins(PlayScala)
-  .enablePlugins(NewRelic)
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
@@ -77,7 +76,6 @@ lazy val www = project
   .aggregate(generated, lib)
   .enablePlugins(PlayScala)
   .enablePlugins(SbtTwirl)
-  .enablePlugins(NewRelic)
   .enablePlugins(JavaAgent)
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
