@@ -118,6 +118,9 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "io.flow" %% "lib-play-play28" % "0.7.87",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
+  libraryDependencySchemes ++= Seq(
+    "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
+  ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
