@@ -1,24 +1,38 @@
-name: "PR Title Check"
+name: "PR Title and Description Check"
 on:
   pull_request:
     types: [opened, edited, synchronize]
+
 jobs:
-  check-title:
+  check-title-and-description:
     runs-on: ubuntu-latest
     steps:
-    - name: Check PR title
+    - name: Check PR title and description
       uses: actions/github-script@v4
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          const payload = context.payload
-          const prTitle = payload.pull_request.title
+          const payload = context.payload;
+          const prTitle = payload.pull_request.title;
+          const prDescription = payload.pull_request.body;
+
           // The pattern for JIRA ticket format
-          const jiraPattern = /([A-Z]+-\d+)|(breakglass)/gi; 
-          if (!jiraPattern.test(prTitle)) {
-            console.log('The PR title does not match JIRA ticket format!')
-            // Fails the workflow
-            core.setFailed('PR title does not match JIRA ticket format!')
+          const jiraPattern = /\b[A-Z]+-\d+\b|breakglass/gi;
+
+          // Check PR title
+          const hasJiraTitle = jiraPattern.test(prTitle);
+          console.log(`PR title: ${hasJiraTitle ? 'Valid' : 'Invalid'}`);
+
+          // Check PR description
+          const hasJiraDescription = prDescription ? prDescription.match(jiraPattern) : false;
+          console.log(`PR description: ${hasJiraDescription ? 'Valid' : 'Invalid'}`);
+
+          if (hasJiraTitle || hasJiraDescription) {
+            console.log('PR title or description format is correct.');
           } else {
-            console.log('PR title format is correct.')
+            const errorMessage = [];
+            errorMessage.push('The PR title and description do not include a valid JIRA ticket!');
+            console.log(errorMessage.join('\n'));
+
+            core.setFailed(errorMessage.join('\n'));
           }
