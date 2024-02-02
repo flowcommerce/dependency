@@ -46,7 +46,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -56,16 +56,16 @@ lazy val api = project
       ws,
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
-      "org.projectlombok" % "lombok" % "1.18.28" % "provided",
+      "org.projectlombok" % "lombok" % "1.18.30" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.28",
-      "io.flow" %% "lib-metrics-play28" % "1.0.67",
-      "io.flow" %% "lib-log" % "0.2.4",
-      "io.flow" %% "lib-usage-play28" % "0.2.30",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.12" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.6.37",
+      "io.flow" %% "lib-metrics-play28" % "1.0.77",
+      "io.flow" %% "lib-log" % "0.2.14",
+      "io.flow" %% "lib-usage-play28" % "0.2.37",
+      "io.flow" %% "lib-test-utils-play28" % "0.2.23" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
-      "org.postgresql" % "postgresql" % "42.6.0",
-      "org.apache.commons" % "commons-text" % "1.10.0",
+      "org.postgresql" % "postgresql" % "42.7.1",
+      "org.apache.commons" % "commons-text" % "1.11.0",
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -80,7 +80,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.20.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -89,13 +89,13 @@ lazy val www = project
       ws,
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
-      "org.projectlombok" % "lombok" % "1.18.28" % "provided",
-      "org.webjars" %% "webjars-play" % "2.8.18",
+      "org.projectlombok" % "lombok" % "1.18.30" % "provided",
+      "org.webjars" %% "webjars-play" % "3.0.1",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "6.4.2",
+      "org.webjars" % "font-awesome" % "6.5.1",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.12" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.2.23" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -115,7 +115,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.7.78",
+    "io.flow" %% "lib-play-play28" % "0.7.89",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
   Test / javaOptions ++= Seq(
