@@ -46,7 +46,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.30.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -80,7 +80,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.30.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -90,9 +90,9 @@ lazy val www = project
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.30" % "provided",
-      "org.webjars" %% "webjars-play" % "3.0.1",
+      "org.webjars" %% "webjars-play" % "2.8.18",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "6.5.1",
+      "org.webjars" % "font-awesome" % "6.4.2",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "io.flow" %% "lib-test-utils-play28" % "0.2.24" % Test,
