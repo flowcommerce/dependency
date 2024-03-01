@@ -1,7 +1,7 @@
 name: "PR Title and Description Check"
 on:
   pull_request:
-    types: [opened, edited, synchronize]
+    types: [opened, edited]
 
 jobs:
   check-title-and-description:

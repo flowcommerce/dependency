@@ -58,11 +58,11 @@ lazy val api = project
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.30" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.37",
-      "io.flow" %% "lib-metrics-play28" % "1.0.77",
+      "io.flow" %% "lib-event-sync-play28" % "0.6.38",
+      "io.flow" %% "lib-metrics-play28" % "1.0.79",
       "io.flow" %% "lib-log" % "0.2.14",
-      "io.flow" %% "lib-usage-play28" % "0.2.37",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.23" % Test,
+      "io.flow" %% "lib-usage-play28" % "0.2.38",
+      "io.flow" %% "lib-test-utils-play28" % "0.2.24" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.1",
       "org.apache.commons" % "commons-text" % "1.11.0",
@@ -95,7 +95,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "6.4.2",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.23" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.2.24" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -115,7 +115,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.7.89",
+    "io.flow" %% "lib-play-play28" % "0.7.90",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
   Test / javaOptions ++= Seq(
