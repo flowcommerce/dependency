@@ -46,7 +46,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.31.2",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -58,13 +58,13 @@ lazy val api = project
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.30" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.38",
-      "io.flow" %% "lib-metrics-play28" % "1.0.79",
-      "io.flow" %% "lib-log" % "0.2.14",
-      "io.flow" %% "lib-usage-play28" % "0.2.38",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.24" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.6.43",
+      "io.flow" %% "lib-metrics-play28" % "1.0.83",
+      "io.flow" %% "lib-log" % "0.2.15",
+      "io.flow" %% "lib-usage-play28" % "0.2.41",
+      "io.flow" %% "lib-test-utils-play28" % "0.2.27" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
-      "org.postgresql" % "postgresql" % "42.7.1",
+      "org.postgresql" % "postgresql" % "42.7.2",
       "org.apache.commons" % "commons-text" % "1.11.0",
     ),
     scalacOptions ++= allScalacOptions,
@@ -80,7 +80,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.28.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.31.2",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -90,12 +90,12 @@ lazy val www = project
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.30" % "provided",
-      "org.webjars" %% "webjars-play" % "2.8.18",
+      "org.webjars" %% "webjars-play" % "3.0.1",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "6.4.2",
+      "org.webjars" % "font-awesome" % "6.5.1",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.24" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.2.27" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -115,7 +115,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.7.90",
+    "io.flow" %% "lib-play-play28" % "0.7.96",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
   Test / javaOptions ++= Seq(
