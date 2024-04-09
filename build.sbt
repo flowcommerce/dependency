@@ -92,7 +92,7 @@ lazy val www = project
       "org.projectlombok" % "lombok" % "1.18.32" % "provided",
       "org.webjars" %% "webjars-play" % "3.0.1",
       "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "6.5.2",
+      "org.webjars" % "font-awesome" % "6.5.1",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
       "io.flow" %% "lib-test-utils-play28" % "0.2.29" % Test,
