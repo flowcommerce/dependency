@@ -4,6 +4,8 @@ organization := "io.flow"
 
 ThisBuild / scalaVersion := "2.13.8"
 
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
+
 lazy val allScalacOptions = Seq(
   "-feature",
   "-Xfatal-warnings",
