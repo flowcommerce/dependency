@@ -92,7 +92,7 @@ lazy val www = project
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.32" % "provided",
-      "org.webjars" %% "webjars-play" % "3.0.1",
+      "org.webjars" %% "webjars-play" % "2.8.18",
       "org.webjars" % "bootstrap" % "3.4.1",
       "org.webjars" % "font-awesome" % "6.5.2",
       "org.webjars" % "jquery" % "3.7.1",
