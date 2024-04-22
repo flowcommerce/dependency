@@ -4418,7 +4418,7 @@ package io.flow.dependency.v0 {
 
     /**
      * Returns the latest identifier for this user. The basic use case is to enable
-     * things like unsubscribe w/out  login (and thus once you have an identifier, you
+     * things like unsubscribe w/out login (and thus once you have an identifier, you
      * can GET /users?identifier=xxx). Identifiers are rotated regularly with last n
      * identifiers being valid (allowing eventual expiration).
      */
