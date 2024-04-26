@@ -6,11 +6,11 @@ ThisBuild / scalaVersion := "2.13.10"
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
-  coverageDataDir := file("target/scala-2.13")
-  coverageHighlighting := true
-  coverageFailOnMinimum := true
-  coverageMinimumStmtTotal := 0
-  coverageMinimumBranchTotal := 0
+coverageDataDir := file("target/scala-2.13")
+coverageHighlighting := true
+coverageFailOnMinimum := true
+coverageMinimumStmtTotal := 0
+coverageMinimumBranchTotal := 0
 
 lazy val allScalacOptions = Seq(
   "-feature",
