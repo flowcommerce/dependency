@@ -2,7 +2,7 @@ name := "dependency"
 
 organization := "io.flow"
 
-ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / scalaVersion := "2.13.10"
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 
@@ -125,6 +125,12 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
   ),
   scalacOptions ++= allScalacOptions,
+  coverageExcludedFiles := ".*\\/generated\\/.*;.*\\/api/app/generated\\/.*;.*\\/api/app/db/generated\\/.*",
+  coverageDataDir := file("target/scala-2.13"),
+  coverageHighlighting := true,
+  coverageFailOnMinimum := true,
+  coverageMinimumStmtTotal := 0,
+  coverageMinimumBranchTotal := 0,
   credentials += credsToUse,
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
 )
