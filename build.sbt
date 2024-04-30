@@ -131,7 +131,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   coverageDataDir := file("target/scala-2.13"),
   coverageHighlighting := true,
   coverageFailOnMinimum := true,
-  coverageMinimumStmtTotal := 35,
-  coverageMinimumBranchTotal := 35,
+  coverageMinimumStmtTotal := 36,
+  coverageMinimumBranchTotal := 36,
 )
 version := "0.8.43"
