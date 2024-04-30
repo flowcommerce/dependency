@@ -127,5 +127,11 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalacOptions ++= allScalacOptions,
   credentials += credsToUse,
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
+  coverageExcludedFiles := ".*\\/*generated*\\/.*",
+  coverageDataDir := file("target/scala-2.13"),
+  coverageHighlighting := true,
+  coverageFailOnMinimum := true,
+  coverageMinimumStmtTotal := 36,
+  coverageMinimumBranchTotal := 36,
 )
 version := "0.8.43"
