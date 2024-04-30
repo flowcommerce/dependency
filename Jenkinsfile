@@ -78,8 +78,8 @@ pipeline {
                     do
                       sleep 10
                     done
-                    sbt clean coverage flowLint test scalafmtSbtCheck scalafmtCheck doc
                   '''
+                  sh 'sbt clean coverage flowLint test scalafmtSbtCheck scalafmtCheck doc'
                   sh 'sbt coverageAggregate'
                 }
                 finally {
