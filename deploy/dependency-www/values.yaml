@@ -16,7 +16,7 @@ resources:
     cpu: .2
 
 jvmOpts:
-  memory: 2101m
+  memory: 2100m
 
 istio:
   alb: true
