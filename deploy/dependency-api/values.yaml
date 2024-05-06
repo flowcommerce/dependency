@@ -12,7 +12,7 @@ image:
 
 resources:
   limits:
-    memory: "3000Mi"
+    memory: "3001Mi"
     cpu: 1
   requests:
     memory: "3000Mi"
