@@ -47,20 +47,12 @@ pipeline {
         allOf {
           not {branch 'main'}
           changeRequest()
-          expression {
-            return changesCheck.hasChangesInDir('deploy')
-          }          
         }
       }
       steps {
         script {
           container('helm') {
-            if(changesCheck.hasChangesInDir('deploy/dependency-api')){
-              new helmDiff().diff('dependency-api')
-            }
-            if(changesCheck.hasChangesInDir('deploy/dependency-www')){
-              new helmDiff().diff('dependency-www')
-            }
+            helmCommonDiff(['dependency-api', 'dependency-www'])
           }
         }
       }
