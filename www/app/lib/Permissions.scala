@@ -24,7 +24,7 @@ object Permissions {
 
   object Resolver {
 
-    @nowarn
+    // @nowarn
     def delete(resolver: Resolver, user: Option[User]): Boolean = {
       // TODO
       true

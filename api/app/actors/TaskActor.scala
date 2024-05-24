@@ -194,7 +194,7 @@ class TaskActorSyncLibrariesByPrefix @Inject() (
   ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
-      case _: TaskActorSyncLibrariesByPrefix => true
+      case _: TaskDataSyncLibrariesByPrefix => true
       case _ => false
     }
   }

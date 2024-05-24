@@ -12,33 +12,33 @@ import io.flow.util.{Config, IdGenerator, Random}
 
 trait DependencySpec extends FlowPlaySpec with Factories {
 
-  implicit val defaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
-  implicit val organizationsDao = init[OrganizationsDao]
-  implicit val binariesDao = init[BinariesDao]
-  implicit val binaryVersionsDao = init[BinaryVersionsDao]
-  implicit val librariesDao = init[LibrariesDao]
-  implicit val libraryVersionsDao = init[LibraryVersionsDao]
-  implicit val usersDao = init[UsersDao]
-  implicit val projectsDao = init[ProjectsDao]
-  implicit val projectLibrariesDao = init[InternalProjectLibrariesDao]
-  implicit val projectBinariesDao = init[ProjectBinariesDao]
-  implicit val githubUsersDao = init[GithubUsersDao]
-  implicit val tokensDao = init[TokensDao]
-  implicit val syncsDao = init[SyncsDao]
-  implicit val resolversDao = init[ResolversDao]
-  implicit val membershipsDao = init[MembershipsDao]
-  implicit val itemsDao = init[InternalItemsDao]
-  implicit val subscriptionsDao = init[SubscriptionsDao]
-  implicit val lastEmailsDao = init[LastEmailsDao]
-  implicit val binaryRecommendationsDao = init[BinaryRecommendationsDao]
-  implicit val libraryRecommendationsDao = init[LibraryRecommendationsDao]
-  implicit val recommendationsDao = init[RecommendationsDao]
-  implicit val userIdentifiersDao = init[UserIdentifiersDao]
-  implicit val config = init[Config]
+  implicit val defaultBinaryVersionProvider: DefaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
+  implicit val organizationsDao: OrganizationsDao = init[OrganizationsDao]
+  implicit val binariesDao: BinariesDao = init[BinariesDao]
+  implicit val binaryVersionsDao: BinaryVersionsDao = init[BinaryVersionsDao]
+  implicit val librariesDao: LibrariesDao = init[LibrariesDao]
+  implicit val libraryVersionsDao: LibraryVersionsDao = init[LibraryVersionsDao]
+  implicit val usersDao: UsersDao = init[UsersDao]
+  implicit val projectsDao: ProjectsDao = init[ProjectsDao]
+  implicit val projectLibrariesDao: InternalProjectLibrariesDao = init[InternalProjectLibrariesDao]
+  implicit val projectBinariesDao: ProjectBinariesDao = init[ProjectBinariesDao]
+  implicit val githubUsersDao: GithubUsersDao = init[GithubUsersDao]
+  implicit val tokensDao: TokensDao = init[TokensDao]
+  implicit val syncsDao: SyncsDao = init[SyncsDao]
+  implicit val resolversDao: ResolversDao = init[ResolversDao]
+  implicit val membershipsDao: MembershipsDao = init[MembershipsDao]
+  implicit val itemsDao: InternalItemsDao = init[InternalItemsDao]
+  implicit val subscriptionsDao: SubscriptionsDao = init[SubscriptionsDao]
+  implicit val lastEmailsDao: LastEmailsDao = init[LastEmailsDao]
+  implicit val binaryRecommendationsDao: BinaryRecommendationsDao = init[BinaryRecommendationsDao]
+  implicit val libraryRecommendationsDao: LibraryRecommendationsDao = init[LibraryRecommendationsDao]
+  implicit val recommendationsDao: RecommendationsDao = init[RecommendationsDao]
+  implicit val userIdentifiersDao: UserIdentifiersDao = init[UserIdentifiersDao]
+  implicit val config: Config = init[Config]
 
   val random = Random()
 
-  implicit def toUserReference(user: User) = UserReference(id = user.id)
+  implicit def toUserReference(user: User): UserReference = UserReference(id = user.id)
 
   lazy val systemUser: User = createUser()
 
