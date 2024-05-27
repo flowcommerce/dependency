@@ -180,7 +180,7 @@ class TaskActorSyncOrganizationLibraries @Inject() (
   ) {
   override def accepts(task: InternalTask): Boolean = {
     task.data match {
-      case _: TaskDataSyncLibrariesByPrefix => true
+      case _: TaskDataSyncOrganizationLibraries => true
       case _ => false
     }
   }
