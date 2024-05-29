@@ -8,4 +8,4 @@ COPY --from=builder /opt/play /opt/play
 WORKDIR /opt/play/api/target/universal/stage
 ENTRYPOINT ["java", "-jar", "/root/environment-provider.jar", "--service", "play", "dependency", "bin/dependency-api"]
 HEALTHCHECK --interval=5s --timeout=5s --retries=10 \
-  CMD curl -f http://localhost:9000/_internal_/healthcheck || exit 1
+  CMD curl -f http://localhost:9000/_internal_/ready || exit 1

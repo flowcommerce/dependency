@@ -10,10 +10,6 @@ code:
       generators:
         play_2_8_client: generated/app
         anorm_2_8_parsers: api/app/generated
-    healthcheck:
-      version: latest
-      generators:
-        play_2_8_client: generated/app
     docker-registry:
       version: latest
       generators:
