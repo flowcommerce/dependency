@@ -833,7 +833,6 @@ package io.flow.dependency.v0.models {
     import io.flow.dependency.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.github.v0.models.json._
-    import io.flow.healthcheck.v0.models.json._
 
     private[v0] implicit val jsonReadsUUID: play.api.libs.json.Reads[_root_.java.util.UUID] = __.read[String].map { str =>
       _root_.java.util.UUID.fromString(str)
@@ -2559,7 +2558,6 @@ package io.flow.dependency.v0 {
     import io.flow.dependency.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.github.v0.models.json._
-    import io.flow.healthcheck.v0.models.json._
 
     private[this] val logger = play.api.Logger("io.flow.dependency.v0.Client")
 
@@ -4442,7 +4440,6 @@ package io.flow.dependency.v0 {
     import io.flow.dependency.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.github.v0.models.json._
-    import io.flow.healthcheck.v0.models.json._
 
     final case class GenericErrorResponse(
       response: play.api.libs.ws.WSResponse,
