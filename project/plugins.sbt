@@ -17,7 +17,7 @@ addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.1")
 
 resolvers += "Flow Plugins" at "https://flow.jfrog.io/flow/plugins-release/"
 
-addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.56")
+addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.57")
 
 // Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007
 ThisBuild / libraryDependencySchemes ++= Seq(
@@ -25,4 +25,4 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 )
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.8")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.1.0")
