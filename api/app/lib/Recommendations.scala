@@ -8,7 +8,7 @@ object Recommendations {
   /** Given the current version and a list of possible versions, suggests the best version to which to upgrade (or None
     * if not found)
     */
-  def version(current: VersionForm, others: Seq[VersionForm]): Option[String] = {
+  def version(current: VersionForm, others: Seq[VersionForm], allowMajorVersionUpgrade: Boolean): Option[String] = {
     val currentTag = Version(current.version) // TODO: are we missing crossBuildVersion here?
 
     others
@@ -16,6 +16,7 @@ object Recommendations {
       .filter(v => matchesCrossBuild(v.crossBuildVersion, current.crossBuildVersion))
       .map(v => Version(v.version))
       .filter(_ > currentTag)
+      .filter(v => allowMajorVersionUpgrade || currentTag.major == v.major)
       .filter(v => isSimple(v) || (currentTag.tags.size == v.tags.size && matchesText(currentTag, v)))
       .sorted
       .reverse

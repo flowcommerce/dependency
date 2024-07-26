@@ -57,6 +57,7 @@ class LibraryRecommendationsDao @Inject() (
       .version(
         VersionForm(current.db.version, current.db.crossBuildVersion),
         others.map(v => VersionForm(v.version, v.crossBuildVersion)),
+        allowMajorVersionUpgrade = true,
       )
       .map { version =>
         others.find { _.version == version }.getOrElse {
