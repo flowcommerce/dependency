@@ -57,6 +57,7 @@ class BinaryRecommendationsDao @Inject() (
       .version(
         VersionForm(current.version),
         others.map(v => VersionForm(v.version)),
+        allowMajorVersionUpgrade = false,
       )
       .map { version =>
         others

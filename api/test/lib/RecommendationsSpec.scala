@@ -9,6 +9,7 @@ class RecommendationsSpec extends DependencySpec {
     Recommendations.version(
       VersionForm(value),
       others.map(VersionForm(_)),
+      allowMajorVersionUpgrade = true,
     )
   }
 
@@ -76,6 +77,7 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.3.2", Some("0.13")),
         VersionForm("1.3.3", Some("0.13")),
       ),
+      allowMajorVersionUpgrade = true,
     ) must be(None)
   }
 
@@ -89,6 +91,7 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.1", Some("2.11.6")),
         VersionForm("1.1", Some("2.11.7")),
       ),
+      allowMajorVersionUpgrade = true,
     ) must be(Some("1.1"))
   }
 
@@ -102,6 +105,7 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10")),
       ),
+      allowMajorVersionUpgrade = true,
     ) must be(Some("1.2.2"))
   }
 
@@ -115,6 +119,20 @@ class RecommendationsSpec extends DependencySpec {
         VersionForm("1.2.1", Some("2.10")),
         VersionForm("1.2.2", Some("2.10")),
       ),
+      allowMajorVersionUpgrade = true,
     ) must be(None)
   }
+
+  "Skips major version" in {
+    Recommendations.version(
+      VersionForm("1.0.1"),
+      Seq(
+        VersionForm("1.0.2"),
+        VersionForm("1.1.0"),
+        VersionForm("2.0.0"),
+      ),
+      allowMajorVersionUpgrade = false,
+    ) must be(Some("1.1.0"))
+  }
+
 }
