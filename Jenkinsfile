@@ -60,7 +60,7 @@ pipeline {
     stage("Build, deploy, SBT test") {
       stages {
         stage('Build dependency-api and depencdency-www services') {
-          // when { branch 'main'}
+          when { branch 'main'}
           stages {
             stage('Build and push docker images') {
               stages {
@@ -185,29 +185,6 @@ pipeline {
           }
         }
         
-        stage('SBT Test') {
-          steps {
-            container('play') {
-              script {
-                try {
-                  sh '''
-                    echo "$(date) - waiting for database to start"
-                    until pg_isready -h localhost
-                    do
-                      sleep 10
-                    done
-                  '''
-                  sh 'sbt clean flowLint coverage test scalafmtSbtCheck scalafmtCheck doc'
-                  sh 'sbt coverageAggregate'
-                }
-                finally {
-                  postSbtReport()
-                }
-              }
-            }
-          }
-        }
-
         stage('Deploy dependency servcies') {
           when { branch 'main' }
           stages {
@@ -230,6 +207,29 @@ pipeline {
                       }
                     }
                   }
+                }
+              }
+            }
+          }
+        }
+
+        stage('SBT Test') {
+          steps {
+            container('play') {
+              script {
+                try {
+                  sh '''
+                    echo "$(date) - waiting for database to start"
+                    until pg_isready -h localhost
+                    do
+                      sleep 10
+                    done
+                  '''
+                  sh 'sbt clean flowLint coverage test scalafmtSbtCheck scalafmtCheck doc'
+                  sh 'sbt coverageAggregate'
+                }
+                finally {
+                  postSbtReport()
                 }
               }
             }
