@@ -57,8 +57,162 @@ pipeline {
         }
       }
     }
-    stage("All in parallel") {
-      parallel {
+    stage("Build, deploy, SBT test") {
+      stages {
+        stage('Build dependency-api and depencdency-www services') {
+          when { branch 'main'}
+          stages {
+            stage('Build and push docker images') {
+              stages {
+                stage('Parallel image builds') {
+                  parallel {
+                    stage("Build x86_64/amd64 dependency-api") {
+                      steps {
+                        container('kaniko') {
+                          script {
+                            String semversion = VERSION.printable()
+                            imageBuild(
+                              orgName: 'flowcommerce',
+                              serviceName: 'dependency-api',
+                              platform: 'amd64',
+                              dockerfilePath: '/api/Dockerfile',
+                              semver: semversion
+                            )
+                          }
+                        }
+                      }
+                    } 
+                    // create new agent to avoid conflicts with the main pipeline agent
+                    stage("Build x86_64/amd64 dependency-www") {
+                      agent {
+                          kubernetes {
+                              label 'dependency-www-amd64'
+                              inheritFrom 'kaniko-slim'
+                          }
+                      }
+                      steps {
+                        container('kaniko') {
+                          script {
+                            String semversion = VERSION.printable()
+                            imageBuild(
+                              orgName: 'flowcommerce',
+                              serviceName: 'dependency-www',
+                              platform: 'amd64',
+                              dockerfilePath: '/www/Dockerfile',
+                              semver: semversion
+                            )
+                          }
+                        }
+                      }
+                    }
+                    stage("Build arm64 dependency-api") {
+                      agent {
+                        kubernetes {
+                          label 'dependency-api-arm64'
+                          inheritFrom 'kaniko-slim-arm64'
+                        }
+                      }
+                      steps {
+                        container('kaniko') {
+                          script {
+                            String semversion = VERSION.printable()
+                            imageBuild(
+                              orgName: 'flowcommerce',
+                              serviceName: 'dependency-api',
+                              platform: 'arm64',
+                              dockerfilePath: '/api/Dockerfile',
+                              semver: semversion
+                            )
+                          }
+                        }
+                      }
+                    }
+                    stage("Build arm64 dependency-www") {
+                      agent {
+                        kubernetes {
+                          label 'dependency-www-arm64'
+                          inheritFrom 'kaniko-slim-arm64'
+                        }
+                      }
+                      steps {
+                        container('kaniko') {
+                          script {
+                            String semversion = VERSION.printable()
+                            imageBuild(
+                              orgName: 'flowcommerce',
+                              serviceName: 'dependency-www',
+                              platform: 'arm64',
+                              dockerfilePath: '/www/Dockerfile',
+                              semver: semversion
+                            )
+                          }
+                        }
+                      }
+                    }  
+                  }
+                }
+              }
+            }
+            stage('run manifest tool for dependency-api') {
+              steps {
+                container('kaniko') {
+                  script {
+                    semver = VERSION.printable()
+                    String templateName = "dependency-api-ARCH:${semver}"
+                    String targetName = "dependency-api:${semver}"
+                    String orgName = "flowcommerce"
+                    String jenkinsAgentArch = "amd64"
+                    manifestTool(templateName, targetName, orgName, jenkinsAgentArch)
+                  }
+                }
+              }
+            }
+        
+            stage('run manifest tool for dependency-www') {
+              steps {
+                container('kaniko') {
+                  script {
+                    semver = VERSION.printable()
+                    String templateName = "dependency-www-ARCH:${semver}"
+                    String targetName = "dependency-www:${semver}"
+                    String orgName = "flowcommerce"
+                    String jenkinsAgentArch = "amd64"
+                    manifestTool(templateName, targetName, orgName, jenkinsAgentArch)
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        stage('Deploy dependency servcies') {
+          when { branch 'main' }
+          stages {
+            stage('Deploy dependency-api and dependency-www services') {
+              parallel {
+                stage('Deploy dependency-api service') {
+                  steps {
+                    script {
+                      container('helm') {
+                        new helmCommonDeploy().deploy('dependency-api', 'production', VERSION.printable(), 600)
+                      }
+                    }
+                  }
+                }
+                stage('Deploy dependency-www service') {
+                  steps {
+                    script {
+                      container('helm') {
+                        new helmCommonDeploy().deploy('dependency-www', 'production', VERSION.printable(), 600)
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         stage('SBT Test') {
           steps {
             container('play') {
@@ -76,69 +230,6 @@ pipeline {
                 }
                 finally {
                   postSbtReport()
-                }
-              }
-            }
-          }
-        }
-        stage('Build and Deploy dependency-api') {
-          when { branch 'main'}
-          stages {
-            stage('Build and push docker image release') {
-              steps {
-                container('kaniko') {
-                  script {
-                    semver = VERSION.printable()
-                    
-                    sh """
-                      /kaniko/executor -f `pwd`/api/Dockerfile -c `pwd` \
-                      --snapshot-mode=redo --use-new-run  \
-                      --destination ${env.ORG}/dependency-api:$semver
-                    """
-                  }
-                }
-              }
-            }
-            stage('deploy dependency-api') {
-              steps {
-                script {
-                  container('helm') {
-                    new helmCommonDeploy().deploy('dependency-api', 'production', VERSION.printable())
-                  }
-                }
-              }
-            }
-          }
-        }
-        stage('Build and Deploy dependency-www') {
-          when { branch 'main'}
-          stages {
-            stage('Build and push docker image release') {
-              agent {
-                label 'builder-1'
-              }
-              steps {
-                container('kaniko') {
-                  script {
-                    semver = VERSION.printable()
-                    
-                    sh """
-                      /kaniko/executor -f `pwd`/www/Dockerfile -c `pwd` \
-                      --snapshot-mode=redo --use-new-run  \
-                      --destination ${env.ORG}/dependency-www:$semver
-                    """
-                  }
-                
-                }
-              }
-            }
-            
-            stage('deploy dependency-www') {
-              steps {
-                script {
-                  container('helm') {
-                    new helmCommonDeploy().deploy('dependency-www', 'production', VERSION.printable())
-                  }
                 }
               }
             }
