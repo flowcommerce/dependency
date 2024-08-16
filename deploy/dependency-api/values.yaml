@@ -30,6 +30,16 @@ deployments:
     maxReplicas: 2
     maxUnavailable: 1
 
+# Migrate dependency-api service to arm64 platform
+nodeSelector:
+  role: workers-arm64
+
+tolerations: 
+  - key: "role"
+    operator: "Equal"
+    value: "workers-arm64"
+    effect: "NoSchedule"
+
 rolloutResource:
   enabled: false
 
