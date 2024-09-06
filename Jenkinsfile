@@ -12,7 +12,7 @@ pipeline {
       inheritFrom 'kaniko-slim'
 
       containerTemplates([
-        containerTemplate(name: 'postgres', image: "flowcommerce/dependency-postgresql:latest-pg15", alwaysPullImage: true, resourceRequestMemory: '1Gi'),
+        containerTemplate(name: 'postgres', image: "flowcommerce/dependency-postgresql:latest", alwaysPullImage: true, resourceRequestMemory: '1Gi'),
         containerTemplate(name: 'play', image: "flowdocker/play_builder:latest-java17", alwaysPullImage: true, resourceRequestMemory: '2Gi', command: 'cat', ttyEnabled: true)
       ])
     }
