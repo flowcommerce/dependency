@@ -50,14 +50,12 @@ deployments:
     maxReplicas: 2
     maxUnavailable: 1
 
-# Migrate dependency-www service to arm64 platform
 nodeSelector:
-  role: workers-arm64
-
-tolerations: 
+  karpenter/role: workers
+tolerations:
   - key: "role"
     operator: "Equal"
-    value: "workers-arm64"
+    value: "workers"
     effect: "NoSchedule"
 
 rolloutResource:
