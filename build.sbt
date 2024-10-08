@@ -49,7 +49,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.39.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.40.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -61,11 +61,11 @@ lazy val api = project
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.34" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.63",
-      "io.flow" %% "lib-metrics-play28" % "1.0.96",
-      "io.flow" %% "lib-log" % "0.2.25",
-      "io.flow" %% "lib-usage-play28" % "0.2.56",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.39" % Test,
+      "io.flow" %% "lib-event-sync-play28" % "0.6.67",
+      "io.flow" %% "lib-metrics-play28" % "1.0.97",
+      "io.flow" %% "lib-log" % "0.2.26",
+      "io.flow" %% "lib-usage-play28" % "0.2.58",
+      "io.flow" %% "lib-test-utils-play28" % "0.2.40" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
       "org.apache.commons" % "commons-text" % "1.12.0",
@@ -83,7 +83,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.39.0",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.40.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -98,7 +98,7 @@ lazy val www = project
       "org.webjars" % "font-awesome" % "6.5.2",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.39" % Test,
+      "io.flow" %% "lib-test-utils-play28" % "0.2.40" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -118,7 +118,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.8.5",
+    "io.flow" %% "lib-play-play28" % "0.8.6",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
   Test / javaOptions ++= Seq(
