@@ -61,9 +61,9 @@ lazy val api = project
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.34" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.67",
+      "io.flow" %% "lib-event-sync-play28" % "0.6.68",
       "io.flow" %% "lib-metrics-play28" % "1.0.97",
-      "io.flow" %% "lib-log" % "0.2.26",
+      "io.flow" %% "lib-log" % "0.2.27",
       "io.flow" %% "lib-usage-play28" % "0.2.58",
       "io.flow" %% "lib-test-utils-play28" % "0.2.40" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
@@ -118,7 +118,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.8.6",
+    "io.flow" %% "lib-play-play28" % "0.8.7",
     "com.typesafe.play" %% "play-json-joda" % "2.9.4",
   ),
   Test / javaOptions ++= Seq(
