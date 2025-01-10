@@ -3,7 +3,6 @@ fullnameOverride: "dependency-www"
 
 team: foundation
 
-iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
   repository: flowcommerce/dependency-www
 
@@ -49,6 +48,8 @@ deployments:
     minReplicas: 2
     maxReplicas: 2
     maxUnavailable: 1
+    serviceAccountName: "flow-prod-eks-production-dependency-www-sa"
+    serviceAccountIamRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
 
 nodeSelector:
   karpenter/role: workers
