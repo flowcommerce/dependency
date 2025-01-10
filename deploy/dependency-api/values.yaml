@@ -6,7 +6,6 @@ service:
 
 team: foundation
 
-iamRole: arn:aws:iam::479720515435:role/ecsInstanceRole
 image:
   repository: flowcommerce/dependency-api
 
@@ -29,6 +28,8 @@ deployments:
     minReplicas: 2
     maxReplicas: 2
     maxUnavailable: 1
+    serviceAccountName: "production-sa"
+    serviceAccountIamRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-sa-role"
 
 nodeSelector:
   karpenter/role: workers
