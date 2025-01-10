@@ -28,7 +28,7 @@ deployments:
     minReplicas: 2
     maxReplicas: 2
     maxUnavailable: 1
-    serviceAccountName: "production-dependency-api-sa"
+    serviceAccountName: "flow-prod-eks-production-dependency-api-sa"
     serviceAccountIamRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
 
 nodeSelector:
