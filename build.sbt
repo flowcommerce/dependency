@@ -49,7 +49,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.44.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.45.2",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -61,13 +61,13 @@ lazy val api = project
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.36" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.79",
+      "io.flow" %% "lib-event-sync-play28" % "0.6.81",
       "io.flow" %% "lib-metrics-play28" % "1.1.4",
-      "io.flow" %% "lib-log" % "0.2.29",
-      "io.flow" %% "lib-usage-play28" % "0.2.64",
+      "io.flow" %% "lib-log" % "0.2.30",
+      "io.flow" %% "lib-usage-play28" % "0.2.65",
       "io.flow" %% "lib-test-utils-play28" % "0.2.43" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
-      "org.postgresql" % "postgresql" % "42.7.4",
+      "org.postgresql" % "postgresql" % "42.7.5",
       "org.apache.commons" % "commons-text" % "1.13.0",
     ),
     scalacOptions ++= allScalacOptions,
@@ -83,7 +83,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.44.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.45.2",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
