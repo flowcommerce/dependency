@@ -25,6 +25,7 @@ lazy val generated = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
+      "joda-time" % "joda-time" % "2.12.7",
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -88,8 +89,6 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "com.google.inject" % "guice" % "5.1.0",
-      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.36" % "provided",
       "org.webjars" %% "webjars-play" % "2.8.18",
       "org.webjars" % "bootstrap" % "5.3.3",
