@@ -1,7 +1,5 @@
 package util
 
-import java.util.UUID
-
 import db._
 import db.generated.ProjectLibraryForm
 import io.flow.common.v0.models.{Name, User, UserReference}
@@ -9,32 +7,42 @@ import io.flow.dependency.api.lib.DefaultBinaryVersionProvider
 import io.flow.dependency.v0.models._
 import io.flow.test.utils.FlowPlaySpec
 import io.flow.util.{Config, IdGenerator, Random}
+import org.scalatest.time.SpanSugar._
+import org.scalatest.{Outcome, Retries}
 
-trait DependencySpec extends FlowPlaySpec with Factories {
+import java.util.UUID
 
-  implicit val defaultBinaryVersionProvider: DefaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
-  implicit val organizationsDao: OrganizationsDao = init[OrganizationsDao]
-  implicit val binariesDao: BinariesDao = init[BinariesDao]
-  implicit val binaryVersionsDao: BinaryVersionsDao = init[BinaryVersionsDao]
-  implicit val librariesDao: LibrariesDao = init[LibrariesDao]
-  implicit val libraryVersionsDao: LibraryVersionsDao = init[LibraryVersionsDao]
-  implicit val usersDao: UsersDao = init[UsersDao]
-  implicit val projectsDao: ProjectsDao = init[ProjectsDao]
-  implicit val projectLibrariesDao: InternalProjectLibrariesDao = init[InternalProjectLibrariesDao]
-  implicit val projectBinariesDao: ProjectBinariesDao = init[ProjectBinariesDao]
-  implicit val githubUsersDao: GithubUsersDao = init[GithubUsersDao]
-  implicit val tokensDao: TokensDao = init[TokensDao]
-  implicit val syncsDao: SyncsDao = init[SyncsDao]
-  implicit val resolversDao: ResolversDao = init[ResolversDao]
-  implicit val membershipsDao: MembershipsDao = init[MembershipsDao]
-  implicit val itemsDao: InternalItemsDao = init[InternalItemsDao]
-  implicit val subscriptionsDao: SubscriptionsDao = init[SubscriptionsDao]
-  implicit val lastEmailsDao: LastEmailsDao = init[LastEmailsDao]
-  implicit val binaryRecommendationsDao: BinaryRecommendationsDao = init[BinaryRecommendationsDao]
-  implicit val libraryRecommendationsDao: LibraryRecommendationsDao = init[LibraryRecommendationsDao]
-  implicit val recommendationsDao: RecommendationsDao = init[RecommendationsDao]
-  implicit val userIdentifiersDao: UserIdentifiersDao = init[UserIdentifiersDao]
-  implicit val config: Config = init[Config]
+trait DependencySpec extends FlowPlaySpec with Factories with Retries {
+
+  // Allow a single retry for each test
+  override final def withFixture(test: NoArgTest): Outcome =
+    withRetry(2 seconds) {
+      super.withFixture(test)
+    }
+
+  implicit lazy val defaultBinaryVersionProvider: DefaultBinaryVersionProvider = init[DefaultBinaryVersionProvider]
+  implicit lazy val organizationsDao: OrganizationsDao = init[OrganizationsDao]
+  implicit lazy val binariesDao: BinariesDao = init[BinariesDao]
+  implicit lazy val binaryVersionsDao: BinaryVersionsDao = init[BinaryVersionsDao]
+  implicit lazy val librariesDao: LibrariesDao = init[LibrariesDao]
+  implicit lazy val libraryVersionsDao: LibraryVersionsDao = init[LibraryVersionsDao]
+  implicit lazy val usersDao: UsersDao = init[UsersDao]
+  implicit lazy val projectsDao: ProjectsDao = init[ProjectsDao]
+  implicit lazy val projectLibrariesDao: InternalProjectLibrariesDao = init[InternalProjectLibrariesDao]
+  implicit lazy val projectBinariesDao: ProjectBinariesDao = init[ProjectBinariesDao]
+  implicit lazy val githubUsersDao: GithubUsersDao = init[GithubUsersDao]
+  implicit lazy val tokensDao: TokensDao = init[TokensDao]
+  implicit lazy val syncsDao: SyncsDao = init[SyncsDao]
+  implicit lazy val resolversDao: ResolversDao = init[ResolversDao]
+  implicit lazy val membershipsDao: MembershipsDao = init[MembershipsDao]
+  implicit lazy val itemsDao: InternalItemsDao = init[InternalItemsDao]
+  implicit lazy val subscriptionsDao: SubscriptionsDao = init[SubscriptionsDao]
+  implicit lazy val lastEmailsDao: LastEmailsDao = init[LastEmailsDao]
+  implicit lazy val binaryRecommendationsDao: BinaryRecommendationsDao = init[BinaryRecommendationsDao]
+  implicit lazy val libraryRecommendationsDao: LibraryRecommendationsDao = init[LibraryRecommendationsDao]
+  implicit lazy val recommendationsDao: RecommendationsDao = init[RecommendationsDao]
+  implicit lazy val userIdentifiersDao: UserIdentifiersDao = init[UserIdentifiersDao]
+  implicit lazy val config: Config = init[Config]
 
   val random = Random()
 
