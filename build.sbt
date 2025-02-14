@@ -2,7 +2,7 @@ name := "dependency"
 
 organization := "io.flow"
 
-ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / scalaVersion := "2.13.16"
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / libraryDependencySchemes += "org.scoverage" %% "sbt-scoverage" % VersionScheme.Always
@@ -90,7 +90,7 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       "org.projectlombok" % "lombok" % "1.18.36" % "provided",
-      "org.webjars" %% "webjars-play" % "3.0.2",
+      "org.webjars" %% "webjars-play" % "3.1.0-M1",
       "org.webjars" % "bootstrap" % "3.3.7",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars" % "bootstrap-social" % "5.0.0",
