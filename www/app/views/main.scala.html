@@ -10,9 +10,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@data.headTitle.getOrElse(data.title.getOrElse("dependency"))</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap/5.3.3/css/bootstrap.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-social/bootstrap-social.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/font-awesome/4.7.0/css/font-awesome.min.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-social/assets/css/font-awesome.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.ico")">
   </head>
@@ -60,7 +60,7 @@
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="@routes.Assets.at("lib/bootstrap/5.3.3/js/bootstrap.min.js")" type="text/javascript"></script>
+    <script src="@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/util.js")" type="text/javascript"></script>
     @jsFiles.map { js =>
       <script src="@routes.Assets.at(s"javascripts/$js")" type="text/javascript"></script>
