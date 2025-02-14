@@ -25,6 +25,7 @@ lazy val generated = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
+      "joda-time" % "joda-time" % "2.12.7",
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -57,17 +58,15 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      "com.google.inject" % "guice" % "5.1.0",
-      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.36" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play28" % "0.6.79",
-      "io.flow" %% "lib-metrics-play28" % "1.1.4",
-      "io.flow" %% "lib-log" % "0.2.29",
-      "io.flow" %% "lib-usage-play28" % "0.2.64",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.43" % Test,
+      "io.flow" %% "lib-event-sync-play29" % "0.6.82",
+      "io.flow" %% "lib-metrics-play29" % "1.1.6",
+      "io.flow" %% "lib-log-play29" % "0.2.33",
+      "io.flow" %% "lib-usage-play29" % "0.2.67",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.45" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
-      "org.postgresql" % "postgresql" % "42.7.4",
+      "org.postgresql" % "postgresql" % "42.7.5",
       "org.apache.commons" % "commons-text" % "1.13.0",
     ),
     scalacOptions ++= allScalacOptions,
@@ -90,15 +89,13 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "com.google.inject" % "guice" % "5.1.0",
-      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "org.projectlombok" % "lombok" % "1.18.36" % "provided",
       "org.webjars" %% "webjars-play" % "2.8.18",
-      "org.webjars" % "bootstrap" % "3.4.1",
-      "org.webjars" % "font-awesome" % "6.7.1",
+      "org.webjars" % "bootstrap" % "5.3.3",
+      "org.webjars" % "font-awesome" % "6.7.2",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars.bower" % "bootstrap-social" % "5.1.1",
-      "io.flow" %% "lib-test-utils-play28" % "0.2.43" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.2.45" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -118,8 +115,8 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play28" % "0.8.9",
-    "com.typesafe.play" %% "play-json-joda" % "2.9.4",
+    "io.flow" %% "lib-play-play29" % "0.8.10",
+    "com.typesafe.play" %% "play-json-joda" % "2.10.6",
   ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
