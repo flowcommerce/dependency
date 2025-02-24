@@ -9,7 +9,7 @@ resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 // Use the Play sbt plugin for Play projects
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.9.6")
 
-addSbtPlugin("com.typesafe.play" % "sbt-twirl" % "1.6.9")
+addSbtPlugin("com.typesafe.play" % "sbt-twirl" % "1.6.8")
 
 addSbtPlugin("com.github.sbt" % "sbt-javaagent" % "0.1.8")
 
