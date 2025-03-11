@@ -3,6 +3,9 @@ fullnameOverride: "dependency-api"
 
 service:
   nameOverride: "dependency"
+  readinessFailureThreshold: 4
+  readinessPeriodSeconds: 3
+  readinessTimeoutSeconds: 3
 
 team: foundation
 
