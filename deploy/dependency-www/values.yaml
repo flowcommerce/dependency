@@ -3,6 +3,11 @@ fullnameOverride: "dependency-www"
 
 team: foundation
 
+service:
+  readinessFailureThreshold: 4
+  readinessPeriodSeconds: 3
+  readinessTimeoutSeconds: 3
+
 image:
   repository: flowcommerce/dependency-www
 
