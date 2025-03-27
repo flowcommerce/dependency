@@ -82,3 +82,4 @@ datadogMonitors:
     threshold: '20'
   warning:
     threshold: '10'
+- type: missing-metrics

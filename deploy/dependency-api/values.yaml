@@ -58,3 +58,4 @@ datadogMonitors:
 - type: trace.akka_http.request-p95
   alert:
     notificationTarget: '@slack-team-foundation-notifications'
+- type: missing-metrics
