@@ -28,9 +28,9 @@ istio:
 
 deployments:
   live:
-    minReplicas: 2
-    maxReplicas: 2
-    maxUnavailable: 1
+    minReplicas: 1
+    maxReplicas: 1
+    maxUnavailable: 0
     serviceAccountName: "flow-prod-eks-production-dependency-api-sa"
     serviceAccountIamRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
 
