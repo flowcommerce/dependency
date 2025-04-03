@@ -53,8 +53,7 @@ deployments:
     minReplicas: 1
     maxReplicas: 1
     maxUnavailable: 0
-    serviceAccountName: "flow-prod-eks-production-dependency-www-sa"
-    serviceAccountIamRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
+    AWSRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
 
 nodeSelector:
   karpenter/role: workers
