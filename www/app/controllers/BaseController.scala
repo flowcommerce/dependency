@@ -33,6 +33,7 @@ class UserActionBuilder(
 abstract class BaseController(
   config: Config,
   dependencyClientProvider: DependencyClientProvider,
+  webJarsUtil: org.webjars.play.WebJarsUtil,
 )(implicit val ec: ExecutionContext)
   extends FlowController
   with I18nSupport {
@@ -98,6 +99,7 @@ abstract class BaseController(
       user = user,
       section = section,
       config = config,
+      webJarsUtil = webJarsUtil,
     )
   }
 
@@ -121,6 +123,7 @@ abstract class BaseController(
       user = user,
       section = section,
       config = config,
+      webJarsUtil = webJarsUtil,
     )
   }
 

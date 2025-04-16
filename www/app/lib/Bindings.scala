@@ -1,5 +1,7 @@
 package io.flow.dependency.www.lib
 
+import io.flow.common.v0.models.UserReference
+import io.flow.dependency.v0.Client
 import play.api.{Configuration, Environment, Mode}
 import play.api.inject.Module
 
@@ -13,8 +15,10 @@ class DependencyClientProviderModule extends Module {
         )
       case Mode.Test =>
         Seq(
-          // TODO: Add mock
-          bind[DependencyClientProvider].to[DependencyClientProvider],
+          bind[DependencyClientProvider].toInstance(new DependencyClientProvider {
+            override def newClient(user: Option[UserReference], requestId: Option[String]): Client =
+              sys.error("Not implemented") // TODO: Add mock
+          }),
         )
     }
   }

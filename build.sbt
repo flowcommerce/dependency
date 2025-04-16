@@ -2,7 +2,7 @@ name := "dependency"
 
 organization := "io.flow"
 
-ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / scalaVersion := "2.13.16"
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
 ThisBuild / libraryDependencySchemes += "org.scoverage" %% "sbt-scoverage" % VersionScheme.Always
@@ -37,8 +37,9 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      playTest,
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
+      playTest % Test,
+      "io.flow" %% "lib-util" % "0.2.50",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
   )
 
@@ -58,13 +59,14 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      "org.projectlombok" % "lombok" % "1.18.38" % "provided",
-      "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play29" % "0.6.89",
-      "io.flow" %% "lib-metrics-play29" % "1.1.13",
-      "io.flow" %% "lib-log-play29" % "0.2.40",
-      "io.flow" %% "lib-usage-play29" % "0.2.73",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.51" % Test,
+      "org.projectlombok" % "lombok" % "1.18.36" % Provided,
+      "com.sendgrid" % "sendgrid-java" % "4.10.3",
+      "io.flow" %% "lib-play-play29" % "0.8.17",
+      "io.flow" %% "lib-postgresql-play29" % "0.2.86",
+      "io.flow" %% "lib-postgresql-play-play29" % "0.5.95" % Runtime, // Module
+      "io.flow" %% "lib-log-play29" % "0.2.37",
+      "io.flow" %% "lib-usage-play29" % "0.2.72",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
       "org.apache.commons" % "commons-text" % "1.13.1",
@@ -89,12 +91,13 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "org.projectlombok" % "lombok" % "1.18.38" % "provided",
+      "org.projectlombok" % "lombok" % "1.18.36" % Provided,
       "org.webjars" %% "webjars-play" % "3.0.0",
-      "org.webjars" % "bootstrap" % "5.3.3",
-      "org.webjars" % "jquery" % "3.7.1",
-      "org.webjars" % "bootstrap-social" % "5.0.0",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.51" % Test,
+      "org.webjars" % "bootstrap" % "3.3.7" % Runtime,
+      "org.webjars" % "jquery" % "3.7.1" % Runtime,
+      "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
+      "io.flow" %% "lib-play-play29" % "0.8.17",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -113,9 +116,6 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
-  libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play29" % "0.8.16",
-  ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",

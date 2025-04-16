@@ -6,6 +6,7 @@ import io.flow.dependency.www.lib.DependencyClientProvider
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{PaginatedCollection, Pagination}
 import io.flow.util.Config
+import org.webjars.play.WebJarsUtil
 import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
@@ -17,8 +18,9 @@ class MembersController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
+  val webJarsUtil: WebJarsUtil,
 )(implicit ec: ExecutionContext)
-  extends controllers.BaseController(config, dependencyClientProvider) {
+  extends controllers.BaseController(config, dependencyClientProvider, webJarsUtil) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Members)
 
