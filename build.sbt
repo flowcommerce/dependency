@@ -58,16 +58,16 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      "org.projectlombok" % "lombok" % "1.18.36" % "provided",
+      "org.projectlombok" % "lombok" % "1.18.38" % "provided",
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play29" % "0.6.87",
-      "io.flow" %% "lib-metrics-play29" % "1.1.12",
-      "io.flow" %% "lib-log-play29" % "0.2.37",
-      "io.flow" %% "lib-usage-play29" % "0.2.72",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
+      "io.flow" %% "lib-event-sync-play29" % "0.6.89",
+      "io.flow" %% "lib-metrics-play29" % "1.1.13",
+      "io.flow" %% "lib-log-play29" % "0.2.40",
+      "io.flow" %% "lib-usage-play29" % "0.2.73",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.51" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
-      "org.apache.commons" % "commons-text" % "1.13.0",
+      "org.apache.commons" % "commons-text" % "1.13.1",
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -89,12 +89,12 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "org.projectlombok" % "lombok" % "1.18.36" % "provided",
+      "org.projectlombok" % "lombok" % "1.18.38" % "provided",
       "org.webjars" %% "webjars-play" % "3.0.0",
       "org.webjars" % "bootstrap" % "5.3.3",
       "org.webjars" % "jquery" % "3.7.1",
       "org.webjars" % "bootstrap-social" % "5.0.0",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.2.51" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -114,8 +114,7 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play29" % "0.8.15",
-    "com.typesafe.play" %% "play-json-joda" % "2.10.6",
+    "io.flow" %% "lib-play-play29" % "0.8.16",
   ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
