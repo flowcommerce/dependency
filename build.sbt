@@ -69,7 +69,7 @@ lazy val api = project
       "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
-      "org.apache.commons" % "commons-text" % "1.13.0",
+      "org.apache.commons" % "commons-text" % "1.13.1",
     ),
     scalacOptions ++= allScalacOptions,
   )
@@ -92,7 +92,7 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       "org.projectlombok" % "lombok" % "1.18.36" % Provided,
-      "org.webjars" %% "webjars-play" % "2.9.1",
+      "org.webjars" %% "webjars-play" % "3.0.0",
       "org.webjars" % "bootstrap" % "3.3.7" % Runtime,
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
