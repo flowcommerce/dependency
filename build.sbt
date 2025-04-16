@@ -37,8 +37,9 @@ lazy val lib = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      playTest,
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0",
+      playTest % Test,
+      "io.flow" %% "lib-util" % "0.2.50",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
   )
 
@@ -58,10 +59,11 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      "org.projectlombok" % "lombok" % "1.18.36" % "provided",
+      "org.projectlombok" % "lombok" % "1.18.36" % Provided,
       "com.sendgrid" % "sendgrid-java" % "4.7.1",
-      "io.flow" %% "lib-event-sync-play29" % "0.6.87",
-      "io.flow" %% "lib-metrics-play29" % "1.1.12",
+      "io.flow" %% "lib-play-play29" % "0.8.17",
+      "io.flow" %% "lib-postgresql-play29" % "0.2.86",
+      "io.flow" %% "lib-postgresql-play-play29" % "0.5.95" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.37",
       "io.flow" %% "lib-usage-play29" % "0.2.72",
       "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
@@ -89,11 +91,12 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "org.projectlombok" % "lombok" % "1.18.36" % "provided",
-      "org.webjars" %% "webjars-play" % "3.0.0",
-      "org.webjars" % "bootstrap" % "5.3.3",
-      "org.webjars" % "jquery" % "3.7.1",
-      "org.webjars" % "bootstrap-social" % "5.0.0",
+      "org.projectlombok" % "lombok" % "1.18.36" % Provided,
+      "org.webjars" %% "webjars-play" % "2.9.1",
+      "org.webjars" % "bootstrap" % "3.3.7" % Runtime,
+      "org.webjars" % "jquery" % "3.7.1" % Runtime,
+      "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
+      "io.flow" %% "lib-play-play29" % "0.8.17",
       "io.flow" %% "lib-test-utils-play29" % "0.2.49" % Test,
     ),
     scalacOptions ++= allScalacOptions,
@@ -113,10 +116,6 @@ val credsToUse = Option(System.getenv("ARTIFACTORY_USERNAME")) match {
 lazy val commonSettings: Seq[Setting[_]] = Seq(
   scalafmtOnCompile := true,
   name ~= ("dependency-" + _),
-  libraryDependencies ++= Seq(
-    "io.flow" %% "lib-play-play29" % "0.8.15",
-    "com.typesafe.play" %% "play-json-joda" % "2.10.6",
-  ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",

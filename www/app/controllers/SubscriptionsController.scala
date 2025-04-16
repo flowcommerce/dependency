@@ -5,6 +5,7 @@ import io.flow.dependency.v0.models.{Publication, SubscriptionForm}
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.FlowControllerComponents
 import io.flow.util.Config
+import org.webjars.play.WebJarsUtil
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,8 +26,9 @@ class SubscriptionsController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
+  val webJarsUtil: WebJarsUtil,
 )(implicit ec: ExecutionContext)
-  extends controllers.BaseController(config, dependencyClientProvider) {
+  extends controllers.BaseController(config, dependencyClientProvider, webJarsUtil) {
 
   private[this] lazy val client = dependencyClientProvider.newClient(user = None, requestId = None)
 
@@ -121,6 +123,7 @@ class SubscriptionsController @javax.inject.Inject() (
       user = user,
       section = Some(io.flow.dependency.www.lib.Section.Subscriptions),
       config = config,
+      webJarsUtil = webJarsUtil,
     )
   }
 

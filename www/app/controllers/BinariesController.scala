@@ -5,6 +5,7 @@ import io.flow.dependency.v0.models.{Binary, SyncEvent}
 import io.flow.dependency.www.lib.{Config, DependencyClientProvider}
 import io.flow.play.controllers.{FlowControllerComponents, IdentifiedRequest}
 import io.flow.play.util.{Config, PaginatedCollection, Pagination}
+import org.webjars.play.WebJarsUtil
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,8 +15,9 @@ class BinariesController @javax.inject.Inject() (
   val config: Config,
   val controllerComponents: ControllerComponents,
   val flowControllerComponents: FlowControllerComponents,
+  val webJarsUtil: WebJarsUtil,
 )(implicit ec: ExecutionContext)
-  extends controllers.BaseController(config, dependencyClientProvider) {
+  extends controllers.BaseController(config, dependencyClientProvider, webJarsUtil) {
 
   override def section = Some(io.flow.dependency.www.lib.Section.Binaries)
 

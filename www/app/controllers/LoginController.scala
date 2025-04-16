@@ -7,6 +7,7 @@ import io.flow.dependency.www.lib
 import io.flow.dependency.www.lib.{DependencyClientProvider, UiData}
 import io.flow.play.controllers.IdentifiedCookie._
 import io.flow.play.util.Config
+import org.webjars.play.WebJarsUtil
 import play.api.i18n._
 import play.api.mvc._
 
@@ -16,12 +17,15 @@ class LoginController @javax.inject.Inject() (
   val provider: DependencyClientProvider,
   val controllerComponents: ControllerComponents,
   config: Config,
+  val webJarsUtil: WebJarsUtil,
 )(implicit ec: ExecutionContext, dependencyConfig: lib.GitHubConfig)
   extends play.api.mvc.BaseController
   with I18nSupport {
 
   def index(returnUrl: Option[String]) = Action { implicit request =>
-    Ok(views.html.login.index(UiData(requestPath = request.path, config = config), returnUrl))
+    Ok(
+      views.html.login.index(UiData(requestPath = request.path, config = config, webJarsUtil = webJarsUtil), returnUrl),
+    )
   }
 
   @nowarn
@@ -53,7 +57,11 @@ class LoginController @javax.inject.Inject() (
       .recover { case response: io.flow.dependency.v0.errors.GenericErrorResponse =>
         Ok(
           views.html.login
-            .index(UiData(requestPath = request.path, config = config), returnUrl, response.genericError.messages),
+            .index(
+              UiData(requestPath = request.path, config = config, webJarsUtil = webJarsUtil),
+              returnUrl,
+              response.genericError.messages,
+            ),
         )
       }
   }

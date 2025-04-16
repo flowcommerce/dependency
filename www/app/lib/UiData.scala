@@ -3,6 +3,7 @@ package io.flow.dependency.www.lib
 import io.flow.common.v0.models.User
 import io.flow.util.{Config => FlowConfig}
 import io.flow.dependency.lib.Urls
+import org.webjars.play.WebJarsUtil
 
 sealed trait Section
 
@@ -25,6 +26,7 @@ case class UiData(
   user: Option[User] = None,
   query: Option[String] = None,
   config: FlowConfig,
+  webJarsUtil: WebJarsUtil,
 ) {
 
   lazy val urls = Urls(config)
