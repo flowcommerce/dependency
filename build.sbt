@@ -115,7 +115,6 @@ lazy val commonSettings: Seq[Setting[_]] = Seq(
   name ~= ("dependency-" + _),
   libraryDependencies ++= Seq(
     "io.flow" %% "lib-play-play29" % "0.8.16",
-    "com.typesafe.play" %% "play-json-joda" % "2.10.6",
   ),
   Test / javaOptions ++= Seq(
     "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
