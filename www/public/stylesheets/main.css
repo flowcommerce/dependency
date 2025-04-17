@@ -17,14 +17,17 @@ body {
 /*
  * Sidebar
  */
-
 /* Hide for mobile, show later */
 .sidebar {
   display: none;
 }
+
 @media (min-width: 768px) {
+  #sticky-sidebar {
+    position:fixed;
+  }
+
   .sidebar {
-    position: fixed;
     top: 51px;
     bottom: 0;
     left: 0;
