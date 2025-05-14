@@ -30,7 +30,6 @@ deployments:
   live:
     minReplicas: 1
     maxReplicas: 1
-    maxUnavailable: 0
     AWSRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
 
 nodeSelector:
