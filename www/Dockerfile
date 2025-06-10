@@ -1,4 +1,4 @@
-FROM flowdocker/play_builder:latest-java17-jammy as builder
+FROM flowdocker/play_builder:latest-java17-noble as builder
 ADD . /opt/play
 WORKDIR /opt/play
 RUN SBT_OPTS="-Xms1024M -Xmx2048M -Xss2M -XX:MaxMetaspaceSize=2048M" sbt 'project www' clean stage
