@@ -53,6 +53,15 @@ deployments:
     minReplicas: 1
     maxReplicas: 1
     AWSRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
+    rateLimit:
+      perPod:
+      - name: local-ratelimit
+        shadow_enabled: true
+        filterEnforcedPercentage: "100"
+        All:
+          maxTokens: "200"
+          maxTokensPerFill: "200"
+          tokensFillInterval: "1s"
 
 nodeSelector:
   karpenter/role: workers
