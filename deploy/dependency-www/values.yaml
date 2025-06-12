@@ -62,14 +62,7 @@ deployments:
           maxTokens: "200"
           maxTokensPerFill: "200"
           tokensFillInterval: "1s"
-      monitor:
-        pod:
-          pctAlertThreshold: "5"
-          requestsAlertThreshold: "600"
-        service:
-          pctAlertThreshold: "5"
-          requestsAlertThreshold: "600"
-          
+
 nodeSelector:
   karpenter/role: workers
 tolerations:
