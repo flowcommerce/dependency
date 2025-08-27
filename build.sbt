@@ -51,7 +51,7 @@ lazy val api = project
   .enablePlugins(JavaAppPackaging, JavaAgent)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.44.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.52.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
@@ -84,7 +84,7 @@ lazy val www = project
   .enablePlugins(SbtWeb)
   .settings(commonSettings: _*)
   .settings(
-    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.44.1",
+    javaAgents += "com.datadoghq" % "dd-java-agent" % "1.52.1",
     routesImport += "io.flow.dependency.v0.Bindables.Core._",
     routesImport += "io.flow.dependency.v0.Bindables.Models._",
     routesGenerator := InjectedRoutesGenerator,
