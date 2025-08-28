@@ -25,7 +25,7 @@ lazy val generated = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
-      "joda-time" % "joda-time" % "2.12.7",
+      "joda-time" % "joda-time" % "2.14.0",
     ),
     scalacOptions ++= allScalacOptions,
   )
