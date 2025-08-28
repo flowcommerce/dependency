@@ -8,7 +8,7 @@ jobs:
   rebase:
     runs-on: ubuntu-latest
     # Only run if the merged PR was labeled 'scala-steward'
-    if: github.event.pull_request.merged == true && contains(fromJSON(toJSON(github.event.pull_request.labels)), 'scala-steward')
+    if: github.event.pull_request.merged == true
 
     steps:
       - uses: actions/checkout@v4
