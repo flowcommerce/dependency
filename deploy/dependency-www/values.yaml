@@ -56,12 +56,14 @@ deployments:
     rateLimit:
       perPod:
       - name: local-ratelimit
-        shadow_enabled: true
+        # shadow_enabled: true
         filterEnforcedPercentage: "100"
         All:
           maxTokens: "200"
           maxTokensPerFill: "200"
           tokensFillInterval: "1s"
+      monitor:
+        pod: {}
 
 nodeSelector:
   karpenter/role: workers
