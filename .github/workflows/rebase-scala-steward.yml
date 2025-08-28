@@ -26,11 +26,19 @@ jobs:
           echo "prs=$OPEN_PRS" >> $GITHUB_OUTPUT
 
       - name: Rebase remaining PRs
+        env:
+          PR_BRANCHES: ${{ steps.prs.outputs.prs }}
         run: |
-          for pr_branch in ${{ steps.prs.outputs.prs }}; do
-            echo "Rebasing $pr_branch onto main"
+          for pr_branch in $PR_BRANCHES; do
+            echo "Processing $pr_branch"
             git fetch origin main
-            git checkout $pr_branch
+            git checkout "$pr_branch"
+          
+            if git merge-base --is-ancestor origin/main HEAD; then
+              echo "$pr_branch is already up-to-date"
+              continue
+            fi
+          
             if git rebase origin/main; then
               git push --force-with-lease
               echo "✅ Rebasing $pr_branch succeeded"
@@ -39,3 +47,4 @@ jobs:
               git rebase --abort
             fi
           done
+
