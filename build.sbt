@@ -38,7 +38,7 @@ lazy val lib = project
   .settings(
     libraryDependencies ++= Seq(
       playTest % Test,
-      "io.flow" %% "lib-util" % "0.2.58",
+      "io.flow" %% "lib-util" % "0.2.64",
       "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
     ),
   )
@@ -61,12 +61,12 @@ lazy val api = project
       ws,
       "org.projectlombok" % "lombok" % "1.18.38" % Provided,
       "com.sendgrid" % "sendgrid-java" % "4.10.3",
-      "io.flow" %% "lib-play-play29" % "0.8.34",
-      "io.flow" %% "lib-postgresql-play29" % "0.2.91",
-      "io.flow" %% "lib-postgresql-play-play29" % "0.6.3" % Runtime, // Module
-      "io.flow" %% "lib-log-play29" % "0.2.43",
-      "io.flow" %% "lib-usage-play29" % "0.2.76",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.54" % Test,
+      "io.flow" %% "lib-play-play29" % "0.8.48",
+      "io.flow" %% "lib-postgresql-play29" % "0.2.99",
+      "io.flow" %% "lib-postgresql-play-play29" % "0.6.21" % Runtime, // Module
+      "io.flow" %% "lib-log-play29" % "0.2.52",
+      "io.flow" %% "lib-usage-play29" % "0.2.94",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.69" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.7",
       "org.apache.commons" % "commons-text" % "1.14.0",
@@ -96,8 +96,8 @@ lazy val www = project
       "org.webjars" % "bootstrap" % "3.4.1" % Runtime,
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
-      "io.flow" %% "lib-play-play29" % "0.8.34",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.54" % Test,
+      "io.flow" %% "lib-play-play29" % "0.8.48",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.69" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
