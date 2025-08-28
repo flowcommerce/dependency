@@ -92,7 +92,7 @@ lazy val www = project
     libraryDependencies ++= Seq(
       ws,
       "org.projectlombok" % "lombok" % "1.18.38" % Provided,
-      "org.webjars" %% "webjars-play" % "3.0.2",
+      "org.webjars" %% "webjars-play" % "3.0.0", // scala-steward:off
       "org.webjars" % "bootstrap" % "3.4.1" % Runtime,
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
