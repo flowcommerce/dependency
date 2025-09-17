@@ -6,7 +6,7 @@ on:
 jobs:
   check-title-and-description:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'scala-steward') }}
+    if: !contains(github.event.pull_request.labels.*.name, 'scala-steward')
     steps:
     - name: Check PR title and description
       uses: actions/github-script@v4
