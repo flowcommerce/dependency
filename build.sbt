@@ -59,7 +59,7 @@ lazy val api = project
     libraryDependencies ++= Seq(
       jdbc,
       ws,
-      "org.projectlombok" % "lombok" % "1.18.40" % Provided,
+      "org.projectlombok" % "lombok" % "1.18.42" % Provided,
       "com.sendgrid" % "sendgrid-java" % "4.10.3",
       "io.flow" %% "lib-play-play29" % "0.8.54",
       "io.flow" %% "lib-postgresql-play29" % "0.3.14",
@@ -91,7 +91,7 @@ lazy val www = project
     Test / testOptions += Tests.Argument("-oD"),
     libraryDependencies ++= Seq(
       ws,
-      "org.projectlombok" % "lombok" % "1.18.40" % Provided,
+      "org.projectlombok" % "lombok" % "1.18.42" % Provided,
       "org.webjars" %% "webjars-play" % "3.0.0",
       "org.webjars" % "bootstrap" % "3.4.1" % Runtime,
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
