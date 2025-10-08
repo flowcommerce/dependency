@@ -6,6 +6,7 @@ import io.flow.akka.SafeReceive
 import io.flow.akka.actor.ReapedActor
 import io.flow.akka.recurring.{ScheduleConfig, Scheduler}
 import io.flow.dependency.v0.models._
+import io.flow.event.actors.ReactiveActor
 import io.flow.log.RollbarLogger
 import io.flow.play.util.ApplicationConfig
 import lib.TasksUtil
