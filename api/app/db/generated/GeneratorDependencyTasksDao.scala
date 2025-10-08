@@ -432,7 +432,7 @@ class TasksDao @Inject() (
     val result = db.withConnection { c =>
       insert(c, updatedBy, form)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
     result
   }
 
@@ -474,7 +474,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       updateById(c, updatedBy, id, form)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def updateById(c: Connection, updatedBy: UserReference, id: String, form: TaskForm): Unit = {
@@ -489,7 +489,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       update(c, updatedBy, existing, form)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def update(c: Connection, updatedBy: UserReference, existing: Task, form: TaskForm): Unit = {
@@ -519,7 +519,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       delete(c, deletedBy, task)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def delete(c: Connection, deletedBy: UserReference, task: Task): Unit = {
@@ -530,7 +530,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       deleteById(c, deletedBy, id)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def deleteById(c: Connection, deletedBy: UserReference, id: String): Unit = {
@@ -560,7 +560,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       deleteAllByNumAttempts(c, deletedBy, numAttempts)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def deleteAllByNumAttempts(c: Connection, deletedBy: UserReference, numAttempts: Int): Unit = {
@@ -590,7 +590,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       deleteAllByNumAttemptsAndProcessedAt(c, deletedBy, numAttempts, processedAt)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def deleteAllByNumAttemptsAndProcessedAt(c: Connection, deletedBy: UserReference, numAttempts: Int, processedAt: DateTime): Unit = {
@@ -606,7 +606,7 @@ class TasksDao @Inject() (
     db.withConnection { c =>
       deleteAllByNumAttemptsAndProcessedAts(c, deletedBy, numAttempts, processedAts)
     }
-    taskActor ! io.flow.dependency.actors.ReactiveActor.Messages.Changed
+    sendChanged()
   }
 
   def deleteAllByNumAttemptsAndProcessedAts(c: Connection, deletedBy: UserReference, numAttempts: Int, processedAts: Seq[DateTime]): Unit = {
