@@ -67,7 +67,7 @@ lazy val api = project
       "io.flow" %% "lib-postgresql-play-play29" % "0.6.35" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.61",
       "io.flow" %% "lib-usage-play29" % "0.3.8",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.81" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.2.82" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
       "org.apache.commons" % "commons-text" % "1.14.0",
@@ -98,7 +98,7 @@ lazy val www = project
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
       "io.flow" %% "lib-play-play29" % "0.8.58",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.81" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.2.82" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
