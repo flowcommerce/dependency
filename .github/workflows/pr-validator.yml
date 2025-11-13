@@ -6,7 +6,6 @@ on:
 jobs:
   check-title-and-description:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'scala-steward') }}
     steps:
     - name: Check PR title and description
       uses: actions/github-script@v4
@@ -15,25 +14,23 @@ jobs:
         script: |
           const payload = context.payload;
           const prTitle = payload.pull_request.title;
-          const prDescription = payload.pull_request.body;
 
           // The pattern for JIRA ticket format
-          const jiraPattern = /\b[A-Z]+-\d+\b|breakglass/gi;
+          // Must be at the beginning of the PR title
+          // Prefix must be at least 3 uppercase letters
+          // Excludes tickets with only zeros after the prefix (e.g., XXX-000, XXX-0000)
+          // Number must be 3 to 6 digits
+          const jiraPattern = /^[A-Z]{3,}-(?!0+\b)\d{3,6}\b/;
 
           // Check PR title
           const hasJiraTitle = jiraPattern.test(prTitle);
           console.log(`PR title: ${hasJiraTitle ? 'Valid' : 'Invalid'}`);
 
-          // Check PR description
-          const hasJiraDescription = prDescription ? prDescription.match(jiraPattern) : false;
-          console.log(`PR description: ${hasJiraDescription ? 'Valid' : 'Invalid'}`);
-
-          if (hasJiraTitle || hasJiraDescription) {
-            console.log('PR title or description format is correct.');
+          if (hasJiraTitle) {
+            console.log('PR title format is correct.');
           } else {
-            const errorMessage = [];
-            errorMessage.push('The PR title and description do not include a valid JIRA ticket!');
-            console.log(errorMessage.join('\n'));
+            const errorMessage = 'The PR title must start with a valid JIRA ticket with 3-6 digits (e.g., ABC-123, DATAPLATFORM-12345). The ticket must be at the start, use at least 3 uppercase letters, and the number must not be all zeros.';
+            console.log(errorMessage);
 
-            core.setFailed(errorMessage.join('\n'));
+            core.setFailed(errorMessage);
           }
