@@ -64,7 +64,7 @@ lazy val api = project
       "io.flow" %% "lib-play-play29" % "0.8.66",
       "io.flow" %% "lib-event-sync-play29" % "0.7.26",
       "io.flow" %% "lib-postgresql-play29" % "0.3.24",
-      "io.flow" %% "lib-postgresql-play-play29" % "0.6.38" % Runtime, // Module
+      "io.flow" %% "lib-postgresql-play-play29" % "0.6.45" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.67",
       "io.flow" %% "lib-usage-play29" % "0.3.13",
       "io.flow" %% "lib-test-utils-play29" % "0.2.85" % Test,
