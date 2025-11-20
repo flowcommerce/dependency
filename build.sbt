@@ -63,7 +63,7 @@ lazy val api = project
       "com.sendgrid" % "sendgrid-java" % "4.10.3",
       "io.flow" %% "lib-play-play29" % "0.8.67",
       "io.flow" %% "lib-event-sync-play29" % "0.7.28",
-      "io.flow" %% "lib-postgresql-play29" % "0.3.29",
+      "io.flow" %% "lib-postgresql-play29" % "0.3.31",
       "io.flow" %% "lib-postgresql-play-play29" % "0.6.47" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.69",
       "io.flow" %% "lib-usage-play29" % "0.3.21",
