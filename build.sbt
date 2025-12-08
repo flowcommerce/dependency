@@ -70,7 +70,7 @@ lazy val api = project
       "io.flow" %% "lib-test-utils-play29" % "0.2.92" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
-      "org.apache.commons" % "commons-text" % "1.14.0",
+      "org.apache.commons" % "commons-text" % "1.15.0",
     ),
     scalacOptions ++= allScalacOptions,
   )
