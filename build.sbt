@@ -38,7 +38,7 @@ lazy val lib = project
   .settings(
     libraryDependencies ++= Seq(
       playTest % Test,
-      "io.flow" %% "lib-util" % "0.2.73",
+      "io.flow" %% "lib-util" % "0.2.74",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
   )
@@ -64,7 +64,7 @@ lazy val api = project
       "io.flow" %% "lib-play-play29" % "0.8.67",
       "io.flow" %% "lib-event-sync-play29" % "0.7.29",
       "io.flow" %% "lib-postgresql-play29" % "0.3.31",
-      "io.flow" %% "lib-postgresql-play-play29" % "0.6.47" % Runtime, // Module
+      "io.flow" %% "lib-postgresql-play-play29" % "0.6.48" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.69",
       "io.flow" %% "lib-usage-play29" % "0.3.24",
       "io.flow" %% "lib-test-utils-play29" % "0.2.92" % Test,
