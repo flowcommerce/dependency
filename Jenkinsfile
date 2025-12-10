@@ -1,10 +1,7 @@
 @Library('lib-jenkins-pipeline') _
 
-
-def newTagEveryRunMainBranch = "yes" // Force a new version and deploy clicking on Build Now in Jenkins
 def sbtOnMain = "yes"
 def sbtCommand = "sbt clean flowLint coverage test scalafmtSbtCheck scalafmtCheck doc && sbt coverageAggregate"
-
 
 // we can remove the pod_template block if we end up having only one template
 // in jenkins config
@@ -28,7 +25,7 @@ podTemplate(
 
         // => tagging function to identify what actions to take depending on the nature of the changes
         stage ('tagging') {
-            semversion = taggingv2(newTagEveryMainRun: "${newTagEveryRunMainBranch}")
+            semversion = taggingv2()
             println(semversion)
         }
 
