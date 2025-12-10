@@ -5,6 +5,8 @@ metadata:
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
+  labels:
+    team: foundation
 spec:
   destination:
     namespace: production
@@ -46,7 +48,7 @@ spec:
     helm:
       parameters:
       - name: deployments.live.version
-        value: "0.10.33"
+        value: "Jenkins_will_update_the_version"
       valueFiles:
       - $values/deploy/dependency-www/values.yaml
   project: production
