@@ -61,7 +61,7 @@ lazy val api = project
       ws,
       "org.projectlombok" % "lombok" % "1.18.42" % Provided,
       "com.sendgrid" % "sendgrid-java" % "4.10.3",
-      "io.flow" %% "lib-play-play29" % "0.8.68",
+      "io.flow" %% "lib-play-play29" % "0.8.69",
       "io.flow" %% "lib-event-sync-play29" % "0.7.32",
       "io.flow" %% "lib-postgresql-play29" % "0.3.32",
       "io.flow" %% "lib-postgresql-play-play29" % "0.6.50" % Runtime, // Module
@@ -97,7 +97,7 @@ lazy val www = project
       "org.webjars" % "bootstrap" % "3.4.1" % Runtime,
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
-      "io.flow" %% "lib-play-play29" % "0.8.68",
+      "io.flow" %% "lib-play-play29" % "0.8.69",
       "io.flow" %% "lib-test-utils-play29" % "0.2.93" % Test,
     ),
     scalacOptions ++= allScalacOptions,
