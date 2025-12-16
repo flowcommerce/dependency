@@ -11,7 +11,7 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.9.6")
 
 addSbtPlugin("com.typesafe.play" % "sbt-twirl" % "1.6.8")
 
-addSbtPlugin("com.github.sbt" % "sbt-javaagent" % "0.1.8")
+addSbtPlugin("com.github.sbt" % "sbt-javaagent" % "0.2.0")
 
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.1")
 
@@ -25,4 +25,4 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 )
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.6")
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.4.2")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.4.3")
