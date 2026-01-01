@@ -63,11 +63,11 @@ lazy val api = project
       "com.sendgrid" % "sendgrid-java" % "4.10.3",
       "io.flow" %% "lib-play-play29" % "0.8.71",
       "io.flow" %% "lib-event-sync-play29" % "0.7.35",
-      "io.flow" %% "lib-postgresql-play29" % "0.3.35",
-      "io.flow" %% "lib-postgresql-play-play29" % "0.6.54" % Runtime, // Module
+      "io.flow" %% "lib-postgresql-play29" % "0.3.36",
+      "io.flow" %% "lib-postgresql-play-play29" % "0.6.55" % Runtime, // Module
       "io.flow" %% "lib-log-play29" % "0.2.73",
-      "io.flow" %% "lib-usage-play29" % "0.3.29",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.97" % Test,
+      "io.flow" %% "lib-usage-play29" % "0.3.30",
+      "io.flow" %% "lib-test-utils-play29" % "0.2.98" % Test,
       "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.29",
       "org.postgresql" % "postgresql" % "42.7.4",
       "org.apache.commons" % "commons-text" % "1.15.0",
@@ -98,7 +98,7 @@ lazy val www = project
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
       "io.flow" %% "lib-play-play29" % "0.8.71",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.97" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.2.98" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
