@@ -98,7 +98,7 @@ lazy val www = project
       "org.webjars" % "jquery" % "3.7.1" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
       "io.flow" %% "lib-play-play29" % "0.8.74",
-      "io.flow" %% "lib-test-utils-play29" % "0.2.99" % Test,
+      "io.flow" %% "lib-test-utils-play29" % "0.3.1" % Test,
     ),
     scalacOptions ++= allScalacOptions,
   )
