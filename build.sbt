@@ -38,7 +38,7 @@ lazy val lib = project
   .settings(
     libraryDependencies ++= Seq(
       playTest % Test,
-      "io.flow" %% "lib-util" % "0.2.78",
+      "io.flow" %% "lib-util" % "0.2.79",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
   )
