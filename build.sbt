@@ -95,7 +95,7 @@ lazy val www = project
       "org.projectlombok" % "lombok" % "1.18.42" % Provided,
       "org.webjars" %% "webjars-play" % "3.0.0",
       "org.webjars" % "bootstrap" % "3.4.1" % Runtime,
-      "org.webjars" % "jquery" % "3.7.1" % Runtime,
+      "org.webjars" % "jquery" % "4.0.0" % Runtime,
       "org.webjars" % "bootstrap-social" % "5.0.0" % Runtime,
       "io.flow" %% "lib-play-play29" % "0.8.79",
       "io.flow" %% "lib-test-utils-play29" % "0.3.6" % Test,
