@@ -22,6 +22,7 @@ resources:
 
 jvmOpts:
   memory: 2100m
+  garbageCollector: ShenandoahGC
 
 istio:
   alb: true
