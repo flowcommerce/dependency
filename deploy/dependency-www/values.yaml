@@ -13,14 +13,14 @@ image:
 
 resources:
   limits:
-    memory: "2700Mi"
+    memory: "768Mi"
     cpu: 1
   requests:
-    memory: "2700Mi"
+    memory: "768Mi"
     cpu: .2
 
 jvmOpts:
-  memory: 2100m
+  memory: 512m
   garbageCollector: ShenandoahGC
 
 istio:
