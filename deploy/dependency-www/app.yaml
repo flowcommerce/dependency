@@ -44,7 +44,7 @@ spec:
 
   - repoURL: 'git@github.com:flowcommerce/generic-charts.git'
     path: charts/flow-generic
-    targetRevision: v2.0.12
+    targetRevision: v2.0.19
     helm:
       parameters:
       - name: deployments.live.version
