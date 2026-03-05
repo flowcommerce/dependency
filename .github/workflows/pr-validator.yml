@@ -2,35 +2,7 @@ name: "PR Title and Description Check"
 on:
   pull_request:
     types: [opened, edited, synchronize]
-
 jobs:
-  check-title-and-description:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Check PR title and description
-      uses: actions/github-script@v4
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const payload = context.payload;
-          const prTitle = payload.pull_request.title;
+  validate:
+    uses: flowcommerce/code-steward/.github/workflows/pr-validator.yml@main
 
-          // The pattern for JIRA ticket format
-          // Must be at the beginning of the PR title
-          // Prefix must be at least 3 uppercase letters
-          // Excludes tickets with only zeros after the prefix (e.g., XXX-000, XXX-0000)
-          // Number must be 3 to 6 digits
-          const jiraPattern = /^[A-Z]{3,}-(?!0+\b)\d{3,6}\b/;
-
-          // Check PR title
-          const hasJiraTitle = jiraPattern.test(prTitle);
-          console.log(`PR title: ${hasJiraTitle ? 'Valid' : 'Invalid'}`);
-
-          if (hasJiraTitle) {
-            console.log('PR title format is correct.');
-          } else {
-            const errorMessage = 'The PR title must start with a valid JIRA ticket with 3-6 digits (e.g., ABC-123, DATAPLATFORM-12345). The ticket must be at the start, use at least 3 uppercase letters, and the number must not be all zeros.';
-            console.log(errorMessage);
-
-            core.setFailed(errorMessage);
-          }
