@@ -1,8 +1,0 @@
-name: "PR Title and Description Check"
-on:
-  pull_request:
-    types: [opened, edited, synchronize]
-jobs:
-  validate:
-    uses: flowcommerce/code-steward/.github/workflows/pr-validator.yml@main
-
