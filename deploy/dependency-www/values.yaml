@@ -54,6 +54,17 @@ deployments:
     minReplicas: 1
     maxReplicas: 1
     AWSRole: "arn:aws:iam::479720515435:role/flow-prod-eks-production-role"
+    env:
+      - name: "CONF_DB_DEFAULT_URL"
+        value: "jdbc:postgresql://dependencydb20211217.cwdsspa5jwrg.us-east-1.rds.amazonaws.com/dependencydb?tcpKeepAlive=true"
+      - name: "CONF_DB_HIKARICP_MAXIMUM_POOL_SIZE"
+        value: "4"
+      - name: "CONF_DB_HIKARICP_MINIMUM_IDLE"
+        value: "4"
+      - name: "CONF_DEPENDENCY_API_HOST"
+        value: "https://dependency.api.flow.io"
+      - name: "CONF_DEPENDENCY_WWW_HOST"
+        value: "https://dependency.flow.io"
     rateLimit:
       perPod:
       - name: local-ratelimit
@@ -63,6 +74,11 @@ deployments:
           maxTokens: "200"
           maxTokensPerFill: "200"
           tokensFillInterval: "1s"
+
+applicationSecrets:
+  paths:
+    - "ssm://services/shared/jwt.salt"
+    - "ssm://services/dependency/"
 
 nodeSelector:
   karpenter/role: workers
